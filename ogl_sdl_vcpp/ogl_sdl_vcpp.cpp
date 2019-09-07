@@ -59,13 +59,13 @@ void initSceneObjects()
     // Sun
     //---------------------------------------
     sun.setColor(0.7f, 0.7f, 0.1f);
-    sun.setRotationParameters(60,                     // radius
+    sun.setRotationParameters(160,                     // radius
         0,                      // initial rotation angle
         0.02f,                   // rotation velocity
         glm::radians(0.0f),     // axis rotation angle
         glm::radians(0.0f)      // axis tilt angle
     );
-    sun.setOrbitalParameters(0,                       // radius of orbit
+    sun.setOrbitalParameters(1,                       // radius of orbit
         0.01f,                       // revolution velocity
         0,                       // orbital rotation angle
         0                        // orbital tilt
@@ -82,7 +82,7 @@ void initSceneObjects()
         glm::radians(23.5f)     // axis tilt angle
     );
     earth.setOrbitalParameters(400,                     // radius of orbit
-        0.01f,                    // revolution velocity
+        0.001f,                    // revolution velocity
         0,                       // orbital rotation angle
         0                        // orbital tilt
     );
@@ -90,13 +90,13 @@ void initSceneObjects()
     // Moon
     //---------------------------------------
     moon.setColor(0.5f, 0.5f, 0.5f);
-    sun.setRotationParameters(15,                     // radius
+    moon.setRotationParameters(15,                     // radius
         0,                      // initial rotation angle
         0.05f,                   // rotation velocity
         glm::radians(0.0f),     // axis rotation angle
         glm::radians(10.0f)     // axis tilt angle
     );
-    sun.setOrbitalParameters(90,                      // radius of orbit
+    moon.setOrbitalParameters(90,                      // radius of orbit
         0.04f,                    // revolution velocity
         0,                       // orbital rotation angle
         0                        // orbital tilt
@@ -146,6 +146,9 @@ void printShaderCompileStatus(GLuint shader)
 		char buffer[512];
 		glGetShaderInfoLog(shader, 512, NULL, buffer);
 		printf("Log:\n%s\n", buffer);
+
+        SDL_Quit();
+        exit(1);
 	}
 }
 
@@ -167,43 +170,41 @@ void compileShaders()
 
         //uniform vec3 sunCenter;
 
-        //struct SphereInfo {
-        //    bool isLightSource;
-        //    bool isValid;
-        //    vec3 center;
-        //    float radius;
-        //};
+        struct SphereInfo {
+            bool isLightSource;
+            bool isValid;
+            vec3 center;
+            float radius;
+        };
 
-        //uniform SphereInfo sphereInfo;
+        uniform SphereInfo sphereInfo;
 
         out vec4 Color;
 
         void main()
         {
-            //if (sphereInfo.isLightSource == false)
-            //{
-            //    if (sphereInfo.isValid)
-            //    {
-            //        vec4 modelTransformedMyCenter = model * vec4(sphereInfo.center, 1.0);
-            //        float r = length(vec2(length(modelTransformedMyCenter),
-            //                              sphereInfo.radius));
+            if (!sphereInfo.isLightSource)
+            {
+                if (sphereInfo.isValid)
+                {
+                    vec4 modelTransformedMyCenter = model * vec4(sphereInfo.center, 1.0);
+                    float r = length(vec2(length(modelTransformedMyCenter),
+                                          sphereInfo.radius));
 
 
-            //        vec4 modelTransformedPosition = model * vec4(position, 1.0);
+                    vec4 modelTransformedPosition = model * vec4(position, 1.0);
 
-            //        if (r < length(modelTransformedPosition))
-            //            Color = vec4(color*0.2, 1.0);
-            //        else
-            //            Color = vec4(color, 1.0);
-            //    }
-            //}
-            //else
-            //{
-            //    Color = vec4(color, 0.5);
-            //}
+                    if (r < length(modelTransformedPosition))
+                        Color = vec4(in_color*0.2, 1.0);
+                    else
+                        Color = vec4(in_color, 1.0);
+                }
+            }
+            else
+            {
+                Color = vec4(in_color, 1.0);
+            }
             
-            Color = vec4(in_color, 1.0);
-
             gl_Position = proj * view * model * vec4(position, 1.0);
         }
 
@@ -302,7 +303,39 @@ void unuseShaderProgram()
 	glUseProgram(0);
 }
 
+GLint getUniformLocation(const std::string& uniformName)
+{
+    GLint id = glGetUniformLocation(shaderProgram, uniformName.c_str());
+    if (id < 0)
+    {
+        printf("Error getting location of uniform variable '%s'", uniformName.c_str());
+        SDL_Quit();
+        exit(1);
+    }
+    else
+    {
+        printf("%s = %d\n", uniformName.c_str(), id);
+    }
 
+    return id;
+}
+
+GLint getAttribLocation(const std::string& attribName)
+{
+    GLint id = glGetAttribLocation(shaderProgram, attribName.c_str());
+    if (id < 0)
+    {
+        printf("Error getting location of attrib variable '%s'", attribName.c_str());
+        SDL_Quit();
+        exit(1);
+    }
+    else
+    {
+        printf("%s = %d\n", attribName.c_str(), id);
+    }
+
+    return id;
+}
 
 void initializeGL()
 {
@@ -317,32 +350,17 @@ void initializeGL()
 
 
     //---------------------------------------------------------------------------------------------------
-    uniModel = glGetUniformLocation(shaderProgram, "model");
-    uniView = glGetUniformLocation(shaderProgram, "view");
-    uniProj = glGetUniformLocation(shaderProgram, "proj");
-    //uniSunCenter = glGetUniformLocation(shaderProgram, "sunCenter");
-    //uniMyCenter = glGetUniformLocation(shaderProgram, "sphereInfo.center");
-    //uniMyRadius = glGetUniformLocation(shaderProgram, "sphereInfo.radius");
-    //uniMyIsValud = glGetUniformLocation(shaderProgram, "sphereInfo.isValid");
-    //uniMyIsLightSource = glGetUniformLocation(shaderProgram, "sphereInfo.isValid");
+    uniModel = getUniformLocation("model");
+    uniView = getUniformLocation("view");
+    uniProj = getUniformLocation("proj");
+    //uniSunCenter = getUniformLocation("sunCenter");
+    uniMyCenter = getUniformLocation("sphereInfo.center");
+    uniMyRadius = getUniformLocation("sphereInfo.radius");
+    uniMyIsValud = getUniformLocation("sphereInfo.isValid");
+    uniMyIsLightSource = getUniformLocation("sphereInfo.isLightSource");
 
-
-    GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
-    GLint colAttrib = glGetAttribLocation(shaderProgram, "in_color");
-
-    printf("uniModel = %d\n", uniModel);
-    printf("uniView = %d\n", uniView);
-    printf("uniProj = %d\n", uniProj);
-
-    //printf("uniSunCenter = %d\n", uniSunCenter);
-    //printf("uniMyCenter = %d\n", uniMyCenter);
-    //printf("uniMyRadius = %d\n", uniMyRadius);
-    //printf("uniMyIsValud = %d\n", uniMyIsValud);
-    //printf("uniMyIsLightSource = %d\n", uniMyIsLightSource);
-
-
-    printf("posAttrib = %d\n", posAttrib);
-    printf("colAttrib = %d\n", colAttrib);  // prints -1
+    GLint posAttrib = getAttribLocation("position");
+    GLint colAttrib = getAttribLocation("in_color");
 
 
     //---------------------------------------------------------------------------------------------------
@@ -402,7 +420,7 @@ int main(int argc, char *argv[])
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
-	SDL_Window *window = SDL_CreateWindow("OpenGL", 100, 100, 800, 600, SDL_WINDOW_OPENGL);
+	SDL_Window *window = SDL_CreateWindow("OpenGL", 100, 100, 800, 600, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
 	printf("Created SDL GL window\n");
 	SDL_GLContext context = SDL_GL_CreateContext(window);
@@ -410,106 +428,40 @@ int main(int argc, char *argv[])
 
 	glewInit();
 
-	
-	//float vertices[] = {
-	//0.0f, 0.5f,
-	//0.5f, -0.5f,
-	//-0.5f, -0.5f
-	//};
-	//GLuint vbo;
-	//glGenBuffers(1, &vbo);
-	//glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	////-------------------------------------------------------------
-	//// Vertex shader
-	//const char* vertexShaderSource = R"glsl(
- //       #version 150 core
-
- //       in vec2 position;
-
- //       void main()
- //       {
- //           gl_Position = vec4(position, 0.0, 1.0);
- //       }
-
- //   )glsl";
-
-	//GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	//glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
-
-	//printf("Compiling vertex shader.\n");
-	//glCompileShader(vertexShader);
-
-	//// Check compile status
-	//printShaderCompileStatus(vertexShader);
-
-
-	////-------------------------------------------------------------
-	//// Fragment shader
-	//const char* fragmentShaderSource = R"glsl(
- //       #version 150 core
-
- //       out vec4 outColor;
- //       void main()
- //       {
- //           outColor = vec4(0.0, 1.0, 1.0, 1.0);
- //       }
- //   )glsl";
-
-	//GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	//glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
-
-	//printf("Compiling fragment shader.\n");
-	//glCompileShader(fragmentShader);
-
-	//printShaderCompileStatus(fragmentShader);
-
-
-	////-------------------------------------------------------------
-	//// Shader program
-	//GLuint shaderProgram = glCreateProgram();
-	//glAttachShader(shaderProgram, vertexShader);
-	//glAttachShader(shaderProgram, fragmentShader);
-
-
-	//// The following function is not available in GLSL 1.5, and is not required.
-	////glBindFragDataLocation(shaderProgram, 0, "outColor");
-
-	//glLinkProgram(shaderProgram);
-	//glUseProgram(shaderProgram);
-
-	////-------------------------------------------------------------
-	//// Make a link between vertex data and attributes
-	//GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
-	//glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
-
-	//glEnableVertexAttribArray(posAttrib);
-
-
     printf("initializing scene objects... ");
     initSceneObjects();
 	initializeGL();
 
     printf("done\n");
 
-    SDL_DisplayMode DM;
-    SDL_GetCurrentDisplayMode(0, &DM);
-    curWidth = DM.w;
-    curHeight = DM.h;
+    SDL_GetWindowSize(window, &curWidth, &curHeight);
+    printf("width = %d\n", curWidth);
+    printf("height = %d\n", curHeight);
 
     glEnable(GL_DEPTH_TEST);
 
 
-	SDL_Event windowEvent;
+	SDL_Event event;
 	while (1)
 	{
-		if (SDL_PollEvent(&windowEvent))
+		if (SDL_PollEvent(&event))
 		{
-			if (windowEvent.type == SDL_QUIT)
+			if (event.type == SDL_QUIT)
 				break;
-			if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_ESCAPE)
+			if (event.type == SDL_KEYUP && event.key.keysym.sym == SDLK_ESCAPE)
 				break;
+            if (event.type == SDL_WINDOWEVENT)
+            {
+                if (event.window.event == SDL_WINDOWEVENT_RESIZED)
+                {
+                    curWidth = event.window.data1;
+                    curHeight = event.window.data2;
+
+                    printf("width = %d\n", curWidth);
+                    printf("height = %d\n", curHeight);
+                    glViewport(0, 0, curWidth, curHeight);
+                }
+            }
 
 		}
 
@@ -528,7 +480,7 @@ int main(int argc, char *argv[])
 
 
         // todo - this could be moved to initialization?
-        glUniform3f(uniSunCenter, sun.getCenter().x, sun.getCenter().y, sun.getCenter().z);
+        //glUniform3f(uniSunCenter, sun.getCenter().x, sun.getCenter().y, sun.getCenter().z);
 
         //=====================================================================================
         // View and projection remain same for the entire scene
@@ -551,31 +503,47 @@ int main(int argc, char *argv[])
         //=====================================================================================
 
 
+
         //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
         //----------------------------------------------
         // earth model transformation
         //----------------------------------------------
         glm::mat4 trans(1.0f);
-        trans = glm::translate(trans, glm::vec3(earth.getCenter().x,
-            earth.getCenter().y,
-            earth.getCenter().z));
-        trans = glm::rotate(trans, angle, glm::vec3(0.0f,
-            0.0f,
-            earth.getAxisRotationAngle()));
-        trans = glm::rotate(trans, angle, glm::vec3(0.0f,
+        trans = glm::translate(
+            trans,
+            glm::vec3(
+                earth.getCenter().x,
+                earth.getCenter().y,
+                earth.getCenter().z));
+        trans = glm::rotate(
+            trans,
+            earth.getAxisRotationAngle(),
+            glm::vec3(
+                0.0f,
+                0.0f,
+                1.0f));
+        trans = glm::rotate(
+            trans,
             earth.getAxisTiltAngle(),
-            0.0f));
-        trans = glm::rotate(trans, angle, glm::vec3(0.0f,
-            0.0f,
-            earth.getRotationAngle()));
+            glm::vec3(
+                0.0f,
+                1.0f,
+                0.0f));
+        trans = glm::rotate(
+            trans,
+            earth.getRotationAngle(),
+            glm::vec3(
+                0.0f,
+                0.0f,
+                1.0f));
 
         glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(trans));
 
-        //glUniform1i(uniMyIsLightSource, false);
-        //glUniform3f(uniMyCenter, 0.0f, 0.0f, 0.0f);
-        //glUniform1f(uniMyRadius, earth.getRadius());
-        //glUniform1i(uniMyIsValud, true);
+        glUniform1i(uniMyIsLightSource, 0);
+        glUniform3f(uniMyCenter, 0.0f, 0.0f, 0.0f);
+        glUniform1f(uniMyRadius, earth.getRadius());
+        glUniform1i(uniMyIsValud, true);
 
         glBindVertexArray(earthVao);
         
@@ -589,17 +557,26 @@ int main(int argc, char *argv[])
         // sun model transformation
         //----------------------------------------------
         glm::mat4 trans2(1.0f);
+        trans2 = glm::translate(
+            trans2,
+            glm::vec3(
+                sun.getCenter().x,
+                sun.getCenter().y,
+                sun.getCenter().z));
 
-        trans2 = glm::rotate(trans2, angle, glm::vec3(0.0f,
+        trans2 = glm::rotate(
+            trans2,
+            angle,
+            glm::vec3(0.0f,
             0.0f,
             sun.getRotationAngle()));
 
         glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(trans2));
 
-        //glUniform1i(uniMyIsLightSource, false);
-        //glUniform1f(uniMyRadius, sun.getRadius());
-        //glUniform3f(uniMyCenter, 0.0f, 0.0f, 0.0f);
-        //glUniform1i(uniMyIsValud, true);
+        glUniform1i(uniMyIsLightSource, 1);
+        glUniform1f(uniMyRadius, sun.getRadius());
+        glUniform3f(uniMyCenter, 0.0f, 0.0f, 0.0f);
+        glUniform1i(uniMyIsValud, true);
 
         glBindVertexArray(sunVao);
 

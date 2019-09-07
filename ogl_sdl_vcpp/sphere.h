@@ -120,7 +120,7 @@ public:
 
     void generateVertices()
     {
-        float numLongitudes = 72;
+        float numLongitudes = 272;
         float inc = float(2*M_PI) / numLongitudes;
 
         for (float alpha = 0; alpha < float(2*M_PI)-inc; alpha += inc)
