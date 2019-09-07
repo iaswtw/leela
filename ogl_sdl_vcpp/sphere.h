@@ -1,7 +1,11 @@
 #ifndef SPHERE_H
 #define SPHERE_H
 
+// GLM includes
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include <vector>
 #include <list>
 #define _USE_MATH_DEFINES
@@ -46,7 +50,8 @@ class Sphere
 public:
     Sphere() : _center(0,0,0), _r(0), _g(0), _b(0),
         _radius(0),        _rotationAngle(0), _rotationAngularVelocity(0), _axisRotationAngle(0),    _axisTiltAngle(0),
-        _orbitalRadius(0), _orbitalAngle(0),  _orbitalAngularVelocity(0),  _orbitalRotationAngle(0), _orbitalTiltAngle(0)
+        _orbitalRadius(0), _orbitalAngle(0),  _orbitalAngularVelocity(0),  _orbitalRotationAngle(0), _orbitalTiltAngle(0),
+        _parent(nullptr)
     {
     }
 
@@ -81,6 +86,11 @@ public:
         _orbitalAngularVelocity = orbitalAngularVelocity;
         _orbitalRotationAngle = orbitalRotationAngle;
         _orbitalTiltAngle = orbitalTiltAngle;
+    }
+
+    void setParentSphere(Sphere *parent)
+    {
+        _parent = parent;
     }
 
     inline Point3D& getCenter()
@@ -193,13 +203,13 @@ public:
 
             for (float alpha = 0; alpha < float(2 * M_PI) - inc; alpha += inc)
             {
-                float x1 = 1.01 * _radius * sin(theta) * cos(alpha);
-                float y1 = 1.01 * _radius * sin(theta) * sin(alpha);
-                float z1 = 1.01 * _radius * cos(theta);
+                float x1 = 1.005 * _radius * sin(theta) * cos(alpha);
+                float y1 = 1.005 * _radius * sin(theta) * sin(alpha);
+                float z1 = 1.005 * _radius * cos(theta);
 
-                float x2 = 1.01 * _radius * sin(theta) * cos(alpha + inc);
-                float y2 = 1.01 * _radius * sin(theta) * sin(alpha + inc);
-                float z2 = 1.01 * _radius * cos(theta);
+                float x2 = 1.005 * _radius * sin(theta) * cos(alpha + inc);
+                float y2 = 1.005 * _radius * sin(theta) * sin(alpha + inc);
+                float z2 = 1.005 * _radius * cos(theta);
 
                 _latLongVertices.push_back(x1);   _latLongVertices.push_back(y1);   _latLongVertices.push_back(z1);   _latLongVertices.push_back(_r*0.5);  _latLongVertices.push_back(_g*0.5); _latLongVertices.push_back(_b*0.5);
                 _latLongVertices.push_back(x2);   _latLongVertices.push_back(y2);   _latLongVertices.push_back(z2);   _latLongVertices.push_back(_r*0.5);  _latLongVertices.push_back(_g*0.5); _latLongVertices.push_back(_b*0.5);
@@ -222,6 +232,28 @@ public:
         return _latLongVertices;
     }
 
+    glm::vec4 getModelTransformedCenter()
+    {
+        glm::vec4 center(_center.x, _center.y, _center.z, 1.0);
+        return getModelTransformMatrix() * center;
+    }
+
+    glm::mat4 getModelTransformMatrix()
+    {
+        glm::mat4 modelTrans(1.0f);
+
+        // translate
+        modelTrans = glm::translate(modelTrans,   glm::vec3(getCenter().x, getCenter().y, getCenter().z));
+
+        // tilt and rotate axis. 
+        // todo - do this using a single rotate invocation
+        modelTrans = glm::rotate(modelTrans,   getAxisRotationAngle(),   glm::vec3(0.0f, 0.0f, 1.0f));
+        modelTrans = glm::rotate(modelTrans,   getAxisTiltAngle(),       glm::vec3(0.0f, 1.0f, 0.0f));
+        modelTrans = glm::rotate(modelTrans,   getRotationAngle(),       glm::vec3(0.0f, 0.0f, 1.0f));
+        
+        return modelTrans;
+    }
+
     void advance(float stepMultiplier)
     {
         _rotationAngle += _rotationAngularVelocity * stepMultiplier;
@@ -229,9 +261,17 @@ public:
         _orbitalAngle += _orbitalAngularVelocity * stepMultiplier;
         _center.x = _orbitalRadius * cos (_orbitalAngle);
         _center.y = _orbitalRadius * sin (_orbitalAngle);
-        _center.z = 0;
+        _center.z = 0;       // todo - use orbital tilt
 
-        // todo - use orbital rotation & axis rotation parameters to increment angles
+        // parent is assumed to have been updated
+        if (_parent != nullptr)
+        {
+            _center.x += _parent->getCenter().x;
+            _center.y += _parent->getCenter().y;
+            _center.z += _parent->getCenter().z;
+        }
+
+       
     }
 
     void freeVertices()
@@ -266,6 +306,7 @@ private:
 
     std::vector<float> _vertices;
     std::vector<float> _latLongVertices;
+    Sphere *_parent;
 };
 
 
