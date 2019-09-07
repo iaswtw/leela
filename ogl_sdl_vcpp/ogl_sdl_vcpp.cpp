@@ -27,6 +27,10 @@ GLuint vbo;                 // Create for
 GLuint sunVao;
 GLuint earthVao;
 GLuint moonVao;
+
+
+GLuint earthLatLongVao;
+
 GLuint shaderProgram;
 GLuint vertexShader;
 GLuint fragmentShader;
@@ -59,7 +63,7 @@ void initSceneObjects()
     // Sun
     //---------------------------------------
     sun.setColor(0.7f, 0.7f, 0.1f);
-    sun.setRotationParameters(160,                     // radius
+    sun.setRotationParameters(100,                     // radius
         0,                      // initial rotation angle
         0.02f,                   // rotation velocity
         glm::radians(0.0f),     // axis rotation angle
@@ -75,13 +79,13 @@ void initSceneObjects()
     // Earth
     //---------------------------------------
     earth.setColor(0.55f, 0.82f, 1.0f);
-    earth.setRotationParameters(40,                     // radius
+    earth.setRotationParameters(80,                     // radius
         0,                      // initial rotation angle
-        0.05f,                   // rotation velocity
+        0.003f,                   // rotation velocity
         glm::radians(270.0f),   // axis rotation angle
         glm::radians(23.5f)     // axis tilt angle
     );
-    earth.setOrbitalParameters(400,                     // radius of orbit
+    earth.setOrbitalParameters(500,                     // radius of orbit
         0.001f,                    // revolution velocity
         0,                       // orbital rotation angle
         0                        // orbital tilt
@@ -364,6 +368,7 @@ void initializeGL()
 
 
     //---------------------------------------------------------------------------------------------------
+    // Earth's sphere
     glGenVertexArrays(1, &earthVao);
     glBindVertexArray(earthVao);
 	
@@ -379,10 +384,28 @@ void initializeGL()
 	glEnableVertexAttribArray(posAttrib);
 
 	glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-    printGlError();     // this is printing error because colAttrib is -1
     glEnableVertexAttribArray(colAttrib);
 
     //---------------------------------------------------------------------------------------------------
+    // Earths latitude and longitude
+    glGenVertexArrays(1, &earthLatLongVao);
+    glBindVertexArray(earthLatLongVao);
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        sizeof(float) * earth.getLatitudeAndLongitudeVertices().size(),
+        earth.getLatitudeAndLongitudeVertices().data(),
+        GL_STATIC_DRAW);
+    
+    glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), nullptr);
+    glEnableVertexAttribArray(posAttrib);
+
+    glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(colAttrib);
+
+    //---------------------------------------------------------------------------------------------------
+    // Sun's sphere
     glGenVertexArrays(1, &sunVao);
     glBindVertexArray(sunVao);
     
@@ -468,7 +491,7 @@ int main(int argc, char *argv[])
         //printf("Iterating\n");
         
         //glClearDepth(1.0);
-		glClearColor(0.0f, 0.5f, 0.0f, 1.0f);
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
@@ -550,6 +573,13 @@ int main(int argc, char *argv[])
         // Draw vertices
         glDrawArrays(GL_TRIANGLES, 0, earth.getVertices().size());
         
+        //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        glBindVertexArray(earthLatLongVao);
+
+        // Draw vertices
+        glDrawArrays(GL_LINES, 0, earth.getLatitudeAndLongitudeVertices().size());
+
 
         //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

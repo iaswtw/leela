@@ -1,7 +1,9 @@
 #ifndef SPHERE_H
 #define SPHERE_H
 
+#include <glm/glm.hpp>
 #include <vector>
+#include <list>
 #define _USE_MATH_DEFINES
 #include <math.h>
 
@@ -154,12 +156,70 @@ public:
             }
         }
 
+        //---------------------------------------------------------------------------------
+        // Longitudes
+        //---------------------------------------------------------------------------------
+        std::list<float> alphas = { 0, 30, 60, 90, 120, 150 };
+
+        for (float alpha : alphas)
+        {
+            alpha = glm::radians(alpha);
+
+            for (float theta = 0; theta < float(2 * M_PI) - inc; theta += inc)
+            {
+                float x1 = 1.01 * _radius * sin(theta) * cos(alpha);
+                float y1 = 1.01 * _radius * sin(theta) * sin(alpha);
+                float z1 = 1.01 * _radius * cos(theta);
+
+                float x2 = 1.01 * _radius * sin(theta + inc) * cos(alpha);
+                float y2 = 1.01 * _radius * sin(theta + inc) * sin(alpha);
+                float z2 = 1.01 * _radius * cos(theta + inc);
+
+                _latLongVertices.push_back(x1);   _latLongVertices.push_back(y1);   _latLongVertices.push_back(z1);   _latLongVertices.push_back(_r*0.5);  _latLongVertices.push_back(_g*0.5); _latLongVertices.push_back(_b*0.5);
+                _latLongVertices.push_back(x2);   _latLongVertices.push_back(y2);   _latLongVertices.push_back(z2);   _latLongVertices.push_back(_r*0.5);  _latLongVertices.push_back(_g*0.5); _latLongVertices.push_back(_b*0.5);
+
+                //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
+            }
+        }
+
+        //---------------------------------------------------------------------------------
+        // Latitudes
+        //---------------------------------------------------------------------------------
+        std::list<float> thetas = { 0, 66.5, 23.5, 90, 90+23.5, 90+66.5 };          // 0 = +z axis, 90 is equator, 90+66.5 is antarctic circle
+
+        for (float theta : thetas)
+        {
+            theta = glm::radians(theta);
+
+            for (float alpha = 0; alpha < float(2 * M_PI) - inc; alpha += inc)
+            {
+                float x1 = 1.01 * _radius * sin(theta) * cos(alpha);
+                float y1 = 1.01 * _radius * sin(theta) * sin(alpha);
+                float z1 = 1.01 * _radius * cos(theta);
+
+                float x2 = 1.01 * _radius * sin(theta) * cos(alpha + inc);
+                float y2 = 1.01 * _radius * sin(theta) * sin(alpha + inc);
+                float z2 = 1.01 * _radius * cos(theta);
+
+                _latLongVertices.push_back(x1);   _latLongVertices.push_back(y1);   _latLongVertices.push_back(z1);   _latLongVertices.push_back(_r*0.5);  _latLongVertices.push_back(_g*0.5); _latLongVertices.push_back(_b*0.5);
+                _latLongVertices.push_back(x2);   _latLongVertices.push_back(y2);   _latLongVertices.push_back(z2);   _latLongVertices.push_back(_r*0.5);  _latLongVertices.push_back(_g*0.5); _latLongVertices.push_back(_b*0.5);
+
+                //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
+            }
+        }
+
+
         printf("sphere vertex generation done\n");
     }
 
     std::vector<float>& getVertices()
     {
         return _vertices;
+    }
+
+    std::vector<float>& getLatitudeAndLongitudeVertices()
+    {
+        return _latLongVertices;
     }
 
     void advance(float stepMultiplier)
@@ -177,6 +237,7 @@ public:
     void freeVertices()
     {
         _vertices.clear();
+        _latLongVertices.clear();
     }
 
 
@@ -204,6 +265,7 @@ private:
 
 
     std::vector<float> _vertices;
+    std::vector<float> _latLongVertices;
 };
 
 
