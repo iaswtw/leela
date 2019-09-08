@@ -12,7 +12,9 @@
 
 #include "sphere.h"
 
-
+#include <fstream>
+#include <iostream>
+#include <string>
 
 float angle;
 
@@ -74,6 +76,7 @@ void initSceneObjects()
         glm::radians(0.0f)                  // axis tilt angle
     );
     sun.setOrbitalParameters(0,             // radius of orbit
+        0.0f,                               // initial orbital angle
         0.01f,                              // revolution velocity
         0,                                  // orbital rotation angle
         0                                   // orbital tilt
@@ -90,8 +93,9 @@ void initSceneObjects()
         glm::radians(23.5f)                 // axis tilt angle
     );
     earth.setOrbitalParameters(800,         // radius of orbit
+        glm::radians(160.0f),               // initial orbital angle
         0.001f,                             // revolution velocity
-        0,                                  // orbital rotation angle
+        0.0f,                               // orbital rotation angle
         0                                   // orbital tilt
     );
 
@@ -100,11 +104,12 @@ void initSceneObjects()
     moon.setColor(0.5f, 0.5f, 0.5f);
     moon.setRotationParameters(30,          // radius
         0,                                  // initial rotation angle
-        0.05f,                              // rotation velocity
+        0.005f,                              // rotation velocity
         glm::radians(0.0f),                 // axis rotation angle
         glm::radians(10.0f)                 // axis tilt angle
     );
     moon.setOrbitalParameters(220,          // radius of orbit
+        0.0f,                               // initial orbital angle
         0.007f,                             // revolution velocity
         0,                                  // orbital rotation angle
         glm::radians(30.0)                  // orbital tilt
@@ -164,61 +169,53 @@ void printShaderCompileStatus(GLuint shader)
 	}
 }
 
+void readAndCompileShader(std::string filePath, GLuint &shaderId)
+{
+    std::string fileContents;
+    std::string line;
+
+    std::ifstream shaderFile(filePath);
+    if (shaderFile.fail())
+    {
+        perror(filePath.c_str());
+        printf("Failed to open %s\n", filePath.c_str());
+        SDL_Quit();
+        exit(1);
+    }
+    while (std::getline(shaderFile, line))
+    {
+        fileContents += line + "\n";
+    }
+    
+    const char *contentsPtr = fileContents.c_str();
+    glShaderSource(shaderId, 1, &contentsPtr, nullptr);
+    glCompileShader(shaderId);
+
+    // Check compile status
+    printShaderCompileStatus(shaderId);
+}
 
 void compileShaders()
 {
 	//-------------------------------------------------------------
 	// Vertex shader
 	//-------------------------------------------------------------
-	const char* vertexShaderSource = 
-    #include "shader.vert"
+    vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    printf("Loading and Compiling Vertex shader.\n");
+    readAndCompileShader("shaders/shader.vert", vertexShader);
 
-
-	vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
-
-	printf("Compiling vertex shader.\n");
-	glCompileShader(vertexShader);
-
-	// Check compile status
-	printShaderCompileStatus(vertexShader);
-
-
-	//-------------------------------------------------------------
+    //-------------------------------------------------------------
 	// Fragment shader
 	//-------------------------------------------------------------
-	const char* fragmentShaderSource = R"glsl(
-        #version 150 core
-
-        in vec4 Color;
-
-        out vec4 outColor;
-
-        void main()
-        {
-            // outColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);
-            outColor = Color;
-        }
-    )glsl";
-
-	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
-
-	printf("Compiling fragment shader.\n");
-	glCompileShader(fragmentShader);
-
-	printShaderCompileStatus(fragmentShader);
+    fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    printf("Loading and Compiling Fragment shader.\n");
+    readAndCompileShader("shaders/shader.frag", fragmentShader);
 
 	//-------------------------------------------------------------
 	// Shader program
 	shaderProgram = glCreateProgram();
 	glAttachShader(shaderProgram, vertexShader);
 	glAttachShader(shaderProgram, fragmentShader);
-
-
-	// The following function is not available in GLSL 1.5, and is not required.
-//    glBindFragDataLocation(shaderProgram, 0, "outColor");
-
 }
 
 void linkShaders()

@@ -80,9 +80,10 @@ public:
         _axisTiltAngle = axisTiltAngle;
     }
 
-    void setOrbitalParameters(float orbitalRadius, float orbitalAngularVelocity, float orbitalRotationAngle, float orbitalTiltAngle)
+    void setOrbitalParameters(float orbitalRadius, float orbitalAngle, float orbitalAngularVelocity, float orbitalRotationAngle, float orbitalTiltAngle)
     {
         setOrbitalRadius(orbitalRadius);
+        _orbitalAngle = orbitalAngle;
         _orbitalAngularVelocity = orbitalAngularVelocity;
         _orbitalRotationAngle = orbitalRotationAngle;
         _orbitalTiltAngle = orbitalTiltAngle;
