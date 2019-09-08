@@ -32,18 +32,18 @@ vec3 nearestPtL(vec3 modelTransformedPosition)
     float k = 0;
     if (den > 0.000001)
     {
-        k = ((modelTransformedPosition.x - sunCenterTransformed.x) * (otherSphereCenterTransformed.x - sunCenterTransformed.x) +
-             (modelTransformedPosition.y - sunCenterTransformed.y) * (otherSphereCenterTransformed.y - sunCenterTransformed.y) +
-             (modelTransformedPosition.z - sunCenterTransformed.z) * (otherSphereCenterTransformed.z - sunCenterTransformed.z)) / den;
+        k = ((modelTransformedPosition.x - otherSphereCenterTransformed.x) * (sunCenterTransformed.x - otherSphereCenterTransformed.x) +
+             (modelTransformedPosition.y - otherSphereCenterTransformed.y) * (sunCenterTransformed.y - otherSphereCenterTransformed.y) +
+             (modelTransformedPosition.z - otherSphereCenterTransformed.z) * (sunCenterTransformed.z - otherSphereCenterTransformed.z)) / den;
     }
     else
     {
         k = 0.5;
     }
 
-    vec3 N = vec3(sunCenterTransformed.x + ((otherSphereCenterTransformed.x - sunCenterTransformed.x) * k),
-                  sunCenterTransformed.y + ((otherSphereCenterTransformed.y - sunCenterTransformed.y) * k),
-                  sunCenterTransformed.z + ((otherSphereCenterTransformed.z - sunCenterTransformed.z) * k));
+    vec3 N = vec3(otherSphereCenterTransformed.x + (sunCenterTransformed.x - otherSphereCenterTransformed.x) * k,
+                  otherSphereCenterTransformed.y + (sunCenterTransformed.y - otherSphereCenterTransformed.y) * k,
+                  otherSphereCenterTransformed.z + (sunCenterTransformed.z - otherSphereCenterTransformed.z) * k);
     return N;
 }
 
@@ -56,8 +56,10 @@ void main()
             vec4 modelTransformedMyCenter   = model * vec4(sphereInfo.center, 1.0);
             float r                         = length(vec2(length(modelTransformedMyCenter),
                                                           sphereInfo.radius));
-
+            
             vec3 modelTransformedPosition   = vec3((model * vec4(position, 1.0)));
+            float dist_sun_thisPoint    = distance(sunCenterTransformed, modelTransformedPosition);
+            float dist_sun_otherSphere  = distance(sunCenterTransformed, vec3(otherSphereCenterTransformed));
 
             if (r < length(modelTransformedPosition))
             {
@@ -68,13 +70,12 @@ void main()
             else
             {
                 //Color = vec4(1.0, 0.0, 0.0, 1.0);
+                
                 bool bInUmbra               = false;
                 bool bInPenumbra            = false;
                 bool bInAntumbra            = false;
                 do
                 {
-                    float dist_sun_thisPoint    = distance(sunCenterTransformed, modelTransformedPosition);
-                    float dist_sun_otherSphere  = distance(sunCenterTransformed, vec3(otherSphereCenterTransformed));
 
                     if (dist_sun_thisPoint < dist_sun_otherSphere)
                         break;                                              // point might be inside the 'other' sphere, but cannot be in shadow.
@@ -88,15 +89,15 @@ void main()
                     //-------------------------------------------------------------
                     // todo - check if point is in penumbra
                     //  on the line joining the centers of Sun and otherSphere, find a point between them that is the vertex of the cone of penumbra.
-                    float h2 = dist_sun_otherSphere * otherSphereRadius / (otherSphereRadius + sunRadius);
-                    if (h2 > otherSphereRadius)
-                    {
-                        float coneHalfAngle = asin(otherSphereRadius / h2);
+//                    float h2 = dist_sun_otherSphere * otherSphereRadius / (otherSphereRadius + sunRadius);
+//                    if (h2 > otherSphereRadius)
+//                    {
+//                        float coneHalfAngle = asin(otherSphereRadius / h2);
 
                                 
                         //float y = tan(coneHalfAngle) * distance(N, h
 
-                    }
+//                    }
 
                     // todo - check if point is in negative umbra
 
@@ -126,6 +127,7 @@ void main()
                 else if (bInPenumbra)
                     Color = vec4(in_color * 0.4, 1.0);
                 else
+                    //Color = vec(1.0, 0.0, 0.0, 1.0);
                     Color = vec4(in_color, 1.0);
                         
             }

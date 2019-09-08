@@ -68,6 +68,10 @@ Sphere sun;
 Sphere moon;
 
 
+/*************************************************************************************************
+
+
+**************************************************************************************************/
 void initSceneObjects()
 {
     axis.generateVertices(
@@ -120,7 +124,7 @@ void initSceneObjects()
     );
     moon.setOrbitalParameters(220,          // radius of orbit
         0.0f,                               // initial orbital angle
-        0.007f,                             // revolution velocity
+        0.04f,                             // revolution velocity
         0,                                  // orbital rotation angle
         glm::radians(30.0)                  // orbital tilt
     );
@@ -134,6 +138,10 @@ void initSceneObjects()
     earth.setParentSphere(&sun);
 }
 
+/*************************************************************************************************
+
+
+**************************************************************************************************/
 void printGlError()
 {
     GLenum err = glGetError();
@@ -157,6 +165,10 @@ void printGlError()
 }
 
 
+/*************************************************************************************************
+
+
+**************************************************************************************************/
 void printShaderCompileStatus(GLuint shader)
 {
 	GLint status;
@@ -179,6 +191,10 @@ void printShaderCompileStatus(GLuint shader)
 	}
 }
 
+/*************************************************************************************************
+
+
+**************************************************************************************************/
 void readAndCompileShader(std::string filePath, GLuint &shaderId)
 {
     std::string fileContents;
@@ -205,6 +221,10 @@ void readAndCompileShader(std::string filePath, GLuint &shaderId)
     printShaderCompileStatus(shaderId);
 }
 
+/*************************************************************************************************
+
+
+**************************************************************************************************/
 void compileShaders()
 {
 	//-------------------------------------------------------------
@@ -228,6 +248,10 @@ void compileShaders()
 	glAttachShader(shaderProgram, fragmentShader);
 }
 
+/*************************************************************************************************
+
+
+**************************************************************************************************/
 void linkShaders()
 {
 	glLinkProgram(shaderProgram);
@@ -264,16 +288,28 @@ void linkShaders()
 }
 
 
+/*************************************************************************************************
+
+
+**************************************************************************************************/
 void useShaderProgram()
 {
 	glUseProgram(shaderProgram);
 }
 
+/*************************************************************************************************
+
+
+**************************************************************************************************/
 void unuseShaderProgram()
 {
 	glUseProgram(0);
 }
 
+/*************************************************************************************************
+
+
+**************************************************************************************************/
 GLint getUniformLocation(const std::string& uniformName)
 {
     GLint id = glGetUniformLocation(shaderProgram, uniformName.c_str());
@@ -291,6 +327,10 @@ GLint getUniformLocation(const std::string& uniformName)
     return id;
 }
 
+/*************************************************************************************************
+
+
+**************************************************************************************************/
 GLint getAttribLocation(const std::string& attribName)
 {
     GLint id = glGetAttribLocation(shaderProgram, attribName.c_str());
@@ -308,6 +348,10 @@ GLint getAttribLocation(const std::string& attribName)
     return id;
 }
 
+/*************************************************************************************************
+
+
+**************************************************************************************************/
 void initializeGL()
 {
 	printf("Inside initializeGL\n");
@@ -443,7 +487,10 @@ void initializeGL()
 }
 
 
+/*************************************************************************************************
 
+
+**************************************************************************************************/
 int main(int argc, char *argv[])
 {
     setvbuf(stdout, 0, _IONBF, 0);
@@ -530,7 +577,8 @@ int main(int argc, char *argv[])
         // View transformation
         //----------------------------------------------
         glm::mat4 view = glm::lookAt(
-            glm::vec3(1600.0f, 1600.0f, 1600.0f),
+//            glm::vec3(1600.0f, 1600.0f, 1600.0f),
+            glm::vec3(1600.0f, 1600.0f, 1200.0f),
             glm::vec3(0.0f, 0.0f, 0.0f),
             glm::vec3(0.0f, 0.0f, 1.0f));
         glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
