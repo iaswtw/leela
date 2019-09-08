@@ -16,8 +16,8 @@ uniform float otherSphereRadius;
 struct SphereInfo {
     bool isLightSource;
     bool isValid;
-    vec3 center;
-    float radius;
+    vec3 centerTransformed;
+//    float radius;
 };
 
 uniform SphereInfo sphereInfo;
@@ -53,15 +53,12 @@ void main()
     {
         if (sphereInfo.isValid)
         {
-            vec4 modelTransformedMyCenter   = model * vec4(sphereInfo.center, 1.0);
-            float r                         = length(vec2(length(modelTransformedMyCenter),
-                                                          sphereInfo.radius));
-            
             vec3 modelTransformedPosition   = vec3((model * vec4(position, 1.0)));
             float dist_sun_thisPoint    = distance(sunCenterTransformed, modelTransformedPosition);
+            float dist_sun_thisSphere   = distance(sunCenterTransformed, sphereInfo.centerTransformed);
             float dist_sun_otherSphere  = distance(sunCenterTransformed, vec3(otherSphereCenterTransformed));
 
-            if (r < length(modelTransformedPosition))
+            if (dist_sun_thisSphere < dist_sun_thisPoint)
             {
                 // point is on the night side of this sphere.
                 // todo - this is only true if radius of sun is same as radius of this planet

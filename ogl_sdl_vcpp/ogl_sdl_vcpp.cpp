@@ -46,8 +46,8 @@ GLint uniProj;
 
 GLint uniOverrideColor;
 
-GLint uniMyCenter;
-GLint uniMyRadius;
+GLint uniMyCenterTransformed;
+//GLint uniMyRadius;
 GLint uniMyIsValud;
 GLint uniMyIsLightSource;
 
@@ -107,7 +107,7 @@ void initSceneObjects()
         glm::radians(23.5f)                 // axis tilt angle
     );
     earth.setOrbitalParameters(1000,         // radius of orbit
-        glm::radians(160.0f),               // initial orbital angle
+        glm::radians(60.0f),               // initial orbital angle
         0.001f,                             // revolution velocity
         0.0f,                               // orbital rotation angle
         0                                   // orbital tilt
@@ -369,8 +369,8 @@ void initializeGL()
     uniView                         = getUniformLocation("view");
     uniProj                         = getUniformLocation("proj");
     
-    uniMyCenter                     = getUniformLocation("sphereInfo.center");
-    uniMyRadius                     = getUniformLocation("sphereInfo.radius");
+    uniMyCenterTransformed          = getUniformLocation("sphereInfo.centerTransformed");
+    //uniMyRadius                     = getUniformLocation("sphereInfo.radius");
     uniMyIsValud                    = getUniformLocation("sphereInfo.isValid");
     uniMyIsLightSource              = getUniformLocation("sphereInfo.isLightSource");
 
@@ -607,8 +607,8 @@ int main(int argc, char *argv[])
         glUniform1i(uniMyIsValud, false);
         // ideally, after setting IsValid to false, no need to set the other variables to draw the axis.
         glUniform1i(uniMyIsLightSource, 0);
-        glUniform3f(uniMyCenter, 0.0f, 0.0f, 0.0f);
-        glUniform1f(uniMyRadius, 0);
+        glUniform3f(uniMyCenterTransformed, 0.0f, 0.0f, 0.0f);
+        //glUniform1f(uniMyRadius, 0);
 
         // When drawing earth, other sphere is moon.
         glUniform1f(uniOtherSphereRadius, 0);
@@ -636,8 +636,8 @@ int main(int argc, char *argv[])
         );
 
         glUniform1i(uniMyIsLightSource, 0);
-        glUniform3f(uniMyCenter, 0.0f, 0.0f, 0.0f);
-        glUniform1f(uniMyRadius, earth.getRadius());
+        glUniform3fv(uniMyCenterTransformed, 1, glm::value_ptr(earth.getCenter()));
+        //glUniform1f(uniMyRadius, earth.getRadius());
         glUniform1i(uniMyIsValud, true);
 
         // When drawing earth, other sphere is moon.
@@ -674,8 +674,8 @@ int main(int argc, char *argv[])
         );
 
         glUniform1i(uniMyIsLightSource, 1);
-        glUniform1f(uniMyRadius, sun.getRadius());
-        glUniform3f(uniMyCenter, 0.0f, 0.0f, 0.0f);
+        //glUniform1f(uniMyRadius, sun.getRadius());
+        glUniform3fv(uniMyCenterTransformed, 1, glm::value_ptr(sun.getCenter()));
         glUniform1i(uniMyIsValud, true);
 
         glBindVertexArray(sunVao);
@@ -695,8 +695,8 @@ int main(int argc, char *argv[])
         );
 
         glUniform1i(uniMyIsLightSource, 0);
-        glUniform3f(uniMyCenter, 0.0f, 0.0f, 0.0f);
-        glUniform1f(uniMyRadius, moon.getRadius());
+        glUniform3fv(uniMyCenterTransformed, 1, glm::value_ptr(moon.getCenter()));
+        //glUniform1f(uniMyRadius, moon.getRadius());
         glUniform1i(uniMyIsValud, true);
 
         // When drawing moon, other sphere is earth.
