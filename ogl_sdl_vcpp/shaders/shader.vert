@@ -7,10 +7,10 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 proj;
 
-uniform vec4  sunCenterTransformed;
+uniform vec3  sunCenterTransformed;
 uniform float sunRadius;
 
-uniform vec4  otherSphereCenterTransformed;
+uniform vec3  otherSphereCenterTransformed;
 uniform float otherSphereRadius;
 
 struct SphereInfo {
@@ -27,14 +27,14 @@ out vec4 Color;
 
 vec3 nearestPtL(vec3 modelTransformedPosition)
 {
-    float dist = distance(vec3(sunCenterTransformed), vec3(otherSphereCenterTransformed));
+    float dist = distance(sunCenterTransformed, otherSphereCenterTransformed);
     float den = dist * dist;
     float k = 0;
     if (den > 0.000001)
     {
         k = ((modelTransformedPosition.x - sunCenterTransformed.x) * (otherSphereCenterTransformed.x - sunCenterTransformed.x) +
-                (modelTransformedPosition.y - sunCenterTransformed.y) * (otherSphereCenterTransformed.y - sunCenterTransformed.y) +
-                (modelTransformedPosition.z - sunCenterTransformed.z) * (otherSphereCenterTransformed.z - sunCenterTransformed.z)) / den;
+             (modelTransformedPosition.y - sunCenterTransformed.y) * (otherSphereCenterTransformed.y - sunCenterTransformed.y) +
+             (modelTransformedPosition.z - sunCenterTransformed.z) * (otherSphereCenterTransformed.z - sunCenterTransformed.z)) / den;
     }
     else
     {
@@ -42,8 +42,8 @@ vec3 nearestPtL(vec3 modelTransformedPosition)
     }
 
     vec3 N = vec3(sunCenterTransformed.x + ((otherSphereCenterTransformed.x - sunCenterTransformed.x) * k),
-                    sunCenterTransformed.y + ((otherSphereCenterTransformed.y - sunCenterTransformed.y) * k),
-                    sunCenterTransformed.z + ((otherSphereCenterTransformed.z - sunCenterTransformed.z) * k));
+                  sunCenterTransformed.y + ((otherSphereCenterTransformed.y - sunCenterTransformed.y) * k),
+                  sunCenterTransformed.z + ((otherSphereCenterTransformed.z - sunCenterTransformed.z) * k));
     return N;
 }
 
@@ -55,7 +55,7 @@ void main()
         {
             vec4 modelTransformedMyCenter   = model * vec4(sphereInfo.center, 1.0);
             float r                         = length(vec2(length(modelTransformedMyCenter),
-                                                        sphereInfo.radius));
+                                                          sphereInfo.radius));
 
             vec3 modelTransformedPosition   = vec3((model * vec4(position, 1.0)));
 
@@ -67,20 +67,20 @@ void main()
             }
             else
             {
-                Color = vec4(1.0, 0.0, 0.0, 1.0);
+                //Color = vec4(1.0, 0.0, 0.0, 1.0);
                 bool bInUmbra               = false;
                 bool bInPenumbra            = false;
                 bool bInAntumbra            = false;
                 do
                 {
-                    float dist_sun_thisPoint    = distance(vec3(sunCenterTransformed), modelTransformedPosition);
-                    float dist_sun_otherSphere  = distance(vec3(sunCenterTransformed), vec3(otherSphereCenterTransformed));
+                    float dist_sun_thisPoint    = distance(sunCenterTransformed, modelTransformedPosition);
+                    float dist_sun_otherSphere  = distance(sunCenterTransformed, vec3(otherSphereCenterTransformed));
 
                     if (dist_sun_thisPoint < dist_sun_otherSphere)
                         break;                                              // point might be inside the 'other' sphere, but cannot be in shadow.
 
 
-                    Color = vec4(0.0, 0.0, 1.0, 1.0);
+                    //Color = vec4(0.0, 0.0, 1.0, 1.0);
                         
 
                     //-------------------------------------------------------------
@@ -103,7 +103,7 @@ void main()
 
                     vec3  N                     = nearestPtL(modelTransformedPosition);
                     float dist_N_thisPoint      = distance(N, modelTransformedPosition);
-                    float dist_N_sun            = distance(N, vec3(sunCenterTransformed));
+                    float dist_N_sun            = distance(N, sunCenterTransformed);
 
                     // calculate length of umbral cone.
                     float umbraLength           = (sunRadius * dist_sun_otherSphere) / (sunRadius - otherSphereRadius);
@@ -125,15 +125,15 @@ void main()
                     Color = vec4(in_color * 0.3, 1.0);
                 else if (bInPenumbra)
                     Color = vec4(in_color * 0.4, 1.0);
-//                    else
-//                        Color = vec4(in_color, 1.0);
+                else
+                    Color = vec4(in_color, 1.0);
                         
             }
         }
         else    // if (sphereInfo.isValid)
         {
-            //Color = vec4(in_color, 1.0);
-            Color = vec4(0.0, 1.0, 0.0, 1.0);
+            Color = vec4(in_color, 1.0);
+            //Color = vec4(0.0, 1.0, 0.0, 1.0);
         }
     }
     else

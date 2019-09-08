@@ -22,9 +22,11 @@ int curWidth;
 int curHeight;
 
 GLuint vbo;                 // Create for 
+GLuint axisVao;
 GLuint sunVao;
 GLuint earthVao;
 GLuint moonVao;
+
 
 
 GLuint earthLatLongVao;
@@ -59,6 +61,8 @@ GLint uniSunRadius;
 GLint _numAttributes;
 
 
+// Sphere and other objects to be drawn on the screen. Instantiate them here. Their data (vertices) will be created later.
+Axis axis;
 Sphere earth;
 Sphere sun;
 Sphere moon;
@@ -66,6 +70,12 @@ Sphere moon;
 
 void initSceneObjects()
 {
+    axis.generateVertices(
+        1400,
+        glm::vec3(0.2f, 0.2f, 0.5f),        // X axis color
+        glm::vec3(0.2f, 0.5f, 0.2f),        // Y axis color
+        glm::vec3(0.2f, 0.5f, 0.5f)         // Z axis color
+    );
     // Sun
     //---------------------------------------
     sun.setColor(0.7f, 0.7f, 0.1f);
@@ -92,7 +102,7 @@ void initSceneObjects()
         glm::radians(270.0f),               // axis rotation angle
         glm::radians(23.5f)                 // axis tilt angle
     );
-    earth.setOrbitalParameters(800,         // radius of orbit
+    earth.setOrbitalParameters(1000,         // radius of orbit
         glm::radians(160.0f),               // initial orbital angle
         0.001f,                             // revolution velocity
         0.0f,                               // orbital rotation angle
@@ -329,14 +339,35 @@ void initializeGL()
 
     GLint posAttrib                 = getAttribLocation("position");
     GLint colAttrib                 = getAttribLocation("in_color");
+    
+
+
+    //---------------------------------------------------------------------------------------------------
+    // Axis
+    glGenVertexArrays(1, &axisVao);
+    glBindVertexArray(axisVao);
+
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        sizeof(float) * axis.getVertices().size(),
+        axis.getVertices().data(),
+        GL_STATIC_DRAW);
+
+    glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), nullptr);
+    glEnableVertexAttribArray(posAttrib);
+
+    glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(colAttrib);
 
 
     //---------------------------------------------------------------------------------------------------
     // Earth's sphere
     glGenVertexArrays(1, &earthVao);
     glBindVertexArray(earthVao);
-	
-	glGenBuffers(1, &vbo);
+
+    glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(
         GL_ARRAY_BUFFER,
@@ -388,7 +419,7 @@ void initializeGL()
 	glEnableVertexAttribArray(colAttrib);
 
     //---------------------------------------------------------------------------------------------------
-    // Sun's sphere
+    // Moon's sphere
     glGenVertexArrays(1, &moonVao);
     glBindVertexArray(moonVao);
 
@@ -468,7 +499,6 @@ int main(int argc, char *argv[])
                     glViewport(0, 0, curWidth, curHeight);
                 }
             }
-
 		}
 
         //printf("Iterating\n");
@@ -486,9 +516,7 @@ int main(int argc, char *argv[])
         useShaderProgram();
 
 
-
-        // todo - this could be moved to initialization?
-        glUniform4fv(
+        glUniform3fv(
             uniSunCenterTransformed,
             1,
             glm::value_ptr(sun.getModelTransformedCenter())
@@ -517,7 +545,35 @@ int main(int argc, char *argv[])
         glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
         //=====================================================================================
 
+        //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        //----------------------------------------------
+        // Axis model transformation
+        //----------------------------------------------
+        glUniformMatrix4fv(
+            uniModel,
+            1,
+            GL_FALSE,
+            glm::value_ptr(glm::mat4(1.0))
+        );
 
+        glUniform1i(uniMyIsValud, false);
+        // ideally, after setting IsValid to false, no need to set the other variables to draw the axis.
+        glUniform1i(uniMyIsLightSource, 0);
+        glUniform3f(uniMyCenter, 0.0f, 0.0f, 0.0f);
+        glUniform1f(uniMyRadius, 0);
+
+        // When drawing earth, other sphere is moon.
+        glUniform1f(uniOtherSphereRadius, 0);
+        glUniform3fv(
+            uniOtherSphereCenterTransformed,
+            1,
+            glm::value_ptr(moon.getModelTransformedCenter())
+        );
+
+        glBindVertexArray(axisVao);
+
+        // Draw vertices
+        glDrawArrays(GL_LINES, 0, axis.getVertices().size()/6);
 
         //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -528,7 +584,7 @@ int main(int argc, char *argv[])
             uniModel,
             1,
             GL_FALSE,
-            glm::value_ptr(earth.getModelTransformMatrix())
+            glm::value_ptr(earth.getModelMatrix())
         );
 
         glUniform1i(uniMyIsLightSource, 0);
@@ -538,7 +594,7 @@ int main(int argc, char *argv[])
 
         // When drawing earth, other sphere is moon.
         glUniform1f(uniOtherSphereRadius, moon.getRadius());
-        glUniform4fv(
+        glUniform3fv(
             uniOtherSphereCenterTransformed,
             1,
             glm::value_ptr(moon.getModelTransformedCenter())
@@ -547,14 +603,14 @@ int main(int argc, char *argv[])
         glBindVertexArray(earthVao);
         
         // Draw vertices
-        glDrawArrays(GL_TRIANGLES, 0, earth.getVertices().size());
+        glDrawArrays(GL_TRIANGLES, 0, earth.getVertices().size()/6);
         
         //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
         glBindVertexArray(earthLatLongVao);
 
         // Draw vertices
-        glDrawArrays(GL_LINES, 0, earth.getLatitudeAndLongitudeVertices().size());
+        glDrawArrays(GL_LINES, 0, earth.getLatitudeAndLongitudeVertices().size()/6);
 
 
         //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -566,7 +622,7 @@ int main(int argc, char *argv[])
             uniModel,
             1,
             GL_FALSE,
-            glm::value_ptr(sun.getModelTransformMatrix())
+            glm::value_ptr(sun.getModelMatrix())
         );
 
         glUniform1i(uniMyIsLightSource, 1);
@@ -576,7 +632,7 @@ int main(int argc, char *argv[])
 
         glBindVertexArray(sunVao);
 
-        glDrawArrays(GL_TRIANGLES, 0, sun.getVertices().size());
+        glDrawArrays(GL_TRIANGLES, 0, sun.getVertices().size()/6);
 
         //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -587,7 +643,7 @@ int main(int argc, char *argv[])
             uniModel,
             1,
             GL_FALSE,
-            glm::value_ptr(moon.getModelTransformMatrix())
+            glm::value_ptr(moon.getModelMatrix())
         );
 
         glUniform1i(uniMyIsLightSource, 0);
@@ -597,16 +653,16 @@ int main(int argc, char *argv[])
 
         // When drawing moon, other sphere is earth.
         glUniform1f(uniOtherSphereRadius, earth.getRadius());
-        glUniform4fv(
+        glUniform3fv(
             uniOtherSphereCenterTransformed,
             1,
-            glm::value_ptr(earth.getModelTransformMatrix())
+            glm::value_ptr(earth.getModelTransformedCenter())
         );
 
         glBindVertexArray(moonVao);
 
         // Draw vertices
-        glDrawArrays(GL_TRIANGLES, 0, moon.getVertices().size());
+        glDrawArrays(GL_TRIANGLES, 0, moon.getVertices().size()/6);
 
         //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

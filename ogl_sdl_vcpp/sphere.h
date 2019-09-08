@@ -167,6 +167,16 @@ public:
             }
         }
 
+        //// add orbital plane to the main vertices for now
+        //_vertices.push_back(-1400);   _vertices.push_back(-1400);   _vertices.push_back(0);   _vertices.push_back(0.5);  _vertices.push_back(0.3); _vertices.push_back(0.3);
+        //_vertices.push_back(1400);   _vertices.push_back(-1400);   _vertices.push_back(0);   _vertices.push_back(0.3);  _vertices.push_back(0.3); _vertices.push_back(0.3);
+        //_vertices.push_back(1400);   _vertices.push_back(1400);   _vertices.push_back(0);   _vertices.push_back(0.3);  _vertices.push_back(0.3); _vertices.push_back(0.3);
+        //_vertices.push_back(1400);   _vertices.push_back(1400);   _vertices.push_back(0);   _vertices.push_back(0.3);  _vertices.push_back(0.3); _vertices.push_back(0.3);
+        //_vertices.push_back(-1400);   _vertices.push_back(1400);   _vertices.push_back(0);   _vertices.push_back(0.3);  _vertices.push_back(0.3); _vertices.push_back(0.3);
+        //_vertices.push_back(-1400);   _vertices.push_back(-1400);   _vertices.push_back(0);   _vertices.push_back(0.3);  _vertices.push_back(0.3); _vertices.push_back(0.3);
+
+
+
         //---------------------------------------------------------------------------------
         // Longitudes
         //---------------------------------------------------------------------------------
@@ -233,13 +243,13 @@ public:
         return _latLongVertices;
     }
 
-    glm::vec4 getModelTransformedCenter()
+    glm::vec3 getModelTransformedCenter()
     {
         glm::vec4 center(_center.x, _center.y, _center.z, 1.0);
-        return getModelTransformMatrix() * center;
+        return glm::vec3(getModelMatrix() * center);
     }
 
-    glm::mat4 getModelTransformMatrix()
+    glm::mat4 getModelMatrix()
     {
         glm::mat4 modelTrans(1.0f);
 
@@ -308,6 +318,47 @@ private:
     std::vector<float> _vertices;
     std::vector<float> _latLongVertices;
     Sphere *_parent;
+};
+
+
+
+class Axis
+{
+public:
+    Axis()
+    {
+    }
+
+    ~Axis()
+    {
+    }
+
+    void generateVertices(float axisLength, glm::vec3 xAxisColor, glm::vec3 yAxisColor, glm::vec3 zAxisColor)
+    {
+        _vertices.push_back(-axisLength);  _vertices.push_back(0.0);  _vertices.push_back(0.0);   _vertices.push_back(xAxisColor.r);  _vertices.push_back(xAxisColor.g);  _vertices.push_back(xAxisColor.b);
+        _vertices.push_back( axisLength);  _vertices.push_back(0.0);  _vertices.push_back(0.0);   _vertices.push_back(xAxisColor.r);  _vertices.push_back(xAxisColor.g);  _vertices.push_back(xAxisColor.b);
+
+        _vertices.push_back(0.0);  _vertices.push_back(-axisLength);  _vertices.push_back(0.0);   _vertices.push_back(yAxisColor.r);  _vertices.push_back(yAxisColor.g);  _vertices.push_back(yAxisColor.b);
+        _vertices.push_back(0.0);  _vertices.push_back( axisLength);  _vertices.push_back(0.0);   _vertices.push_back(yAxisColor.r);  _vertices.push_back(yAxisColor.g);  _vertices.push_back(yAxisColor.b);
+
+        _vertices.push_back(0.0);  _vertices.push_back(0.0);  _vertices.push_back(-axisLength);   _vertices.push_back(zAxisColor.r);  _vertices.push_back(zAxisColor.g);  _vertices.push_back(zAxisColor.b);
+        _vertices.push_back(0.0);  _vertices.push_back(0.0);  _vertices.push_back( axisLength);   _vertices.push_back(zAxisColor.r);  _vertices.push_back(zAxisColor.g);  _vertices.push_back(zAxisColor.b);
+    }
+
+    std::vector<float>& getVertices()
+    {
+        return _vertices;
+    }
+
+    void freeVertices()
+    {
+        _vertices.clear();
+    }
+
+
+private:
+    std::vector<float> _vertices;
+
 };
 
 
