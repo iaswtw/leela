@@ -24,12 +24,26 @@ uniform SphereInfo sphereInfo;
 
 out vec4 Color;
         
+//--------------------------------------------------------------------------------------------------------------------------
+// Terminology:
+//--------------------------------------------------------------------------------------------------------------------------
+//   thisPoint - the point being rendered
+//   thisSphere - the sphere on which thisPoint might exist. Why 'might'? Because this point might belong to axis or
+//                orbital plane, in which case, it is not part of any sphere.
+//   otherSphere - the center of a sphere that can cause thisPoint to be in its shadow.  Only one such sphere is supported at the moment.
+//                 E.g. otherSphere will be set to the center of moon when the thisPoint is a point on the earth.
 
+
+//-------------------------------------------------------------------------------------------------
+// Calculate perpendicular from the given point in argument (modelTransformedPosition, i.e. thisPoint
+// transformed using its model matrix) point on the line joining the sun's center and the
+// otherSphere's center.
+//-------------------------------------------------------------------------------------------------
 vec3 nearestPtL(vec3 modelTransformedPosition)
 {
     float dist = distance(sunCenterTransformed, otherSphereCenterTransformed);
     float den = dist * dist;
-    float k = 0;
+    float k = 0.0;
     if (den > 0.000001)
     {
         k = ((modelTransformedPosition.x - otherSphereCenterTransformed.x) * (sunCenterTransformed.x - otherSphereCenterTransformed.x) +
@@ -73,7 +87,6 @@ void main()
                 bool bInAntumbra            = false;
                 do
                 {
-
                     if (dist_sun_thisPoint < dist_sun_otherSphere)
                         break;                                              // point might be inside the 'other' sphere, but cannot be in shadow.
 
@@ -102,13 +115,14 @@ void main()
                     vec3  N                     = nearestPtL(modelTransformedPosition);
                     float dist_N_thisPoint      = distance(N, modelTransformedPosition);
                     float dist_N_sun            = distance(N, sunCenterTransformed);
+                    float dist_N_otherSphere    = distance(N, otherSphereCenterTransformed);
 
                     // calculate length of umbral cone.
-                    float umbraLength           = (sunRadius * dist_sun_otherSphere) / (sunRadius - otherSphereRadius);
+                    float umbraLength           = (otherSphereRadius * dist_sun_otherSphere) / (sunRadius - otherSphereRadius);
 
                     // Find radius of shadow cone at a cross section taken at the nearest point
-                    float umbraConeHalfAngle = asin(sunRadius / umbraLength);
-                    float y = (umbraLength - dist_N_sun) * tan(umbraConeHalfAngle);
+                    float umbraConeHalfAngle = asin(otherSphereRadius / umbraLength);
+                    float y = (umbraLength - dist_N_otherSphere) * tan(umbraConeHalfAngle);
                         
                     if (dist_N_thisPoint < y)
                         bInUmbra = true;

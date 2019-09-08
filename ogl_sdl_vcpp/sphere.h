@@ -226,8 +226,10 @@ public:
 
     glm::vec3 getModelTransformedCenter()
     {
-        glm::vec4 center(_center.x, _center.y, _center.z, 1.0);
-        return glm::vec3(getModelMatrix() * center);
+        //glm::vec4 center(_center.x, _center.y, _center.z, 1.0);
+        //return glm::vec3(getModelMatrix() * center);
+
+        return _center;
     }
 
     glm::mat4 getModelMatrix()

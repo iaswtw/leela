@@ -107,8 +107,8 @@ void initSceneObjects()
         glm::radians(23.5f)                 // axis tilt angle
     );
     earth.setOrbitalParameters(1000,         // radius of orbit
-        glm::radians(60.0f),               // initial orbital angle
-        0.001f,                             // revolution velocity
+        glm::radians(120.0f),               // initial orbital angle
+        0.0001f,                             // revolution velocity
         0.0f,                               // orbital rotation angle
         0                                   // orbital tilt
     );
@@ -124,7 +124,7 @@ void initSceneObjects()
     );
     moon.setOrbitalParameters(220,          // radius of orbit
         0.0f,                               // initial orbital angle
-        0.04f,                             // revolution velocity
+        0.004f,                             // revolution velocity
         0,                                  // orbital rotation angle
         glm::radians(30.0)                  // orbital tilt
     );
