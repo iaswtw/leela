@@ -83,7 +83,7 @@ void initSceneObjects()
     // Sun
     //---------------------------------------
     sun.setColor(0.7f, 0.7f, 0.1f);
-    sun.setRotationParameters(120,          // radius
+    sun.setRotationParameters(160,          // radius
         0,                                  // initial rotation angle
         0.02f,                              // rotation velocity
         glm::radians(0.0f),                 // axis rotation angle
@@ -107,7 +107,7 @@ void initSceneObjects()
         glm::radians(23.5f)                 // axis tilt angle
     );
     earth.setOrbitalParameters(1000,         // radius of orbit
-        glm::radians(120.0f),               // initial orbital angle
+        glm::radians(240.0f),               // initial orbital angle
         0.0001f,                             // revolution velocity
         0.0f,                               // orbital rotation angle
         0                                   // orbital tilt
@@ -578,7 +578,7 @@ int main(int argc, char *argv[])
         //----------------------------------------------
         glm::mat4 view = glm::lookAt(
 //            glm::vec3(1600.0f, 1600.0f, 1600.0f),
-            glm::vec3(1600.0f, 1600.0f, 1200.0f),
+            glm::vec3(1300.0f, 1300.0f, 1000.0f),
             glm::vec3(0.0f, 0.0f, 0.0f),
             glm::vec3(0.0f, 0.0f, 1.0f));
         glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));

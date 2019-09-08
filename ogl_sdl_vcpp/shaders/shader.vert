@@ -80,8 +80,10 @@ void main()
             }
             else
             {
-                //Color = vec4(1.0, 0.0, 0.0, 1.0);
-                
+                //---------------------------------------------------------------------------------
+                // In this code block, check if point is in penumbra, antumbra, umbra or none.
+                // Provide color to the point accordingly.
+                //---------------------------------------------------------------------------------
                 bool bInUmbra               = false;
                 bool bInPenumbra            = false;
                 bool bInAntumbra            = false;
@@ -90,41 +92,42 @@ void main()
                     if (dist_sun_thisPoint < dist_sun_otherSphere)
                         break;                                              // point might be inside the 'other' sphere, but cannot be in shadow.
 
-
-                    //Color = vec4(0.0, 0.0, 1.0, 1.0);
-                        
-
-                    //-------------------------------------------------------------
-                    // Check if point is in penumbra OR negative umbra OR umbra
-                    //-------------------------------------------------------------
-                    // todo - check if point is in penumbra
-                    //  on the line joining the centers of Sun and otherSphere, find a point between them that is the vertex of the cone of penumbra.
-//                    float h2 = dist_sun_otherSphere * otherSphereRadius / (otherSphereRadius + sunRadius);
-//                    if (h2 > otherSphereRadius)
-//                    {
-//                        float coneHalfAngle = asin(otherSphereRadius / h2);
-
-                                
-                        //float y = tan(coneHalfAngle) * distance(N, h
-
-//                    }
-
-                    // todo - check if point is in negative umbra
-
-
+                    // Calculate some important points and distances about umbra and penumbra.
                     vec3  N                     = nearestPtL(modelTransformedPosition);
                     float dist_N_thisPoint      = distance(N, modelTransformedPosition);
                     float dist_N_sun            = distance(N, sunCenterTransformed);
                     float dist_N_otherSphere    = distance(N, otherSphereCenterTransformed);
 
+                    //---------------------------------------------------------
+                    // Penumbra specific calculation and check
+                    //---------------------------------------------------------
+                    // this is the length from the start of imginary cone, between the sun and the 'other' sphere, to otherSphere center.
+                    float penumbraLength        = (sunRadius * dist_sun_otherSphere) / (sunRadius - otherSphereRadius);
+                    float penumbraConeHalfAngle = asin(otherSphereRadius / penumbraLength);
+
+                    // y2 = radius of crosssection of penumbra at N
+                    float y1 = (penumbraLength + dist_N_otherSphere) * tan(penumbraConeHalfAngle);
+                    if (dist_N_thisPoint < y1)
+                        bInPenumbra = true;
+                    
+                    // Even if the point was determined to be in penumbra, it might actually be in umbra. So continue to check further.
+
+                    // todo - check if point is in antumbra
+
+
+                    //---------------------------------------------------------
+                    // Umbra specific calculation and check
+                    //---------------------------------------------------------
                     // calculate length of umbral cone.
                     float umbraLength           = (otherSphereRadius * dist_sun_otherSphere) / (sunRadius - otherSphereRadius);
 
                     // Find radius of shadow cone at a cross section taken at the nearest point
                     float umbraConeHalfAngle = asin(otherSphereRadius / umbraLength);
-                    float y = (umbraLength - dist_N_otherSphere) * tan(umbraConeHalfAngle);
+                    
+                    // y2 = radius of crosssection of umbra at N
+                    float y2 = (umbraLength - dist_N_otherSphere) * tan(umbraConeHalfAngle);
                         
-                    if (dist_N_thisPoint < y)
+                    if (dist_N_thisPoint < y2)
                         bInUmbra = true;
 
                 } while (false);
