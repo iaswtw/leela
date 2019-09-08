@@ -12,25 +12,6 @@
 #include <math.h>
 
 
-class Point3D
-{
-public:
-    float x, y, z;
-    Point3D() : x(0), y(0), z(0)
-    {
-    }
-    Point3D(float x, float y, float z)
-    {
-        this->x = x;
-        this->y = y;
-        this->z = z;
-    }
-
-    ~Point3D()
-    {
-    }
-};
-
 class Color
 {
 public:
@@ -94,7 +75,7 @@ public:
         _parent = parent;
     }
 
-    inline Point3D& getCenter()
+    inline glm::vec3& getCenter()
     {
         return _center;
     }
@@ -254,7 +235,7 @@ public:
         glm::mat4 modelTrans(1.0f);
 
         // translate
-        modelTrans = glm::translate(modelTrans,   glm::vec3(getCenter().x, getCenter().y, getCenter().z));
+        modelTrans = glm::translate(modelTrans,   getCenter());
 
         // tilt and rotate axis. 
         // todo - do this using a single rotate invocation
@@ -295,7 +276,7 @@ public:
 private:
     // angles and angle velocities are in radians
 
-    Point3D _center;
+    glm::vec3 _center;
     float _r;
     float _g;
     float _b;
