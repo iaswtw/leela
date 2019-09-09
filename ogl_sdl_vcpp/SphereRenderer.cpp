@@ -91,6 +91,25 @@ void SphereRenderer::createVaoAndVbos(OglHandles oglHandles)
     glVertexAttribPointer(oglHandles.colAttrib, 4, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(oglHandles.colAttrib);
 
+    //---------------------------------------------------------------------------------------------------
+    // Orbital itself
+    glGenVertexArrays(1, &_orbitVao);
+    glBindVertexArray(_orbitVao);
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        sizeof(float) * _sphere.getOrbitVertices().size(),
+        _sphere.getOrbitVertices().data(),
+        GL_STATIC_DRAW);
+
+    glVertexAttribPointer(oglHandles.posAttrib, 3, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), nullptr);
+    glEnableVertexAttribArray(oglHandles.posAttrib);
+
+    glVertexAttribPointer(oglHandles.colAttrib, 4, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(oglHandles.colAttrib);
+
+
 }
 
 void SphereRenderer::render(OglHandles oglHandles, Sphere* otherSphere)
@@ -156,8 +175,29 @@ void SphereRenderer::render(OglHandles oglHandles, Sphere* otherSphere)
         glBindVertexArray(_orbitalPlaneVao);
 
         // Draw vertices
+//        glDepthMask(GL_FALSE);
         glDrawArrays(GL_TRIANGLES, 0, _sphere.getOrbitalPlaneVertices().size() / VERTEX_STRIDE_IN_VBO);
+//        glDepthMask(GL_TRUE);
     }
 
+    //----------------------------------------------------------------------------------------------------
+    // Orbital itself
+    //----------------------------------------------------------------------------------------------------
+    // Uses same transform as that of orbital plane. But orbital plane may not be drawn depending on flags. Hence
+    // set the model matrix again.
+    if (bShowOrbit)
+    {
+        glUniformMatrix4fv(
+            oglHandles.uniModel,
+            1,
+            GL_FALSE,
+            glm::value_ptr(_sphere.getOrbitalPlaneModelMatrix())
+        );
+
+        glUniform1i(oglHandles.uniMyIsValud, false);
+
+        glBindVertexArray(_orbitVao);
+        glDrawArrays(GL_LINES, 0, _sphere.getOrbitVertices().size() / VERTEX_STRIDE_IN_VBO);
+    }
 
 }

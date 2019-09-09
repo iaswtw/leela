@@ -24,8 +24,7 @@ Universe::~Universe()
 **************************************************************************************************/
 void Universe::initSceneObjects()
 {
-    space.initFrame();
-
+    SetDefaultView();
 
     axis.generateVertices(
         1400, 1400, 800,
@@ -36,7 +35,7 @@ void Universe::initSceneObjects()
     // Sun
     //---------------------------------------
     //sun.setColor(0.7f, 0.7f, 0.1f);
-    sun.setColor(1.0f, 1.0f, 1.0f);
+    sun.setColor(1.0f, 1.0f, 0.6f);
     sun.setRotationParameters(140,          // radius
         0,                                  // initial rotation angle
         0.02f,                              // rotation velocity
@@ -57,19 +56,20 @@ void Universe::initSceneObjects()
     earth.setRotationParameters(80,         // radius
         0,                                  // initial rotation angle
         0.003f,                             // rotation velocity
-        glm::radians(270.0f),               // axis rotation angle
+        glm::radians(0.0f),               // axis rotation angle
         glm::radians(23.5f)                 // axis tilt angle
     );
-    earth.setOrbitalParameters(1000,         // radius of orbit
-        glm::radians(240.0f),               // initial orbital angle
+    earth.setOrbitalParameters(1000,        // radius of orbit
+        glm::radians(0.0f),                 // initial orbital angle
         0.001f,                             // revolution velocity
         0.0f,                               // orbital rotation angle
         0                                   // orbital tilt
     );
+    earth.setOrbitalPlaneColor(glm::vec3(0.5, 0.3, 0.3));
 
     // Moon
     //---------------------------------------
-    moon.setColor(0.5f, 0.5f, 0.5f);
+    moon.setColor(0.8f, 0.8f, 0.8f);
     moon.setRotationParameters(30,          // radius
         0,                                  // initial rotation angle
         0.005f,                              // rotation velocity
@@ -82,7 +82,7 @@ void Universe::initSceneObjects()
         0,                                  // orbital rotation angle
         glm::radians(30.0)                  // orbital tilt
     );
-
+    moon.setOrbitalPlaneColor(glm::vec3(0.3, 0.5, 0.3));
 
     earth.generateVertices();
     sun.generateVertices();
@@ -654,11 +654,20 @@ void Universe::advance(float stepMultiplier)
 void Universe::onKeyDown(SDL_Event* event)
 {
     switch (event->key.keysym.sym) {
+    case SDLK_c:
+        NavigationLockOntoSun(UCmdParam_Toggle);
+        break;
+    case SDLK_d:
+        SetDefaultView();
+        break;
     case SDLK_f:
         FastForward(UCmdParam_Start);
         break;
     case SDLK_g:
         Earth_OrbitalPlane(UCmdParam_Toggle);
+        break;
+    case SDLK_m:
+        Moon_OrbitalPlane(UCmdParam_Toggle);
         break;
     case SDLK_r:
         Rewind(UCmdParam_Start);
@@ -675,6 +684,18 @@ void Universe::onKeyDown(SDL_Event* event)
         break;
     case SDLK_1:
         Earth_SetOrbitalPositionAngle(M_PI / 2);
+        Earth_RevolutionMotion(UCmdParam_Off);
+        break;
+    case SDLK_2:
+        Earth_SetOrbitalPositionAngle(M_PI);
+        Earth_RevolutionMotion(UCmdParam_Off);
+        break;
+    case SDLK_3:
+        Earth_SetOrbitalPositionAngle(3 * M_PI / 2);
+        Earth_RevolutionMotion(UCmdParam_Off);
+        break;
+    case SDLK_4:
+        Earth_SetOrbitalPositionAngle(0);
         Earth_RevolutionMotion(UCmdParam_Off);
         break;
 
@@ -798,7 +819,7 @@ void Universe::SetDefaultView()
 
     space.initFrame();
     space.rotateFrame(PNT(0, 0, 0), -10.0, -15.0);
-    space.moveFrame(Movement_Backward, 3400);
+    //space.moveFrame(Movement_Backward, 3400);
 
     bLockOntoSun = false;
     bLockOntoEarth = false;
@@ -1178,6 +1199,7 @@ int Universe::run()
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //glBlendFunc(GL_SRC_ALPHA, GL_SRC_ALPHA);
 
 
     SDL_GetMouseState(&previousX, &previousY);

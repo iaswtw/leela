@@ -22,6 +22,7 @@ public:
 
 public:
     bool bShowOrbitalPlane = false;
+    bool bShowOrbit = true;
     bool bShowLatitudesAndLongitudes = false;
 
 private:
@@ -29,6 +30,7 @@ private:
 
     GLuint _mainVao;
     GLuint _orbitalPlaneVao;
+    GLuint _orbitVao;
     GLuint _latAndLongVao;
 
     bool _bIsLightSource = false;

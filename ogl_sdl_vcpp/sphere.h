@@ -59,6 +59,10 @@ public:
         _g = g;
         _b = b;
     }
+    void setOrbitalPlaneColor(glm::vec3 orbitalPlaneColor)
+    {
+        _orbitalPlaneColor = orbitalPlaneColor;
+    }
 
     void setOrbitalRadius(float orbitalRadius)
     {
@@ -192,29 +196,34 @@ public:
 
     void generateVertices()
     {
-        float numLongitudes = 1200;
-        float inc = float(2*M_PI) / numLongitudes;
-        _vertices.reserve( int((2*M_PI/inc)*(M_PI/inc)) * 7 );
+        float numLongitudes = 1000;
+        float alpha_inc = float(2*M_PI) / numLongitudes;
+        float theat_inc = float(M_PI) / (numLongitudes/2);
+        float inc = float(2 * M_PI) / numLongitudes;
 
-        for (float alpha = 0; alpha < float(2*M_PI)-inc; alpha += inc)
+        int numFloats = int((2 * M_PI / alpha_inc) * (M_PI / theat_inc)) * 7;
+        printf("numFloats = %d\n", numFloats);
+        _vertices.reserve(numFloats);
+
+        for (float alpha = 0; alpha < float(2*M_PI); alpha += alpha_inc)
         {
-            for (float theta = 0; theta < float(M_PI)-inc; theta += inc)
+            for (float theta = 0; theta < float(M_PI); theta += theat_inc)
             {
                 float x1 = _radius * sin(theta) * cos(alpha);
                 float y1 = _radius * sin(theta) * sin(alpha);
                 float z1 = _radius * cos(theta);
 
-                float x2 = _radius * sin(theta+inc) * cos(alpha);
-                float y2 = _radius * sin(theta+inc) * sin(alpha);
-                float z2 = _radius * cos(theta+inc);
+                float x2 = _radius * sin(theta+ theat_inc) * cos(alpha);
+                float y2 = _radius * sin(theta+ theat_inc) * sin(alpha);
+                float z2 = _radius * cos(theta+ theat_inc);
 
-                float x3 = _radius * sin(theta) * cos(alpha+inc);
-                float y3 = _radius * sin(theta) * sin(alpha+inc);
+                float x3 = _radius * sin(theta) * cos(alpha+ alpha_inc);
+                float y3 = _radius * sin(theta) * sin(alpha+ alpha_inc);
                 float z3 = _radius * cos(theta);
 
-                float x4 = _radius * sin(theta+inc) * cos(alpha+inc);
-                float y4 = _radius * sin(theta+inc) * sin(alpha+inc);
-                float z4 = _radius * cos(theta+inc);
+                float x4 = _radius * sin(theta+ theat_inc) * cos(alpha+ alpha_inc);
+                float y4 = _radius * sin(theta+ theat_inc) * sin(alpha+ alpha_inc);
+                float z4 = _radius * cos(theta+ theat_inc);
 
                 _vertices.push_back(x1);   _vertices.push_back(y1);   _vertices.push_back(z1);   _vertices.push_back(_r);  _vertices.push_back(_g); _vertices.push_back(_b);  _vertices.push_back(1.0);
                 _vertices.push_back(x2);   _vertices.push_back(y2);   _vertices.push_back(z2);   _vertices.push_back(_r);  _vertices.push_back(_g); _vertices.push_back(_b);  _vertices.push_back(1.0);
@@ -228,12 +237,28 @@ public:
         }
 
         // add orbital plane to the main vertices for now
-        _orbitalPlaneVertices.push_back(-1400);   _orbitalPlaneVertices.push_back(-1400);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(0.3);  _orbitalPlaneVertices.push_back(0.15); _orbitalPlaneVertices.push_back(0.15);    _orbitalPlaneVertices.push_back(0.4);
-        _orbitalPlaneVertices.push_back(1400);    _orbitalPlaneVertices.push_back(-1400);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(0.3);  _orbitalPlaneVertices.push_back(0.15); _orbitalPlaneVertices.push_back(0.15);    _orbitalPlaneVertices.push_back(0.4);
-        _orbitalPlaneVertices.push_back(1400);    _orbitalPlaneVertices.push_back(1400);    _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(0.3);  _orbitalPlaneVertices.push_back(0.15); _orbitalPlaneVertices.push_back(0.15);    _orbitalPlaneVertices.push_back(0.4);
-        _orbitalPlaneVertices.push_back(1400);    _orbitalPlaneVertices.push_back(1400);    _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(0.3);  _orbitalPlaneVertices.push_back(0.15); _orbitalPlaneVertices.push_back(0.15);    _orbitalPlaneVertices.push_back(0.4);
-        _orbitalPlaneVertices.push_back(-1400);   _orbitalPlaneVertices.push_back(1400);    _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(0.3);  _orbitalPlaneVertices.push_back(0.15); _orbitalPlaneVertices.push_back(0.15);    _orbitalPlaneVertices.push_back(0.4);
-        _orbitalPlaneVertices.push_back(-1400);   _orbitalPlaneVertices.push_back(-1400);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(0.3);  _orbitalPlaneVertices.push_back(0.15); _orbitalPlaneVertices.push_back(0.15);    _orbitalPlaneVertices.push_back(0.4);
+        _orbitalPlaneVertices.push_back(-_orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(-_orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(_orbitalPlaneColor.r);  _orbitalPlaneVertices.push_back(_orbitalPlaneColor.g); _orbitalPlaneVertices.push_back(_orbitalPlaneColor.b);    _orbitalPlaneVertices.push_back(0.4);
+        _orbitalPlaneVertices.push_back( _orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(-_orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(_orbitalPlaneColor.r);  _orbitalPlaneVertices.push_back(_orbitalPlaneColor.g); _orbitalPlaneVertices.push_back(_orbitalPlaneColor.b);    _orbitalPlaneVertices.push_back(0.4);
+        _orbitalPlaneVertices.push_back( _orbitalRadius*1.2);   _orbitalPlaneVertices.push_back( _orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(_orbitalPlaneColor.r);  _orbitalPlaneVertices.push_back(_orbitalPlaneColor.g); _orbitalPlaneVertices.push_back(_orbitalPlaneColor.b);    _orbitalPlaneVertices.push_back(0.4);
+        _orbitalPlaneVertices.push_back( _orbitalRadius*1.2);   _orbitalPlaneVertices.push_back( _orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(_orbitalPlaneColor.r);  _orbitalPlaneVertices.push_back(_orbitalPlaneColor.g); _orbitalPlaneVertices.push_back(_orbitalPlaneColor.b);    _orbitalPlaneVertices.push_back(0.4);
+        _orbitalPlaneVertices.push_back(-_orbitalRadius*1.2);   _orbitalPlaneVertices.push_back( _orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(_orbitalPlaneColor.r);  _orbitalPlaneVertices.push_back(_orbitalPlaneColor.g); _orbitalPlaneVertices.push_back(_orbitalPlaneColor.b);    _orbitalPlaneVertices.push_back(0.4);
+        _orbitalPlaneVertices.push_back(-_orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(-_orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(_orbitalPlaneColor.r);  _orbitalPlaneVertices.push_back(_orbitalPlaneColor.g); _orbitalPlaneVertices.push_back(_orbitalPlaneColor.b);    _orbitalPlaneVertices.push_back(0.4);
+
+
+        // Orbit itself
+        for (float alpha = 0; alpha < 2 * M_PI; alpha += alpha_inc)
+        {
+            float x1 = _orbitalRadius * cos(alpha);
+            float y1 = _orbitalRadius * sin(alpha);
+            float z1 = 0;
+
+            float x2 = _orbitalRadius * cos(alpha+alpha_inc);
+            float y2 = _orbitalRadius * sin(alpha + alpha_inc);
+            float z2 = 0;
+
+            _orbitVertices.push_back(x1);  _orbitVertices.push_back(y1);  _orbitVertices.push_back(z1);   _orbitVertices.push_back(_orbitalPlaneColor.r); _orbitVertices.push_back(_orbitalPlaneColor.g); _orbitVertices.push_back(_orbitalPlaneColor.b);  _orbitVertices.push_back(0.8);
+            _orbitVertices.push_back(x2);  _orbitVertices.push_back(y2);  _orbitVertices.push_back(z2);   _orbitVertices.push_back(_orbitalPlaneColor.r); _orbitVertices.push_back(_orbitalPlaneColor.g); _orbitVertices.push_back(_orbitalPlaneColor.b);  _orbitVertices.push_back(0.8);
+        }
 
 
         //---------------------------------------------------------------------------------
@@ -329,6 +354,11 @@ public:
     std::vector<float>& getOrbitalPlaneVertices()
     {
         return _orbitalPlaneVertices;
+    }
+
+    std::vector<float>& getOrbitVertices()
+    {
+        return _orbitVertices;
     }
 
     glm::mat4 getOrbitalPlaneModelMatrix()
@@ -445,6 +475,7 @@ private:
     float _r = 1;
     float _g = 1;
     float _b = 1;
+    glm::vec3 _orbitalPlaneColor = glm::vec3(1.0, 1.0, 1.0);
 
     // Rotation variables
     float _radius = 0;
@@ -465,6 +496,7 @@ private:
     std::vector<float> _vertices;
     std::vector<float> _latLongVertices;
     std::vector<float> _orbitalPlaneVertices;
+    std::vector<float> _orbitVertices;
     Sphere *_parent;
 };
 
