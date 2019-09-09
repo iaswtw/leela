@@ -1,6 +1,6 @@
 #version 150 core
 
-#define PI 3.1415926538
+const float PI = 3.1415926535897932384626433832795;
 
 in vec3 position;
 in vec4 in_color;
@@ -19,7 +19,7 @@ struct SphereInfo {
     bool isLightSource;
     bool isValid;
     vec3 centerTransformed;
-//    float radius;
+    float radius;
 };
 
 uniform SphereInfo sphereInfo;
@@ -70,11 +70,16 @@ void main()
         if (sphereInfo.isValid)
         {
             vec3 modelTransformedPosition   = vec3((model * vec4(position, 1.0)));
-            float dist_sun_thisPoint    = distance(sunCenterTransformed, modelTransformedPosition);
-            float dist_sun_thisSphere   = distance(sunCenterTransformed, sphereInfo.centerTransformed);
-            float dist_sun_otherSphere  = distance(sunCenterTransformed, vec3(otherSphereCenterTransformed));
+            float dist_sun_thisPoint        = distance(sunCenterTransformed, modelTransformedPosition);
+            float dist_sun_thisSphere       = distance(sunCenterTransformed, sphereInfo.centerTransformed);
+            float dist_sun_otherSphere      = distance(sunCenterTransformed, vec3(otherSphereCenterTransformed));
+            
+            // calculate distance beyond which this point will be in the night side.  Regardless of the size of the sun,
+            // our calculations assume night side to be equal in size to the day side.
+            float longest_dist_of_point_in_day = length(vec2(dist_sun_thisSphere, sphereInfo.radius));
+            
 
-            if (dist_sun_thisSphere < dist_sun_thisPoint)
+            if (longest_dist_of_point_in_day < dist_sun_thisPoint)
             {
                 // point is on the night side of this sphere.
                 // todo - this is only true if radius of sun is same as radius of this planet

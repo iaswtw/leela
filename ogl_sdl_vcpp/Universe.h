@@ -18,6 +18,10 @@
 #include <string>
 
 
+#define MAXSTARS 1800
+#define MAXGALAXYSTARS 10000
+
+
 
 /*!
  **************************************************************************
@@ -155,6 +159,7 @@ public:
     Universe();
     ~Universe();
 
+    void generateStars();
     int run();
 
     void render();
@@ -220,6 +225,8 @@ private:
     bool bLockOntoEarth = false;
     bool bLockOntoSun = false;
 
+    bool bStars = true;
+
     /*! \todo F_REFERENCE_VECTOR_ALONG_Z is checked before bLockOntoEarth
         or bLockOntoSun in the function on_MouseMotion().  Need
         to consider if the priority of this check should be reversed.
@@ -228,28 +235,22 @@ private:
     char F_REFERENCE_VECTOR_ALONG_Z = 0;
 
 
-    bool bSimulationPause;
+    bool bSimulationPause = false;
 
     USimulationSpeedType eSimulationSpeed;
     UTimeDirectionType eTimeDirection;
     UDotDensityType eDotDensity;
 
 
-    float angle;
+    float angle = 0.0f;
 
-    int curWidth;
-    int curHeight;
+    int curWidth = 0;
+    int curHeight = 0;
 
 
     OglHandles oglHandles;
 
     GLuint vbo;                 // Create for 
-    GLuint earthOrbitalPlaneVao;
-    GLuint sunVao;
-    GLuint earthVao;
-    GLuint moonVao;
-       
-    GLuint earthLatLongVao;
     
     // Texture handles
     GLuint tex1;
@@ -272,6 +273,13 @@ private:
     SphereRenderer moonRenderer;
 
     Space space;
+
+    PNT star[MAXSTARS];
+    PNT gstar[MAXGALAXYSTARS];
+
+    std::vector<float> starVertices;
+    std::vector<float> gstarVertices;
+
 
     bool bUpdateUI;
 };

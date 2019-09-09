@@ -25,6 +25,8 @@ Universe::~Universe()
 void Universe::initSceneObjects()
 {
     SetDefaultView();
+    generateStars();
+
 
     axis.generateVertices(
         1400, 1400, 800,
@@ -56,7 +58,7 @@ void Universe::initSceneObjects()
     earth.setRotationParameters(80,         // radius
         0,                                  // initial rotation angle
         0.003f,                             // rotation velocity
-        glm::radians(0.0f),               // axis rotation angle
+        glm::radians(270.0f),               // axis rotation angle
         glm::radians(23.5f)                 // axis tilt angle
     );
     earth.setOrbitalParameters(1000,        // radius of orbit
@@ -90,6 +92,116 @@ void Universe::initSceneObjects()
 
     moon.setParentSphere(&earth);
     earth.setParentSphere(&sun);
+}
+
+
+/*!
+****************************************************************************
+
+
+
+****************************************************************************/
+void Universe::generateStars()
+{
+    /*  NOTE:
+     *  max_z is the thickness of galaxy at a particular radius
+     *  it is dynamically calculated for every randomly generated 'r'
+     */
+
+
+    int i;
+    double max_dist;
+    double max_radius;
+    double max_theta;
+    double max_z;
+    double r, theta, phi;
+    double w;
+    unsigned char color;  // one component of color
+
+    // generate cubically distributed stars
+    i = 0;
+    max_dist = 500000.0;
+    while (1) {
+        if (i == MAXSTARS)
+            break;
+
+        star[i].x = max_dist * double(rand()) / RAND_MAX - max_dist / 2;
+        star[i].y = max_dist * double(rand()) / RAND_MAX - max_dist / 2;
+        star[i].z = max_dist * double(rand()) / RAND_MAX - max_dist / 2;
+        color = static_cast<unsigned char>(55) + static_cast<unsigned char>((double(rand()) / RAND_MAX) * 200);
+        //star[i].c = SDL_MapRGB ( space.surface->format, color, color, color );
+        star[i].set_color(color, color, color);
+
+        if (fabs(star[i].x) > 10000 ||
+            fabs(star[i].y) > 10000 ||
+            fabs(star[i].z) > 10000)
+        {
+            i++;
+            starVertices.push_back(star[i].x);  starVertices.push_back(star[i].y);  starVertices.push_back(star[i].z);   starVertices.push_back(0.8);  starVertices.push_back(0.8);  starVertices.push_back(0.8);  starVertices.push_back(1.0);
+        }
+    }
+
+    // generate stars for the galaxy
+    max_radius = 1000000.0;
+    max_theta = 2 * M_PI;
+    i = 0;
+    while (1) {
+        if (i == .7 * MAXGALAXYSTARS)
+            break;
+
+        r = max_radius * (double(rand()) / RAND_MAX);
+        theta = max_theta * (double(rand()) / RAND_MAX);
+        w = r / max_radius;
+        if (r < 40000)
+            max_z = r;
+        else
+            max_z = 400000 * (1 / sqrt(1 + 20 * w*w));
+
+        gstar[i].x = r * cos(theta);
+        gstar[i].y = r * sin(theta);
+        gstar[i].z = max_z * double(rand()) / RAND_MAX - max_z / 2;
+        color = static_cast<unsigned char>(55) + static_cast<unsigned char>((double(rand()) / RAND_MAX) * 200);
+        //gstar[i].c = SDL_MapRGB ( space.surface->format, color, color, color );
+        gstar[i].set_color(color, color, color);
+
+
+
+        if (fabs(gstar[i].x) > 1000 ||
+            fabs(gstar[i].y) > 1000 ||
+            fabs(gstar[i].z) > 1000)
+            i++;
+    }
+
+    while (1) {
+        if (i == MAXGALAXYSTARS)
+            break;
+
+        r = 200000 * (double(rand()) / RAND_MAX);
+        theta = M_PI * (double(rand()) / RAND_MAX);
+        phi = 2 * M_PI * (double(rand()) / RAND_MAX);
+        gstar[i].x = r * sin(theta) * cos(phi);
+        gstar[i].y = r * sin(theta) * sin(phi);
+        gstar[i].z = r * cos(theta);
+        color = static_cast<unsigned char>((double(rand()) / RAND_MAX) * 255);
+        //gstar[i].c = SDL_MapRGB ( space.surface->format, color, color, color );
+        gstar[i].set_color(color, color, color);
+        i++;
+
+    }
+
+    // shift the Galaxy stars along x axis
+    for (i = 0; i < MAXGALAXYSTARS; i++)
+        gstar[i].x += max_radius * .66;
+
+
+    // rotate all stars so that the the plane of the solar system
+    // is perpendicular to the plane of the galaxy
+    for (i = 0; i < MAXGALAXYSTARS; i++)
+        gstar[i] = space.rotate(PNT(0, 0, 0), PNT(100, 0, 0), gstar[i], 80.0);
+
+
+    gstarVertices.push_back(gstar[i].x);  gstarVertices.push_back(gstar[i].y);  gstarVertices.push_back(gstar[i].z);   gstarVertices.push_back(0.8);  gstarVertices.push_back(0.8);  gstarVertices.push_back(0.8);  gstarVertices.push_back(1.0);
+
 }
 
 /*************************************************************************************************
@@ -281,16 +393,16 @@ void Universe::initializeGL()
     oglHandles.uniView = getUniformLocation(oglHandles.shaderProgram, "view");
     oglHandles.uniProj = getUniformLocation(oglHandles.shaderProgram, "proj");
 
-    oglHandles.uniMyCenterTransformed = getUniformLocation(oglHandles.shaderProgram, "sphereInfo.centerTransformed");
-    //uniMyRadius                     = getUniformLocation(oglHandles.shaderProgram, "sphereInfo.radius");
-    oglHandles.uniMyIsValud = getUniformLocation(oglHandles.shaderProgram, "sphereInfo.isValid");
-    oglHandles.uniMyIsLightSource = getUniformLocation(oglHandles.shaderProgram, "sphereInfo.isLightSource");
+    oglHandles.uniMyCenterTransformed  = getUniformLocation(oglHandles.shaderProgram, "sphereInfo.centerTransformed");
+    oglHandles.uniMyRadius             = getUniformLocation(oglHandles.shaderProgram, "sphereInfo.radius");
+    oglHandles.uniMyIsValud            = getUniformLocation(oglHandles.shaderProgram, "sphereInfo.isValid");
+    oglHandles.uniMyIsLightSource      = getUniformLocation(oglHandles.shaderProgram, "sphereInfo.isLightSource");
 
     oglHandles.uniSunCenterTransformed = getUniformLocation(oglHandles.shaderProgram, "sunCenterTransformed");
-    oglHandles.uniSunRadius = getUniformLocation(oglHandles.shaderProgram, "sunRadius");
+    oglHandles.uniSunRadius            = getUniformLocation(oglHandles.shaderProgram, "sunRadius");
 
     oglHandles.uniOtherSphereCenterTransformed = getUniformLocation(oglHandles.shaderProgram, "otherSphereCenterTransformed");
-    oglHandles.uniOtherSphereRadius = getUniformLocation(oglHandles.shaderProgram, "otherSphereRadius");
+    oglHandles.uniOtherSphereRadius            = getUniformLocation(oglHandles.shaderProgram, "otherSphereRadius");
 
 
     oglHandles.posAttrib = getAttribLocation(oglHandles.shaderProgram, "position");
@@ -317,102 +429,48 @@ void Universe::initializeGL()
     glVertexAttribPointer(oglHandles.colAttrib, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(oglHandles.colAttrib);
 
+    //---------------------------------------------------------------------------------------------------
+    // Cube stars
+    glGenVertexArrays(1, &oglHandles.starsVao);
+    glBindVertexArray(oglHandles.starsVao);
 
-    ////---------------------------------------------------------------------------------------------------
-    //// Earth's sphere
-    //glGenVertexArrays(1, &earthVao);
-    //glBindVertexArray(earthVao);
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        sizeof(float) * starVertices.size(),
+        starVertices.data(),
+        GL_STATIC_DRAW);
 
-    //glGenBuffers(1, &vbo);
-    //glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    //glBufferData(
-    //    GL_ARRAY_BUFFER,
-    //    sizeof(float) * earth.getVertices().size(),
-    //    earth.getVertices().data(),
-    //    GL_STATIC_DRAW);
+    glVertexAttribPointer(oglHandles.posAttrib, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), nullptr);
+    glEnableVertexAttribArray(oglHandles.posAttrib);
 
-    //glVertexAttribPointer(oglHandles.posAttrib, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), nullptr);
-    //glEnableVertexAttribArray(oglHandles.posAttrib);
-
-    //glVertexAttribPointer(oglHandles.colAttrib, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
-    //glEnableVertexAttribArray(oglHandles.colAttrib);
-
-    ////---------------------------------------------------------------------------------------------------
-    //// Earths latitude and longitude
-    //glGenVertexArrays(1, &earthLatLongVao);
-    //glBindVertexArray(earthLatLongVao);
-    //glGenBuffers(1, &vbo);
-    //glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    //glBufferData(
-    //    GL_ARRAY_BUFFER,
-    //    sizeof(float) * earth.getLatitudeAndLongitudeVertices().size(),
-    //    earth.getLatitudeAndLongitudeVertices().data(),
-    //    GL_STATIC_DRAW);
-
-    //glVertexAttribPointer(oglHandles.posAttrib, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), nullptr);
-    //glEnableVertexAttribArray(oglHandles.posAttrib);
-
-    //glVertexAttribPointer(oglHandles.colAttrib, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
-    //glEnableVertexAttribArray(oglHandles.colAttrib);
-
-    ////---------------------------------------------------------------------------------------------------
-    //// Earth's orbital plane
-    //glGenVertexArrays(1, &earthOrbitalPlaneVao);
-    //glBindVertexArray(earthOrbitalPlaneVao);
-    //glGenBuffers(1, &vbo);
-    //glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    //glBufferData(
-    //    GL_ARRAY_BUFFER,
-    //    sizeof(float) * earth.getOrbitalPlaneVertices().size(),
-    //    earth.getOrbitalPlaneVertices().data(),
-    //    GL_STATIC_DRAW);
-
-    //glVertexAttribPointer(oglHandles.posAttrib, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), nullptr);
-    //glEnableVertexAttribArray(oglHandles.posAttrib);
-
-    //glVertexAttribPointer(oglHandles.colAttrib, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
-    //glEnableVertexAttribArray(oglHandles.colAttrib);
-
-    ////---------------------------------------------------------------------------------------------------
-    //// Sun's sphere
-    //glGenVertexArrays(1, &sunVao);
-    //glBindVertexArray(sunVao);
-
-    //glGenBuffers(1, &vbo);
-    //glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    //glBufferData(
-    //    GL_ARRAY_BUFFER,
-    //    sizeof(float) * sun.getVertices().size(),
-    //    sun.getVertices().data(),
-    //    GL_STATIC_DRAW);
-
-    //glVertexAttribPointer(oglHandles.posAttrib, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), nullptr);
-    //glEnableVertexAttribArray(oglHandles.posAttrib);
-
-    //glVertexAttribPointer(oglHandles.colAttrib, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
-    //glEnableVertexAttribArray(oglHandles.colAttrib);
-
-    ////---------------------------------------------------------------------------------------------------
-    //// Moon's sphere
-    //glGenVertexArrays(1, &moonVao);
-    //glBindVertexArray(moonVao);
-
-    //glGenBuffers(1, &vbo);
-    //glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    //glBufferData(
-    //    GL_ARRAY_BUFFER,
-    //    sizeof(float) * moon.getVertices().size(),
-    //    moon.getVertices().data(),
-    //    GL_STATIC_DRAW);
-
-    //glVertexAttribPointer(oglHandles.posAttrib, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), nullptr);
-    //glEnableVertexAttribArray(oglHandles.posAttrib);
-
-    //glVertexAttribPointer(oglHandles.colAttrib, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
-    //glEnableVertexAttribArray(oglHandles.colAttrib);
+    glVertexAttribPointer(oglHandles.colAttrib, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(oglHandles.colAttrib);
 
     //---------------------------------------------------------------------------------------------------
-    
+    // galaxy stars
+    glGenVertexArrays(1, &oglHandles.gstarsVao);
+    glBindVertexArray(oglHandles.gstarsVao);
+
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        sizeof(float) * gstarVertices.size(),
+        gstarVertices.data(),
+        GL_STATIC_DRAW);
+
+    glVertexAttribPointer(oglHandles.posAttrib, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), nullptr);
+    glEnableVertexAttribArray(oglHandles.posAttrib);
+
+    glVertexAttribPointer(oglHandles.colAttrib, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(oglHandles.colAttrib);
+
+    //---------------------------------------------------------------------------------------------------
+
+
+
     sunRenderer.createVaoAndVbos(oglHandles);
     earthRenderer.createVaoAndVbos(oglHandles);
     moonRenderer.createVaoAndVbos(oglHandles);
@@ -463,11 +521,6 @@ void Universe::render()
 
     glUniform1f(oglHandles.uniSunRadius, sun.getRadius());
 
-    //std::cout << glm::to_string(space.getDirectionPoint()) << std::endl;
-    //std::cout << glm::to_string(space.getSourcePoint()) << std::endl;
-    //std::cout << glm::to_string(space.getUpwardDirectionVector()) << std::endl;
-
-    //std::cout << endl;
 
     //=====================================================================================
     // View and projection remain same for the entire scene
@@ -488,7 +541,7 @@ void Universe::render()
         glm::radians(35.0f),
         float(curWidth) / float(curHeight),
         1.0f,
-        10000.0f);
+        10000000.0f);
 
     glUniformMatrix4fv(oglHandles.uniProj, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
     //=====================================================================================
@@ -508,128 +561,56 @@ void Universe::render()
     // ideally, after setting IsValid to false, no need to set the other variables to draw the axis.
     glUniform1i(oglHandles.uniMyIsLightSource, 0);
     glUniform3f(oglHandles.uniMyCenterTransformed, 0.0f, 0.0f, 0.0f);
-    //glUniform1f(uniMyRadius, 0);
-
-    // When drawing earth, other sphere is moon.
-    glUniform1f(oglHandles.uniOtherSphereRadius, 0);
-    glUniform3fv(
-        oglHandles.uniOtherSphereCenterTransformed,
-        1,
-        glm::value_ptr(moon.getModelTransformedCenter())
-    );
-
+      
     glBindVertexArray(oglHandles.axisVao);
 
     // Draw vertices
     glDrawArrays(GL_LINES, 0, axis.getVertices().size() / 7);
 
-    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    //----------------------------------------------
+    // Cubic stars model transformation
+    //----------------------------------------------
+    glUniformMatrix4fv(
+        oglHandles.uniModel,
+        1,
+        GL_FALSE,
+        glm::value_ptr(glm::mat4(1.0))
+    );
+
+    glUniform1i(oglHandles.uniMyIsValud, false);
+    glBindVertexArray(oglHandles.starsVao);
+
+    //printf("num points in startVertices = %d\n", starVertices.size());
+    // Draw vertices
+    glDrawArrays(GL_POINTS, 0, starVertices.size() / 7);
+
+    ////%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ////----------------------------------------------
-    //// earth model transformation
+    //// Galaxy stars model transformation
     ////----------------------------------------------
     //glUniformMatrix4fv(
     //    oglHandles.uniModel,
     //    1,
     //    GL_FALSE,
-    //    glm::value_ptr(earth.getModelMatrix())
+    //    glm::value_ptr(glm::mat4(1.0))
     //);
 
-    //glUniform1i(oglHandles.uniMyIsLightSource, 0);
-    //glUniform3fv(oglHandles.uniMyCenterTransformed, 1, glm::value_ptr(earth.getCenter()));
-    ////glUniform1f(uniMyRadius, earth.getRadius());
-    //glUniform1i(oglHandles.uniMyIsValud, true);
-
-    //// When drawing earth, other sphere is moon.
-    //glUniform1f(oglHandles.uniOtherSphereRadius, moon.getRadius());
+    //glUniform1i(oglHandles.uniMyIsValud, false);
     //glUniform3fv(
     //    oglHandles.uniOtherSphereCenterTransformed,
     //    1,
     //    glm::value_ptr(moon.getModelTransformedCenter())
     //);
 
-    //glBindVertexArray(earthVao);
+    //glBindVertexArray(oglHandles.gstarsVao);
 
     //// Draw vertices
-    //glDrawArrays(GL_TRIANGLES, 0, earth.getVertices().size() / 7);
-
-    ////%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-    //glBindVertexArray(earthLatLongVao);
-
-    //// Draw vertices
-    //glDrawArrays(GL_LINES, 0, earth.getLatitudeAndLongitudeVertices().size() / 7);
-
-    ////%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-    //glUniformMatrix4fv(
-    //    oglHandles.uniModel,
-    //    1,
-    //    GL_FALSE,
-    //    glm::value_ptr(earth.getOrbitalPlaneModelMatrix())
-    //);
-
-    //glUniform1i(oglHandles.uniMyIsValud, false);
-
-    //glBindVertexArray(earthOrbitalPlaneVao);
-
-    //// Draw vertices
-    //glDrawArrays(GL_TRIANGLES, 0, earth.getOrbitalPlaneVertices().size() / 7);
-
-
-    ////%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-    ////----------------------------------------------
-    //// sun model transformation
-    ////----------------------------------------------
-    //glUniformMatrix4fv(
-    //    oglHandles.uniModel,
-    //    1,
-    //    GL_FALSE,
-    //    glm::value_ptr(sun.getModelMatrix())
-    //);
-
-    //glUniform1i(oglHandles.uniMyIsLightSource, 1);
-    ////glUniform1f(uniMyRadius, sun.getRadius());
-    //glUniform3fv(oglHandles.uniMyCenterTransformed, 1, glm::value_ptr(sun.getCenter()));
-    //glUniform1i(oglHandles.uniMyIsValud, true);
-
-    //glBindVertexArray(sunVao);
-
-    //glDrawArrays(GL_TRIANGLES, 0, sun.getVertices().size() / 7);
-
-    ////%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-    ////----------------------------------------------
-    //// moon model transformation
-    ////----------------------------------------------
-    //glUniformMatrix4fv(
-    //    oglHandles.uniModel,
-    //    1,
-    //    GL_FALSE,
-    //    glm::value_ptr(moon.getModelMatrix())
-    //);
-
-    //glUniform1i(oglHandles.uniMyIsLightSource, 0);
-    //glUniform3fv(oglHandles.uniMyCenterTransformed, 1, glm::value_ptr(moon.getCenter()));
-    ////glUniform1f(uniMyRadius, moon.getRadius());
-    //glUniform1i(oglHandles.uniMyIsValud, true);
-
-    //// When drawing moon, other sphere is earth.
-    //glUniform1f(oglHandles.uniOtherSphereRadius, earth.getRadius());
-    //glUniform3fv(
-    //    oglHandles.uniOtherSphereCenterTransformed,
-    //    1,
-    //    glm::value_ptr(earth.getModelTransformedCenter())
-    //);
-
-    //glBindVertexArray(moonVao);
-
-    //// Draw vertices
-    //glDrawArrays(GL_TRIANGLES, 0, moon.getVertices().size() / 7);
+    //glDrawArrays(GL_POINT, 0, gstarVertices.size() / 7);
 
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
     earthRenderer.render(oglHandles, &moon);
     moonRenderer.render(oglHandles, &earth);
@@ -669,6 +650,11 @@ void Universe::onKeyDown(SDL_Event* event)
     case SDLK_m:
         Moon_OrbitalPlane(UCmdParam_Toggle);
         break;
+    case SDLK_p:
+    case SDLK_PAUSE:
+    case SDLK_SPACE:
+        SimulationPause(UCmdParam_Toggle);
+        break;
     case SDLK_r:
         Rewind(UCmdParam_Start);
         break;
@@ -701,10 +687,10 @@ void Universe::onKeyDown(SDL_Event* event)
 
 
     case SDLK_UP:
-        _stepMultiplier *= 1.25;
+        _stepMultiplier *= 1.6666;
         break;
     case SDLK_DOWN:
-        _stepMultiplier *= 0.8;
+        _stepMultiplier *= 0.6;
         break;
     }
 
@@ -1265,13 +1251,15 @@ int Universe::run()
 
 
 
-        if (bFastForward)
-            advance(5 * _stepMultiplier);
-        else if (bFastReverse)
-            advance(-5 * _stepMultiplier);
-        else
-            advance(_stepMultiplier);
-
+        if (!bSimulationPause)
+        {
+            if (bFastForward)
+                advance(5 * _stepMultiplier);
+            else if (bFastReverse)
+                advance(-5 * _stepMultiplier);
+            else
+                advance(_stepMultiplier);
+        }
 
         render();
 

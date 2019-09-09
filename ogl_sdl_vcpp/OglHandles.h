@@ -19,9 +19,11 @@ struct OglHandles
     GLint uniProj;
 
     GLuint axisVao;
+    GLuint starsVao;
+    GLuint gstarsVao;
 
     GLint uniMyCenterTransformed;
-    //GLint uniMyRadius;
+    GLint uniMyRadius;
     GLint uniMyIsValud;
     GLint uniMyIsLightSource;
 

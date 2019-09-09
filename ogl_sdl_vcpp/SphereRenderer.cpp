@@ -126,7 +126,7 @@ void SphereRenderer::render(OglHandles oglHandles, Sphere* otherSphere)
 
     glUniform1i(oglHandles.uniMyIsLightSource, _bIsLightSource);
     glUniform3fv(oglHandles.uniMyCenterTransformed, 1, glm::value_ptr(_sphere.getCenter()));
-    //glUniform1f(uniMyRadius, earth.getRadius());
+    glUniform1f(oglHandles.uniMyRadius, _sphere.getRadius());
     glUniform1i(oglHandles.uniMyIsValud, true);
 
     if (otherSphere != nullptr)
