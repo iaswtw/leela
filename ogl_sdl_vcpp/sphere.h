@@ -12,6 +12,22 @@
 #include <math.h>
 
 
+#define VERTEX_STRIDE_IN_VBO        7
+
+typedef enum
+{
+    RotationPaused,
+    RevolutionPaused,
+    PrecessionPaused
+} SphereFlagEnum;
+
+typedef enum
+{
+    False,
+    True,
+    Toggle
+} SphereFlagOperationEnum;
+
 class Color
 {
 public:
@@ -29,10 +45,7 @@ public:
 class Sphere
 {
 public:
-    Sphere() : _center(0, 0, 0), _r(0), _g(0), _b(0),
-        _radius(0), _rotationAngle(0), _rotationAngularVelocity(0), _axisRotationAngle(0), _axisTiltAngle(0),
-        _orbitalRadius(0), _orbitalAngle(0), _orbitalAngularVelocity(0), _orbitalPlaneRotationAngle(0), _orbitalPlaneTiltAngle(0),
-        _parent(nullptr), _bOrbitalPlane(false)
+    Sphere()
     {
     }
 
@@ -73,6 +86,15 @@ public:
     void setParentSphere(Sphere *parent)
     {
         _parent = parent;
+    }
+
+    void setOrbitalAngle(float orbitalAngle)
+    {
+        _orbitalAngle = orbitalAngle;
+    }
+    void setAxisRotationAngle(float axisRotationAngle)
+    {
+        _axisRotationAngle = axisRotationAngle;
     }
 
     inline glm::vec3& getCenter()
@@ -121,10 +143,52 @@ public:
         return _orbitalPlaneRotationAngle;
     }
 
-    void enableOrbitalPlaneGeneration()
-    {
-        _bOrbitalPlane = true;
-    }
+    //void pauseRevolution()
+    //{
+    //    changeFlag(RevolutionPaused, True);
+    //}
+
+    //void unpauseRevolution()
+    //{
+    //    changeFlag(RevolutionPaused, False);
+    //}
+
+    //void pauseRotation()
+    //{
+    //    changeFlag(RotationPaused, True);
+    //}
+
+    //void unpauseRotation()
+    //{
+    //    changeFlag(RotationPaused, False);
+    //}
+
+    //inline bool isRevolutionPaused()
+    //{
+    //    return _bRevolutionPaused;
+    //}
+
+    //inline bool isRotationPaused()
+    //{
+    //    return _bRotationPaused;
+    //}
+
+    //void changeFlag(SphereFlagEnum flagType, SphereFlagOperationEnum flagOperation)
+    //{
+    //    switch (flagType)
+    //    {
+    //    case RotationPaused:
+    //        changeBoolean(&_bRotationPaused, flagOperation);
+    //        break;
+    //    case RevolutionPaused:
+    //        changeBoolean(&_bRevolutionPaused, flagOperation);
+    //        break;
+    //    case PrecessionPaused:
+    //        changeBoolean(&_bPrecessionPaused, flagOperation);
+    //        break;
+    //    }
+    //}
+
 
     void generateVertices()
     {
@@ -163,16 +227,13 @@ public:
             }
         }
 
-        if (_bOrbitalPlane)
-        {
-            // add orbital plane to the main vertices for now
-            _orbitalPlaneVertices.push_back(-1400);   _orbitalPlaneVertices.push_back(-1400);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(0.3);  _orbitalPlaneVertices.push_back(0.15); _orbitalPlaneVertices.push_back(0.15);    _orbitalPlaneVertices.push_back(0.4);
-            _orbitalPlaneVertices.push_back(1400);    _orbitalPlaneVertices.push_back(-1400);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(0.3);  _orbitalPlaneVertices.push_back(0.15); _orbitalPlaneVertices.push_back(0.15);    _orbitalPlaneVertices.push_back(0.4);
-            _orbitalPlaneVertices.push_back(1400);    _orbitalPlaneVertices.push_back(1400);    _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(0.3);  _orbitalPlaneVertices.push_back(0.15); _orbitalPlaneVertices.push_back(0.15);    _orbitalPlaneVertices.push_back(0.4);
-            _orbitalPlaneVertices.push_back(1400);    _orbitalPlaneVertices.push_back(1400);    _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(0.3);  _orbitalPlaneVertices.push_back(0.15); _orbitalPlaneVertices.push_back(0.15);    _orbitalPlaneVertices.push_back(0.4);
-            _orbitalPlaneVertices.push_back(-1400);   _orbitalPlaneVertices.push_back(1400);    _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(0.3);  _orbitalPlaneVertices.push_back(0.15); _orbitalPlaneVertices.push_back(0.15);    _orbitalPlaneVertices.push_back(0.4);
-            _orbitalPlaneVertices.push_back(-1400);   _orbitalPlaneVertices.push_back(-1400);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(0.3);  _orbitalPlaneVertices.push_back(0.15); _orbitalPlaneVertices.push_back(0.15);    _orbitalPlaneVertices.push_back(0.4);
-        }
+        // add orbital plane to the main vertices for now
+        _orbitalPlaneVertices.push_back(-1400);   _orbitalPlaneVertices.push_back(-1400);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(0.3);  _orbitalPlaneVertices.push_back(0.15); _orbitalPlaneVertices.push_back(0.15);    _orbitalPlaneVertices.push_back(0.4);
+        _orbitalPlaneVertices.push_back(1400);    _orbitalPlaneVertices.push_back(-1400);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(0.3);  _orbitalPlaneVertices.push_back(0.15); _orbitalPlaneVertices.push_back(0.15);    _orbitalPlaneVertices.push_back(0.4);
+        _orbitalPlaneVertices.push_back(1400);    _orbitalPlaneVertices.push_back(1400);    _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(0.3);  _orbitalPlaneVertices.push_back(0.15); _orbitalPlaneVertices.push_back(0.15);    _orbitalPlaneVertices.push_back(0.4);
+        _orbitalPlaneVertices.push_back(1400);    _orbitalPlaneVertices.push_back(1400);    _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(0.3);  _orbitalPlaneVertices.push_back(0.15); _orbitalPlaneVertices.push_back(0.15);    _orbitalPlaneVertices.push_back(0.4);
+        _orbitalPlaneVertices.push_back(-1400);   _orbitalPlaneVertices.push_back(1400);    _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(0.3);  _orbitalPlaneVertices.push_back(0.15); _orbitalPlaneVertices.push_back(0.15);    _orbitalPlaneVertices.push_back(0.4);
+        _orbitalPlaneVertices.push_back(-1400);   _orbitalPlaneVertices.push_back(-1400);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(0.3);  _orbitalPlaneVertices.push_back(0.15); _orbitalPlaneVertices.push_back(0.15);    _orbitalPlaneVertices.push_back(0.4);
 
 
         //---------------------------------------------------------------------------------
@@ -311,16 +372,25 @@ public:
 
     void advance(float stepMultiplier)
     {
-        _rotationAngle += _rotationAngularVelocity * stepMultiplier;
+        if (bRotationMotion)
+            _rotationAngle += _rotationAngularVelocity * stepMultiplier;
 
-        _orbitalAngle += _orbitalAngularVelocity * stepMultiplier;
-        _center.x = _orbitalRadius * cos (_orbitalAngle);
-        _center.y = _orbitalRadius * sin (_orbitalAngle);
+        if (bRevolutionMotion)
+            _orbitalAngle += _orbitalAngularVelocity * stepMultiplier;
+
+        calculateCenterPosition();
+    }
+
+    // Calculates center position based on the value of current parameters
+    void calculateCenterPosition()
+    {
+        _center.x = _orbitalRadius * cos(_orbitalAngle);
+        _center.y = _orbitalRadius * sin(_orbitalAngle);
         _center.z = 0;       // todo - use orbital tilt
 
         // apply orbital tilt
         _center.z = -_center.x * sin(_orbitalPlaneTiltAngle);
-        _center.x =  _center.x * cos(_orbitalPlaneTiltAngle);
+        _center.x = _center.x * cos(_orbitalPlaneTiltAngle);
 
         // apply orbital rotation
         float x, y;
@@ -337,8 +407,6 @@ public:
             _center.y += _parent->getCenter().y;
             _center.z += _parent->getCenter().z;
         }
-
-       
     }
 
     void freeVertices()
@@ -347,31 +415,53 @@ public:
         _latLongVertices.clear();
     }
 
+public:
+    bool bRevolutionMotion = true;
+    bool bRotationMotion = true;
+    bool bPrecessionMotion = false;
+
+
+private:
+    //void changeBoolean(bool *pBool, SphereFlagOperationEnum flagOperation)
+    //{
+    //    switch (flagOperation)
+    //    {
+    //    case Toggle:
+    //        *pBool = !*pBool;
+    //        break;
+    //    case True:
+    //        *pBool = true;
+    //        break;
+    //    case False:
+    //        *pBool = false;
+    //        break;
+    //    }
+    //}
 
 private:
     // angles and angle velocities are in radians
 
-    glm::vec3 _center;
-    float _r;
-    float _g;
-    float _b;
+    glm::vec3 _center = glm::vec3(0.0, 0.0, 0.0);
+    float _r = 1;
+    float _g = 1;
+    float _b = 1;
 
     // Rotation variables
-    float _radius;
-    float _rotationAngle;               // current rotation angle (increments based on rotation angular velocity). Previously called 'th'.
-    float _rotationAngularVelocity;     // angular velocity or rotation around sphere's axis. Previously called 'w'.
-    float _axisRotationAngle;           // previously called 'alpha'
-    float _axisTiltAngle;               // previously called 'beta'
+    float _radius = 0;
+    float _rotationAngle = 0;               // current rotation angle (increments based on rotation angular velocity). Previously called 'th'.
+    float _rotationAngularVelocity = 0;     // angular velocity or rotation around sphere's axis. Previously called 'w'.
+    float _axisRotationAngle = 0;           // previously called 'alpha'
+    float _axisTiltAngle = 0;               // previously called 'beta'
 
     // Revolution variables
-    float _orbitalRadius;
-    float _orbitalAngle;                // current revolution (orbital) angle (increments based on revolution angular velocity). Previously called 'tho'
-    float _orbitalAngularVelocity;      // angular velocity of revolution around parent sphere. Previously called 'wo'.
-    float _orbitalPlaneRotationAngle;   // previously called 'alphao'
-    float _orbitalPlaneTiltAngle;       // previously called 'betao'
+    float _orbitalRadius = 0;
+    float _orbitalAngle = 0;                // current revolution (orbital) angle (increments based on revolution angular velocity). Previously called 'tho'
+    float _orbitalAngularVelocity = 0;      // angular velocity of revolution around parent sphere. Previously called 'wo'.
+    float _orbitalPlaneRotationAngle = 0;   // previously called 'alphao'
+    float _orbitalPlaneTiltAngle = 0;       // previously called 'betao'
 
 
-    bool _bOrbitalPlane;
+
     std::vector<float> _vertices;
     std::vector<float> _latLongVertices;
     std::vector<float> _orbitalPlaneVertices;

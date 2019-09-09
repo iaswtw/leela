@@ -2,9 +2,12 @@
 #include <windows.h>
 #include <stdio.h>
 #include "Universe.h"
+#include "Utils.h"
 
-
-Universe::Universe()
+Universe::Universe() :
+    sunRenderer(sun),
+    earthRenderer(earth),
+    moonRenderer(moon)
 {
 }
 
@@ -32,7 +35,8 @@ void Universe::initSceneObjects()
     );
     // Sun
     //---------------------------------------
-    sun.setColor(0.7f, 0.7f, 0.1f);
+    //sun.setColor(0.7f, 0.7f, 0.1f);
+    sun.setColor(1.0f, 1.0f, 1.0f);
     sun.setRotationParameters(140,          // radius
         0,                                  // initial rotation angle
         0.02f,                              // rotation velocity
@@ -62,7 +66,6 @@ void Universe::initSceneObjects()
         0.0f,                               // orbital rotation angle
         0                                   // orbital tilt
     );
-    earth.enableOrbitalPlaneGeneration();
 
     // Moon
     //---------------------------------------
@@ -181,22 +184,22 @@ void Universe::compileShaders()
     //-------------------------------------------------------------
     // Vertex shader
     //-------------------------------------------------------------
-    vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    oglHandles.vertexShader = glCreateShader(GL_VERTEX_SHADER);
     printf("Loading and Compiling Vertex shader.\n");
-    readAndCompileShader("shaders/shader.vert", vertexShader);
+    readAndCompileShader("shaders/shader.vert", oglHandles.vertexShader);
 
     //-------------------------------------------------------------
     // Fragment shader
     //-------------------------------------------------------------
-    fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    oglHandles.fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     printf("Loading and Compiling Fragment shader.\n");
-    readAndCompileShader("shaders/shader.frag", fragmentShader);
+    readAndCompileShader("shaders/shader.frag", oglHandles.fragmentShader);
 
     //-------------------------------------------------------------
     // Shader program
-    shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
+    oglHandles.shaderProgram = glCreateProgram();
+    glAttachShader(oglHandles.shaderProgram, oglHandles.vertexShader);
+    glAttachShader(oglHandles.shaderProgram, oglHandles.fragmentShader);
 }
 
 /*************************************************************************************************
@@ -205,36 +208,36 @@ void Universe::compileShaders()
 **************************************************************************************************/
 void Universe::linkShaders()
 {
-    glLinkProgram(shaderProgram);
+    glLinkProgram(oglHandles.shaderProgram);
 
     // todo perform check to see if linking was successful
     GLint isLinked = 0;
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, (int *)&isLinked);
+    glGetProgramiv(oglHandles.shaderProgram, GL_LINK_STATUS, (int *)&isLinked);
     if (isLinked == GL_FALSE)
     {
         GLint maxLength = 0;
-        glGetProgramiv(shaderProgram, GL_INFO_LOG_LENGTH, &maxLength);
+        glGetProgramiv(oglHandles.shaderProgram, GL_INFO_LOG_LENGTH, &maxLength);
 
         // The maxLength includes the NULL character
         std::vector<GLchar> infoLog(maxLength);
-        glGetProgramInfoLog(shaderProgram, maxLength, &maxLength, &infoLog[0]);
+        glGetProgramInfoLog(oglHandles.shaderProgram, maxLength, &maxLength, &infoLog[0]);
 
         printf("Linker error log:\n");
         printf("%s\n", infoLog.data());
 
         // We don't need the program anymore.
-        glDeleteProgram(shaderProgram);
+        glDeleteProgram(oglHandles.shaderProgram);
     }
     else
     {
         printf("\nShader program link successful\n");
-        glDetachShader(shaderProgram, vertexShader);
-        glDetachShader(shaderProgram, fragmentShader);
+        glDetachShader(oglHandles.shaderProgram, oglHandles.vertexShader);
+        glDetachShader(oglHandles.shaderProgram, oglHandles.fragmentShader);
     }
 
     // Don't leak shaders either.
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+    glDeleteShader(oglHandles.vertexShader);
+    glDeleteShader(oglHandles.fragmentShader);
 
 }
 
@@ -245,7 +248,7 @@ void Universe::linkShaders()
 **************************************************************************************************/
 void Universe::useShaderProgram()
 {
-    glUseProgram(shaderProgram);
+    glUseProgram(oglHandles.shaderProgram);
 }
 
 /*************************************************************************************************
@@ -261,86 +264,44 @@ void Universe::unuseShaderProgram()
 
 
 **************************************************************************************************/
-GLint Universe::getUniformLocation(const std::string& uniformName)
-{
-    GLint id = glGetUniformLocation(shaderProgram, uniformName.c_str());
-    if (id < 0)
-    {
-        printf("Error getting location of uniform variable '%s'", uniformName.c_str());
-        SDL_Quit();
-        exit(1);
-    }
-    else
-    {
-        printf("%s = %d\n", uniformName.c_str(), id);
-    }
-
-    return id;
-}
-
-/*************************************************************************************************
-
-
-**************************************************************************************************/
-GLint Universe::getAttribLocation(const std::string& attribName)
-{
-    GLint id = glGetAttribLocation(shaderProgram, attribName.c_str());
-    if (id < 0)
-    {
-        printf("Error getting location of attrib variable '%s'", attribName.c_str());
-        SDL_Quit();
-        exit(1);
-    }
-    else
-    {
-        printf("%s = %d\n", attribName.c_str(), id);
-    }
-
-    return id;
-}
-
-/*************************************************************************************************
-
-
-**************************************************************************************************/
 void Universe::initializeGL()
 {
     printf("Inside initializeGL\n");
 
     compileShaders();
 
-    glBindAttribLocation(shaderProgram, 0, "position");
-    glBindAttribLocation(shaderProgram, 1, "in_color");
+    glBindAttribLocation(oglHandles.shaderProgram, 0, "position");
+    glBindAttribLocation(oglHandles.shaderProgram, 1, "in_color");
 
     linkShaders();
 
 
     //---------------------------------------------------------------------------------------------------
-    uniModel = getUniformLocation("model");
-    uniView = getUniformLocation("view");
-    uniProj = getUniformLocation("proj");
+    oglHandles.uniModel = getUniformLocation(oglHandles.shaderProgram, "model");
+    oglHandles.uniView = getUniformLocation(oglHandles.shaderProgram, "view");
+    oglHandles.uniProj = getUniformLocation(oglHandles.shaderProgram, "proj");
 
-    uniMyCenterTransformed = getUniformLocation("sphereInfo.centerTransformed");
-    //uniMyRadius                     = getUniformLocation("sphereInfo.radius");
-    uniMyIsValud = getUniformLocation("sphereInfo.isValid");
-    uniMyIsLightSource = getUniformLocation("sphereInfo.isLightSource");
+    oglHandles.uniMyCenterTransformed = getUniformLocation(oglHandles.shaderProgram, "sphereInfo.centerTransformed");
+    //uniMyRadius                     = getUniformLocation(oglHandles.shaderProgram, "sphereInfo.radius");
+    oglHandles.uniMyIsValud = getUniformLocation(oglHandles.shaderProgram, "sphereInfo.isValid");
+    oglHandles.uniMyIsLightSource = getUniformLocation(oglHandles.shaderProgram, "sphereInfo.isLightSource");
 
-    uniSunCenterTransformed = getUniformLocation("sunCenterTransformed");
-    uniSunRadius = getUniformLocation("sunRadius");
+    oglHandles.uniSunCenterTransformed = getUniformLocation(oglHandles.shaderProgram, "sunCenterTransformed");
+    oglHandles.uniSunRadius = getUniformLocation(oglHandles.shaderProgram, "sunRadius");
 
-    uniOtherSphereCenterTransformed = getUniformLocation("otherSphereCenterTransformed");
-    uniOtherSphereRadius = getUniformLocation("otherSphereRadius");
+    oglHandles.uniOtherSphereCenterTransformed = getUniformLocation(oglHandles.shaderProgram, "otherSphereCenterTransformed");
+    oglHandles.uniOtherSphereRadius = getUniformLocation(oglHandles.shaderProgram, "otherSphereRadius");
 
 
-    GLint posAttrib = getAttribLocation("position");
-    GLint colAttrib = getAttribLocation("in_color");
+    oglHandles.posAttrib = getAttribLocation(oglHandles.shaderProgram, "position");
+    oglHandles.colAttrib = getAttribLocation(oglHandles.shaderProgram, "in_color");
 
 
 
     //---------------------------------------------------------------------------------------------------
     // Axis
-    glGenVertexArrays(1, &axisVao);
-    glBindVertexArray(axisVao);
+    glGenVertexArrays(1, &oglHandles.axisVao);
+    glBindVertexArray(oglHandles.axisVao);
 
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -350,107 +311,115 @@ void Universe::initializeGL()
         axis.getVertices().data(),
         GL_STATIC_DRAW);
 
-    glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), nullptr);
-    glEnableVertexAttribArray(posAttrib);
+    glVertexAttribPointer(oglHandles.posAttrib, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), nullptr);
+    glEnableVertexAttribArray(oglHandles.posAttrib);
 
-    glVertexAttribPointer(colAttrib, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(colAttrib);
+    glVertexAttribPointer(oglHandles.colAttrib, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(oglHandles.colAttrib);
 
+
+    ////---------------------------------------------------------------------------------------------------
+    //// Earth's sphere
+    //glGenVertexArrays(1, &earthVao);
+    //glBindVertexArray(earthVao);
+
+    //glGenBuffers(1, &vbo);
+    //glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    //glBufferData(
+    //    GL_ARRAY_BUFFER,
+    //    sizeof(float) * earth.getVertices().size(),
+    //    earth.getVertices().data(),
+    //    GL_STATIC_DRAW);
+
+    //glVertexAttribPointer(oglHandles.posAttrib, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), nullptr);
+    //glEnableVertexAttribArray(oglHandles.posAttrib);
+
+    //glVertexAttribPointer(oglHandles.colAttrib, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
+    //glEnableVertexAttribArray(oglHandles.colAttrib);
+
+    ////---------------------------------------------------------------------------------------------------
+    //// Earths latitude and longitude
+    //glGenVertexArrays(1, &earthLatLongVao);
+    //glBindVertexArray(earthLatLongVao);
+    //glGenBuffers(1, &vbo);
+    //glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    //glBufferData(
+    //    GL_ARRAY_BUFFER,
+    //    sizeof(float) * earth.getLatitudeAndLongitudeVertices().size(),
+    //    earth.getLatitudeAndLongitudeVertices().data(),
+    //    GL_STATIC_DRAW);
+
+    //glVertexAttribPointer(oglHandles.posAttrib, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), nullptr);
+    //glEnableVertexAttribArray(oglHandles.posAttrib);
+
+    //glVertexAttribPointer(oglHandles.colAttrib, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
+    //glEnableVertexAttribArray(oglHandles.colAttrib);
+
+    ////---------------------------------------------------------------------------------------------------
+    //// Earth's orbital plane
+    //glGenVertexArrays(1, &earthOrbitalPlaneVao);
+    //glBindVertexArray(earthOrbitalPlaneVao);
+    //glGenBuffers(1, &vbo);
+    //glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    //glBufferData(
+    //    GL_ARRAY_BUFFER,
+    //    sizeof(float) * earth.getOrbitalPlaneVertices().size(),
+    //    earth.getOrbitalPlaneVertices().data(),
+    //    GL_STATIC_DRAW);
+
+    //glVertexAttribPointer(oglHandles.posAttrib, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), nullptr);
+    //glEnableVertexAttribArray(oglHandles.posAttrib);
+
+    //glVertexAttribPointer(oglHandles.colAttrib, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
+    //glEnableVertexAttribArray(oglHandles.colAttrib);
+
+    ////---------------------------------------------------------------------------------------------------
+    //// Sun's sphere
+    //glGenVertexArrays(1, &sunVao);
+    //glBindVertexArray(sunVao);
+
+    //glGenBuffers(1, &vbo);
+    //glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    //glBufferData(
+    //    GL_ARRAY_BUFFER,
+    //    sizeof(float) * sun.getVertices().size(),
+    //    sun.getVertices().data(),
+    //    GL_STATIC_DRAW);
+
+    //glVertexAttribPointer(oglHandles.posAttrib, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), nullptr);
+    //glEnableVertexAttribArray(oglHandles.posAttrib);
+
+    //glVertexAttribPointer(oglHandles.colAttrib, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
+    //glEnableVertexAttribArray(oglHandles.colAttrib);
+
+    ////---------------------------------------------------------------------------------------------------
+    //// Moon's sphere
+    //glGenVertexArrays(1, &moonVao);
+    //glBindVertexArray(moonVao);
+
+    //glGenBuffers(1, &vbo);
+    //glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    //glBufferData(
+    //    GL_ARRAY_BUFFER,
+    //    sizeof(float) * moon.getVertices().size(),
+    //    moon.getVertices().data(),
+    //    GL_STATIC_DRAW);
+
+    //glVertexAttribPointer(oglHandles.posAttrib, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), nullptr);
+    //glEnableVertexAttribArray(oglHandles.posAttrib);
+
+    //glVertexAttribPointer(oglHandles.colAttrib, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
+    //glEnableVertexAttribArray(oglHandles.colAttrib);
 
     //---------------------------------------------------------------------------------------------------
-    // Earth's sphere
-    glGenVertexArrays(1, &earthVao);
-    glBindVertexArray(earthVao);
+    
+    sunRenderer.createVaoAndVbos(oglHandles);
+    earthRenderer.createVaoAndVbos(oglHandles);
+    moonRenderer.createVaoAndVbos(oglHandles);
 
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        sizeof(float) * earth.getVertices().size(),
-        earth.getVertices().data(),
-        GL_STATIC_DRAW);
+    earthRenderer.bShowLatitudesAndLongitudes = true;
+    sunRenderer.setAsLightSource();
 
-    glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), nullptr);
-    glEnableVertexAttribArray(posAttrib);
-
-    glVertexAttribPointer(colAttrib, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(colAttrib);
-
-    //---------------------------------------------------------------------------------------------------
-    // Earths latitude and longitude
-    glGenVertexArrays(1, &earthLatLongVao);
-    glBindVertexArray(earthLatLongVao);
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        sizeof(float) * earth.getLatitudeAndLongitudeVertices().size(),
-        earth.getLatitudeAndLongitudeVertices().data(),
-        GL_STATIC_DRAW);
-
-    glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), nullptr);
-    glEnableVertexAttribArray(posAttrib);
-
-    glVertexAttribPointer(colAttrib, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(colAttrib);
-
-    //---------------------------------------------------------------------------------------------------
-    // Earth's orbital plane
-    glGenVertexArrays(1, &earthOrbitalPlaneVao);
-    glBindVertexArray(earthOrbitalPlaneVao);
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        sizeof(float) * earth.getOrbitalPlaneVertices().size(),
-        earth.getOrbitalPlaneVertices().data(),
-        GL_STATIC_DRAW);
-
-    glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), nullptr);
-    glEnableVertexAttribArray(posAttrib);
-
-    glVertexAttribPointer(colAttrib, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(colAttrib);
-
-    //---------------------------------------------------------------------------------------------------
-    // Sun's sphere
-    glGenVertexArrays(1, &sunVao);
-    glBindVertexArray(sunVao);
-
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        sizeof(float) * sun.getVertices().size(),
-        sun.getVertices().data(),
-        GL_STATIC_DRAW);
-
-    glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), nullptr);
-    glEnableVertexAttribArray(posAttrib);
-
-    glVertexAttribPointer(colAttrib, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(colAttrib);
-
-    //---------------------------------------------------------------------------------------------------
-    // Moon's sphere
-    glGenVertexArrays(1, &moonVao);
-    glBindVertexArray(moonVao);
-
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        sizeof(float) * moon.getVertices().size(),
-        moon.getVertices().data(),
-        GL_STATIC_DRAW);
-
-    glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), nullptr);
-    glEnableVertexAttribArray(posAttrib);
-
-    glVertexAttribPointer(colAttrib, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(colAttrib);
-
-    //---------------------------------------------------------------------------------------------------
     glBindVertexArray(0);       // Disable VBO
 
 
@@ -487,12 +456,12 @@ void Universe::render()
     useShaderProgram();
 
     glUniform3fv(
-        uniSunCenterTransformed,
+        oglHandles.uniSunCenterTransformed,
         1,
         glm::value_ptr(sun.getModelTransformedCenter())
     );
 
-    glUniform1f(uniSunRadius, sun.getRadius());
+    glUniform1f(oglHandles.uniSunRadius, sun.getRadius());
 
     //std::cout << glm::to_string(space.getDirectionPoint()) << std::endl;
     //std::cout << glm::to_string(space.getSourcePoint()) << std::endl;
@@ -505,7 +474,7 @@ void Universe::render()
     //=====================================================================================
     // View transformation
     //----------------------------------------------
-    glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+    glUniformMatrix4fv(oglHandles.uniView, 1, GL_FALSE, glm::value_ptr(viewMatrix));
 
     // Create the initial View matrix
     viewMatrix = glm::lookAt(
@@ -521,7 +490,7 @@ void Universe::render()
         1.0f,
         10000.0f);
 
-    glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+    glUniformMatrix4fv(oglHandles.uniProj, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
     //=====================================================================================
 
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -529,139 +498,143 @@ void Universe::render()
     // Axis model transformation
     //----------------------------------------------
     glUniformMatrix4fv(
-        uniModel,
+        oglHandles.uniModel,
         1,
         GL_FALSE,
         glm::value_ptr(glm::mat4(1.0))
     );
 
-    glUniform1i(uniMyIsValud, false);
+    glUniform1i(oglHandles.uniMyIsValud, false);
     // ideally, after setting IsValid to false, no need to set the other variables to draw the axis.
-    glUniform1i(uniMyIsLightSource, 0);
-    glUniform3f(uniMyCenterTransformed, 0.0f, 0.0f, 0.0f);
+    glUniform1i(oglHandles.uniMyIsLightSource, 0);
+    glUniform3f(oglHandles.uniMyCenterTransformed, 0.0f, 0.0f, 0.0f);
     //glUniform1f(uniMyRadius, 0);
 
     // When drawing earth, other sphere is moon.
-    glUniform1f(uniOtherSphereRadius, 0);
+    glUniform1f(oglHandles.uniOtherSphereRadius, 0);
     glUniform3fv(
-        uniOtherSphereCenterTransformed,
+        oglHandles.uniOtherSphereCenterTransformed,
         1,
         glm::value_ptr(moon.getModelTransformedCenter())
     );
 
-    glBindVertexArray(axisVao);
+    glBindVertexArray(oglHandles.axisVao);
 
     // Draw vertices
     glDrawArrays(GL_LINES, 0, axis.getVertices().size() / 7);
 
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    //----------------------------------------------
-    // earth model transformation
-    //----------------------------------------------
-    glUniformMatrix4fv(
-        uniModel,
-        1,
-        GL_FALSE,
-        glm::value_ptr(earth.getModelMatrix())
-    );
+    ////----------------------------------------------
+    //// earth model transformation
+    ////----------------------------------------------
+    //glUniformMatrix4fv(
+    //    oglHandles.uniModel,
+    //    1,
+    //    GL_FALSE,
+    //    glm::value_ptr(earth.getModelMatrix())
+    //);
 
-    glUniform1i(uniMyIsLightSource, 0);
-    glUniform3fv(uniMyCenterTransformed, 1, glm::value_ptr(earth.getCenter()));
-    //glUniform1f(uniMyRadius, earth.getRadius());
-    glUniform1i(uniMyIsValud, true);
+    //glUniform1i(oglHandles.uniMyIsLightSource, 0);
+    //glUniform3fv(oglHandles.uniMyCenterTransformed, 1, glm::value_ptr(earth.getCenter()));
+    ////glUniform1f(uniMyRadius, earth.getRadius());
+    //glUniform1i(oglHandles.uniMyIsValud, true);
 
-    // When drawing earth, other sphere is moon.
-    glUniform1f(uniOtherSphereRadius, moon.getRadius());
-    glUniform3fv(
-        uniOtherSphereCenterTransformed,
-        1,
-        glm::value_ptr(moon.getModelTransformedCenter())
-    );
+    //// When drawing earth, other sphere is moon.
+    //glUniform1f(oglHandles.uniOtherSphereRadius, moon.getRadius());
+    //glUniform3fv(
+    //    oglHandles.uniOtherSphereCenterTransformed,
+    //    1,
+    //    glm::value_ptr(moon.getModelTransformedCenter())
+    //);
 
-    glBindVertexArray(earthVao);
+    //glBindVertexArray(earthVao);
 
-    // Draw vertices
-    glDrawArrays(GL_TRIANGLES, 0, earth.getVertices().size() / 7);
+    //// Draw vertices
+    //glDrawArrays(GL_TRIANGLES, 0, earth.getVertices().size() / 7);
+
+    ////%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    //glBindVertexArray(earthLatLongVao);
+
+    //// Draw vertices
+    //glDrawArrays(GL_LINES, 0, earth.getLatitudeAndLongitudeVertices().size() / 7);
+
+    ////%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+    //glUniformMatrix4fv(
+    //    oglHandles.uniModel,
+    //    1,
+    //    GL_FALSE,
+    //    glm::value_ptr(earth.getOrbitalPlaneModelMatrix())
+    //);
+
+    //glUniform1i(oglHandles.uniMyIsValud, false);
+
+    //glBindVertexArray(earthOrbitalPlaneVao);
+
+    //// Draw vertices
+    //glDrawArrays(GL_TRIANGLES, 0, earth.getOrbitalPlaneVertices().size() / 7);
+
+
+    ////%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    ////----------------------------------------------
+    //// sun model transformation
+    ////----------------------------------------------
+    //glUniformMatrix4fv(
+    //    oglHandles.uniModel,
+    //    1,
+    //    GL_FALSE,
+    //    glm::value_ptr(sun.getModelMatrix())
+    //);
+
+    //glUniform1i(oglHandles.uniMyIsLightSource, 1);
+    ////glUniform1f(uniMyRadius, sun.getRadius());
+    //glUniform3fv(oglHandles.uniMyCenterTransformed, 1, glm::value_ptr(sun.getCenter()));
+    //glUniform1i(oglHandles.uniMyIsValud, true);
+
+    //glBindVertexArray(sunVao);
+
+    //glDrawArrays(GL_TRIANGLES, 0, sun.getVertices().size() / 7);
+
+    ////%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    ////----------------------------------------------
+    //// moon model transformation
+    ////----------------------------------------------
+    //glUniformMatrix4fv(
+    //    oglHandles.uniModel,
+    //    1,
+    //    GL_FALSE,
+    //    glm::value_ptr(moon.getModelMatrix())
+    //);
+
+    //glUniform1i(oglHandles.uniMyIsLightSource, 0);
+    //glUniform3fv(oglHandles.uniMyCenterTransformed, 1, glm::value_ptr(moon.getCenter()));
+    ////glUniform1f(uniMyRadius, moon.getRadius());
+    //glUniform1i(oglHandles.uniMyIsValud, true);
+
+    //// When drawing moon, other sphere is earth.
+    //glUniform1f(oglHandles.uniOtherSphereRadius, earth.getRadius());
+    //glUniform3fv(
+    //    oglHandles.uniOtherSphereCenterTransformed,
+    //    1,
+    //    glm::value_ptr(earth.getModelTransformedCenter())
+    //);
+
+    //glBindVertexArray(moonVao);
+
+    //// Draw vertices
+    //glDrawArrays(GL_TRIANGLES, 0, moon.getVertices().size() / 7);
 
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    glBindVertexArray(earthLatLongVao);
-
-    // Draw vertices
-    glDrawArrays(GL_LINES, 0, earth.getLatitudeAndLongitudeVertices().size() / 7);
-
-    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-    glUniformMatrix4fv(
-        uniModel,
-        1,
-        GL_FALSE,
-        glm::value_ptr(earth.getOrbitalPlaneModelMatrix())
-    );
-
-    glUniform1i(uniMyIsValud, false);
-
-    glBindVertexArray(earthOrbitalPlaneVao);
-
-    // Draw vertices
-    glDrawArrays(GL_TRIANGLES, 0, earth.getOrbitalPlaneVertices().size() / 7);
-
-
-    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-    //----------------------------------------------
-    // sun model transformation
-    //----------------------------------------------
-    glUniformMatrix4fv(
-        uniModel,
-        1,
-        GL_FALSE,
-        glm::value_ptr(sun.getModelMatrix())
-    );
-
-    glUniform1i(uniMyIsLightSource, 1);
-    //glUniform1f(uniMyRadius, sun.getRadius());
-    glUniform3fv(uniMyCenterTransformed, 1, glm::value_ptr(sun.getCenter()));
-    glUniform1i(uniMyIsValud, true);
-
-    glBindVertexArray(sunVao);
-
-    glDrawArrays(GL_TRIANGLES, 0, sun.getVertices().size() / 7);
-
-    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-    //----------------------------------------------
-    // moon model transformation
-    //----------------------------------------------
-    glUniformMatrix4fv(
-        uniModel,
-        1,
-        GL_FALSE,
-        glm::value_ptr(moon.getModelMatrix())
-    );
-
-    glUniform1i(uniMyIsLightSource, 0);
-    glUniform3fv(uniMyCenterTransformed, 1, glm::value_ptr(moon.getCenter()));
-    //glUniform1f(uniMyRadius, moon.getRadius());
-    glUniform1i(uniMyIsValud, true);
-
-    // When drawing moon, other sphere is earth.
-    glUniform1f(uniOtherSphereRadius, earth.getRadius());
-    glUniform3fv(
-        uniOtherSphereCenterTransformed,
-        1,
-        glm::value_ptr(earth.getModelTransformedCenter())
-    );
-
-    glBindVertexArray(moonVao);
-
-    // Draw vertices
-    glDrawArrays(GL_TRIANGLES, 0, moon.getVertices().size() / 7);
-
-    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+    earthRenderer.render(oglHandles, &moon);
+    moonRenderer.render(oglHandles, &earth);
+    sunRenderer.render(oglHandles, nullptr);
+    
 
     glBindVertexArray(0);
 
@@ -670,6 +643,500 @@ void Universe::render()
 }
 
 
+void Universe::advance(float stepMultiplier)
+{
+    // Advance parents before children
+    sun.advance(stepMultiplier);
+    earth.advance(stepMultiplier);
+    moon.advance(stepMultiplier);
+}
+
+void Universe::onKeyDown(SDL_Event* event)
+{
+    switch (event->key.keysym.sym) {
+    case SDLK_f:
+        FastForward(UCmdParam_Start);
+        break;
+    case SDLK_g:
+        Earth_OrbitalPlane(UCmdParam_Toggle);
+        break;
+    case SDLK_r:
+        Rewind(UCmdParam_Start);
+        break;
+    case SDLK_v:
+        ChangeSidewaysMotionMode();
+        break;
+    case SDLK_z:
+        NavigationLockOntoEarth(UCmdParam_Toggle);
+        break;
+
+    case SDLK_0:
+        Earth_RevolutionMotion(UCmdParam_Toggle);
+        break;
+    case SDLK_1:
+        Earth_SetOrbitalPositionAngle(M_PI / 2);
+        Earth_RevolutionMotion(UCmdParam_Off);
+        break;
+
+
+    case SDLK_UP:
+        _stepMultiplier *= 1.25;
+        break;
+    case SDLK_DOWN:
+        _stepMultiplier *= 0.8;
+        break;
+    }
+
+}
+
+void Universe::onKeyUp(SDL_Event* event)
+{
+    switch (event->key.keysym.sym) {
+    case SDLK_ESCAPE:
+        bMouseGrabbed = false;
+        SDL_ShowCursor(SDL_ENABLE);
+        SDL_SetRelativeMouseMode(SDL_FALSE);
+        break;
+    case SDLK_f:
+        FastForward(UCmdParam_Stop);
+        break;
+    case SDLK_r:
+        Rewind(UCmdParam_Stop);
+        break;
+    }
+
+}
+
+void Universe::onMouseMotion(SDL_Event* event)
+{
+    int dx = event->motion.xrel;
+    int dy = event->motion.yrel;
+
+    //printf("dx = %d, dy = %d\n", dx, dy);
+
+    if (F_REFERENCE_VECTOR_ALONG_Z == 1)
+    {
+        if (F_L_BUTTON_DOWN == 1) {
+            space.moveFrame(Movement_Forward, -dy * 5);
+            if (bLockOntoEarth)
+                space.rotateFrame(earth.getCenter(), dx / 10., 0);
+            else if (bLockOntoSun)
+                space.rotateFrame(sun.getCenter(), dx / 10., 0);
+        }
+        else {
+            if (bLockOntoEarth)
+                space.rotateFrame(earth.getCenter(), dx / 10., -dy / 10.);
+            else if (bLockOntoSun)
+                space.rotateFrame(sun.getCenter(), dx / 10., -dy / 10.);
+        }
+        return;
+    }
+
+
+    while (1)
+    {
+        if (F_L_BUTTON_DOWN == 1) {
+            space.moveFrame(Movement_Forward, -dy * 5);
+
+
+            if (bSidewaysMotionMode == 1) {
+                space.moveFrame(Movement_RotateRight, 90);
+                space.moveFrame(Movement_Forward, dx);
+                space.moveFrame(Movement_RotateLeft, 90);
+            }
+            else {
+                space.moveFrame(Movement_RotateRight, dx / 10.0);
+            }
+            break;
+        }
+
+        if (F_R_BUTTON_DOWN == 1) {
+            space.moveFrame(Movement_RightAlongSD, dx / 10.0);
+            break;
+        }
+
+        if (bSidewaysMotionMode) {
+            space.moveFrame(Movement_RotateRight, 90);
+            space.moveFrame(Movement_Forward, dx);
+            space.moveFrame(Movement_RotateLeft, 90);
+
+            space.moveFrame(Movement_RotateUp, 90);
+            space.moveFrame(Movement_Forward, -dy);
+            space.moveFrame(Movement_RotateDown, 90);
+
+        }
+        else {
+            space.moveFrame(Movement_RotateRight, (dx / 10.0));
+            space.moveFrame(Movement_RotateUp, -(dy / 10.0));
+        }
+        break;
+    }
+}
+
+
+/*!
+****************************************************************************
+
+
+
+****************************************************************************/
+void Universe::ChangeSidewaysMotionMode()
+{
+    bSidewaysMotionMode = !bSidewaysMotionMode;
+    bUpdateUI = true;
+}
+
+/*!
+****************************************************************************
+
+
+
+****************************************************************************/
+void Universe::SetDefaultView()
+{
+    space.pushFrame();
+
+    space.initFrame();
+    space.rotateFrame(PNT(0, 0, 0), -10.0, -15.0);
+    space.moveFrame(Movement_Backward, 3400);
+
+    bLockOntoSun = false;
+    bLockOntoEarth = false;
+    F_REFERENCE_VECTOR_ALONG_Z = 0;
+
+    bUpdateUI = true;
+}
+
+/*!
+****************************************************************************
+
+ Lock/Unlock/Toggle the earth at the center of the view.  Set the
+ reference vector along -Z.
+
+****************************************************************************/
+void Universe::NavigationLockOntoEarth(int nParam)
+{
+    switch (nParam)
+    {
+    case UCmdParam_On:
+        bLockOntoEarth = true;
+        bLockOntoSun = false;
+        F_REFERENCE_VECTOR_ALONG_Z = 1;
+
+        ChangeBoolean(&earth.bRevolutionMotion, UCmdParam_Off);
+        space.setFrame(AT_POINT,
+            space.S,
+            VECTOR(space.S, earth.getCenter()),
+            PNT(space.S.x, space.S.y, space.S.z - 100));
+        break;
+
+    case UCmdParam_Off:
+        bLockOntoEarth = false;
+        F_REFERENCE_VECTOR_ALONG_Z = 0;
+        break;
+
+    case UCmdParam_Toggle:
+        if (bLockOntoEarth)
+        {
+            NavigationLockOntoEarth(UCmdParam_Off);
+        }
+        else
+        {
+            NavigationLockOntoEarth(UCmdParam_On);
+        }
+        break;
+    }
+
+    bUpdateUI = true;
+
+}
+
+/*!
+****************************************************************************
+
+ Lock/Unlock/Toggle the sun at the center of the view.  Set the
+ reference vector along -Z.
+
+****************************************************************************/
+void Universe::NavigationLockOntoSun(int nParam)
+{
+    switch (nParam)
+    {
+    case UCmdParam_On:
+        bLockOntoSun = true;
+        bLockOntoEarth = false;
+        F_REFERENCE_VECTOR_ALONG_Z = 1;
+
+        space.setFrame(AT_POINT,
+            space.S,
+            VECTOR(space.S, sun.getCenter()),
+            PNT(space.S.x, space.S.y, space.S.z - 100));
+        break;
+
+    case UCmdParam_Off:
+        bLockOntoSun = false;
+        F_REFERENCE_VECTOR_ALONG_Z = 0;
+        break;
+
+    case UCmdParam_Toggle:
+        if (bLockOntoSun)
+        {
+            NavigationLockOntoSun(UCmdParam_Off);
+        }
+        else
+        {
+            NavigationLockOntoSun(UCmdParam_On);
+        }
+        break;
+    }
+
+    bUpdateUI = true;
+
+}
+
+
+/*!
+****************************************************************************
+
+ Set simulation speed to one of the 5 hardcoded values.
+
+****************************************************************************/
+void Universe::SetSimulationSpeed(int nParam)
+{
+    eSimulationSpeed = USimulationSpeedType(nParam);
+    switch (eSimulationSpeed)
+    {
+    case USimulationSpeed_VeryLow:
+        _stepMultiplier = 0.005;
+        break;
+
+    case USimulationSpeed_Low:
+        _stepMultiplier = 0.05;
+        break;
+
+    case USimulationSpeed_Normal:
+        _stepMultiplier = 0.36;
+        break;
+
+    case USimulationSpeed_High:
+        _stepMultiplier = 3;
+        break;
+
+    case USimulationSpeed_VeryHigh:
+        _stepMultiplier = 10;
+        break;
+    }
+
+    bUpdateUI = true;
+}
+
+/*!
+****************************************************************************
+
+ Set time flow direction to either Forward or Reverse depending on the
+ argument.
+
+****************************************************************************/
+void Universe::SetTimeDirection(int nParam)
+{
+    eTimeDirection = (UTimeDirectionType)nParam;
+    bUpdateUI = true;
+}
+
+/*!
+****************************************************************************
+
+ Turn On/Off Fast forward motion.
+
+****************************************************************************/
+void Universe::FastForward(int nParam)
+{
+    ChangeBoolean(&bFastForward, nParam);
+}
+
+/*!
+****************************************************************************
+
+ Turn On/Off fast Reverse motion.
+
+****************************************************************************/
+void Universe::Rewind(int nParam)
+{
+    ChangeBoolean(&bFastReverse, nParam);
+}
+
+
+/*!
+****************************************************************************
+
+ Set, Reset or Toggle a given boolean
+
+ This function operates on a given boolean & sets the boolean to True/False
+ or toggles it depending on the second argument which is actually an
+ enum of type UCmdParamType.
+
+ Sets bUpdateUI to true unconditionally.
+
+****************************************************************************/
+void Universe::ChangeBoolean(bool *pBool, int nParam)
+{
+    switch (nParam)
+    {
+    case UCmdParam_Toggle:
+        *pBool = !*pBool;
+        break;
+
+    case UCmdParam_On:
+    case UCmdParam_Start:
+        *pBool = true;
+        break;
+
+    case UCmdParam_Off:
+    case UCmdParam_Stop:
+        *pBool = false;
+        break;
+    }
+
+    bUpdateUI = true;
+
+}
+
+
+/*!
+****************************************************************************
+
+
+
+****************************************************************************/
+void Universe::SimulationPause(int nParam)
+{
+    ChangeBoolean(&bSimulationPause, nParam);
+    bUpdateUI = true;
+}
+
+
+/*!
+****************************************************************************
+
+
+
+****************************************************************************/
+void Universe::Earth_RotationMotion(int nParam)
+{
+    ChangeBoolean(&earth.bRevolutionMotion, nParam);
+    bUpdateUI = true;
+}
+
+/*!
+****************************************************************************
+
+
+
+****************************************************************************/
+void Universe::Earth_RevolutionMotion(int nParam)
+{
+    ChangeBoolean(&earth.bRevolutionMotion, nParam);
+    F_REFERENCE_VECTOR_ALONG_Z = 0;
+    bLockOntoEarth = false;
+
+    bUpdateUI = true;
+}
+
+
+/*!
+****************************************************************************
+
+
+
+****************************************************************************/
+void Universe::Earth_PrecessionMotion(int nParam)
+{
+    if (nParam == UCmdParam_Reset)
+    {
+        earth.bPrecessionMotion = false;
+        earth.setAxisRotationAngle(90);
+    }
+    else
+    {
+        ChangeBoolean(&earth.bPrecessionMotion, nParam);
+    }
+
+    bUpdateUI = true;
+}
+
+
+/*!
+****************************************************************************
+
+
+
+****************************************************************************/
+void Universe::Earth_OrbitalPlane(int nParam)
+{
+    ChangeBoolean(&earthRenderer.bShowOrbitalPlane, nParam);
+    bUpdateUI = true;
+}
+
+
+/*!
+****************************************************************************
+
+
+
+****************************************************************************/
+void Universe::Earth_SetOrbitalPositionAngle(double fAngle)
+{
+    earth.setOrbitalAngle(fAngle);
+
+    /* Even though the earth's coordinates would be calculated from its
+       orbit angle (tho) in the advance() function, it won't happen if
+       the simulation is paused.  Hence we need to do it here. */
+    //earth.C.x = earth.R * cos(earth.tho);
+    //earth.C.y = earth.R * sin(earth.tho);
+    //earth.C.z = 0;
+
+    earth.calculateCenterPosition();
+}
+
+
+/*!
+****************************************************************************
+
+
+
+****************************************************************************/
+void Universe::Moon_OrbitalPlane(int nParam)
+{
+    ChangeBoolean(&moonRenderer.bShowOrbitalPlane, nParam);
+    bUpdateUI = true;
+
+}
+
+
+/*!
+****************************************************************************
+
+
+
+****************************************************************************/
+void Universe::Moon_RevolutionMotion(int nParam)
+{
+    ChangeBoolean(&moon.bRevolutionMotion, nParam);
+    bUpdateUI = true;
+}
+
+
+/*!
+****************************************************************************
+
+
+
+****************************************************************************/
+void Universe::Moon_SetOrbitalPositionAngle(double fAngle)
+{
+    moon.setOrbitalAngle(fAngle);
+    moon.calculateCenterPosition();
+}
 
 
 /*************************************************************************************************
@@ -724,39 +1191,10 @@ int Universe::run()
             {
             case SDL_QUIT:           bQuit = true;                  break;
             case SDL_KEYDOWN:
-                switch (event.key.keysym.sym) {
-                case SDLK_f:
-                    if (!bFastForward) {
-                        previousStepMultiplier = stepMultiplier;
-                        stepMultiplier *= 5;
-                        bFastForward = true;
-                    }
-                    break;
-                case SDLK_r:
-                    if (!bFastReverse) {
-                        previousStepMultiplier = stepMultiplier;
-                        stepMultiplier *= -5;
-                        bFastReverse = true;
-                    }
-                    break;
-                case SDLK_UP:
-                    stepMultiplier *= 1.25;
-                    break;
-                case SDLK_DOWN:
-                    stepMultiplier *= 0.8;
-                    break;
-                }
+                onKeyDown(&event);
                 break;
             case SDL_KEYUP:
-                switch (event.key.keysym.sym) {
-                case SDLK_ESCAPE:
-                    bMouseGrabbed = false;
-                    SDL_ShowCursor(SDL_ENABLE);
-                    SDL_SetRelativeMouseMode(SDL_FALSE);
-                    break;
-                case SDLK_f:         bFastForward = false;  stepMultiplier = previousStepMultiplier;        break;
-                case SDLK_r:         bFastReverse = false;  stepMultiplier = previousStepMultiplier;        break;
-                }
+                onKeyUp(&event);
                 break;
             case SDL_MOUSEBUTTONDOWN:
                 if (!bMouseGrabbed) {
@@ -764,7 +1202,6 @@ int Universe::run()
                     SDL_ShowCursor(SDL_DISABLE);
                     //SDL_WarpMouseInWindow(window, curWidth / 2, curHeight / 2);
                     SDL_SetRelativeMouseMode(SDL_TRUE);
-                    bExplicitMouseMove = true;
                 }
                 switch (event.button.button) {
                 case SDL_BUTTON_LEFT:   bLeftMouseButtonDown = true;   F_L_BUTTON_DOWN = 1;   break;
@@ -780,22 +1217,7 @@ int Universe::run()
             case SDL_MOUSEMOTION:
                 if (bMouseGrabbed)
                 {
-                    //if (bExplicitMouseMove) {
-                    //    bExplicitMouseMove = false;
-                    //    break;
-                    //}
-
-                    //dx = event.motion.x - previousX;
-                    //dy = event.motion.y - previousY;
-
-                    //previousX = event.motion.x;
-                    //previousY = event.motion.y;
-
-                    //SDL_WarpMouseInWindow(window, curWidth / 2, curHeight / 2);
-                    //bExplicitMouseMove = true;
-                    onMouseMotion(event.motion.xrel, event.motion.yrel);
-                    //onMouseMotion(0, 10);
-                    //printf("Mouse moved by: %d, %d\n", dx, dy);
+                    onMouseMotion(&event);
                 }
                 break;
             case SDL_WINDOWEVENT:
@@ -819,10 +1241,15 @@ int Universe::run()
         if (bQuit)
             break;
 
-        // Advance parents before children
-        sun.advance(stepMultiplier);
-        earth.advance(stepMultiplier);
-        moon.advance(stepMultiplier);
+
+
+        if (bFastForward)
+            advance(5 * _stepMultiplier);
+        else if (bFastReverse)
+            advance(-5 * _stepMultiplier);
+        else
+            advance(_stepMultiplier);
+
 
         render();
 
@@ -833,79 +1260,3 @@ int Universe::run()
     SDL_Quit();
     return 0;
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
-
-
-void Universe::onMouseMotion(int dx, int dy)
-{
-    //printf("dx = %d, dy = %d\n", dx, dy);
-
-    if (F_REFERENCE_VECTOR_ALONG_Z == 1)
-    {
-        if (F_L_BUTTON_DOWN == 1) {
-            space.moveFrame(Movement_Forward, -dy * 5);
-            if (bLockOntoEarth)
-                space.rotateFrame(earth.getCenter(), dx / 10., 0);
-            else if (bLockOntoSun)
-                space.rotateFrame(sun.getCenter(), dx / 10., 0);
-        }
-        else {
-            if (bLockOntoEarth)
-                space.rotateFrame(earth.getCenter(), dx / 10., -dy / 10.);
-            else if (bLockOntoSun)
-                space.rotateFrame(sun.getCenter(), dx / 10., -dy / 10.);
-        }
-        return;
-    }
-
-
-    while (1)
-    {
-        if (F_L_BUTTON_DOWN == 1) {
-            space.moveFrame(Movement_Forward, -dy * 5);
-
-
-            if (bSidewaysMotionMode == 1) {
-                space.moveFrame(Movement_RotateRight, 90);
-                space.moveFrame(Movement_Forward, double(dx));
-                space.moveFrame(Movement_RotateLeft, 90);
-            }
-            else {
-                space.moveFrame(Movement_RotateRight, dx / 10.);
-            }
-            break;
-        }
-
-        if (F_R_BUTTON_DOWN == 1) {
-            space.moveFrame(Movement_RightAlongSD, double(dx / 10));
-            break;
-        }
-
-        if (bSidewaysMotionMode) {
-            space.moveFrame(Movement_RotateRight, 90);
-            space.moveFrame(Movement_Forward, double(dx));
-            space.moveFrame(Movement_RotateLeft, 90);
-
-            space.moveFrame(Movement_RotateUp, 90);
-            space.moveFrame(Movement_Forward, -double(dy));
-            space.moveFrame(Movement_RotateDown, 90);
-
-        }
-        else {
-            space.moveFrame(Movement_RotateRight, double(dx / 10));
-            space.moveFrame(Movement_RotateUp, -double(dy / 10));
-        }
-        break;
-    }
-}
-

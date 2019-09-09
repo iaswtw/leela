@@ -542,8 +542,67 @@ public:
         }
     }
 
+    /*!
+    ****************************************************************************
 
-private:
+
+
+    ****************************************************************************/
+    void pushFrame()
+    {
+        OLD_S = S;
+        OLD_D = D;
+        OLD_R = R;
+        OLD_L = L;
+    }
+
+    /*!
+    ****************************************************************************
+
+
+
+    ****************************************************************************/
+    void popFrame()
+    {
+        S = OLD_S;
+        D = OLD_D;
+        R = OLD_R;
+        L = OLD_L;
+
+        DS.SET(D, S);
+        DR.SET(D, R);
+        DL.SET(D, L);
+        PP.SET(D, S);
+    }
+
+    /*!
+    ****************************************************************************
+
+
+
+    ****************************************************************************/
+    void swapFrame()
+    {
+        PNT TS, TD, TR, TL;
+
+        // save the current frame to a temporary frame
+        TS = S;
+        TD = D;
+        TR = R;
+        TL = L;
+
+        // copy old frame to current frame
+        popFrame();
+
+        // copy temporary frame to old frame
+        OLD_S = TS;
+        OLD_D = TD;
+        OLD_R = TR;
+        OLD_L = TL;
+
+    }
+
+public:
 
     // The Origin and Standard Axis points
     PNT O, X, Y, Z;
