@@ -29,10 +29,10 @@ public:
 class Sphere
 {
 public:
-    Sphere() : _center(0,0,0), _r(0), _g(0), _b(0),
-        _radius(0),        _rotationAngle(0), _rotationAngularVelocity(0), _axisRotationAngle(0),    _axisTiltAngle(0),
-        _orbitalRadius(0), _orbitalAngle(0),  _orbitalAngularVelocity(0),  _orbitalRotationAngle(0), _orbitalTiltAngle(0),
-        _parent(nullptr)
+    Sphere() : _center(0, 0, 0), _r(0), _g(0), _b(0),
+        _radius(0), _rotationAngle(0), _rotationAngularVelocity(0), _axisRotationAngle(0), _axisTiltAngle(0),
+        _orbitalRadius(0), _orbitalAngle(0), _orbitalAngularVelocity(0), _orbitalPlaneRotationAngle(0), _orbitalPlaneTiltAngle(0),
+        _parent(nullptr), _bOrbitalPlane(false)
     {
     }
 
@@ -61,13 +61,13 @@ public:
         _axisTiltAngle = axisTiltAngle;
     }
 
-    void setOrbitalParameters(float orbitalRadius, float orbitalAngle, float orbitalAngularVelocity, float orbitalRotationAngle, float orbitalTiltAngle)
+    void setOrbitalParameters(float orbitalRadius, float orbitalAngle, float orbitalAngularVelocity, float orbitalPlaneRotationAngle, float orbitalPlaneTiltAngle)
     {
         setOrbitalRadius(orbitalRadius);
         _orbitalAngle = orbitalAngle;
         _orbitalAngularVelocity = orbitalAngularVelocity;
-        _orbitalRotationAngle = orbitalRotationAngle;
-        _orbitalTiltAngle = orbitalTiltAngle;
+        _orbitalPlaneRotationAngle = orbitalPlaneRotationAngle;
+        _orbitalPlaneTiltAngle = orbitalPlaneTiltAngle;
     }
 
     void setParentSphere(Sphere *parent)
@@ -108,14 +108,29 @@ public:
 
     inline float getOrbitalTiltAngle()
     {
-        return _orbitalTiltAngle;
+        return _orbitalPlaneTiltAngle;
     }
 
+    inline float getOrbitalPlaneTiltAngle()
+    {
+        return _orbitalPlaneTiltAngle;
+    }
+
+    inline float getOrbitalPlaneRotationAngle()
+    {
+        return _orbitalPlaneRotationAngle;
+    }
+
+    void enableOrbitalPlaneGeneration()
+    {
+        _bOrbitalPlane = true;
+    }
 
     void generateVertices()
     {
-        float numLongitudes = 1720;
+        float numLongitudes = 1200;
         float inc = float(2*M_PI) / numLongitudes;
+        _vertices.reserve( int((2*M_PI/inc)*(M_PI/inc)) * 7 );
 
         for (float alpha = 0; alpha < float(2*M_PI)-inc; alpha += inc)
         {
@@ -137,25 +152,27 @@ public:
                 float y4 = _radius * sin(theta+inc) * sin(alpha+inc);
                 float z4 = _radius * cos(theta+inc);
 
-                _vertices.push_back(x1);   _vertices.push_back(y1);   _vertices.push_back(z1);   _vertices.push_back(_r);  _vertices.push_back(_g); _vertices.push_back(_b);
-                _vertices.push_back(x2);   _vertices.push_back(y2);   _vertices.push_back(z2);   _vertices.push_back(_r);  _vertices.push_back(_g); _vertices.push_back(_b);
-                _vertices.push_back(x3);   _vertices.push_back(y3);   _vertices.push_back(z3);   _vertices.push_back(_r);  _vertices.push_back(_g); _vertices.push_back(_b);
-                _vertices.push_back(x3);   _vertices.push_back(y3);   _vertices.push_back(z3);   _vertices.push_back(_r);  _vertices.push_back(_g); _vertices.push_back(_b);
-                _vertices.push_back(x2);   _vertices.push_back(y2);   _vertices.push_back(z2);   _vertices.push_back(_r);  _vertices.push_back(_g); _vertices.push_back(_b);
-                _vertices.push_back(x4);   _vertices.push_back(y4);   _vertices.push_back(z4);   _vertices.push_back(_r);  _vertices.push_back(_g); _vertices.push_back(_b);
+                _vertices.push_back(x1);   _vertices.push_back(y1);   _vertices.push_back(z1);   _vertices.push_back(_r);  _vertices.push_back(_g); _vertices.push_back(_b);  _vertices.push_back(1.0);
+                _vertices.push_back(x2);   _vertices.push_back(y2);   _vertices.push_back(z2);   _vertices.push_back(_r);  _vertices.push_back(_g); _vertices.push_back(_b);  _vertices.push_back(1.0);
+                _vertices.push_back(x3);   _vertices.push_back(y3);   _vertices.push_back(z3);   _vertices.push_back(_r);  _vertices.push_back(_g); _vertices.push_back(_b);  _vertices.push_back(1.0);
+                _vertices.push_back(x3);   _vertices.push_back(y3);   _vertices.push_back(z3);   _vertices.push_back(_r);  _vertices.push_back(_g); _vertices.push_back(_b);  _vertices.push_back(1.0);
+                _vertices.push_back(x2);   _vertices.push_back(y2);   _vertices.push_back(z2);   _vertices.push_back(_r);  _vertices.push_back(_g); _vertices.push_back(_b);  _vertices.push_back(1.0);
+                _vertices.push_back(x4);   _vertices.push_back(y4);   _vertices.push_back(z4);   _vertices.push_back(_r);  _vertices.push_back(_g); _vertices.push_back(_b);  _vertices.push_back(1.0);
 
                 //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
             }
         }
 
-        //// add orbital plane to the main vertices for now
-        //_vertices.push_back(-1400);   _vertices.push_back(-1400);   _vertices.push_back(0);   _vertices.push_back(0.5);  _vertices.push_back(0.3); _vertices.push_back(0.3);
-        //_vertices.push_back(1400);   _vertices.push_back(-1400);   _vertices.push_back(0);   _vertices.push_back(0.3);  _vertices.push_back(0.3); _vertices.push_back(0.3);
-        //_vertices.push_back(1400);   _vertices.push_back(1400);   _vertices.push_back(0);   _vertices.push_back(0.3);  _vertices.push_back(0.3); _vertices.push_back(0.3);
-        //_vertices.push_back(1400);   _vertices.push_back(1400);   _vertices.push_back(0);   _vertices.push_back(0.3);  _vertices.push_back(0.3); _vertices.push_back(0.3);
-        //_vertices.push_back(-1400);   _vertices.push_back(1400);   _vertices.push_back(0);   _vertices.push_back(0.3);  _vertices.push_back(0.3); _vertices.push_back(0.3);
-        //_vertices.push_back(-1400);   _vertices.push_back(-1400);   _vertices.push_back(0);   _vertices.push_back(0.3);  _vertices.push_back(0.3); _vertices.push_back(0.3);
-
+        if (_bOrbitalPlane)
+        {
+            // add orbital plane to the main vertices for now
+            _orbitalPlaneVertices.push_back(-1400);   _orbitalPlaneVertices.push_back(-1400);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(0.3);  _orbitalPlaneVertices.push_back(0.15); _orbitalPlaneVertices.push_back(0.15);    _orbitalPlaneVertices.push_back(0.4);
+            _orbitalPlaneVertices.push_back(1400);    _orbitalPlaneVertices.push_back(-1400);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(0.3);  _orbitalPlaneVertices.push_back(0.15); _orbitalPlaneVertices.push_back(0.15);    _orbitalPlaneVertices.push_back(0.4);
+            _orbitalPlaneVertices.push_back(1400);    _orbitalPlaneVertices.push_back(1400);    _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(0.3);  _orbitalPlaneVertices.push_back(0.15); _orbitalPlaneVertices.push_back(0.15);    _orbitalPlaneVertices.push_back(0.4);
+            _orbitalPlaneVertices.push_back(1400);    _orbitalPlaneVertices.push_back(1400);    _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(0.3);  _orbitalPlaneVertices.push_back(0.15); _orbitalPlaneVertices.push_back(0.15);    _orbitalPlaneVertices.push_back(0.4);
+            _orbitalPlaneVertices.push_back(-1400);   _orbitalPlaneVertices.push_back(1400);    _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(0.3);  _orbitalPlaneVertices.push_back(0.15); _orbitalPlaneVertices.push_back(0.15);    _orbitalPlaneVertices.push_back(0.4);
+            _orbitalPlaneVertices.push_back(-1400);   _orbitalPlaneVertices.push_back(-1400);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(0.3);  _orbitalPlaneVertices.push_back(0.15); _orbitalPlaneVertices.push_back(0.15);    _orbitalPlaneVertices.push_back(0.4);
+        }
 
 
         //---------------------------------------------------------------------------------
@@ -164,7 +181,7 @@ public:
         //std::list<float> alphas = { 0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165 };
 
         //for (float alpha : alphas)
-        for (float alphas = 0.0f; alphas < 180.0f; alphas += 5.0f)
+        for (float alphas = 0.0f; alphas < 180.0f; alphas += 30.0f)
         {
             float alpha = glm::radians(alphas);
 
@@ -178,15 +195,15 @@ public:
                 float y2 = 1.01 * _radius * sin(theta + inc) * sin(alpha);
                 float z2 = 1.01 * _radius * cos(theta + inc);
 
-                _latLongVertices.push_back(x1);   _latLongVertices.push_back(y1);   _latLongVertices.push_back(z1);   _latLongVertices.push_back(_r*0.5);  _latLongVertices.push_back(_g*0.5); _latLongVertices.push_back(_b*0.5);
-                _latLongVertices.push_back(x2);   _latLongVertices.push_back(y2);   _latLongVertices.push_back(z2);   _latLongVertices.push_back(_r*0.5);  _latLongVertices.push_back(_g*0.5); _latLongVertices.push_back(_b*0.5);
+                _latLongVertices.push_back(x1);   _latLongVertices.push_back(y1);   _latLongVertices.push_back(z1);   _latLongVertices.push_back(_r*0.5);  _latLongVertices.push_back(_g*0.5); _latLongVertices.push_back(_b*0.5);  _latLongVertices.push_back(1.0);
+                _latLongVertices.push_back(x2);   _latLongVertices.push_back(y2);   _latLongVertices.push_back(z2);   _latLongVertices.push_back(_r*0.5);  _latLongVertices.push_back(_g*0.5); _latLongVertices.push_back(_b*0.5);  _latLongVertices.push_back(1.0);
 
                 //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
             }
         }
 
         //---------------------------------------------------------------------------------
-        // Latitudes
+        // Special Latitudes
         //---------------------------------------------------------------------------------
         std::list<float> thetas = { 0, 66.5, 23.5, 90, 90+23.5, 90+66.5 };          // 0 = +z axis, 90 is equator, 90+66.5 is antarctic circle
 
@@ -204,14 +221,17 @@ public:
                 float y2 = 1.005 * _radius * sin(theta) * sin(alpha + inc);
                 float z2 = 1.005 * _radius * cos(theta);
 
-                _latLongVertices.push_back(x1);   _latLongVertices.push_back(y1);   _latLongVertices.push_back(z1);   _latLongVertices.push_back(_r*0.9);  _latLongVertices.push_back(_g*0.5); _latLongVertices.push_back(_b*0.5);
-                _latLongVertices.push_back(x2);   _latLongVertices.push_back(y2);   _latLongVertices.push_back(z2);   _latLongVertices.push_back(_r*0.9);  _latLongVertices.push_back(_g*0.5); _latLongVertices.push_back(_b*0.5);
+                _latLongVertices.push_back(x1);   _latLongVertices.push_back(y1);   _latLongVertices.push_back(z1);   _latLongVertices.push_back(_r*0.9);  _latLongVertices.push_back(_g*0.5); _latLongVertices.push_back(_b*0.5);  _latLongVertices.push_back(1.0);
+                _latLongVertices.push_back(x2);   _latLongVertices.push_back(y2);   _latLongVertices.push_back(z2);   _latLongVertices.push_back(_r*0.9);  _latLongVertices.push_back(_g*0.5); _latLongVertices.push_back(_b*0.5);  _latLongVertices.push_back(1.0);
 
                 //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
             }
         }
 
-        for (float thetas = 0; thetas < 180; thetas += 5)
+        //---------------------------------------------------------------------------------
+        // Latitudes
+        //---------------------------------------------------------------------------------
+        for (float thetas = 0; thetas < 180; thetas += 30)
         {
             float theta = glm::radians(thetas);
 
@@ -225,15 +245,13 @@ public:
                 float y2 = 1.005 * _radius * sin(theta) * sin(alpha + inc);
                 float z2 = 1.005 * _radius * cos(theta);
 
-                _latLongVertices.push_back(x1);   _latLongVertices.push_back(y1);   _latLongVertices.push_back(z1);   _latLongVertices.push_back(_r*0.5);  _latLongVertices.push_back(_g*0.5); _latLongVertices.push_back(_b*0.5);
-                _latLongVertices.push_back(x2);   _latLongVertices.push_back(y2);   _latLongVertices.push_back(z2);   _latLongVertices.push_back(_r*0.5);  _latLongVertices.push_back(_g*0.5); _latLongVertices.push_back(_b*0.5);
+                _latLongVertices.push_back(x1);   _latLongVertices.push_back(y1);   _latLongVertices.push_back(z1);   _latLongVertices.push_back(_r*0.5);  _latLongVertices.push_back(_g*0.5); _latLongVertices.push_back(_b*0.5);  _latLongVertices.push_back(1.0);
+                _latLongVertices.push_back(x2);   _latLongVertices.push_back(y2);   _latLongVertices.push_back(z2);   _latLongVertices.push_back(_r*0.5);  _latLongVertices.push_back(_g*0.5); _latLongVertices.push_back(_b*0.5);  _latLongVertices.push_back(1.0);
 
                 //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
             }
         }
-
-
-
+        
         printf("sphere vertex generation done\n");
     }
 
@@ -245,6 +263,26 @@ public:
     std::vector<float>& getLatitudeAndLongitudeVertices()
     {
         return _latLongVertices;
+    }
+
+    std::vector<float>& getOrbitalPlaneVertices()
+    {
+        return _orbitalPlaneVertices;
+    }
+
+    glm::mat4 getOrbitalPlaneModelMatrix()
+    {
+        glm::mat4 modelTrans(1.0f);
+
+        // translate to the parent's center.
+        if (_parent != nullptr)
+        {
+            modelTrans = glm::translate(modelTrans, _parent->getCenter());
+            modelTrans = glm::rotate(modelTrans, getOrbitalPlaneRotationAngle(), glm::vec3(0.0f, 0.0f, 1.0f));
+            modelTrans = glm::rotate(modelTrans, getOrbitalPlaneTiltAngle(), glm::vec3(0.0f, 1.0f, 0.0f));
+        }
+
+        return modelTrans;
     }
 
     glm::vec3 getModelTransformedCenter()
@@ -279,6 +317,18 @@ public:
         _center.x = _orbitalRadius * cos (_orbitalAngle);
         _center.y = _orbitalRadius * sin (_orbitalAngle);
         _center.z = 0;       // todo - use orbital tilt
+
+        // apply orbital tilt
+        _center.z = -_center.x * sin(_orbitalPlaneTiltAngle);
+        _center.x =  _center.x * cos(_orbitalPlaneTiltAngle);
+
+        // apply orbital rotation
+        float x, y;
+        x = _center.x;
+        y = _center.y;
+        _center.x = x * cos(_orbitalPlaneRotationAngle) - y * sin(_orbitalPlaneRotationAngle);
+        _center.y = x * sin(_orbitalPlaneRotationAngle) + y * cos(_orbitalPlaneRotationAngle);
+
 
         // parent is assumed to have been updated
         if (_parent != nullptr)
@@ -317,12 +367,14 @@ private:
     float _orbitalRadius;
     float _orbitalAngle;                // current revolution (orbital) angle (increments based on revolution angular velocity). Previously called 'tho'
     float _orbitalAngularVelocity;      // angular velocity of revolution around parent sphere. Previously called 'wo'.
-    float _orbitalRotationAngle;        // previously called 'alphao'
-    float _orbitalTiltAngle;            // previously called 'betao'
+    float _orbitalPlaneRotationAngle;   // previously called 'alphao'
+    float _orbitalPlaneTiltAngle;       // previously called 'betao'
 
 
+    bool _bOrbitalPlane;
     std::vector<float> _vertices;
     std::vector<float> _latLongVertices;
+    std::vector<float> _orbitalPlaneVertices;
     Sphere *_parent;
 };
 
@@ -339,16 +391,16 @@ public:
     {
     }
 
-    void generateVertices(float axisLength, glm::vec3 xAxisColor, glm::vec3 yAxisColor, glm::vec3 zAxisColor)
+    void generateVertices(float xAxisLength, float yAxisLength, float zAxisLength, glm::vec3 xAxisColor, glm::vec3 yAxisColor, glm::vec3 zAxisColor)
     {
-        _vertices.push_back(-axisLength);  _vertices.push_back(0.0);  _vertices.push_back(0.0);   _vertices.push_back(xAxisColor.r);  _vertices.push_back(xAxisColor.g);  _vertices.push_back(xAxisColor.b);
-        _vertices.push_back( axisLength);  _vertices.push_back(0.0);  _vertices.push_back(0.0);   _vertices.push_back(xAxisColor.r);  _vertices.push_back(xAxisColor.g);  _vertices.push_back(xAxisColor.b);
+        _vertices.push_back(-xAxisLength);  _vertices.push_back(0.0);  _vertices.push_back(0.0);   _vertices.push_back(xAxisColor.r);  _vertices.push_back(xAxisColor.g);  _vertices.push_back(xAxisColor.b); _vertices.push_back(0.8);
+        _vertices.push_back(xAxisLength);  _vertices.push_back(0.0);  _vertices.push_back(0.0);   _vertices.push_back(xAxisColor.r);  _vertices.push_back(xAxisColor.g);  _vertices.push_back(xAxisColor.b);  _vertices.push_back(0.8);
 
-        _vertices.push_back(0.0);  _vertices.push_back(-axisLength);  _vertices.push_back(0.0);   _vertices.push_back(yAxisColor.r);  _vertices.push_back(yAxisColor.g);  _vertices.push_back(yAxisColor.b);
-        _vertices.push_back(0.0);  _vertices.push_back( axisLength);  _vertices.push_back(0.0);   _vertices.push_back(yAxisColor.r);  _vertices.push_back(yAxisColor.g);  _vertices.push_back(yAxisColor.b);
+        _vertices.push_back(0.0);  _vertices.push_back(-yAxisLength);  _vertices.push_back(0.0);   _vertices.push_back(yAxisColor.r);  _vertices.push_back(yAxisColor.g);  _vertices.push_back(yAxisColor.b); _vertices.push_back(0.8);
+        _vertices.push_back(0.0);  _vertices.push_back(yAxisLength);  _vertices.push_back(0.0);   _vertices.push_back(yAxisColor.r);  _vertices.push_back(yAxisColor.g);  _vertices.push_back(yAxisColor.b);  _vertices.push_back(0.8);
 
-        _vertices.push_back(0.0);  _vertices.push_back(0.0);  _vertices.push_back(-axisLength);   _vertices.push_back(zAxisColor.r);  _vertices.push_back(zAxisColor.g);  _vertices.push_back(zAxisColor.b);
-        _vertices.push_back(0.0);  _vertices.push_back(0.0);  _vertices.push_back( axisLength);   _vertices.push_back(zAxisColor.r);  _vertices.push_back(zAxisColor.g);  _vertices.push_back(zAxisColor.b);
+        _vertices.push_back(0.0);  _vertices.push_back(0.0);  _vertices.push_back(-zAxisLength);   _vertices.push_back(zAxisColor.r);  _vertices.push_back(zAxisColor.g);  _vertices.push_back(zAxisColor.b); _vertices.push_back(0.8);
+        _vertices.push_back(0.0);  _vertices.push_back(0.0);  _vertices.push_back(zAxisLength);   _vertices.push_back(zAxisColor.r);  _vertices.push_back(zAxisColor.g);  _vertices.push_back(zAxisColor.b);  _vertices.push_back(0.8);
     }
 
     std::vector<float>& getVertices()

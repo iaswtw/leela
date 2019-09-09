@@ -161,11 +161,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Class.h" />
     <ClInclude Include="glcorearb.h" />
+    <ClInclude Include="OglSphere.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Space.h" />
     <ClInclude Include="sphere.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Class.cpp" />
     <ClCompile Include="ogl_sdl_vcpp.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

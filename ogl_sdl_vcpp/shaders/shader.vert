@@ -3,7 +3,7 @@
 #define PI 3.1415926538
 
 in vec3 position;
-in vec3 in_color;
+in vec4 in_color;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -78,7 +78,7 @@ void main()
             {
                 // point is on the night side of this sphere.
                 // todo - this is only true if radius of sun is same as radius of this planet
-                Color = vec4(in_color*0.2, 1.0);
+                Color = vec4(in_color.xyz*0.2, in_color.a);
             }
             else
             {
@@ -158,26 +158,26 @@ void main()
                 //----------------------------------------------------------------
                 // Apply coloring based on the type of shadow the point is in.
                 if (bInUmbra)
-                    Color = vec4(in_color * 0.2, 1.0);
+                    Color = vec4(in_color.rgb * 0.2, in_color.a);
                 else if (bInAntumbra)
-                    Color = vec4(in_color * 0.4, 1.0);
+                    Color = vec4(in_color.rgb * 0.4, in_color.a);
                 else if (bInPenumbra)
-                    Color = vec4(in_color * 0.6, 1.0);
+                    Color = vec4(in_color.rgb * 0.6, in_color.a);
                 else
                     //Color = vec(1.0, 0.0, 0.0, 1.0);
-                    Color = vec4(in_color, 1.0);
+                    Color = in_color;
                         
             }
         }
         else    // if (sphereInfo.isValid)
         {
-            Color = vec4(in_color, 1.0);
+            Color = in_color;
             //Color = vec4(0.0, 1.0, 0.0, 1.0);
         }
     }
     else
     {
-        Color = vec4(in_color, 1.0);
+        Color = in_color;
     }
             
     // apply all 3 transformations to the original point
