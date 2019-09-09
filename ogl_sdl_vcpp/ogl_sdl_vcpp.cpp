@@ -83,7 +83,7 @@ void initSceneObjects()
     // Sun
     //---------------------------------------
     sun.setColor(0.7f, 0.7f, 0.1f);
-    sun.setRotationParameters(160,          // radius
+    sun.setRotationParameters(140,          // radius
         0,                                  // initial rotation angle
         0.02f,                              // rotation velocity
         glm::radians(0.0f),                 // axis rotation angle
@@ -122,7 +122,7 @@ void initSceneObjects()
         glm::radians(0.0f),                 // axis rotation angle
         glm::radians(10.0f)                 // axis tilt angle
     );
-    moon.setOrbitalParameters(220,          // radius of orbit
+    moon.setOrbitalParameters(260,          // radius of orbit
         0.0f,                               // initial orbital angle
         0.004f,                             // revolution velocity
         0,                                  // orbital rotation angle
@@ -487,6 +487,173 @@ void initializeGL()
 }
 
 
+void render()
+{
+    //glClearDepth(1.0);
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    useShaderProgram();
+
+    glUniform3fv(
+        uniSunCenterTransformed,
+        1,
+        glm::value_ptr(sun.getModelTransformedCenter())
+    );
+
+    glUniform1f(uniSunRadius, sun.getRadius());
+
+    //=====================================================================================
+    // View and projection remain same for the entire scene
+    //=====================================================================================
+    // View transformation
+    //----------------------------------------------
+    glm::mat4 view = glm::lookAt(
+        //            glm::vec3(1600.0f, 1600.0f, 1600.0f),
+        glm::vec3(-200.0f, -700.0f, 200.0f),
+        //glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3(-650.0f, -900.0f, -100.0f),
+        glm::vec3(0.0f, 0.0f, 1.0f));
+    glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
+
+    // perspective transformation
+    //----------------------------------------------
+    glm::mat4 proj = glm::perspective(
+        glm::radians(35.0f),
+        float(curWidth) / float(curHeight),
+        1.0f,
+        10000.0f);
+    glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
+    //=====================================================================================
+
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    //----------------------------------------------
+    // Axis model transformation
+    //----------------------------------------------
+    glUniformMatrix4fv(
+        uniModel,
+        1,
+        GL_FALSE,
+        glm::value_ptr(glm::mat4(1.0))
+    );
+
+    glUniform1i(uniMyIsValud, false);
+    // ideally, after setting IsValid to false, no need to set the other variables to draw the axis.
+    glUniform1i(uniMyIsLightSource, 0);
+    glUniform3f(uniMyCenterTransformed, 0.0f, 0.0f, 0.0f);
+    //glUniform1f(uniMyRadius, 0);
+
+    // When drawing earth, other sphere is moon.
+    glUniform1f(uniOtherSphereRadius, 0);
+    glUniform3fv(
+        uniOtherSphereCenterTransformed,
+        1,
+        glm::value_ptr(moon.getModelTransformedCenter())
+    );
+
+    glBindVertexArray(axisVao);
+
+    // Draw vertices
+    glDrawArrays(GL_LINES, 0, axis.getVertices().size() / 6);
+
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    //----------------------------------------------
+    // earth model transformation
+    //----------------------------------------------
+    glUniformMatrix4fv(
+        uniModel,
+        1,
+        GL_FALSE,
+        glm::value_ptr(earth.getModelMatrix())
+    );
+
+    glUniform1i(uniMyIsLightSource, 0);
+    glUniform3fv(uniMyCenterTransformed, 1, glm::value_ptr(earth.getCenter()));
+    //glUniform1f(uniMyRadius, earth.getRadius());
+    glUniform1i(uniMyIsValud, true);
+
+    // When drawing earth, other sphere is moon.
+    glUniform1f(uniOtherSphereRadius, moon.getRadius());
+    glUniform3fv(
+        uniOtherSphereCenterTransformed,
+        1,
+        glm::value_ptr(moon.getModelTransformedCenter())
+    );
+
+    glBindVertexArray(earthVao);
+
+    // Draw vertices
+    glDrawArrays(GL_TRIANGLES, 0, earth.getVertices().size() / 6);
+
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    glBindVertexArray(earthLatLongVao);
+
+    // Draw vertices
+    glDrawArrays(GL_LINES, 0, earth.getLatitudeAndLongitudeVertices().size() / 6);
+
+
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    //----------------------------------------------
+    // sun model transformation
+    //----------------------------------------------
+    glUniformMatrix4fv(
+        uniModel,
+        1,
+        GL_FALSE,
+        glm::value_ptr(sun.getModelMatrix())
+    );
+
+    glUniform1i(uniMyIsLightSource, 1);
+    //glUniform1f(uniMyRadius, sun.getRadius());
+    glUniform3fv(uniMyCenterTransformed, 1, glm::value_ptr(sun.getCenter()));
+    glUniform1i(uniMyIsValud, true);
+
+    glBindVertexArray(sunVao);
+
+    glDrawArrays(GL_TRIANGLES, 0, sun.getVertices().size() / 6);
+
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    //----------------------------------------------
+    // moon model transformation
+    //----------------------------------------------
+    glUniformMatrix4fv(
+        uniModel,
+        1,
+        GL_FALSE,
+        glm::value_ptr(moon.getModelMatrix())
+    );
+
+    glUniform1i(uniMyIsLightSource, 0);
+    glUniform3fv(uniMyCenterTransformed, 1, glm::value_ptr(moon.getCenter()));
+    //glUniform1f(uniMyRadius, moon.getRadius());
+    glUniform1i(uniMyIsValud, true);
+
+    // When drawing moon, other sphere is earth.
+    glUniform1f(uniOtherSphereRadius, earth.getRadius());
+    glUniform3fv(
+        uniOtherSphereCenterTransformed,
+        1,
+        glm::value_ptr(earth.getModelTransformedCenter())
+    );
+
+    glBindVertexArray(moonVao);
+
+    // Draw vertices
+    glDrawArrays(GL_TRIANGLES, 0, moon.getVertices().size() / 6);
+
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+    glBindVertexArray(0);
+
+    unuseShaderProgram();
+
+}
+
 /*************************************************************************************************
 
 
@@ -516,6 +683,7 @@ int main(int argc, char *argv[])
     initSceneObjects();
 	initializeGL();
 
+
     printf("done\n");
 
     SDL_GetWindowSize(window, &curWidth, &curHeight);
@@ -524,17 +692,49 @@ int main(int argc, char *argv[])
 
     glEnable(GL_DEPTH_TEST);
 
+    bool bQuit = false;
+    bool bFastForward = false;
+    bool bFastReverse = false;
 
 	SDL_Event event;
 	while (1)
 	{
 		if (SDL_PollEvent(&event))
 		{
-			if (event.type == SDL_QUIT)
-				break;
-			if (event.type == SDL_KEYUP && event.key.keysym.sym == SDLK_ESCAPE)
-				break;
-            if (event.type == SDL_WINDOWEVENT)
+            switch (event.type)
+            {
+            case SDL_QUIT:
+                bQuit = true;
+                break;
+
+            case SDL_KEYDOWN:
+                switch (event.key.keysym.sym)
+                {
+                case SDLK_f:
+                    bFastForward = true;
+                    break;
+                case SDLK_r:
+                    bFastReverse = true;
+                    break;
+                }
+                break;
+
+            case SDL_KEYUP:
+                switch (event.key.keysym.sym)
+                {
+                case SDLK_ESCAPE:
+                    bQuit = true;
+                    break;
+                case SDLK_f:
+                    bFastForward = false;
+                    break;
+                case SDLK_r:
+                    bFastReverse = false;
+                    break;
+                }
+                break;
+
+            case SDL_WINDOWEVENT:
             {
                 if (event.window.event == SDL_WINDOWEVENT_RESIZED)
                 {
@@ -545,182 +745,31 @@ int main(int argc, char *argv[])
                     printf("height = %d\n", curHeight);
                     glViewport(0, 0, curWidth, curHeight);
                 }
+                break;
             }
+            }
+
+            if (bQuit)
+                break;
 		}
 
         //printf("Iterating\n");
         
-        //glClearDepth(1.0);
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+        float stepMultiplier = 0.05;
+        if (bFastForward)
+            stepMultiplier = 1;
+        else if (bFastReverse)
+            stepMultiplier = -1;
 
         // Advance parents before children
-        sun.advance(1);
-        earth.advance(1);
-        moon.advance(1);
+        sun.advance(stepMultiplier);
+        earth.advance(stepMultiplier);
+        moon.advance(stepMultiplier);
 
-        useShaderProgram();
-
-
-        glUniform3fv(
-            uniSunCenterTransformed,
-            1,
-            glm::value_ptr(sun.getModelTransformedCenter())
-        );
-
-        glUniform1f(uniSunRadius, sun.getRadius());
-
-        //=====================================================================================
-        // View and projection remain same for the entire scene
-        //=====================================================================================
-        // View transformation
-        //----------------------------------------------
-        glm::mat4 view = glm::lookAt(
-//            glm::vec3(1600.0f, 1600.0f, 1600.0f),
-            glm::vec3(1300.0f, 1300.0f, 1000.0f),
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec3(0.0f, 0.0f, 1.0f));
-        glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
-
-        // perspective transformation
-        //----------------------------------------------
-        glm::mat4 proj = glm::perspective(
-            glm::radians(35.0f),
-            float(curWidth) / float(curHeight),
-            1.0f,
-            10000.0f);
-        glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
-        //=====================================================================================
-
-        //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        //----------------------------------------------
-        // Axis model transformation
-        //----------------------------------------------
-        glUniformMatrix4fv(
-            uniModel,
-            1,
-            GL_FALSE,
-            glm::value_ptr(glm::mat4(1.0))
-        );
-
-        glUniform1i(uniMyIsValud, false);
-        // ideally, after setting IsValid to false, no need to set the other variables to draw the axis.
-        glUniform1i(uniMyIsLightSource, 0);
-        glUniform3f(uniMyCenterTransformed, 0.0f, 0.0f, 0.0f);
-        //glUniform1f(uniMyRadius, 0);
-
-        // When drawing earth, other sphere is moon.
-        glUniform1f(uniOtherSphereRadius, 0);
-        glUniform3fv(
-            uniOtherSphereCenterTransformed,
-            1,
-            glm::value_ptr(moon.getModelTransformedCenter())
-        );
-
-        glBindVertexArray(axisVao);
-
-        // Draw vertices
-        glDrawArrays(GL_LINES, 0, axis.getVertices().size()/6);
-
-        //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-        //----------------------------------------------
-        // earth model transformation
-        //----------------------------------------------
-        glUniformMatrix4fv(
-            uniModel,
-            1,
-            GL_FALSE,
-            glm::value_ptr(earth.getModelMatrix())
-        );
-
-        glUniform1i(uniMyIsLightSource, 0);
-        glUniform3fv(uniMyCenterTransformed, 1, glm::value_ptr(earth.getCenter()));
-        //glUniform1f(uniMyRadius, earth.getRadius());
-        glUniform1i(uniMyIsValud, true);
-
-        // When drawing earth, other sphere is moon.
-        glUniform1f(uniOtherSphereRadius, moon.getRadius());
-        glUniform3fv(
-            uniOtherSphereCenterTransformed,
-            1,
-            glm::value_ptr(moon.getModelTransformedCenter())
-        );
-
-        glBindVertexArray(earthVao);
-        
-        // Draw vertices
-        glDrawArrays(GL_TRIANGLES, 0, earth.getVertices().size()/6);
-        
-        //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-        glBindVertexArray(earthLatLongVao);
-
-        // Draw vertices
-        glDrawArrays(GL_LINES, 0, earth.getLatitudeAndLongitudeVertices().size()/6);
-
-
-        //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-        //----------------------------------------------
-        // sun model transformation
-        //----------------------------------------------
-        glUniformMatrix4fv(
-            uniModel,
-            1,
-            GL_FALSE,
-            glm::value_ptr(sun.getModelMatrix())
-        );
-
-        glUniform1i(uniMyIsLightSource, 1);
-        //glUniform1f(uniMyRadius, sun.getRadius());
-        glUniform3fv(uniMyCenterTransformed, 1, glm::value_ptr(sun.getCenter()));
-        glUniform1i(uniMyIsValud, true);
-
-        glBindVertexArray(sunVao);
-
-        glDrawArrays(GL_TRIANGLES, 0, sun.getVertices().size()/6);
-
-        //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-        //----------------------------------------------
-        // moon model transformation
-        //----------------------------------------------
-        glUniformMatrix4fv(
-            uniModel,
-            1,
-            GL_FALSE,
-            glm::value_ptr(moon.getModelMatrix())
-        );
-
-        glUniform1i(uniMyIsLightSource, 0);
-        glUniform3fv(uniMyCenterTransformed, 1, glm::value_ptr(moon.getCenter()));
-        //glUniform1f(uniMyRadius, moon.getRadius());
-        glUniform1i(uniMyIsValud, true);
-
-        // When drawing moon, other sphere is earth.
-        glUniform1f(uniOtherSphereRadius, earth.getRadius());
-        glUniform3fv(
-            uniOtherSphereCenterTransformed,
-            1,
-            glm::value_ptr(earth.getModelTransformedCenter())
-        );
-
-        glBindVertexArray(moonVao);
-
-        // Draw vertices
-        glDrawArrays(GL_TRIANGLES, 0, moon.getVertices().size()/6);
-
-        //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-        glBindVertexArray(0);
-
-        unuseShaderProgram();
+        render();
 
 		SDL_GL_SwapWindow(window);
-		SDL_Delay(10);
+		SDL_Delay(0);
 	}
 
 	SDL_Quit();

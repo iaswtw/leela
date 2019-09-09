@@ -114,7 +114,7 @@ public:
 
     void generateVertices()
     {
-        float numLongitudes = 720;
+        float numLongitudes = 1720;
         float inc = float(2*M_PI) / numLongitudes;
 
         for (float alpha = 0; alpha < float(2*M_PI)-inc; alpha += inc)
@@ -161,11 +161,12 @@ public:
         //---------------------------------------------------------------------------------
         // Longitudes
         //---------------------------------------------------------------------------------
-        std::list<float> alphas = { 0, 30, 60, 90, 120, 150 };
+        //std::list<float> alphas = { 0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165 };
 
-        for (float alpha : alphas)
+        //for (float alpha : alphas)
+        for (float alphas = 0.0f; alphas < 180.0f; alphas += 5.0f)
         {
-            alpha = glm::radians(alpha);
+            float alpha = glm::radians(alphas);
 
             for (float theta = 0; theta < float(2 * M_PI) - inc; theta += inc)
             {
@@ -203,12 +204,34 @@ public:
                 float y2 = 1.005 * _radius * sin(theta) * sin(alpha + inc);
                 float z2 = 1.005 * _radius * cos(theta);
 
+                _latLongVertices.push_back(x1);   _latLongVertices.push_back(y1);   _latLongVertices.push_back(z1);   _latLongVertices.push_back(_r*0.9);  _latLongVertices.push_back(_g*0.5); _latLongVertices.push_back(_b*0.5);
+                _latLongVertices.push_back(x2);   _latLongVertices.push_back(y2);   _latLongVertices.push_back(z2);   _latLongVertices.push_back(_r*0.9);  _latLongVertices.push_back(_g*0.5); _latLongVertices.push_back(_b*0.5);
+
+                //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
+            }
+        }
+
+        for (float thetas = 0; thetas < 180; thetas += 5)
+        {
+            float theta = glm::radians(thetas);
+
+            for (float alpha = 0; alpha < float(2 * M_PI) - inc; alpha += inc)
+            {
+                float x1 = 1.005 * _radius * sin(theta) * cos(alpha);
+                float y1 = 1.005 * _radius * sin(theta) * sin(alpha);
+                float z1 = 1.005 * _radius * cos(theta);
+
+                float x2 = 1.005 * _radius * sin(theta) * cos(alpha + inc);
+                float y2 = 1.005 * _radius * sin(theta) * sin(alpha + inc);
+                float z2 = 1.005 * _radius * cos(theta);
+
                 _latLongVertices.push_back(x1);   _latLongVertices.push_back(y1);   _latLongVertices.push_back(z1);   _latLongVertices.push_back(_r*0.5);  _latLongVertices.push_back(_g*0.5); _latLongVertices.push_back(_b*0.5);
                 _latLongVertices.push_back(x2);   _latLongVertices.push_back(y2);   _latLongVertices.push_back(z2);   _latLongVertices.push_back(_r*0.5);  _latLongVertices.push_back(_g*0.5); _latLongVertices.push_back(_b*0.5);
 
                 //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
             }
         }
+
 
 
         printf("sphere vertex generation done\n");

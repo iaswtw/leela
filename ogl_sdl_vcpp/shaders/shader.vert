@@ -1,5 +1,7 @@
 #version 150 core
 
+#define PI 3.1415926538
+
 in vec3 position;
 in vec3 in_color;
 
@@ -87,6 +89,7 @@ void main()
                 bool bInUmbra               = false;
                 bool bInPenumbra            = false;
                 bool bInAntumbra            = false;
+                float edgeCloseness = 0.0;
                 do
                 {
                     if (dist_sun_thisPoint < dist_sun_otherSphere)
@@ -108,12 +111,14 @@ void main()
                     // y2 = radius of crosssection of penumbra at N
                     float y1 = (penumbraLength + dist_N_otherSphere) * tan(penumbraConeHalfAngle);
                     if (dist_N_thisPoint < y1)
+                    {
                         bInPenumbra = true;
+                        edgeCloseness = dist_N_thisPoint / y1;
+                    }
+                    else
+                        break;      // no need to check for other shadow types.
                     
                     // Even if the point was determined to be in penumbra, it might actually be in umbra. So continue to check further.
-
-                    // todo - check if point is in antumbra
-
 
                     //---------------------------------------------------------
                     // Umbra specific calculation and check
@@ -128,7 +133,25 @@ void main()
                     float y2 = (umbraLength - dist_N_otherSphere) * tan(umbraConeHalfAngle);
                         
                     if (dist_N_thisPoint < y2)
+                    {
                         bInUmbra = true;
+                        edgeCloseness = dist_N_thisPoint / y2;
+                    }
+
+                    //---------------------------------------------------------
+                    // Antumbra specific calculation and check
+                    //---------------------------------------------------------
+                    // antumbra half angle cone is same as that umbra.  We will reuse umbraConeHalfAngle.
+                    if (umbraLength < dist_N_otherSphere)
+                    {
+                        // there is a chance the point is in antumbra.
+                        float y3 = (dist_N_otherSphere - umbraLength) * tan(umbraConeHalfAngle);
+                        if (dist_N_thisPoint < y3)
+                        {
+                            bInAntumbra = true;
+                            edgeCloseness = dist_N_thisPoint / y3;
+                        }
+                    }
 
                 } while (false);
 
@@ -137,9 +160,9 @@ void main()
                 if (bInUmbra)
                     Color = vec4(in_color * 0.2, 1.0);
                 else if (bInAntumbra)
-                    Color = vec4(in_color * 0.3, 1.0);
-                else if (bInPenumbra)
                     Color = vec4(in_color * 0.4, 1.0);
+                else if (bInPenumbra)
+                    Color = vec4(in_color * 0.6, 1.0);
                 else
                     //Color = vec(1.0, 0.0, 0.0, 1.0);
                     Color = vec4(in_color, 1.0);
