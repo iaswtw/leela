@@ -162,6 +162,7 @@ public:
     void generateStars();
     int run();
 
+    void processFlags();
     void render();
     void initializeGL();
     void initSceneObjects();
@@ -208,8 +209,6 @@ private:
     bool bFastForward = false;
     bool bFastReverse = false;
 
-    bool bLeftMouseButtonDown = false;
-    bool bRightMouseButtonDown = false;
     int dx = 0;
     int dy = 0;
     int previousX = 0;
@@ -217,13 +216,38 @@ private:
     float _stepMultiplier = 1;
 
 
-    char F_L_BUTTON_DOWN = 0;
-    char F_R_BUTTON_DOWN = 0;
-    char F_M_BUTTON_DOWN = 0;
+    bool bLeftMouseButtonDown = false;
+    bool bRightMouseButtonDown = false;
+    bool bMiddleMouseButtonDown = false;
 
-    bool bCtrlKey = false;
-    bool bAltKey = false;
-    bool bShiftKey = false;
+    bool bMoveForward = false;
+    bool bMoveBackward = false;
+    bool bRotateRight = false;
+    bool bRotateLeft = false;
+    bool bRotateRightSd = false;
+    bool bRotateLeftSd = false;
+
+
+    const float noYaw               = 0.0f;
+    const float noPitch             = 0.0f;
+    const float noRoll              = 0.0f;
+    const float noThrottle          = 0.0f;
+
+    const float nominalYaw          = 0.5f;
+    const float nominalPitch        = 0.5f;
+    const float nominalRoll         = 0.5f;
+    const float nominalThrottle     = 30.0f;
+
+
+    float yaw       = 0.0f;
+    float pitch     = 0.0f;
+    float roll      = 0.0f;
+    float throttle  = 0.0f;
+
+
+    bool bCtrlModifier = false;
+    bool bAltModifier = false;
+    bool bShiftModifier = false;
 
     bool bSidewaysMotionMode = true;
     bool bLockOntoEarth = false;

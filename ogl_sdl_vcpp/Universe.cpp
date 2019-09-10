@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include "Universe.h"
 #include "Utils.h"
+#include <stdio.h>
 
 Universe::Universe() :
     sunRenderer(sun),
@@ -497,127 +498,6 @@ void Universe::initializeGL()
 }
 
 
-/*************************************************************************************************
-
-
-**************************************************************************************************/
-void Universe::render()
-{
-    //glClearDepth(1.0);
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    useShaderProgram();
-
-    glUniform3fv(
-        oglHandles.uniSunCenterTransformed,
-        1,
-        glm::value_ptr(sun.getModelTransformedCenter())
-    );
-
-    glUniform1f(oglHandles.uniSunRadius, sun.getRadius());
-
-
-    //=====================================================================================
-    // View and projection remain same for the entire scene
-    //=====================================================================================
-    // View transformation
-    //----------------------------------------------
-    glUniformMatrix4fv(oglHandles.uniView, 1, GL_FALSE, glm::value_ptr(viewMatrix));
-
-    // Create the initial View matrix
-    viewMatrix = glm::lookAt(
-        space.getSourcePoint(),
-        space.getDirectionPoint(),
-        space.getUpwardDirectionVector());
-
-    // perspective transformation
-    //----------------------------------------------
-    projectionMatrix = glm::perspective(
-        glm::radians(35.0f),
-        float(curWidth) / float(curHeight),
-        1.0f,
-        10000000.0f);
-
-    glUniformMatrix4fv(oglHandles.uniProj, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
-    //=====================================================================================
-
-    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    //----------------------------------------------
-    // Axis model transformation
-    //----------------------------------------------
-    glUniformMatrix4fv(
-        oglHandles.uniModel,
-        1,
-        GL_FALSE,
-        glm::value_ptr(glm::mat4(1.0))
-    );
-
-    glUniform1i(oglHandles.uniMyIsValud, false);
-    // ideally, after setting IsValid to false, no need to set the other variables to draw the axis.
-    glUniform1i(oglHandles.uniMyIsLightSource, 0);
-    glUniform3f(oglHandles.uniMyCenterTransformed, 0.0f, 0.0f, 0.0f);
-      
-    glBindVertexArray(oglHandles.axisVao);
-
-    // Draw vertices
-    glDrawArrays(GL_LINES, 0, axis.getVertices().size() / 7);
-
-
-    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    //----------------------------------------------
-    // Cubic stars model transformation
-    //----------------------------------------------
-    glUniformMatrix4fv(
-        oglHandles.uniModel,
-        1,
-        GL_FALSE,
-        glm::value_ptr(glm::mat4(1.0))
-    );
-
-    glUniform1i(oglHandles.uniMyIsValud, false);
-    glBindVertexArray(oglHandles.starsVao);
-
-    //printf("num points in startVertices = %d\n", starVertices.size());
-    // Draw vertices
-    glDrawArrays(GL_POINTS, 0, starVertices.size() / 7);
-
-    ////%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    ////----------------------------------------------
-    //// Galaxy stars model transformation
-    ////----------------------------------------------
-    //glUniformMatrix4fv(
-    //    oglHandles.uniModel,
-    //    1,
-    //    GL_FALSE,
-    //    glm::value_ptr(glm::mat4(1.0))
-    //);
-
-    //glUniform1i(oglHandles.uniMyIsValud, false);
-    //glUniform3fv(
-    //    oglHandles.uniOtherSphereCenterTransformed,
-    //    1,
-    //    glm::value_ptr(moon.getModelTransformedCenter())
-    //);
-
-    //glBindVertexArray(oglHandles.gstarsVao);
-
-    //// Draw vertices
-    //glDrawArrays(GL_POINT, 0, gstarVertices.size() / 7);
-
-    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-    earthRenderer.render(oglHandles, &moon);
-    moonRenderer.render(oglHandles, &earth);
-    sunRenderer.render(oglHandles, nullptr);
-    
-
-    glBindVertexArray(0);
-
-    unuseShaderProgram();
-
-}
 
 
 void Universe::advance(float stepMultiplier)
@@ -690,9 +570,44 @@ void Universe::onKeyDown(SDL_Event* event)
         break;
 
 
+    case SDLK_HOME:
+        throttle = nominalThrottle;
+        break;
+    case SDLK_END:
+        throttle = -nominalThrottle;
+        break;
+    case SDLK_PAGEDOWN:
+        yaw = nominalYaw;
+        break;
+    case SDLK_DELETE:
+        yaw = -nominalYaw;
+        break;
+    case SDLK_PAGEUP:
+        if (!bCtrlModifier)
+            roll = nominalRoll;
+        else
+            pitch = nominalPitch;
+        break;
+    case SDLK_INSERT:
+        if (!bCtrlModifier)
+            roll = -nominalRoll;
+        else
+            pitch = -nominalPitch;
+        break;
+
+    // Modifiers
     case SDLK_LCTRL:
     case SDLK_RCTRL:
-        bCtrlKey = true;
+        bCtrlModifier = true;
+        break;
+    case SDLK_LSHIFT:
+    case SDLK_RSHIFT:
+        bShiftModifier = true;
+        break;
+    case SDLK_LALT:
+    case SDLK_RALT:
+        bAltModifier = true;
+        break;
 
     }
 
@@ -713,10 +628,34 @@ void Universe::onKeyUp(SDL_Event* event)
         Rewind(UCmdParam_Stop);
         break;
 
+    case SDLK_HOME:
+    case SDLK_END:
+        throttle = noThrottle;
+        break;
+    case SDLK_PAGEDOWN:
+    case SDLK_DELETE:
+        yaw = noYaw;
+        break;
+    case SDLK_PAGEUP:
+    case SDLK_INSERT:
+        roll = noRoll;
+        pitch = noPitch;
+        break;
 
+
+        // Modifiers
     case SDLK_LCTRL:
     case SDLK_RCTRL:
-        bCtrlKey = false;
+        bCtrlModifier = false;
+        break;
+    case SDLK_LSHIFT:
+    case SDLK_RSHIFT:
+        bShiftModifier = false;
+        break;
+    case SDLK_LALT:
+    case SDLK_RALT:
+        bAltModifier = false;
+        break;
 
     }
 
@@ -727,7 +666,7 @@ void Universe::onMouseMotion(SDL_Event* event)
     float dx = event->motion.xrel;
     float dy = event->motion.yrel;
 
-    if (bCtrlKey)
+    if (bCtrlModifier)
     {
         dx /= 15.0f;
         dy /= 15.0f;
@@ -737,7 +676,7 @@ void Universe::onMouseMotion(SDL_Event* event)
 
     if (F_REFERENCE_VECTOR_ALONG_Z == 1)
     {
-        if (F_L_BUTTON_DOWN == 1) {
+        if (bLeftMouseButtonDown) {
             space.moveFrame(Movement_Forward, -dy * 5);
             if (bLockOntoEarth)
                 space.rotateFrame(earth.getCenter(), dx / 10., 0);
@@ -756,7 +695,7 @@ void Universe::onMouseMotion(SDL_Event* event)
 
     while (1)
     {
-        if (F_L_BUTTON_DOWN == 1) {
+        if (bLeftMouseButtonDown) {
             space.moveFrame(Movement_Forward, -dy * 5);
 
 
@@ -771,7 +710,7 @@ void Universe::onMouseMotion(SDL_Event* event)
             break;
         }
 
-        if (F_R_BUTTON_DOWN == 1) {
+        if (bRightMouseButtonDown) {
             space.moveFrame(Movement_RightAlongSD, dx / 10.0);
             break;
         }
@@ -1164,6 +1103,200 @@ void Universe::Moon_SetOrbitalPositionAngle(double fAngle)
 
 
 **************************************************************************************************/
+void Universe::render()
+{
+    //glClearDepth(1.0);
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    useShaderProgram();
+
+    glUniform3fv(
+        oglHandles.uniSunCenterTransformed,
+        1,
+        glm::value_ptr(sun.getModelTransformedCenter())
+    );
+
+    glUniform1f(oglHandles.uniSunRadius, sun.getRadius());
+
+
+    //=====================================================================================
+    // View and projection remain same for the entire scene
+    //=====================================================================================
+    // View transformation
+    //----------------------------------------------
+    glUniformMatrix4fv(oglHandles.uniView, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+
+    // Create the initial View matrix
+    viewMatrix = glm::lookAt(
+        space.getSourcePoint(),
+        space.getDirectionPoint(),
+        space.getUpwardDirectionVector());
+
+    // perspective transformation
+    //----------------------------------------------
+    projectionMatrix = glm::perspective(
+        glm::radians(35.0f),
+        float(curWidth) / float(curHeight),
+        1.0f,
+        10000000.0f);
+
+    glUniformMatrix4fv(oglHandles.uniProj, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+    //=====================================================================================
+
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    //----------------------------------------------
+    // Axis model transformation
+    //----------------------------------------------
+    glUniformMatrix4fv(
+        oglHandles.uniModel,
+        1,
+        GL_FALSE,
+        glm::value_ptr(glm::mat4(1.0))
+    );
+
+    glUniform1i(oglHandles.uniMyIsValud, false);
+    // ideally, after setting IsValid to false, no need to set the other variables to draw the axis.
+    glUniform1i(oglHandles.uniMyIsLightSource, 0);
+    glUniform3f(oglHandles.uniMyCenterTransformed, 0.0f, 0.0f, 0.0f);
+
+    glBindVertexArray(oglHandles.axisVao);
+
+    // Draw vertices
+    glDrawArrays(GL_LINES, 0, axis.getVertices().size() / 7);
+
+
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    //----------------------------------------------
+    // Cubic stars model transformation
+    //----------------------------------------------
+    glUniformMatrix4fv(
+        oglHandles.uniModel,
+        1,
+        GL_FALSE,
+        glm::value_ptr(glm::mat4(1.0))
+    );
+
+    glUniform1i(oglHandles.uniMyIsValud, false);
+    glBindVertexArray(oglHandles.starsVao);
+
+    //printf("num points in startVertices = %d\n", starVertices.size());
+    // Draw vertices
+    glDrawArrays(GL_POINTS, 0, starVertices.size() / 7);
+
+    ////%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    ////----------------------------------------------
+    //// Galaxy stars model transformation
+    ////----------------------------------------------
+    //glUniformMatrix4fv(
+    //    oglHandles.uniModel,
+    //    1,
+    //    GL_FALSE,
+    //    glm::value_ptr(glm::mat4(1.0))
+    //);
+
+    //glUniform1i(oglHandles.uniMyIsValud, false);
+    //glUniform3fv(
+    //    oglHandles.uniOtherSphereCenterTransformed,
+    //    1,
+    //    glm::value_ptr(moon.getModelTransformedCenter())
+    //);
+
+    //glBindVertexArray(oglHandles.gstarsVao);
+
+    //// Draw vertices
+    //glDrawArrays(GL_POINT, 0, gstarVertices.size() / 7);
+
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+    earthRenderer.render(oglHandles, &moon);
+    moonRenderer.render(oglHandles, &earth);
+    sunRenderer.render(oglHandles, nullptr);
+
+
+    glBindVertexArray(0);
+
+    unuseShaderProgram();
+
+}
+
+
+/*************************************************************************************************
+
+
+**************************************************************************************************/
+void Universe::processFlags()
+{
+    // Accept the current values of the 4 motions into local variables
+    float __throttle = throttle;
+    float __yaw = yaw;
+    float __pitch = pitch;
+    float __roll = roll;
+    
+
+    // Amply or attenuate the value based on keyboard modifiers.
+    if (bCtrlModifier)
+        __throttle /= 10;
+    else if (bShiftModifier)
+        __throttle *= 100;
+
+    if (bCtrlModifier)
+        __yaw /= 10;
+    else if (bShiftModifier)
+        __yaw *= 10;
+
+    if (bCtrlModifier)
+        __pitch /= 100;
+    else if (bShiftModifier)
+        __pitch *= 10;
+
+    if (bCtrlModifier)
+        __roll /= 10;
+    else if (bShiftModifier)
+        __roll *= 100;
+
+    // Finally, Apply the motion value.
+    if (__throttle != 0.0f)
+        space.moveFrame(Movement_Forward, __throttle);
+    if ((__yaw != 0.0f) || (__pitch != 0.0f))
+    {
+        if (bSidewaysMotionMode) {
+            space.moveFrame(Movement_RotateRight, 90);
+            space.moveFrame(Movement_Forward, __yaw*50);
+            space.moveFrame(Movement_RotateLeft, 90);
+
+            space.moveFrame(Movement_RotateUp, 90);
+            space.moveFrame(Movement_Forward, __pitch*50);
+            space.moveFrame(Movement_RotateDown, 90);
+        }
+        else {
+            space.moveFrame(Movement_RotateRight, __yaw);
+            space.moveFrame(Movement_RotateUp, __pitch);
+        }
+    }
+    if (__roll != 0.0f)
+        space.moveFrame(Movement_RightAlongSD, __roll);
+
+
+
+    if (!bSimulationPause)
+    {
+        if (bFastForward)
+            advance(5 * _stepMultiplier);
+        else if (bFastReverse)
+            advance(-5 * _stepMultiplier);
+        else
+            advance(_stepMultiplier);
+    }
+
+
+}
+
+/*************************************************************************************************
+
+
+**************************************************************************************************/
 int Universe::run()
 {
     setvbuf(stdout, 0, _IONBF, 0);
@@ -1226,14 +1359,14 @@ int Universe::run()
                     SDL_SetRelativeMouseMode(SDL_TRUE);
                 }
                 switch (event.button.button) {
-                case SDL_BUTTON_LEFT:   bLeftMouseButtonDown = true;   F_L_BUTTON_DOWN = 1;   break;
-                case SDL_BUTTON_RIGHT:  bRightMouseButtonDown = true;  F_R_BUTTON_DOWN = 1;   break;
+                case SDL_BUTTON_LEFT:   bLeftMouseButtonDown = true;    break;
+                case SDL_BUTTON_RIGHT:  bRightMouseButtonDown = true;   break;
                 }
                 break;
             case SDL_MOUSEBUTTONUP:
                 switch (event.button.button) {
-                case SDL_BUTTON_LEFT:   bLeftMouseButtonDown = false;   F_L_BUTTON_DOWN = 0;      break;
-                case SDL_BUTTON_RIGHT:  bRightMouseButtonDown = false;  F_R_BUTTON_DOWN = 0;      break;
+                case SDL_BUTTON_LEFT:   bLeftMouseButtonDown = false;   break;
+                case SDL_BUTTON_RIGHT:  bRightMouseButtonDown = false;  break;
                 }
                 break;
             case SDL_MOUSEMOTION:
@@ -1264,16 +1397,7 @@ int Universe::run()
             break;
 
 
-
-        if (!bSimulationPause)
-        {
-            if (bFastForward)
-                advance(5 * _stepMultiplier);
-            else if (bFastReverse)
-                advance(-5 * _stepMultiplier);
-            else
-                advance(_stepMultiplier);
-        }
+        processFlags();
 
         render();
 
