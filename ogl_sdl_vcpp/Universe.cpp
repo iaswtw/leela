@@ -61,7 +61,7 @@ void Universe::initSceneObjects()
         glm::radians(270.0f),               // axis rotation angle
         glm::radians(23.5f)                 // axis tilt angle
     );
-    earth.setOrbitalParameters(1000,        // radius of orbit
+    earth.setOrbitalParameters(1400,        // radius of orbit
         glm::radians(0.0f),                 // initial orbital angle
         0.001f,                             // revolution velocity
         0.0f,                               // orbital rotation angle
@@ -72,7 +72,7 @@ void Universe::initSceneObjects()
     // Moon
     //---------------------------------------
     moon.setColor(0.8f, 0.8f, 0.8f);
-    moon.setRotationParameters(30,          // radius
+    moon.setRotationParameters(25,          // radius
         0,                                  // initial rotation angle
         0.005f,                              // rotation velocity
         glm::radians(0.0f),                 // axis rotation angle
@@ -85,10 +85,6 @@ void Universe::initSceneObjects()
         glm::radians(30.0)                  // orbital tilt
     );
     moon.setOrbitalPlaneColor(glm::vec3(0.3, 0.5, 0.3));
-
-    earth.generateVertices();
-    sun.generateVertices();
-    moon.generateVertices();
 
     moon.setParentSphere(&earth);
     earth.setParentSphere(&sun);
@@ -471,9 +467,9 @@ void Universe::initializeGL()
 
 
 
-    sunRenderer.createVaoAndVbos(oglHandles);
-    earthRenderer.createVaoAndVbos(oglHandles);
-    moonRenderer.createVaoAndVbos(oglHandles);
+    sunRenderer.constructVerticesAndSendToGpu(oglHandles);
+    earthRenderer.constructVerticesAndSendToGpu(oglHandles);
+    moonRenderer.constructVerticesAndSendToGpu(oglHandles);
 
     earthRenderer.bShowLatitudesAndLongitudes = true;
     sunRenderer.setAsLightSource();
