@@ -1,8 +1,8 @@
 #pragma once
 
 
-#include "glm/ext.hpp"
-#include "glm/gtx/string_cast.hpp"
+#include <glm/ext.hpp>
+#include <glm/gtx/string_cast.hpp>
 #include <GL/glew.h>
 
 #include <SDL.h>
