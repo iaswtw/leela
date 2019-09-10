@@ -468,12 +468,19 @@ void Universe::initializeGL()
 
 
 
-    sunRenderer.constructVerticesAndSendToGpu(oglHandles);
+	sunRenderer.setAsLightSource();
+
+	sunRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
+	earthRenderer.setPolygonCountLevel(PolygonCountLevel_High);
+	moonRenderer.setPolygonCountLevel(PolygonCountLevel_Medium);
+
+
+
+	sunRenderer.constructVerticesAndSendToGpu(oglHandles);
     earthRenderer.constructVerticesAndSendToGpu(oglHandles);
     moonRenderer.constructVerticesAndSendToGpu(oglHandles);
 
     earthRenderer.bShowLatitudesAndLongitudes = true;
-    sunRenderer.setAsLightSource();
 
     glBindVertexArray(0);       // Disable VBO
 

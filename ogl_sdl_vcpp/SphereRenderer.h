@@ -10,6 +10,14 @@
 
 #include "OglHandles.h"
 
+
+enum PolygonCountLevel
+{
+	PolygonCountLevel_Low,
+	PolygonCountLevel_Medium,
+	PolygonCountLevel_High
+} ;
+
 class SphereRenderer
 {
 public:
@@ -17,6 +25,7 @@ public:
     ~SphereRenderer();
 
     void setAsLightSource();
+	void setPolygonCountLevel(PolygonCountLevel polygonCountLevel);
     void constructVerticesAndSendToGpu(OglHandles oglHandles);
     void render(OglHandles oglHandles, Sphere* otherSphere = nullptr);
 
@@ -33,6 +42,8 @@ private:
     std::vector<float>* _constructOrbitalPlaneVertices();
     std::vector<float>* _constructOrbitalPlaneGridVertices();
 
+	float _getPolygonIncrement();
+
 private:
     Sphere& _sphere;
 
@@ -48,6 +59,7 @@ private:
     int numOrbitalPlaneGridVertices = -1;
     int numOrbitVertices = -1;
 
+	PolygonCountLevel _polygonCountLevel;
 
     bool _bIsLightSource = false;
 };

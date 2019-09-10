@@ -32,15 +32,21 @@ void SphereRenderer::setAsLightSource()
     _bIsLightSource = True;
 }
 
+void SphereRenderer::setPolygonCountLevel(PolygonCountLevel polygonCountLevel)
+{
+	_polygonCountLevel = polygonCountLevel;
+}
+
 
 std::vector<float>* SphereRenderer::_constructMainSphereVertices()
 {
     std::vector<float>* v = new std::vector<float>();
     Sphere& s = _sphere;
 
-    float numLongitudes = 1700;
-    float alpha_inc = float(2 * M_PI) / numLongitudes;
-    float theat_inc = float(M_PI) / (numLongitudes / 2);
+	float polygonIncrement = _getPolygonIncrement();
+
+	float alpha_inc = float(2 * M_PI) / polygonIncrement;
+    float theat_inc = float(M_PI) / (polygonIncrement / 2);
 
     int numFloats = int((2 * M_PI / alpha_inc) * (M_PI / theat_inc)) * 7;
     printf("numFloats = %d\n", numFloats);
@@ -85,7 +91,8 @@ std::vector<float>* SphereRenderer::_constructLatitudesAndLongitudeVertices()
     std::vector<float>* v = new std::vector<float>();
     Sphere& s = _sphere;
 
-    float inc = float(2 * M_PI) / 1000;
+	float polygonIncrement = _getPolygonIncrement();
+    float inc = float(2 * M_PI) / polygonIncrement;
 
     //---------------------------------------------------------------------------------
     // Longitudes
@@ -180,7 +187,7 @@ std::vector<float>* SphereRenderer::_constructOrbit()
     std::vector<float>* v = new std::vector<float>();
     Sphere& s = _sphere;
 
-    float alpha_inc = float(2 * M_PI) / 1000;
+    float alpha_inc = float(2 * M_PI) / 500;
 
     //---------------------------------------------------------------------------------
     // Orbit itself
@@ -477,4 +484,17 @@ void SphereRenderer::render(OglHandles oglHandles, Sphere* otherSphere)
         glDrawArrays(GL_LINES, 0, numOrbitVertices);
     }
 
+}
+
+float SphereRenderer::_getPolygonIncrement()
+{
+	switch (_polygonCountLevel)
+	{
+	case PolygonCountLevel_Low:
+		return 100.0;
+	case PolygonCountLevel_Medium:
+		return 500.0;
+	case PolygonCountLevel_High:
+		return 1800.0;
+	}
 }
