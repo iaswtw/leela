@@ -30,7 +30,7 @@ void Universe::initSceneObjects()
 
 
     axis.generateVertices(
-        1400, 1400, 800,
+        1600, 1600, 800,
         glm::vec3(0.2f, 0.2f, 0.5f),        // X axis color
         glm::vec3(0.2f, 0.5f, 0.2f),        // Y axis color
         glm::vec3(0.2f, 0.5f, 0.5f)         // Z axis color
@@ -562,6 +562,15 @@ void Universe::onKeyDown(SDL_Event* event)
         break;
 
 
+
+    // Function keys
+    case SDLK_F6:
+        if (bShiftModifier)
+            Earth_PrecessionMotion(UCmdParam_Reset);
+        else
+            Earth_PrecessionMotion(UCmdParam_Toggle);
+        break;
+
     case SDLK_UP:
         _stepMultiplier *= 1.6666;
         break;
@@ -583,16 +592,16 @@ void Universe::onKeyDown(SDL_Event* event)
         yaw = -nominalYaw;
         break;
     case SDLK_PAGEUP:
-        if (!bCtrlModifier)
-            roll = nominalRoll;
-        else
+        if (!bAltModifier)
             pitch = nominalPitch;
+        else
+            roll = nominalRoll;
         break;
     case SDLK_INSERT:
-        if (!bCtrlModifier)
-            roll = -nominalRoll;
+        if (!bAltModifier)
+            pitch = -nominalPitch; 
         else
-            pitch = -nominalPitch;
+            roll = -nominalRoll;
         break;
 
     // Modifiers
@@ -1014,7 +1023,7 @@ void Universe::Earth_PrecessionMotion(int nParam)
     if (nParam == UCmdParam_Reset)
     {
         earth.bPrecessionMotion = false;
-        earth.setAxisRotationAngle(90);
+        earth.setAxisRotationAngle(glm::radians(270.0f));
     }
     else
     {
@@ -1276,7 +1285,7 @@ void Universe::processFlags()
         }
     }
     if (__roll != 0.0f)
-        space.moveFrame(Movement_RightAlongSD, __roll);
+        space.moveFrame(Movement_RightAlongSD, -__roll);        // todo - why the -ve sign?
 
 
 
