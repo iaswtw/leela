@@ -8,6 +8,7 @@
 
 #include <vector>
 #include <list>
+#include <algorithm>
 #define _USE_MATH_DEFINES
 #include <math.h>
 
@@ -149,161 +150,12 @@ public:
 
     void generateVertices()
     {
-        float numLongitudes = 1000;
-        float alpha_inc = float(2*M_PI) / numLongitudes;
-        float theat_inc = float(M_PI) / (numLongitudes/2);
+        _constructMainSphereVertices();
+        _constructLatitudesAndLongitudeVertices();
 
-        int numFloats = int((2 * M_PI / alpha_inc) * (M_PI / theat_inc)) * 7;
-        printf("numFloats = %d\n", numFloats);
-        _vertices.reserve(numFloats);
-
-        for (float alpha = 0; alpha < float(2*M_PI); alpha += alpha_inc)
-        {
-            for (float theta = 0; theta < float(M_PI); theta += theat_inc)
-            {
-                float x1 = _radius * sin(theta) * cos(alpha);
-                float y1 = _radius * sin(theta) * sin(alpha);
-                float z1 = _radius * cos(theta);
-
-                float x2 = _radius * sin(theta+ theat_inc) * cos(alpha);
-                float y2 = _radius * sin(theta+ theat_inc) * sin(alpha);
-                float z2 = _radius * cos(theta+ theat_inc);
-
-                float x3 = _radius * sin(theta) * cos(alpha+ alpha_inc);
-                float y3 = _radius * sin(theta) * sin(alpha+ alpha_inc);
-                float z3 = _radius * cos(theta);
-
-                float x4 = _radius * sin(theta+ theat_inc) * cos(alpha+ alpha_inc);
-                float y4 = _radius * sin(theta+ theat_inc) * sin(alpha+ alpha_inc);
-                float z4 = _radius * cos(theta+ theat_inc);
-
-                _vertices.push_back(x1);   _vertices.push_back(y1);   _vertices.push_back(z1);   _vertices.push_back(_r);  _vertices.push_back(_g); _vertices.push_back(_b);  _vertices.push_back(1.0);
-                _vertices.push_back(x2);   _vertices.push_back(y2);   _vertices.push_back(z2);   _vertices.push_back(_r);  _vertices.push_back(_g); _vertices.push_back(_b);  _vertices.push_back(1.0);
-                _vertices.push_back(x3);   _vertices.push_back(y3);   _vertices.push_back(z3);   _vertices.push_back(_r);  _vertices.push_back(_g); _vertices.push_back(_b);  _vertices.push_back(1.0);
-                _vertices.push_back(x3);   _vertices.push_back(y3);   _vertices.push_back(z3);   _vertices.push_back(_r);  _vertices.push_back(_g); _vertices.push_back(_b);  _vertices.push_back(1.0);
-                _vertices.push_back(x2);   _vertices.push_back(y2);   _vertices.push_back(z2);   _vertices.push_back(_r);  _vertices.push_back(_g); _vertices.push_back(_b);  _vertices.push_back(1.0);
-                _vertices.push_back(x4);   _vertices.push_back(y4);   _vertices.push_back(z4);   _vertices.push_back(_r);  _vertices.push_back(_g); _vertices.push_back(_b);  _vertices.push_back(1.0);
-
-                //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
-            }
-        }
-
-        // Add orbital plane to the main vertices for now.  This is centered at origin.
-        _orbitalPlaneVertices.push_back(-_orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(-_orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(_orbitalPlaneColor.r*0.3);  _orbitalPlaneVertices.push_back(_orbitalPlaneColor.g*0.3); _orbitalPlaneVertices.push_back(_orbitalPlaneColor.b*0.3);    _orbitalPlaneVertices.push_back(1.0);
-        _orbitalPlaneVertices.push_back( _orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(-_orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(_orbitalPlaneColor.r*0.3);  _orbitalPlaneVertices.push_back(_orbitalPlaneColor.g*0.3); _orbitalPlaneVertices.push_back(_orbitalPlaneColor.b*0.3);    _orbitalPlaneVertices.push_back(1.0);
-        _orbitalPlaneVertices.push_back( _orbitalRadius*1.2);   _orbitalPlaneVertices.push_back( _orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(_orbitalPlaneColor.r*0.3);  _orbitalPlaneVertices.push_back(_orbitalPlaneColor.g*0.3); _orbitalPlaneVertices.push_back(_orbitalPlaneColor.b*0.3);    _orbitalPlaneVertices.push_back(1.0);
-        _orbitalPlaneVertices.push_back( _orbitalRadius*1.2);   _orbitalPlaneVertices.push_back( _orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(_orbitalPlaneColor.r*0.3);  _orbitalPlaneVertices.push_back(_orbitalPlaneColor.g*0.3); _orbitalPlaneVertices.push_back(_orbitalPlaneColor.b*0.3);    _orbitalPlaneVertices.push_back(1.0);
-        _orbitalPlaneVertices.push_back(-_orbitalRadius*1.2);   _orbitalPlaneVertices.push_back( _orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(_orbitalPlaneColor.r*0.3);  _orbitalPlaneVertices.push_back(_orbitalPlaneColor.g*0.3); _orbitalPlaneVertices.push_back(_orbitalPlaneColor.b*0.3);    _orbitalPlaneVertices.push_back(1.0);
-        _orbitalPlaneVertices.push_back(-_orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(-_orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(_orbitalPlaneColor.r*0.3);  _orbitalPlaneVertices.push_back(_orbitalPlaneColor.g*0.3); _orbitalPlaneVertices.push_back(_orbitalPlaneColor.b*0.3);    _orbitalPlaneVertices.push_back(1.0);
-
-
-        // generate parallel lines along Y axis in the orbital plane
-        float inc = float(_orbitalRadius) / int(_orbitalRadius / 50.0);
-        for (float x = -_orbitalRadius * 1.2; x <= _orbitalRadius*1.2; x += inc)
-        {
-            _orbitalPlaneGridVertices.push_back(x);   _orbitalPlaneGridVertices.push_back(-_orbitalRadius * 1.2);   _orbitalPlaneGridVertices.push_back(1);   _orbitalPlaneGridVertices.push_back(_orbitalPlaneColor.r*1.2);  _orbitalPlaneGridVertices.push_back(_orbitalPlaneColor.g*1.2); _orbitalPlaneGridVertices.push_back(_orbitalPlaneColor.b*1.2);    _orbitalPlaneGridVertices.push_back(1.0);
-            _orbitalPlaneGridVertices.push_back(x);   _orbitalPlaneGridVertices.push_back( _orbitalRadius * 1.2);   _orbitalPlaneGridVertices.push_back(1);   _orbitalPlaneGridVertices.push_back(_orbitalPlaneColor.r*1.2);  _orbitalPlaneGridVertices.push_back(_orbitalPlaneColor.g*1.2); _orbitalPlaneGridVertices.push_back(_orbitalPlaneColor.b*1.2);    _orbitalPlaneGridVertices.push_back(1.0);
-        }
-        for (float y = -_orbitalRadius * 1.2; y <= _orbitalRadius*1.2; y += inc)
-        {
-            _orbitalPlaneGridVertices.push_back(-_orbitalRadius * 1.2);   _orbitalPlaneGridVertices.push_back(y);   _orbitalPlaneGridVertices.push_back(1);   _orbitalPlaneGridVertices.push_back(_orbitalPlaneColor.r*1.2);  _orbitalPlaneGridVertices.push_back(_orbitalPlaneColor.g*1.2); _orbitalPlaneGridVertices.push_back(_orbitalPlaneColor.b*1.2);    _orbitalPlaneGridVertices.push_back(1.0);
-            _orbitalPlaneGridVertices.push_back( _orbitalRadius * 1.2);   _orbitalPlaneGridVertices.push_back(y);   _orbitalPlaneGridVertices.push_back(1);   _orbitalPlaneGridVertices.push_back(_orbitalPlaneColor.r*1.2);  _orbitalPlaneGridVertices.push_back(_orbitalPlaneColor.g*1.2); _orbitalPlaneGridVertices.push_back(_orbitalPlaneColor.b*1.2);    _orbitalPlaneGridVertices.push_back(1.0);
-        }
-
-        // Orbit itself
-        for (float alpha = 0; alpha < 2 * M_PI; alpha += alpha_inc)
-        {
-            float x1 = _orbitalRadius * cos(alpha);
-            float y1 = _orbitalRadius * sin(alpha);
-            float z1 = 0;
-
-            float x2 = _orbitalRadius * cos(alpha+alpha_inc);
-            float y2 = _orbitalRadius * sin(alpha + alpha_inc);
-            float z2 = 0;
-
-            _orbitVertices.push_back(x1);  _orbitVertices.push_back(y1);  _orbitVertices.push_back(z1);   _orbitVertices.push_back(_orbitalPlaneColor.r); _orbitVertices.push_back(_orbitalPlaneColor.g); _orbitVertices.push_back(_orbitalPlaneColor.b);  _orbitVertices.push_back(0.8);
-            _orbitVertices.push_back(x2);  _orbitVertices.push_back(y2);  _orbitVertices.push_back(z2);   _orbitVertices.push_back(_orbitalPlaneColor.r); _orbitVertices.push_back(_orbitalPlaneColor.g); _orbitVertices.push_back(_orbitalPlaneColor.b);  _orbitVertices.push_back(0.8);
-        }
-
-
-        inc = float(2 * M_PI) / numLongitudes;
-
-        //---------------------------------------------------------------------------------
-        // Longitudes
-        //---------------------------------------------------------------------------------
-        //std::list<float> alphas = { 0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165 };
-
-        //for (float alpha : alphas)
-        for (float alphas = 0.0f; alphas < 180.0f; alphas += 30.0f)
-        {
-            float alpha = glm::radians(alphas);
-
-            for (float theta = 0; theta < float(2 * M_PI); theta += inc)
-            {
-                float x1 = 1.01 * _radius * sin(theta) * cos(alpha);
-                float y1 = 1.01 * _radius * sin(theta) * sin(alpha);
-                float z1 = 1.01 * _radius * cos(theta);
-
-                float x2 = 1.01 * _radius * sin(theta + inc) * cos(alpha);
-                float y2 = 1.01 * _radius * sin(theta + inc) * sin(alpha);
-                float z2 = 1.01 * _radius * cos(theta + inc);
-
-                _latLongVertices.push_back(x1);   _latLongVertices.push_back(y1);   _latLongVertices.push_back(z1);   _latLongVertices.push_back(_r*0.5);  _latLongVertices.push_back(_g*0.5); _latLongVertices.push_back(_b*0.5);  _latLongVertices.push_back(1.0);
-                _latLongVertices.push_back(x2);   _latLongVertices.push_back(y2);   _latLongVertices.push_back(z2);   _latLongVertices.push_back(_r*0.5);  _latLongVertices.push_back(_g*0.5); _latLongVertices.push_back(_b*0.5);  _latLongVertices.push_back(1.0);
-
-                //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
-            }
-        }
-
-        //---------------------------------------------------------------------------------
-        // Special Latitudes
-        //---------------------------------------------------------------------------------
-        std::list<float> thetas = { 0, 66.5, 23.5, 90, 90+23.5, 90+66.5 };          // 0 = +z axis, 90 is equator, 90+66.5 is antarctic circle
-
-        for (float theta : thetas)
-        {
-            theta = glm::radians(theta);
-
-            for (float alpha = 0; alpha < float(2 * M_PI); alpha += inc)
-            {
-                float x1 = 1.005 * _radius * sin(theta) * cos(alpha);
-                float y1 = 1.005 * _radius * sin(theta) * sin(alpha);
-                float z1 = 1.005 * _radius * cos(theta);
-
-                float x2 = 1.005 * _radius * sin(theta) * cos(alpha + inc);
-                float y2 = 1.005 * _radius * sin(theta) * sin(alpha + inc);
-                float z2 = 1.005 * _radius * cos(theta);
-
-                _latLongVertices.push_back(x1);   _latLongVertices.push_back(y1);   _latLongVertices.push_back(z1);   _latLongVertices.push_back(_r*0.9);  _latLongVertices.push_back(_g*0.5); _latLongVertices.push_back(_b*0.5);  _latLongVertices.push_back(1.0);
-                _latLongVertices.push_back(x2);   _latLongVertices.push_back(y2);   _latLongVertices.push_back(z2);   _latLongVertices.push_back(_r*0.9);  _latLongVertices.push_back(_g*0.5); _latLongVertices.push_back(_b*0.5);  _latLongVertices.push_back(1.0);
-
-                //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
-            }
-        }
-
-        //---------------------------------------------------------------------------------
-        // Latitudes
-        //---------------------------------------------------------------------------------
-        for (float thetas = 0; thetas < 180; thetas += 30)
-        {
-            float theta = glm::radians(thetas);
-
-            for (float alpha = 0; alpha < float(2 * M_PI) - inc; alpha += inc)
-            {
-                float x1 = 1.005 * _radius * sin(theta) * cos(alpha);
-                float y1 = 1.005 * _radius * sin(theta) * sin(alpha);
-                float z1 = 1.005 * _radius * cos(theta);
-
-                float x2 = 1.005 * _radius * sin(theta) * cos(alpha + inc);
-                float y2 = 1.005 * _radius * sin(theta) * sin(alpha + inc);
-                float z2 = 1.005 * _radius * cos(theta);
-
-                _latLongVertices.push_back(x1);   _latLongVertices.push_back(y1);   _latLongVertices.push_back(z1);   _latLongVertices.push_back(_r*0.5);  _latLongVertices.push_back(_g*0.5); _latLongVertices.push_back(_b*0.5);  _latLongVertices.push_back(1.0);
-                _latLongVertices.push_back(x2);   _latLongVertices.push_back(y2);   _latLongVertices.push_back(z2);   _latLongVertices.push_back(_r*0.5);  _latLongVertices.push_back(_g*0.5); _latLongVertices.push_back(_b*0.5);  _latLongVertices.push_back(1.0);
-
-                //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
-            }
-        }
+        _constructOrbit();
+        _constructOrbitalPlaneVertices();
+        _constructOrbitalPlaneGridVertices();
         
         printf("sphere vertex generation done\n");
     }
@@ -424,21 +276,217 @@ public:
 
 
 private:
-    //void changeBoolean(bool *pBool, SphereFlagOperationEnum flagOperation)
-    //{
-    //    switch (flagOperation)
-    //    {
-    //    case Toggle:
-    //        *pBool = !*pBool;
-    //        break;
-    //    case True:
-    //        *pBool = true;
-    //        break;
-    //    case False:
-    //        *pBool = false;
-    //        break;
-    //    }
-    //}
+    void _constructMainSphereVertices()
+    {
+        float numLongitudes = 1700;
+        float alpha_inc = float(2 * M_PI) / numLongitudes;
+        float theat_inc = float(M_PI) / (numLongitudes / 2);
+
+        int numFloats = int((2 * M_PI / alpha_inc) * (M_PI / theat_inc)) * 7;
+        printf("numFloats = %d\n", numFloats);
+
+        std::vector<float>& v = _vertices;
+
+        v.reserve(numFloats);
+
+        for (float alpha = 0; alpha < float(2 * M_PI); alpha += alpha_inc)
+        {
+            for (float theta = 0; theta < float(M_PI); theta += theat_inc)
+            {
+                float x1 = _radius * sin(theta) * cos(alpha);
+                float y1 = _radius * sin(theta) * sin(alpha);
+                float z1 = _radius * cos(theta);
+
+                float x2 = _radius * sin(theta + theat_inc) * cos(alpha);
+                float y2 = _radius * sin(theta + theat_inc) * sin(alpha);
+                float z2 = _radius * cos(theta + theat_inc);
+
+                float x3 = _radius * sin(theta) * cos(alpha + alpha_inc);
+                float y3 = _radius * sin(theta) * sin(alpha + alpha_inc);
+                float z3 = _radius * cos(theta);
+
+                float x4 = _radius * sin(theta + theat_inc) * cos(alpha + alpha_inc);
+                float y4 = _radius * sin(theta + theat_inc) * sin(alpha + alpha_inc);
+                float z4 = _radius * cos(theta + theat_inc);
+
+                v.push_back(x1);   v.push_back(y1);   v.push_back(z1);   v.push_back(_r);  v.push_back(_g); v.push_back(_b);  v.push_back(1.0);
+                v.push_back(x2);   v.push_back(y2);   v.push_back(z2);   v.push_back(_r);  v.push_back(_g); v.push_back(_b);  v.push_back(1.0);
+                v.push_back(x3);   v.push_back(y3);   v.push_back(z3);   v.push_back(_r);  v.push_back(_g); v.push_back(_b);  v.push_back(1.0);
+                v.push_back(x3);   v.push_back(y3);   v.push_back(z3);   v.push_back(_r);  v.push_back(_g); v.push_back(_b);  v.push_back(1.0);
+                v.push_back(x2);   v.push_back(y2);   v.push_back(z2);   v.push_back(_r);  v.push_back(_g); v.push_back(_b);  v.push_back(1.0);
+                v.push_back(x4);   v.push_back(y4);   v.push_back(z4);   v.push_back(_r);  v.push_back(_g); v.push_back(_b);  v.push_back(1.0);
+
+                //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
+            }
+        }
+    }
+    void _constructLatitudesAndLongitudeVertices()
+    {
+        float inc = float(2 * M_PI) / 1000;
+
+        //---------------------------------------------------------------------------------
+        // Longitudes
+        //---------------------------------------------------------------------------------
+        //std::list<float> alphas = { 0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165 };
+
+        std::vector<float>& v = _latLongVertices;
+
+        //for (float alpha : alphas)
+        for (float alphas = 0.0f; alphas < 180.0f; alphas += 10.0f)
+        {
+            float alpha = glm::radians(alphas);
+
+            for (float theta = 0; theta < float(2 * M_PI); theta += inc)
+            {
+                float x1 = 1.001 * _radius * sin(theta) * cos(alpha);
+                float y1 = 1.001 * _radius * sin(theta) * sin(alpha);
+                float z1 = 1.001 * _radius * cos(theta);
+
+                float x2 = 1.001 * _radius * sin(theta + inc) * cos(alpha);
+                float y2 = 1.001 * _radius * sin(theta + inc) * sin(alpha);
+                float z2 = 1.001 * _radius * cos(theta + inc);
+
+                float cMult;
+                if (alpha == 0.0f)
+                    cMult = 0.8;
+                else
+                    cMult = 0.9;
+
+                v.push_back(x1);   v.push_back(y1);   v.push_back(z1);   v.push_back(_r*cMult);  v.push_back(_g*cMult); v.push_back(_b*cMult);  v.push_back(1.0);
+                v.push_back(x2);   v.push_back(y2);   v.push_back(z2);   v.push_back(_r*cMult);  v.push_back(_g*cMult); v.push_back(_b*cMult);  v.push_back(1.0);
+
+                //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
+            }
+        }
+
+        //---------------------------------------------------------------------------------
+        // Special Latitudes
+        //---------------------------------------------------------------------------------
+        std::list<float> thetas = { 0, 66.5, 23.5, 90, 90 + 23.5, 90 + 66.5 };          // 0 = +z axis, 90 is equator, 90+66.5 is antarctic circle
+
+        for (float theta : thetas)
+        {
+            theta = glm::radians(theta);
+
+            for (float alpha = 0; alpha < float(2 * M_PI); alpha += inc)
+            {
+                float x1 = 1.001 * _radius * sin(theta) * cos(alpha);
+                float y1 = 1.001 * _radius * sin(theta) * sin(alpha);
+                float z1 = 1.001 * _radius * cos(theta);
+
+                float x2 = 1.001 * _radius * sin(theta) * cos(alpha + inc);
+                float y2 = 1.001 * _radius * sin(theta) * sin(alpha + inc);
+                float z2 = 1.001 * _radius * cos(theta);
+
+                v.push_back(x1);   v.push_back(y1);   v.push_back(z1);   v.push_back(_r*0.9);  v.push_back(_g*0.5); v.push_back(_b*0.5);  v.push_back(1.0);
+                v.push_back(x2);   v.push_back(y2);   v.push_back(z2);   v.push_back(_r*0.9);  v.push_back(_g*0.5); v.push_back(_b*0.5);  v.push_back(1.0);
+
+                //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
+            }
+        }
+
+        //---------------------------------------------------------------------------------
+        // Latitudes
+        //---------------------------------------------------------------------------------
+        for (float thetas = 0; thetas < 180; thetas += 10)
+        {
+            float theta = glm::radians(thetas);
+
+            for (float alpha = 0; alpha < float(2 * M_PI) - inc; alpha += inc)
+            {
+                float x1 = 1.001 * _radius * sin(theta) * cos(alpha);
+                float y1 = 1.001 * _radius * sin(theta) * sin(alpha);
+                float z1 = 1.001 * _radius * cos(theta);
+
+                float x2 = 1.001 * _radius * sin(theta) * cos(alpha + inc);
+                float y2 = 1.001 * _radius * sin(theta) * sin(alpha + inc);
+                float z2 = 1.001 * _radius * cos(theta);
+
+                v.push_back(x1);  v.push_back(y1);   v.push_back(z1);  v.push_back(_r*0.9); v.push_back(_g*0.9); v.push_back(_b*0.9);  v.push_back(1.0);
+                v.push_back(x2);  v.push_back(y2);   v.push_back(z2);  v.push_back(_r*0.9); v.push_back(_g*0.9); v.push_back(_b*0.9);  v.push_back(1.0);
+
+                //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
+            }
+        }
+
+    }
+
+
+    // Construct the circular/elliptical orbit
+    void _constructOrbit()
+    {
+        float alpha_inc = float(2 * M_PI) / 1000;
+
+        //---------------------------------------------------------------------------------
+        // Orbit itself
+        //---------------------------------------------------------------------------------
+        std::vector<float>& v = _orbitVertices;
+        for (float alpha = 0; alpha < 2 * M_PI; alpha += alpha_inc)
+        {
+            float x1 = _orbitalRadius * cos(alpha);
+            float y1 = _orbitalRadius * sin(alpha);
+            float z1 = 0;
+
+            float x2 = _orbitalRadius * cos(alpha + alpha_inc);
+            float y2 = _orbitalRadius * sin(alpha + alpha_inc);
+            float z2 = 0;
+
+            v.push_back(x1);  v.push_back(y1);  v.push_back(z1);   v.push_back(_orbitalPlaneColor.r); v.push_back(_orbitalPlaneColor.g); v.push_back(_orbitalPlaneColor.b);  v.push_back(0.8);
+            v.push_back(x2);  v.push_back(y2);  v.push_back(z2);   v.push_back(_orbitalPlaneColor.r); v.push_back(_orbitalPlaneColor.g); v.push_back(_orbitalPlaneColor.b);  v.push_back(0.8);
+        }
+    }
+
+    void _constructOrbitalPlaneVertices()
+    {
+        std::vector<float>& v = _orbitalPlaneVertices;
+
+        //---------------------------------------------------------------------------------
+        // Orbital plane.  This is centered at origin.
+        //---------------------------------------------------------------------------------
+        v.push_back(-_orbitalRadius * 1.2);   v.push_back(-_orbitalRadius * 1.2);   v.push_back(0);   v.push_back(_orbitalPlaneColor.r*0.3);  v.push_back(_orbitalPlaneColor.g*0.3); v.push_back(_orbitalPlaneColor.b*0.3);    v.push_back(1.0);
+        v.push_back( _orbitalRadius * 1.2);   v.push_back(-_orbitalRadius * 1.2);   v.push_back(0);   v.push_back(_orbitalPlaneColor.r*0.3);  v.push_back(_orbitalPlaneColor.g*0.3); v.push_back(_orbitalPlaneColor.b*0.3);    v.push_back(1.0);
+        v.push_back( _orbitalRadius * 1.2);   v.push_back( _orbitalRadius * 1.2);   v.push_back(0);   v.push_back(_orbitalPlaneColor.r*0.3);  v.push_back(_orbitalPlaneColor.g*0.3); v.push_back(_orbitalPlaneColor.b*0.3);    v.push_back(1.0);
+        v.push_back( _orbitalRadius * 1.2);   v.push_back( _orbitalRadius * 1.2);   v.push_back(0);   v.push_back(_orbitalPlaneColor.r*0.3);  v.push_back(_orbitalPlaneColor.g*0.3); v.push_back(_orbitalPlaneColor.b*0.3);    v.push_back(1.0);
+        v.push_back(-_orbitalRadius * 1.2);   v.push_back( _orbitalRadius * 1.2);   v.push_back(0);   v.push_back(_orbitalPlaneColor.r*0.3);  v.push_back(_orbitalPlaneColor.g*0.3); v.push_back(_orbitalPlaneColor.b*0.3);    v.push_back(1.0);
+        v.push_back(-_orbitalRadius * 1.2);   v.push_back(-_orbitalRadius * 1.2);   v.push_back(0);   v.push_back(_orbitalPlaneColor.r*0.3);  v.push_back(_orbitalPlaneColor.g*0.3); v.push_back(_orbitalPlaneColor.b*0.3);    v.push_back(1.0);
+
+    }
+    void _constructOrbitalPlaneGridVertices()
+    {
+        //---------------------------------------------------------------------------------
+        // Orbital plane grid.
+        //---------------------------------------------------------------------------------
+        // generate parallel lines along Y axis in the orbital plane
+        //float inc = float(_orbitalRadius) / int(_orbitalRadius / 50.0);
+
+        float maxGridLines = 20;
+        float inc = (_orbitalRadius * 2 * 1.2) / maxGridLines;
+        //inc = std::max(inc, 50.0f);
+        printf("inc = %f\n", inc);
+        float x, y;
+        x = y = -_orbitalRadius * 1.2;
+        std::vector<float>& v = _orbitalPlaneGridVertices;
+        for (int i = 0; i <= maxGridLines; i++)
+        {
+            v.push_back(x);   v.push_back(-_orbitalRadius * 1.2);   v.push_back(1);   v.push_back(_orbitalPlaneColor.r*1.2);  v.push_back(_orbitalPlaneColor.g*1.2); v.push_back(_orbitalPlaneColor.b*1.2);    v.push_back(1.0);
+            v.push_back(x);   v.push_back(_orbitalRadius * 1.2);   v.push_back(1);   v.push_back(_orbitalPlaneColor.r*1.2);  v.push_back(_orbitalPlaneColor.g*1.2); v.push_back(_orbitalPlaneColor.b*1.2);    v.push_back(1.0);
+
+            v.push_back(x);   v.push_back(-_orbitalRadius * 1.2);   v.push_back(-1);   v.push_back(_orbitalPlaneColor.r*1.2);  v.push_back(_orbitalPlaneColor.g*1.2); v.push_back(_orbitalPlaneColor.b*1.2);    v.push_back(1.0);
+            v.push_back(x);   v.push_back(_orbitalRadius * 1.2);   v.push_back(-1);   v.push_back(_orbitalPlaneColor.r*1.2);  v.push_back(_orbitalPlaneColor.g*1.2); v.push_back(_orbitalPlaneColor.b*1.2);    v.push_back(1.0);
+
+            x += inc;
+        }
+        for (int i = 0; i <= maxGridLines; i++)
+        {
+            v.push_back(-_orbitalRadius * 1.2);   v.push_back(y);   v.push_back(1);   v.push_back(_orbitalPlaneColor.r*1.2);  v.push_back(_orbitalPlaneColor.g*1.2); v.push_back(_orbitalPlaneColor.b*1.2);    v.push_back(1.0);
+            v.push_back(_orbitalRadius * 1.2);   v.push_back(y);   v.push_back(1);   v.push_back(_orbitalPlaneColor.r*1.2);  v.push_back(_orbitalPlaneColor.g*1.2); v.push_back(_orbitalPlaneColor.b*1.2);    v.push_back(1.0);
+
+            v.push_back(-_orbitalRadius * 1.2);   v.push_back(y);   v.push_back(-1);   v.push_back(_orbitalPlaneColor.r*1.2);  v.push_back(_orbitalPlaneColor.g*1.2); v.push_back(_orbitalPlaneColor.b*1.2);    v.push_back(1.0);
+            v.push_back(_orbitalRadius * 1.2);   v.push_back(y);   v.push_back(-1);   v.push_back(_orbitalPlaneColor.r*1.2);  v.push_back(_orbitalPlaneColor.g*1.2); v.push_back(_orbitalPlaneColor.b*1.2);    v.push_back(1.0);
+
+            y += inc;
+        }
+    }
 
 private:
     // angles and angle velocities are in radians

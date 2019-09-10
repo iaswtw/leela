@@ -692,6 +692,12 @@ void Universe::onKeyDown(SDL_Event* event)
     case SDLK_DOWN:
         _stepMultiplier *= 0.6;
         break;
+
+
+    case SDLK_LCTRL:
+    case SDLK_RCTRL:
+        bCtrlKey = true;
+
     }
 
 }
@@ -710,14 +716,26 @@ void Universe::onKeyUp(SDL_Event* event)
     case SDLK_r:
         Rewind(UCmdParam_Stop);
         break;
+
+
+    case SDLK_LCTRL:
+    case SDLK_RCTRL:
+        bCtrlKey = false;
+
     }
 
 }
 
 void Universe::onMouseMotion(SDL_Event* event)
 {
-    int dx = event->motion.xrel;
-    int dy = event->motion.yrel;
+    float dx = event->motion.xrel;
+    float dy = event->motion.yrel;
+
+    if (bCtrlKey)
+    {
+        dx /= 15.0f;
+        dy /= 15.0f;
+    }
 
     //printf("dx = %d, dy = %d\n", dx, dy);
 

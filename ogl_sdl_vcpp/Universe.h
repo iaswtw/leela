@@ -221,6 +221,10 @@ private:
     char F_R_BUTTON_DOWN = 0;
     char F_M_BUTTON_DOWN = 0;
 
+    bool bCtrlKey = false;
+    bool bAltKey = false;
+    bool bShiftKey = false;
+
     bool bSidewaysMotionMode = true;
     bool bLockOntoEarth = false;
     bool bLockOntoSun = false;
