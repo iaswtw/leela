@@ -196,6 +196,9 @@ public:
         if (bRevolutionMotion)
             _orbitalAngle += _orbitalAngularVelocity * stepMultiplier;
 
+        if (bPrecessionMotion)
+            _axisRotationAngle += 0.01;      // todo - use step multiplier and a new internal velocity variable.
+
         calculateCenterPosition();
     }
 
