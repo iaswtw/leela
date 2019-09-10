@@ -30,6 +30,7 @@ private:
 
     GLuint _mainVao;
     GLuint _orbitalPlaneVao;
+    GLuint _orbitalPlaneGridVao;            // grid lines in the orbital plane
     GLuint _orbitVao;
     GLuint _latAndLongVao;
 

@@ -147,59 +147,11 @@ public:
         return _orbitalPlaneRotationAngle;
     }
 
-    //void pauseRevolution()
-    //{
-    //    changeFlag(RevolutionPaused, True);
-    //}
-
-    //void unpauseRevolution()
-    //{
-    //    changeFlag(RevolutionPaused, False);
-    //}
-
-    //void pauseRotation()
-    //{
-    //    changeFlag(RotationPaused, True);
-    //}
-
-    //void unpauseRotation()
-    //{
-    //    changeFlag(RotationPaused, False);
-    //}
-
-    //inline bool isRevolutionPaused()
-    //{
-    //    return _bRevolutionPaused;
-    //}
-
-    //inline bool isRotationPaused()
-    //{
-    //    return _bRotationPaused;
-    //}
-
-    //void changeFlag(SphereFlagEnum flagType, SphereFlagOperationEnum flagOperation)
-    //{
-    //    switch (flagType)
-    //    {
-    //    case RotationPaused:
-    //        changeBoolean(&_bRotationPaused, flagOperation);
-    //        break;
-    //    case RevolutionPaused:
-    //        changeBoolean(&_bRevolutionPaused, flagOperation);
-    //        break;
-    //    case PrecessionPaused:
-    //        changeBoolean(&_bPrecessionPaused, flagOperation);
-    //        break;
-    //    }
-    //}
-
-
     void generateVertices()
     {
         float numLongitudes = 1000;
         float alpha_inc = float(2*M_PI) / numLongitudes;
         float theat_inc = float(M_PI) / (numLongitudes/2);
-        float inc = float(2 * M_PI) / numLongitudes;
 
         int numFloats = int((2 * M_PI / alpha_inc) * (M_PI / theat_inc)) * 7;
         printf("numFloats = %d\n", numFloats);
@@ -236,14 +188,27 @@ public:
             }
         }
 
-        // add orbital plane to the main vertices for now
-        _orbitalPlaneVertices.push_back(-_orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(-_orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(_orbitalPlaneColor.r);  _orbitalPlaneVertices.push_back(_orbitalPlaneColor.g); _orbitalPlaneVertices.push_back(_orbitalPlaneColor.b);    _orbitalPlaneVertices.push_back(0.4);
-        _orbitalPlaneVertices.push_back( _orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(-_orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(_orbitalPlaneColor.r);  _orbitalPlaneVertices.push_back(_orbitalPlaneColor.g); _orbitalPlaneVertices.push_back(_orbitalPlaneColor.b);    _orbitalPlaneVertices.push_back(0.4);
-        _orbitalPlaneVertices.push_back( _orbitalRadius*1.2);   _orbitalPlaneVertices.push_back( _orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(_orbitalPlaneColor.r);  _orbitalPlaneVertices.push_back(_orbitalPlaneColor.g); _orbitalPlaneVertices.push_back(_orbitalPlaneColor.b);    _orbitalPlaneVertices.push_back(0.4);
-        _orbitalPlaneVertices.push_back( _orbitalRadius*1.2);   _orbitalPlaneVertices.push_back( _orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(_orbitalPlaneColor.r);  _orbitalPlaneVertices.push_back(_orbitalPlaneColor.g); _orbitalPlaneVertices.push_back(_orbitalPlaneColor.b);    _orbitalPlaneVertices.push_back(0.4);
-        _orbitalPlaneVertices.push_back(-_orbitalRadius*1.2);   _orbitalPlaneVertices.push_back( _orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(_orbitalPlaneColor.r);  _orbitalPlaneVertices.push_back(_orbitalPlaneColor.g); _orbitalPlaneVertices.push_back(_orbitalPlaneColor.b);    _orbitalPlaneVertices.push_back(0.4);
-        _orbitalPlaneVertices.push_back(-_orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(-_orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(_orbitalPlaneColor.r);  _orbitalPlaneVertices.push_back(_orbitalPlaneColor.g); _orbitalPlaneVertices.push_back(_orbitalPlaneColor.b);    _orbitalPlaneVertices.push_back(0.4);
+        // Add orbital plane to the main vertices for now.  This is centered at origin.
+        _orbitalPlaneVertices.push_back(-_orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(-_orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(_orbitalPlaneColor.r*0.3);  _orbitalPlaneVertices.push_back(_orbitalPlaneColor.g*0.3); _orbitalPlaneVertices.push_back(_orbitalPlaneColor.b*0.3);    _orbitalPlaneVertices.push_back(1.0);
+        _orbitalPlaneVertices.push_back( _orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(-_orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(_orbitalPlaneColor.r*0.3);  _orbitalPlaneVertices.push_back(_orbitalPlaneColor.g*0.3); _orbitalPlaneVertices.push_back(_orbitalPlaneColor.b*0.3);    _orbitalPlaneVertices.push_back(1.0);
+        _orbitalPlaneVertices.push_back( _orbitalRadius*1.2);   _orbitalPlaneVertices.push_back( _orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(_orbitalPlaneColor.r*0.3);  _orbitalPlaneVertices.push_back(_orbitalPlaneColor.g*0.3); _orbitalPlaneVertices.push_back(_orbitalPlaneColor.b*0.3);    _orbitalPlaneVertices.push_back(1.0);
+        _orbitalPlaneVertices.push_back( _orbitalRadius*1.2);   _orbitalPlaneVertices.push_back( _orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(_orbitalPlaneColor.r*0.3);  _orbitalPlaneVertices.push_back(_orbitalPlaneColor.g*0.3); _orbitalPlaneVertices.push_back(_orbitalPlaneColor.b*0.3);    _orbitalPlaneVertices.push_back(1.0);
+        _orbitalPlaneVertices.push_back(-_orbitalRadius*1.2);   _orbitalPlaneVertices.push_back( _orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(_orbitalPlaneColor.r*0.3);  _orbitalPlaneVertices.push_back(_orbitalPlaneColor.g*0.3); _orbitalPlaneVertices.push_back(_orbitalPlaneColor.b*0.3);    _orbitalPlaneVertices.push_back(1.0);
+        _orbitalPlaneVertices.push_back(-_orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(-_orbitalRadius*1.2);   _orbitalPlaneVertices.push_back(0);   _orbitalPlaneVertices.push_back(_orbitalPlaneColor.r*0.3);  _orbitalPlaneVertices.push_back(_orbitalPlaneColor.g*0.3); _orbitalPlaneVertices.push_back(_orbitalPlaneColor.b*0.3);    _orbitalPlaneVertices.push_back(1.0);
 
+
+        // generate parallel lines along Y axis in the orbital plane
+        float inc = float(_orbitalRadius) / int(_orbitalRadius / 50.0);
+        for (float x = -_orbitalRadius * 1.2; x <= _orbitalRadius*1.2; x += inc)
+        {
+            _orbitalPlaneGridVertices.push_back(x);   _orbitalPlaneGridVertices.push_back(-_orbitalRadius * 1.2);   _orbitalPlaneGridVertices.push_back(1);   _orbitalPlaneGridVertices.push_back(_orbitalPlaneColor.r*1.2);  _orbitalPlaneGridVertices.push_back(_orbitalPlaneColor.g*1.2); _orbitalPlaneGridVertices.push_back(_orbitalPlaneColor.b*1.2);    _orbitalPlaneGridVertices.push_back(1.0);
+            _orbitalPlaneGridVertices.push_back(x);   _orbitalPlaneGridVertices.push_back( _orbitalRadius * 1.2);   _orbitalPlaneGridVertices.push_back(1);   _orbitalPlaneGridVertices.push_back(_orbitalPlaneColor.r*1.2);  _orbitalPlaneGridVertices.push_back(_orbitalPlaneColor.g*1.2); _orbitalPlaneGridVertices.push_back(_orbitalPlaneColor.b*1.2);    _orbitalPlaneGridVertices.push_back(1.0);
+        }
+        for (float y = -_orbitalRadius * 1.2; y <= _orbitalRadius*1.2; y += inc)
+        {
+            _orbitalPlaneGridVertices.push_back(-_orbitalRadius * 1.2);   _orbitalPlaneGridVertices.push_back(y);   _orbitalPlaneGridVertices.push_back(1);   _orbitalPlaneGridVertices.push_back(_orbitalPlaneColor.r*1.2);  _orbitalPlaneGridVertices.push_back(_orbitalPlaneColor.g*1.2); _orbitalPlaneGridVertices.push_back(_orbitalPlaneColor.b*1.2);    _orbitalPlaneGridVertices.push_back(1.0);
+            _orbitalPlaneGridVertices.push_back( _orbitalRadius * 1.2);   _orbitalPlaneGridVertices.push_back(y);   _orbitalPlaneGridVertices.push_back(1);   _orbitalPlaneGridVertices.push_back(_orbitalPlaneColor.r*1.2);  _orbitalPlaneGridVertices.push_back(_orbitalPlaneColor.g*1.2); _orbitalPlaneGridVertices.push_back(_orbitalPlaneColor.b*1.2);    _orbitalPlaneGridVertices.push_back(1.0);
+        }
 
         // Orbit itself
         for (float alpha = 0; alpha < 2 * M_PI; alpha += alpha_inc)
@@ -261,6 +226,8 @@ public:
         }
 
 
+        inc = float(2 * M_PI) / numLongitudes;
+
         //---------------------------------------------------------------------------------
         // Longitudes
         //---------------------------------------------------------------------------------
@@ -271,7 +238,7 @@ public:
         {
             float alpha = glm::radians(alphas);
 
-            for (float theta = 0; theta < float(2 * M_PI) - inc; theta += inc)
+            for (float theta = 0; theta < float(2 * M_PI); theta += inc)
             {
                 float x1 = 1.01 * _radius * sin(theta) * cos(alpha);
                 float y1 = 1.01 * _radius * sin(theta) * sin(alpha);
@@ -297,7 +264,7 @@ public:
         {
             theta = glm::radians(theta);
 
-            for (float alpha = 0; alpha < float(2 * M_PI) - inc; alpha += inc)
+            for (float alpha = 0; alpha < float(2 * M_PI); alpha += inc)
             {
                 float x1 = 1.005 * _radius * sin(theta) * cos(alpha);
                 float y1 = 1.005 * _radius * sin(theta) * sin(alpha);
@@ -354,6 +321,11 @@ public:
     std::vector<float>& getOrbitalPlaneVertices()
     {
         return _orbitalPlaneVertices;
+    }
+
+    std::vector<float>& getOrbitalPlaneGridVertices()
+    {
+        return _orbitalPlaneGridVertices;
     }
 
     std::vector<float>& getOrbitVertices()
@@ -496,6 +468,7 @@ private:
     std::vector<float> _vertices;
     std::vector<float> _latLongVertices;
     std::vector<float> _orbitalPlaneVertices;
+    std::vector<float> _orbitalPlaneGridVertices;
     std::vector<float> _orbitVertices;
     Sphere *_parent;
 };

@@ -67,7 +67,7 @@ void Universe::initSceneObjects()
         0.0f,                               // orbital rotation angle
         0                                   // orbital tilt
     );
-    earth.setOrbitalPlaneColor(glm::vec3(0.5, 0.3, 0.3));
+    earth.setOrbitalPlaneColor(glm::vec3(0.55, 0.82, 1.0));
 
     // Moon
     //---------------------------------------

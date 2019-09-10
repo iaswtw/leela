@@ -92,6 +92,24 @@ void SphereRenderer::createVaoAndVbos(OglHandles oglHandles)
     glEnableVertexAttribArray(oglHandles.colAttrib);
 
     //---------------------------------------------------------------------------------------------------
+    // orbital plane grid lines
+    glGenVertexArrays(1, &_orbitalPlaneGridVao);
+    glBindVertexArray(_orbitalPlaneGridVao);
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        sizeof(float) * _sphere.getOrbitalPlaneGridVertices().size(),
+        _sphere.getOrbitalPlaneGridVertices().data(),
+        GL_STATIC_DRAW);
+
+    glVertexAttribPointer(oglHandles.posAttrib, 3, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), nullptr);
+    glEnableVertexAttribArray(oglHandles.posAttrib);
+
+    glVertexAttribPointer(oglHandles.colAttrib, 4, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(oglHandles.colAttrib);
+
+    //---------------------------------------------------------------------------------------------------
     // Orbital itself
     glGenVertexArrays(1, &_orbitVao);
     glBindVertexArray(_orbitVao);
@@ -172,12 +190,18 @@ void SphereRenderer::render(OglHandles oglHandles, Sphere* otherSphere)
 
         glUniform1i(oglHandles.uniMyIsValud, false);
 
-        glBindVertexArray(_orbitalPlaneVao);
+
+        // Draw orbital plane grid
+        glBindVertexArray(_orbitalPlaneGridVao);
+        glDrawArrays(GL_LINES, 0, _sphere.getOrbitalPlaneGridVertices().size() / VERTEX_STRIDE_IN_VBO);
 
         // Draw vertices
 //        glDepthMask(GL_FALSE);
+        glBindVertexArray(_orbitalPlaneVao);
         glDrawArrays(GL_TRIANGLES, 0, _sphere.getOrbitalPlaneVertices().size() / VERTEX_STRIDE_IN_VBO);
 //        glDepthMask(GL_TRUE);
+
+
     }
 
     //----------------------------------------------------------------------------------------------------
