@@ -570,7 +570,15 @@ void Universe::onKeyDown(SDL_Event* event)
         else
             Earth_PrecessionMotion(UCmdParam_Toggle);
         break;
+    case SDLK_F5:
+        if (bShiftModifier)
+            Moon_OrbitalPlaneRotation(UCmdParam_Reset);
+        else
+            Moon_OrbitalPlaneRotation(UCmdParam_Toggle);
+        break;
 
+
+    // Arrow keys
     case SDLK_UP:
         _stepMultiplier *= 1.6666;
         break;
@@ -1081,6 +1089,28 @@ void Universe::Moon_OrbitalPlane(int nParam)
 
 }
 
+
+/*!
+****************************************************************************
+
+
+
+****************************************************************************/
+void Universe::Moon_OrbitalPlaneRotation(int nParam)
+{
+
+    if (nParam == UCmdParam_Reset)
+    {
+        moon.bOrbitalPlaneRotation = false;
+        moon._orbitalPlaneRotationAngle = glm::radians(0.0f);
+    }
+    else
+    {
+        ChangeBoolean(&moon.bOrbitalPlaneRotation, nParam);
+    }
+
+    bUpdateUI = true;
+}
 
 /*!
 ****************************************************************************
