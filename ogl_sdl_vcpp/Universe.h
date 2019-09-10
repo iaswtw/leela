@@ -190,6 +190,7 @@ public:
     void Earth_OrbitalPlane(int nParam);
     void Earth_SetOrbitalPositionAngle(double fAngle);
     void Moon_OrbitalPlane(int nParam);
+    void Moon_OrbitalPlaneRotation(int nParam);
     void Moon_RevolutionMotion(int nParam);
     void Moon_SetOrbitalPositionAngle(double fAngle);
 

@@ -199,6 +199,9 @@ public:
         if (bPrecessionMotion)
             _axisRotationAngle += 0.01;      // todo - use step multiplier and a new internal velocity variable.
 
+        if (bOrbitalPlaneRotation)
+            _orbitalPlaneRotationAngle += 0.01;     // todo - use step multiplier and velocity
+
         calculateCenterPosition();
     }
 
@@ -240,6 +243,7 @@ public:
     bool bRevolutionMotion = true;
     bool bRotationMotion = true;
     bool bPrecessionMotion = false;
+    bool bOrbitalPlaneRotation = false;
 
 
 private:
