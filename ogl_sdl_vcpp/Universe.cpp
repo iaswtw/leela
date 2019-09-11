@@ -1,5 +1,10 @@
 #include "pch.h"
 #include <windows.h>
+
+#include "imgui.h"
+#include "imgui_impl_sdl.h"
+#include "imgui_impl_opengl3.h"
+
 #include <stdio.h>
 #include "Universe.h"
 #include "Utils.h"
@@ -640,11 +645,6 @@ void Universe::onKeyDown(SDL_Event* event)
 void Universe::onKeyUp(SDL_Event* event)
 {
     switch (event->key.keysym.sym) {
-    case SDLK_ESCAPE:
-        bMouseGrabbed = false;
-        SDL_ShowCursor(SDL_ENABLE);
-        SDL_SetRelativeMouseMode(SDL_FALSE);
-        break;
     case SDLK_f:
         FastForward(UCmdParam_Stop);
         break;
@@ -1154,6 +1154,7 @@ void Universe::render()
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
     useShaderProgram();
 
     glUniform3fv(
@@ -1345,6 +1346,7 @@ void Universe::processFlags()
 int Universe::run()
 {
     setvbuf(stdout, 0, _IONBF, 0);
+    const char* glsl_version = "#version 130";
 
     SDL_Init(SDL_INIT_EVERYTHING);
 
@@ -1363,11 +1365,33 @@ int Universe::run()
 
     glewInit();
 
+    // Setup Dear ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+    //ImGui::StyleColorsClassic();
+
+    // Setup Platform/Renderer bindings
+    ImGui_ImplSDL2_InitForOpenGL(window, context);
+    ImGui_ImplOpenGL3_Init(glsl_version);
+
+    // Our state
+    bool show_demo_window = true;
+    bool show_another_window = false;
+    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    bool bControlPanelActive = true;
+
+
+
     SDL_GetWindowSize(window, &curWidth, &curHeight);
     printf("width = %d\n", curWidth);
     printf("height = %d\n", curHeight);
-
-
+    
     printf("initializing scene objects... ");
     initSceneObjects();
     initializeGL();
@@ -1387,6 +1411,7 @@ int Universe::run()
     {
         while (SDL_PollEvent(&event))
         {
+            ImGui_ImplSDL2_ProcessEvent(&event);
             switch (event.type)
             {
             case SDL_QUIT:           bQuit = true;                  break;
@@ -1394,30 +1419,24 @@ int Universe::run()
                 onKeyDown(&event);
                 break;
             case SDL_KEYUP:
-                onKeyUp(&event);
-                break;
-            case SDL_MOUSEBUTTONDOWN:
-                if (!bMouseGrabbed) {
-                    bMouseGrabbed = true;
-                    SDL_ShowCursor(SDL_DISABLE);
-                    //SDL_WarpMouseInWindow(window, curWidth / 2, curHeight / 2);
-                    SDL_SetRelativeMouseMode(SDL_TRUE);
-                }
-                switch (event.button.button) {
-                case SDL_BUTTON_LEFT:   bLeftMouseButtonDown = true;    break;
-                case SDL_BUTTON_RIGHT:  bRightMouseButtonDown = true;   break;
-                }
-                break;
-            case SDL_MOUSEBUTTONUP:
-                switch (event.button.button) {
-                case SDL_BUTTON_LEFT:   bLeftMouseButtonDown = false;   break;
-                case SDL_BUTTON_RIGHT:  bRightMouseButtonDown = false;  break;
-                }
-                break;
-            case SDL_MOUSEMOTION:
-                if (bMouseGrabbed)
+                if (event.key.keysym.sym == SDLK_ESCAPE)
                 {
-                    onMouseMotion(&event);
+                    bControlPanelActive = !bControlPanelActive;
+                    if (bMouseGrabbed)
+                    {
+                        bMouseGrabbed = false;
+                        SDL_ShowCursor(SDL_ENABLE);
+                        SDL_SetRelativeMouseMode(SDL_FALSE);
+                    }
+                    else {
+                        bMouseGrabbed = true;
+                        SDL_ShowCursor(SDL_DISABLE);
+                        SDL_SetRelativeMouseMode(SDL_TRUE);
+                    }
+                }
+                else
+                {
+                    onKeyUp(&event);
                 }
                 break;
             case SDL_WINDOWEVENT:
@@ -1432,10 +1451,123 @@ int Universe::run()
                 break;
             }
 
+            if (event.type == SDL_MOUSEBUTTONDOWN ||
+                event.type == SDL_MOUSEBUTTONUP ||
+                event.type == SDL_MOUSEMOTION)
+            {
+                if (!bControlPanelActive)
+                {
+                    //----------------------------------------------------
+                    // Mouse events
+                    switch (event.type)
+                    {
+                    case SDL_MOUSEBUTTONDOWN:
+                        switch (event.button.button) {
+                        case SDL_BUTTON_LEFT:   bLeftMouseButtonDown = true;    break;
+                        case SDL_BUTTON_RIGHT:  bRightMouseButtonDown = true;   break;
+                        }
+                        break;
+                    case SDL_MOUSEBUTTONUP:
+                        switch (event.button.button) {
+                        case SDL_BUTTON_LEFT:   bLeftMouseButtonDown = false;   break;
+                        case SDL_BUTTON_RIGHT:  bRightMouseButtonDown = false;  break;
+                        }
+                        break;
+                    case SDL_MOUSEMOTION:
+                        if (bMouseGrabbed)
+                        {
+                            onMouseMotion(&event);
+                        }
+                        break;
+                    }
+                }
+            }
+
+
             if (bQuit)
                 break;
 
         } // while SDL event poll
+
+
+
+        //==============================================================
+        // Start the Dear ImGui frame
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplSDL2_NewFrame(window);
+        ImGui::NewFrame();
+
+        // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
+        if (bControlPanelActive)
+        {
+            //if (show_demo_window)
+            //    ImGui::ShowDemoWindow(&show_demo_window);
+
+            // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
+            {
+                static float f = 0.0f;
+                static int counter = 0;
+
+                ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+
+                ImGui::Text("Earth's parameters:");               // Display some text (you can use a format strings too)
+                ImGui::Checkbox("Precession motion", &earth.bPrecessionMotion);
+                ImGui::Checkbox("Revolution motion", &earth.bRevolutionMotion);
+                ImGui::Checkbox("Orbital plane", &earthRenderer.bShowOrbitalPlane);
+
+                ImGui::Text("Moon's parameters:");               // Display some text (you can use a format strings too)
+                ImGui::Checkbox("Revolution motion", &moon.bRevolutionMotion);
+                ImGui::Checkbox("#Orbital plane", &moonRenderer.bShowOrbitalPlane);
+                ImGui::Checkbox("Orbital plane rotation", &moon.bOrbitalPlaneRotation);
+
+                ImGui::Text("Navigation Flags:");
+                ImGui::Checkbox("Sideways motion mode (v)", &bSidewaysMotionMode);
+                ImGui::Checkbox("Lock on earth's position (z)", &bLockOntoEarth);
+                ImGui::Checkbox("Lock on sun's position (c)", &bLockOntoSun);
+                ImGui::Checkbox("Time pause (space)", &bSimulationPause);
+
+                if (ImGui::Button("Default view"))
+                    SetDefaultView();
+
+
+
+
+                //ImGui::Checkbox("Another Window", &show_another_window);
+
+                //ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+                //ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+
+                //if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+                //    counter++;
+                //ImGui::SameLine();
+                //ImGui::Text("counter = %d", counter);
+
+                //ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+                ImGui::End();
+
+                //ImGui::Begin("Demo window");
+                //ImGui::Button("Hello!");
+                //ImGui::End();
+                //ImGui::Begin("Demo2 window");
+                //ImGui::Button("Hello again!");
+                //ImGui::End();
+
+            }
+
+            // 3. Show another simple window.
+            //if (show_another_window)
+            //{
+            //    ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+            //    ImGui::Text("Hello from another window!");
+            //    if (ImGui::Button("Close Me"))
+            //        show_another_window = false;
+            //    ImGui::End();
+            //}
+
+            // Rendering
+            ImGui::Render();
+        }
+        //==============================================================
 
 
         if (bQuit)
@@ -1446,9 +1578,19 @@ int Universe::run()
 
         render();
 
+        if (bControlPanelActive)
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
         SDL_GL_SwapWindow(window);
         SDL_Delay(10);
     }
+
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplSDL2_Shutdown();
+    ImGui::DestroyContext();
+
+    SDL_GL_DeleteContext(context);
+    SDL_DestroyWindow(window);
 
     SDL_Quit();
     return 0;
