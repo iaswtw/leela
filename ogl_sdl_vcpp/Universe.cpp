@@ -1144,6 +1144,22 @@ void Universe::Moon_SetOrbitalPositionAngle(double fAngle)
     moon.calculateCenterPosition();
 }
 
+void Universe::toggleWidgetControlMode()
+{
+    bControlPanelActive = !bControlPanelActive;
+    if (bMouseGrabbed)
+    {
+        bMouseGrabbed = false;
+        SDL_ShowCursor(SDL_ENABLE);
+        SDL_SetRelativeMouseMode(SDL_FALSE);
+    }
+    else {
+        bMouseGrabbed = true;
+        SDL_ShowCursor(SDL_DISABLE);
+        SDL_SetRelativeMouseMode(SDL_TRUE);
+    }
+
+}
 
 /*************************************************************************************************
 
@@ -1384,7 +1400,6 @@ int Universe::run()
     bool show_demo_window = true;
     bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-    bool bControlPanelActive = true;
 
 
 
@@ -1421,18 +1436,7 @@ int Universe::run()
             case SDL_KEYUP:
                 if (event.key.keysym.sym == SDLK_ESCAPE)
                 {
-                    bControlPanelActive = !bControlPanelActive;
-                    if (bMouseGrabbed)
-                    {
-                        bMouseGrabbed = false;
-                        SDL_ShowCursor(SDL_ENABLE);
-                        SDL_SetRelativeMouseMode(SDL_FALSE);
-                    }
-                    else {
-                        bMouseGrabbed = true;
-                        SDL_ShowCursor(SDL_DISABLE);
-                        SDL_SetRelativeMouseMode(SDL_TRUE);
-                    }
+                    toggleWidgetControlMode();
                 }
                 else
                 {
@@ -1440,7 +1444,8 @@ int Universe::run()
                 }
                 break;
             case SDL_WINDOWEVENT:
-                if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+                if ((event.window.event == SDL_WINDOWEVENT_RESIZED) || 
+                    (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)) {
                     curWidth = event.window.data1;
                     curHeight = event.window.data2;
 
@@ -1463,8 +1468,20 @@ int Universe::run()
                     {
                     case SDL_MOUSEBUTTONDOWN:
                         switch (event.button.button) {
-                        case SDL_BUTTON_LEFT:   bLeftMouseButtonDown = true;    break;
-                        case SDL_BUTTON_RIGHT:  bRightMouseButtonDown = true;   break;
+                        case SDL_BUTTON_LEFT:
+                            if (event.button.clicks == 2) {
+                                toggleWidgetControlMode();
+                                break;
+                            }
+                            bLeftMouseButtonDown = true;
+                            break;
+                        case SDL_BUTTON_RIGHT:
+                            if (event.button.clicks == 2) {
+                                toggleWidgetControlMode();
+                                break;
+                            }
+                            bRightMouseButtonDown = true;
+                            break;
                         }
                         break;
                     case SDL_MOUSEBUTTONUP:
@@ -1479,6 +1496,22 @@ int Universe::run()
                             onMouseMotion(&event);
                         }
                         break;
+                    }
+                }
+                else
+                {
+                    switch (event.type)
+                    {
+                    case SDL_MOUSEBUTTONDOWN:
+                        switch (event.button.button)
+                        {
+                        case SDL_BUTTON_RIGHT:
+                            if (event.button.clicks == 2) {
+                                toggleWidgetControlMode();
+                            }
+                        }
+                    
+                        
                     }
                 }
             }
@@ -1497,18 +1530,36 @@ int Universe::run()
         ImGui_ImplSDL2_NewFrame(window);
         ImGui::NewFrame();
 
+        // Always showing overlay window showing status of various flags
+        ImGuiIO& io = ImGui::GetIO();
+        ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - 10.0f, 25.0f), ImGuiCond_Always, ImVec2(1.0f, 0.0f));
+        ImGui::SetNextWindowBgAlpha(0.35f);
+        if (ImGui::Begin("Flags", &bShowFlagsOverlay, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
+        {
+            ImGui::Text("V");
+        }
+        ImGui::End();
+
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         if (bControlPanelActive)
         {
             //if (show_demo_window)
             //    ImGui::ShowDemoWindow(&show_demo_window);
 
+            ImGui::SetNextWindowPos(ImVec2(10.0f, 20.0f), ImGuiCond_Always);
+            ImGui::SetNextWindowSize(ImVec2(250.0f, curHeight - 20.0f));
+
             // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
             {
                 static float f = 0.0f;
                 static int counter = 0;
 
-                ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+                // Create a window called "Hello, world!" and append into it.
+                ImGui::Begin(
+                    "Hello, world!",
+                    nullptr,
+                    ImGuiWindowFlags_NoTitleBar |  ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing
+                );
 
                 ImGui::Text("Earth's parameters:");               // Display some text (you can use a format strings too)
                 ImGui::Checkbox("Precession motion", &earth.bPrecessionMotion);
@@ -1554,6 +1605,25 @@ int Universe::run()
 
             }
 
+            if (ImGui::BeginMainMenuBar())
+            {
+                if (ImGui::BeginMenu("Universe3d"))
+                {
+                    if (ImGui::MenuItem("Show Fullscreen", "CTRL+1"))
+                    {
+                        if (bIsWindowFullScreen) {
+                            SDL_SetWindowFullscreen(window, 0);
+                            bIsWindowFullScreen = false;
+                        }
+                        else {
+                            SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+                            bIsWindowFullScreen = true;
+                        }
+                    }
+                    ImGui::EndMenu();
+                }
+                ImGui::EndMainMenuBar();
+            }
             // 3. Show another simple window.
             //if (show_another_window)
             //{
@@ -1565,8 +1635,11 @@ int Universe::run()
             //}
 
             // Rendering
-            ImGui::Render();
         }
+
+
+        ImGui::Render();
+
         //==============================================================
 
 
@@ -1578,8 +1651,8 @@ int Universe::run()
 
         render();
 
-        if (bControlPanelActive)
-            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        //if (bControlPanelActive)
+             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         SDL_GL_SwapWindow(window);
         SDL_Delay(10);
