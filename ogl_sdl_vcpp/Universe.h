@@ -197,7 +197,9 @@ public:
     void Moon_RevolutionMotion(int nParam);
     void Moon_SetOrbitalPositionAngle(double fAngle);
 
-    
+    void SetDotDensity(int nParam);
+    void ShowDemo(int nParam);
+
     void ChangeBoolean(bool *pBool, int nParam);
 
     void advance(float stepMultiplier);
@@ -209,6 +211,7 @@ public:
     void toggleFullScreen();
     void toggleWidgetControlMode();
     void cleanupAndExitApplication();
+    void generateImGuiWidgets();
 
 private:
     bool bQuit = false;

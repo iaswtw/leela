@@ -1081,27 +1081,6 @@ void Universe::Earth_OrbitalPlane(int nParam)
 
 
 ****************************************************************************/
-void Universe::Earth_SetOrbitalPositionAngle(double fAngle)
-{
-    earth.setOrbitalAngle(fAngle);
-
-    /* Even though the earth's coordinates would be calculated from its
-       orbit angle (tho) in the advance() function, it won't happen if
-       the simulation is paused.  Hence we need to do it here. */
-    //earth.C.x = earth.R * cos(earth.tho);
-    //earth.C.y = earth.R * sin(earth.tho);
-    //earth.C.z = 0;
-
-    earth.calculateCenterPosition();
-}
-
-
-/*!
-****************************************************************************
-
-
-
-****************************************************************************/
 void Universe::Moon_OrbitalPlane(int nParam)
 {
     ChangeBoolean(&moonRenderer.bShowOrbitalPlane, nParam);
@@ -1145,6 +1124,174 @@ void Universe::Moon_RevolutionMotion(int nParam)
 }
 
 
+/*!
+****************************************************************************
+
+
+
+****************************************************************************/
+void Universe::SetDotDensity(int nParam)
+{
+    eDotDensity = (UDotDensityType)nParam;
+    switch (eDotDensity)
+    {
+    case UDotDensity_Normal:
+        // todo
+        //inc_multiplier = 0.8;
+        break;
+
+    case UDotDensity_High:
+        // todo
+        //inc_multiplier = 0.5;
+        break;
+    }
+}
+
+
+/*!
+****************************************************************************
+
+
+
+****************************************************************************/
+void Universe::ShowDemo(int nParam)
+{
+    PNT newS;
+
+    switch ((UDemoType)nParam)
+    {
+    case UDemo_TotalSolarEclipse:
+
+        // Set earth at (0,R,0)
+        Earth_SetOrbitalPositionAngle(M_PI / 2);
+
+        Earth_OrbitalPlane(UCmdParam_Off);
+        Moon_OrbitalPlane(UCmdParam_Off);
+
+        // Adjust navigation view locks on earth and sun
+        NavigationLockOntoEarth(UCmdParam_On);
+        NavigationLockOntoSun(UCmdParam_Off);
+
+        // Set S
+        newS = PNT(earth.getCenter().x + 500, earth.getCenter().y - 700, earth.getCenter().z + 150);
+        space.setFrame(AT_POINT,
+            newS,
+            VECTOR(newS, earth.getCenter()),
+            PNT(newS.x, newS.y, newS.z - 100));
+
+        /* Set proper moon's position so that the moon's shadow will
+           fall on the earth shortly */
+        Moon_SetOrbitalPositionAngle(-3 * M_PI / 5);
+
+        // Adjust earth's motions
+        Earth_RotationMotion(UCmdParam_On);
+        Earth_RevolutionMotion(UCmdParam_Off);
+        Earth_PrecessionMotion(UCmdParam_Reset);
+
+        // Adjust Moon's motions
+        Moon_RevolutionMotion(UCmdParam_On);
+
+        // Increase the dot density
+        SetDotDensity(UDotDensity_High);
+        SetSimulationSpeed(USimulationSpeed_Low);
+        SimulationPause(UCmdParam_Off);
+
+        /* F_REFERENCE_VECTOR_ALONG_Z is checked before bLockOntoEarth
+           or bLockOntoSun in the function on_MouseMotion().  Need
+           to consider if the priority of this check should be reversed.
+           Without the setting below, the Lock on earth or sun won't
+           work. */
+        F_REFERENCE_VECTOR_ALONG_Z = 1;
+
+        bUpdateUI = true;
+
+        break;
+
+    case UDemo_PrecessionMotion:
+        // Set earth at (0,R,0)
+        Earth_SetOrbitalPositionAngle(M_PI / 2);
+
+        // Let the moon hide below the earth's orbital plane so that
+        // it won't distract the user
+        Moon_SetOrbitalPositionAngle(0);
+
+        // Adjust navigation view locks on earth and sun
+        NavigationLockOntoEarth(UCmdParam_On);
+        NavigationLockOntoSun(UCmdParam_Off);
+
+        // Set S
+        newS = PNT(earth.getCenter().x + 300, earth.getCenter().y - 400, earth.getCenter().z + 300);
+        space.setFrame(AT_POINT,
+            newS,
+            VECTOR(newS, earth.getCenter()),
+            PNT(newS.x, newS.y, newS.z - 100));
+
+
+        // Adjust earth's motions
+        Earth_RotationMotion(UCmdParam_Off);
+        Earth_RevolutionMotion(UCmdParam_Off);
+        Earth_PrecessionMotion(UCmdParam_Start);
+
+        // Adjust Moon's motions
+        Moon_RevolutionMotion(UCmdParam_Off);
+
+        // Adjust orbital planes
+        Earth_OrbitalPlane(UCmdParam_On);
+        Moon_OrbitalPlane(UCmdParam_Off);
+
+        SetDotDensity(UDotDensity_Normal);
+        SetSimulationSpeed(USimulationSpeed_Normal);
+        SimulationPause(UCmdParam_Off);
+
+        /* F_REFERENCE_VECTOR_ALONG_Z is checked before bLockOntoEarth
+           or bLockOntoSun in the function on_MouseMotion().  Need
+           to consider if the priority of this check should be reversed.
+           Without the setting below, the Lock on earth or sun won't
+           work. */
+        F_REFERENCE_VECTOR_ALONG_Z = 1;
+
+        bUpdateUI = true;
+
+        break;
+
+    case UDemo_TiltedOrbitalPlanes:
+        Earth_SetOrbitalPositionAngle(M_PI / 2 - M_PI / 10);
+
+        // Tilted orbit demo must show both the orbital planes
+        Earth_OrbitalPlane(UCmdParam_On);
+        Moon_OrbitalPlane(UCmdParam_On);
+
+        // Adjust navigation view locks on earth and sun
+        NavigationLockOntoEarth(UCmdParam_Off);
+        NavigationLockOntoSun(UCmdParam_Off);
+
+        newS = PNT(earth.getCenter().x + 0, earth.getCenter().y + 1300, earth.getCenter().z + 200);
+        space.setFrame(AT_POINT,
+            newS,
+            VECTOR(newS, PNT(-700, 0, -300)),
+            PNT(newS.x, newS.y, newS.z - 100));
+
+
+        // Adjust earth's motions
+        Earth_RotationMotion(UCmdParam_On);
+        Earth_RevolutionMotion(UCmdParam_On);
+        Earth_PrecessionMotion(UCmdParam_Reset);
+
+        // Adjust Moon's motions
+        Moon_RevolutionMotion(UCmdParam_On);
+
+        SetSimulationSpeed(USimulationSpeed_Normal);
+        SetDotDensity(UDotDensity_Normal);
+        SimulationPause(UCmdParam_Off);
+
+
+        bUpdateUI = true;
+
+        break;
+    }
+}
+
+
 void Universe::toggleFullScreen()
 {
     if (bIsWindowFullScreen) {
@@ -1181,6 +1328,19 @@ void Universe::Moon_SetOrbitalPositionAngle(double fAngle)
     moon.setOrbitalAngle(fAngle);
     moon.calculateCenterPosition();
 }
+
+/*!
+****************************************************************************
+
+
+
+****************************************************************************/
+void Universe::Earth_SetOrbitalPositionAngle(double fAngle)
+{
+    earth.setOrbitalAngle(fAngle);
+    earth.calculateCenterPosition();
+}
+
 
 void Universe::toggleWidgetControlMode()
 {
@@ -1398,6 +1558,146 @@ void Universe::processFlags()
 
 }
 
+
+void Universe::generateImGuiWidgets()
+{
+    // Our state
+    bool show_demo_window = true;
+    bool show_another_window = false;
+    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
+    // Start the Dear ImGui frame
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplSDL2_NewFrame(window);
+    ImGui::NewFrame();
+
+    // Always showing overlay window showing status of various flags
+    ImGuiIO& io = ImGui::GetIO();
+    ImGui::SetNextWindowPos(ImVec2(5.0f, io.DisplaySize.y - 5.0f), ImGuiCond_Always, ImVec2(0.0f, 1.0f));
+    ImGui::SetNextWindowBgAlpha(0.35f);
+    if (ImGui::Begin("Flags", &bShowFlagsOverlay, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
+    {
+        ImGui::Text("V this is some text");
+    }
+    ImGui::End();
+
+
+    float upperMargin = bControlPanelActive ? 35.0f : 25.0f;
+    ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x / 2.0f, upperMargin), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+    ImGui::SetNextWindowBgAlpha(0.35f);
+    if (ImGui::Begin("Escape message", &bShowFlagsOverlay, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
+    {
+        ImGui::Text(
+            bControlPanelActive ?
+            "Escape key / double rightclick to dismiss control panel" :
+            "Escape key / double rightclick to restore control panel"
+        );
+    }
+    ImGui::End();
+
+
+    // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
+    if (bControlPanelActive)
+    {
+        if (show_demo_window)
+            ImGui::ShowDemoWindow(&show_demo_window);
+
+        ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - 5.0f, 20.0f), ImGuiCond_Always, ImVec2(1.0f, 0.0f));
+        //ImGui::SetNextWindowSize(ImVec2(250.0f, curHeight - 25.0f));
+        ImGui::SetNextWindowBgAlpha(0.8f);
+
+        // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
+        {
+            static float f = 0.0f;
+            static int counter = 0;
+
+            // Create a window called "Hello, world!" and append into it.
+            ImGui::Begin(
+                "Hello, world!",
+                nullptr,
+                ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing
+            );
+
+            ImGui::Text("Demos:");
+            if (ImGui::Button("Total Solar Eclipse"))
+                ShowDemo(UDemo_TotalSolarEclipse);
+            if (ImGui::Button("Tilted orbital planes"))
+                ShowDemo(UDemo_TiltedOrbitalPlanes);
+            if (ImGui::Button("Precession motion"))
+                ShowDemo(UDemo_PrecessionMotion);
+            ImGui::Separator();
+
+            ImGui::Text("Earth:");               // Display some text (you can use a format strings too)
+            ImGui::Checkbox("Revolution motion", &earth.bRevolutionMotion);
+            ImGui::Checkbox("Orbital plane##earth", &earthRenderer.bShowOrbitalPlane);
+            ImGui::Checkbox("Precession motion", &earth.bPrecessionMotion);
+            ImGui::Separator();
+
+            ImGui::Text("Moon:");               // Display some text (you can use a format strings too)
+            ImGui::Checkbox("Revolution motion", &moon.bRevolutionMotion);
+            ImGui::Checkbox("Orbital plane##moon", &moonRenderer.bShowOrbitalPlane);
+            ImGui::Checkbox("Orbital plane rotation", &moon.bOrbitalPlaneRotation);
+            ImGui::Separator();
+
+            ImGui::Text("Navigation Flags:");
+            ImGui::Checkbox("Sideways motion mode (v)", &bSidewaysMotionMode);
+            ImGui::Checkbox("Lock on earth's position (z)", &bLockOntoEarth);
+            if (ImGui::IsItemEdited())
+                NavigationLockOntoEarth(bLockOntoEarth ? UCmdParam_On : UCmdParam_Off);
+
+            ImGui::Checkbox("Lock on sun's position (c)", &bLockOntoSun);
+            if (ImGui::IsItemEdited())
+                NavigationLockOntoSun(bLockOntoSun ? UCmdParam_On : UCmdParam_Off);
+
+            ImGui::Checkbox("Time pause (space)", &bSimulationPause);
+
+            if (ImGui::Button("Default view"))
+                SetDefaultView();
+
+            //ImGui::Checkbox("Another Window", &show_another_window);
+
+            //ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+            //ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+
+            //if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+            //    counter++;
+            //ImGui::SameLine();
+            //ImGui::Text("counter = %d", counter);
+
+            //ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            ImGui::End();
+        }
+
+        if (ImGui::BeginMainMenuBar())
+        {
+            if (ImGui::BeginMenu("Universe3d"))
+            {
+                if (ImGui::MenuItem("Show Fullscreen", "F11"))
+                    toggleFullScreen();
+                if (ImGui::MenuItem("Exit Application"))
+                    bQuit = true;
+
+                ImGui::EndMenu();
+            }
+            ImGui::EndMainMenuBar();
+        }
+        // 3. Show another simple window.
+        //if (show_another_window)
+        //{
+        //    ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+        //    ImGui::Text("Hello from another window!");
+        //    if (ImGui::Button("Close Me"))
+        //        show_another_window = false;
+        //    ImGui::End();
+        //}
+
+        // Rendering
+    }
+
+
+    ImGui::Render();
+}
+
 /*************************************************************************************************
 
 
@@ -1438,12 +1738,6 @@ int Universe::run()
     // Setup Platform/Renderer bindings
     ImGui_ImplSDL2_InitForOpenGL(window, context);
     ImGui_ImplOpenGL3_Init(glsl_version);
-
-    // Our state
-    bool show_demo_window = true;
-    bool show_another_window = false;
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
 
 
     SDL_GetWindowSize(window, &curWidth, &curHeight);
@@ -1551,7 +1845,7 @@ int Universe::run()
                         break;
                     }
                 }
-                else
+                else   // if (!bControlPanelActive)
                 {
                     switch (event.type)
                     {
@@ -1562,172 +1856,30 @@ int Universe::run()
                             if (event.button.clicks == 2) {
                                 toggleWidgetControlMode();
                             }
-                        }
-                    
-                        
+                        }                        
                     }
-                }
+                }     // else of if (!bControlPanelActive)
             }
-
-
+            
             if (bQuit)
                 break;
 
         } // while SDL event poll
-
-
-
-        //==============================================================
-        // Start the Dear ImGui frame
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplSDL2_NewFrame(window);
-        ImGui::NewFrame();
-
-        // Always showing overlay window showing status of various flags
-        ImGuiIO& io = ImGui::GetIO();
-        ImGui::SetNextWindowPos(ImVec2(5.0f, io.DisplaySize.y - 5.0f), ImGuiCond_Always, ImVec2(0.0f, 1.0f));
-        ImGui::SetNextWindowBgAlpha(0.35f);
-        if (ImGui::Begin("Flags", &bShowFlagsOverlay, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
-        {
-            ImGui::Text("V this is some text");
-        }
-        ImGui::End();
-
-
-        float upperMargin = bControlPanelActive ? 35.0f : 25.0f;
-        ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x / 2.0f, upperMargin), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-        ImGui::SetNextWindowBgAlpha(0.35f);
-        if (ImGui::Begin("Escape message", &bShowFlagsOverlay, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
-        {
-            ImGui::Text(
-                bControlPanelActive ?
-                "Escape key / double rightclick to dismiss control panel" : 
-                "Escape key / double rightclick to restore control panel"
-            );
-        }
-        ImGui::End();
-
-
-        // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-        if (bControlPanelActive)
-        {
-            if (show_demo_window)
-                ImGui::ShowDemoWindow(&show_demo_window);
-
-            ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - 5.0f, 20.0f), ImGuiCond_Always, ImVec2(1.0f, 0.0f));
-            //ImGui::SetNextWindowSize(ImVec2(250.0f, curHeight - 25.0f));
-            ImGui::SetNextWindowBgAlpha(0.8f);
-
-            // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
-            {
-                static float f = 0.0f;
-                static int counter = 0;
-
-                // Create a window called "Hello, world!" and append into it.
-                ImGui::Begin(
-                    "Hello, world!",
-                    nullptr,
-                    ImGuiWindowFlags_NoTitleBar |  ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing
-                );
-
-                ImGui::Text("Earth's parameters:");               // Display some text (you can use a format strings too)
-                ImGui::Checkbox("Revolution motion", &earth.bRevolutionMotion);
-                ImGui::Checkbox("Orbital plane##earth", &earthRenderer.bShowOrbitalPlane);
-                ImGui::Checkbox("Precession motion", &earth.bPrecessionMotion);
-
-                ImGui::Text("Moon's parameters:");               // Display some text (you can use a format strings too)
-                ImGui::Checkbox("Revolution motion", &moon.bRevolutionMotion);
-                ImGui::Checkbox("Orbital plane##moon", &moonRenderer.bShowOrbitalPlane);
-                ImGui::Checkbox("Orbital plane rotation", &moon.bOrbitalPlaneRotation);
-
-                ImGui::Text("Navigation Flags:");
-                ImGui::Checkbox("Sideways motion mode (v)", &bSidewaysMotionMode);
-                ImGui::Checkbox("Lock on earth's position (z)", &bLockOntoEarth);
-                if (ImGui::IsItemEdited())
-                    NavigationLockOntoEarth(bLockOntoEarth ? UCmdParam_On : UCmdParam_Off);
-
-                ImGui::Checkbox("Lock on sun's position (c)", &bLockOntoSun);
-                if (ImGui::IsItemEdited())
-                    NavigationLockOntoSun(bLockOntoSun ? UCmdParam_On : UCmdParam_Off);
-
-                ImGui::Checkbox("Time pause (space)", &bSimulationPause);
-
-                if (ImGui::Button("Default view"))
-                    SetDefaultView();
-
-
-
-
-                //ImGui::Checkbox("Another Window", &show_another_window);
-
-                //ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-                //ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-                //if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-                //    counter++;
-                //ImGui::SameLine();
-                //ImGui::Text("counter = %d", counter);
-
-                //ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-                ImGui::End();
-
-                //ImGui::Begin("Demo window");
-                //ImGui::Button("Hello!");
-                //ImGui::End();
-                //ImGui::Begin("Demo2 window");
-                //ImGui::Button("Hello again!");
-                //ImGui::End();
-
-            }
-
-            if (ImGui::BeginMainMenuBar())
-            {
-                if (ImGui::BeginMenu("Universe3d"))
-                {
-                    if (ImGui::MenuItem("Show Fullscreen", "F11"))
-                        toggleFullScreen();
-                    if (ImGui::MenuItem("Exit Application"))
-                        bQuit = true;
-
-                    ImGui::EndMenu();
-                }
-                ImGui::EndMainMenuBar();
-            }
-            // 3. Show another simple window.
-            //if (show_another_window)
-            //{
-            //    ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-            //    ImGui::Text("Hello from another window!");
-            //    if (ImGui::Button("Close Me"))
-            //        show_another_window = false;
-            //    ImGui::End();
-            //}
-
-            // Rendering
-        }
-
-
-        ImGui::Render();
-
-        //==============================================================
-
+        
+        generateImGuiWidgets();
 
         if (bQuit)
             break;
 
-
         processFlags();
-
         render();
 
-        //if (bControlPanelActive)
-             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         SDL_GL_SwapWindow(window);
         SDL_Delay(10);
     }
 
     cleanupAndExitApplication();
-
     return 0;
 }
