@@ -63,7 +63,7 @@ void Universe::initSceneObjects()
     earth.setColor(0.55f, 0.82f, 1.0f);
     earth.setRotationParameters(80,         // radius
         0,                                  // initial rotation angle
-        0.003f,                             // rotation velocity
+        0.02f,                             // rotation velocity
         glm::radians(270.0f),               // axis rotation angle
         glm::radians(23.5f)                 // axis tilt angle
     );
@@ -588,7 +588,9 @@ void Universe::onKeyDown(SDL_Event* event)
         else
             Moon_OrbitalPlaneRotation(UCmdParam_Toggle);
         break;
-
+    case SDLK_F11:
+        toggleFullScreen();
+        break;
 
     // Arrow keys
     case SDLK_UP:
@@ -685,10 +687,10 @@ void Universe::onKeyUp(SDL_Event* event)
 
 }
 
-void Universe::onMouseMotion(SDL_Event* event)
+void Universe::onMouseMotion(int xrel, int yrel)
 {
-    float dx = event->motion.xrel;
-    float dy = event->motion.yrel;
+    float dx = xrel;
+    float dy = yrel;
 
     if (bCtrlModifier)
     {
@@ -808,10 +810,7 @@ void Universe::NavigationLockOntoEarth(int nParam)
         F_REFERENCE_VECTOR_ALONG_Z = 1;
 
         ChangeBoolean(&earth.bRevolutionMotion, UCmdParam_Off);
-        space.setFrame(AT_POINT,
-            space.S,
-            VECTOR(space.S, earth.getCenter()),
-            PNT(space.S.x, space.S.y, space.S.z - 100));
+        LookAtEarth();
         break;
 
     case UCmdParam_Off:
@@ -850,11 +849,7 @@ void Universe::NavigationLockOntoSun(int nParam)
         bLockOntoSun = true;
         bLockOntoEarth = false;
         F_REFERENCE_VECTOR_ALONG_Z = 1;
-
-        space.setFrame(AT_POINT,
-            space.S,
-            VECTOR(space.S, sun.getCenter()),
-            PNT(space.S.x, space.S.y, space.S.z - 100));
+        LookAtSun();
         break;
 
     case UCmdParam_Off:
@@ -875,6 +870,24 @@ void Universe::NavigationLockOntoSun(int nParam)
     }
 
     bUpdateUI = true;
+
+}
+
+void Universe::LookAtEarth()
+{
+    space.setFrame(AT_POINT,
+        space.S,
+        VECTOR(space.S, earth.getCenter()),
+        PNT(space.S.x, space.S.y, space.S.z - 100));
+
+}
+
+void Universe::LookAtSun()
+{
+    space.setFrame(AT_POINT,
+        space.S,
+        VECTOR(space.S, sun.getCenter()),
+        PNT(space.S.x, space.S.y, space.S.z - 100));
 
 }
 
@@ -1021,7 +1034,7 @@ void Universe::Earth_RevolutionMotion(int nParam)
 {
     ChangeBoolean(&earth.bRevolutionMotion, nParam);
     F_REFERENCE_VECTOR_ALONG_Z = 0;
-    bLockOntoEarth = false;
+    //bLockOntoEarth = false;
 
     bUpdateUI = true;
 }
@@ -1131,6 +1144,31 @@ void Universe::Moon_RevolutionMotion(int nParam)
     bUpdateUI = true;
 }
 
+
+void Universe::toggleFullScreen()
+{
+    if (bIsWindowFullScreen) {
+        SDL_SetWindowFullscreen(window, 0);
+        bIsWindowFullScreen = false;
+    }
+    else {
+        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+        bIsWindowFullScreen = true;
+    }
+}
+
+
+void Universe::cleanupAndExitApplication()
+{
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplSDL2_Shutdown();
+    ImGui::DestroyContext();
+
+    SDL_GL_DeleteContext(context);
+    SDL_DestroyWindow(window);
+
+    SDL_Quit();
+}
 
 /*!
 ****************************************************************************
@@ -1353,6 +1391,11 @@ void Universe::processFlags()
     }
 
 
+    if (bLockOntoEarth)
+        LookAtEarth();
+    if (bLockOntoSun)
+        LookAtSun();
+
 }
 
 /*************************************************************************************************
@@ -1373,10 +1416,10 @@ int Universe::run()
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
-    SDL_Window *window = SDL_CreateWindow("OpenGL", 100, 100, 800, 600, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED);
+    window = SDL_CreateWindow("OpenGL", 100, 100, 800, 600, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED);
 
     printf("Created SDL GL window\n");
-    SDL_GLContext context = SDL_GL_CreateContext(window);
+    context = SDL_GL_CreateContext(window);
     SDL_GL_SetSwapInterval(1);
 
     glewInit();
@@ -1458,7 +1501,8 @@ int Universe::run()
 
             if (event.type == SDL_MOUSEBUTTONDOWN ||
                 event.type == SDL_MOUSEBUTTONUP ||
-                event.type == SDL_MOUSEMOTION)
+                event.type == SDL_MOUSEMOTION ||
+                event.type == SDL_MOUSEWHEEL)
             {
                 if (!bControlPanelActive)
                 {
@@ -1491,9 +1535,18 @@ int Universe::run()
                         }
                         break;
                     case SDL_MOUSEMOTION:
+                        printf("mouse motion event\n");
                         if (bMouseGrabbed)
-                        {
-                            onMouseMotion(&event);
+                            onMouseMotion(event.motion.xrel, event.motion.yrel);
+                        break;
+                    case SDL_MOUSEWHEEL:
+                        printf("mouse scroll event: %d, %d\n", event.wheel.x, event.wheel.y);
+                        if (bMouseGrabbed) {
+                            // Hack
+                            bool oldValue = bLeftMouseButtonDown;
+                            bLeftMouseButtonDown = true;
+                            onMouseMotion(-event.wheel.x * 10, -event.wheel.y * 10);
+                            bLeftMouseButtonDown = oldValue;
                         }
                         break;
                     }
@@ -1532,22 +1585,38 @@ int Universe::run()
 
         // Always showing overlay window showing status of various flags
         ImGuiIO& io = ImGui::GetIO();
-        ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - 10.0f, 25.0f), ImGuiCond_Always, ImVec2(1.0f, 0.0f));
+        ImGui::SetNextWindowPos(ImVec2(5.0f, io.DisplaySize.y - 5.0f), ImGuiCond_Always, ImVec2(0.0f, 1.0f));
         ImGui::SetNextWindowBgAlpha(0.35f);
         if (ImGui::Begin("Flags", &bShowFlagsOverlay, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
         {
-            ImGui::Text("V");
+            ImGui::Text("V this is some text");
         }
         ImGui::End();
+
+
+        float upperMargin = bControlPanelActive ? 35.0f : 25.0f;
+        ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x / 2.0f, upperMargin), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+        ImGui::SetNextWindowBgAlpha(0.35f);
+        if (ImGui::Begin("Escape message", &bShowFlagsOverlay, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
+        {
+            ImGui::Text(
+                bControlPanelActive ?
+                "Escape key / double rightclick to dismiss control panel" : 
+                "Escape key / double rightclick to restore control panel"
+            );
+        }
+        ImGui::End();
+
 
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         if (bControlPanelActive)
         {
-            //if (show_demo_window)
-            //    ImGui::ShowDemoWindow(&show_demo_window);
+            if (show_demo_window)
+                ImGui::ShowDemoWindow(&show_demo_window);
 
-            ImGui::SetNextWindowPos(ImVec2(10.0f, 20.0f), ImGuiCond_Always);
-            ImGui::SetNextWindowSize(ImVec2(250.0f, curHeight - 20.0f));
+            ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - 5.0f, 20.0f), ImGuiCond_Always, ImVec2(1.0f, 0.0f));
+            //ImGui::SetNextWindowSize(ImVec2(250.0f, curHeight - 25.0f));
+            ImGui::SetNextWindowBgAlpha(0.8f);
 
             // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
             {
@@ -1562,19 +1631,25 @@ int Universe::run()
                 );
 
                 ImGui::Text("Earth's parameters:");               // Display some text (you can use a format strings too)
-                ImGui::Checkbox("Precession motion", &earth.bPrecessionMotion);
                 ImGui::Checkbox("Revolution motion", &earth.bRevolutionMotion);
-                ImGui::Checkbox("Orbital plane", &earthRenderer.bShowOrbitalPlane);
+                ImGui::Checkbox("Orbital plane##earth", &earthRenderer.bShowOrbitalPlane);
+                ImGui::Checkbox("Precession motion", &earth.bPrecessionMotion);
 
                 ImGui::Text("Moon's parameters:");               // Display some text (you can use a format strings too)
                 ImGui::Checkbox("Revolution motion", &moon.bRevolutionMotion);
-                ImGui::Checkbox("#Orbital plane", &moonRenderer.bShowOrbitalPlane);
+                ImGui::Checkbox("Orbital plane##moon", &moonRenderer.bShowOrbitalPlane);
                 ImGui::Checkbox("Orbital plane rotation", &moon.bOrbitalPlaneRotation);
 
                 ImGui::Text("Navigation Flags:");
                 ImGui::Checkbox("Sideways motion mode (v)", &bSidewaysMotionMode);
                 ImGui::Checkbox("Lock on earth's position (z)", &bLockOntoEarth);
+                if (ImGui::IsItemEdited())
+                    NavigationLockOntoEarth(bLockOntoEarth ? UCmdParam_On : UCmdParam_Off);
+
                 ImGui::Checkbox("Lock on sun's position (c)", &bLockOntoSun);
+                if (ImGui::IsItemEdited())
+                    NavigationLockOntoSun(bLockOntoSun ? UCmdParam_On : UCmdParam_Off);
+
                 ImGui::Checkbox("Time pause (space)", &bSimulationPause);
 
                 if (ImGui::Button("Default view"))
@@ -1609,17 +1684,11 @@ int Universe::run()
             {
                 if (ImGui::BeginMenu("Universe3d"))
                 {
-                    if (ImGui::MenuItem("Show Fullscreen", "CTRL+1"))
-                    {
-                        if (bIsWindowFullScreen) {
-                            SDL_SetWindowFullscreen(window, 0);
-                            bIsWindowFullScreen = false;
-                        }
-                        else {
-                            SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
-                            bIsWindowFullScreen = true;
-                        }
-                    }
+                    if (ImGui::MenuItem("Show Fullscreen", "F11"))
+                        toggleFullScreen();
+                    if (ImGui::MenuItem("Exit Application"))
+                        bQuit = true;
+
                     ImGui::EndMenu();
                 }
                 ImGui::EndMainMenuBar();
@@ -1658,13 +1727,7 @@ int Universe::run()
         SDL_Delay(10);
     }
 
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplSDL2_Shutdown();
-    ImGui::DestroyContext();
+    cleanupAndExitApplication();
 
-    SDL_GL_DeleteContext(context);
-    SDL_DestroyWindow(window);
-
-    SDL_Quit();
     return 0;
 }
