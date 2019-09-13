@@ -178,6 +178,9 @@ public:
     void SetDefaultView();
     void NavigationLockOntoEarth(int nParam);
     void NavigationLockOntoSun(int nParam);
+    void LookAtEarth();
+    void LookAtSun();
+
     void SetSimulationSpeed(int nParam);
     void SetTimeDirection(int nParam);
     void FastForward(int nParam);
@@ -194,17 +197,18 @@ public:
     void Moon_RevolutionMotion(int nParam);
     void Moon_SetOrbitalPositionAngle(double fAngle);
 
-
-
+    
     void ChangeBoolean(bool *pBool, int nParam);
 
     void advance(float stepMultiplier);
 
     void onKeyDown(SDL_Event* event);
     void onKeyUp(SDL_Event* event);
-    void onMouseMotion(SDL_Event* event);
+    void onMouseMotion(int xrel, int yrel);
 
+    void toggleFullScreen();
     void toggleWidgetControlMode();
+    void cleanupAndExitApplication();
 
 private:
     bool bQuit = false;
@@ -316,7 +320,9 @@ private:
     bool bUpdateUI;
 
     //=================================================================
-    // IMGUI related
+    // IMGUI, SDL related
+    SDL_Window *window = nullptr;
+    SDL_GLContext context;
 
     bool bControlPanelActive = true;
     bool bIsWindowFullScreen = false;

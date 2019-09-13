@@ -83,7 +83,7 @@ void main()
             {
                 // point is on the night side of this sphere.
                 // todo - this is only true if radius of sun is same as radius of this planet
-                Color = vec4(in_color.xyz*0.2, in_color.a);
+                Color = vec4(in_color.xyz*0.05, in_color.a);
             }
             else
             {
