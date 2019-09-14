@@ -213,16 +213,17 @@ std::vector<float>* SphereRenderer::_constructOrbitalPlaneVertices()
 {
     std::vector<float>* v = new std::vector<float>();
     Sphere& s = _sphere;
+    float m = 0.2;      // color multiplier
 
     //---------------------------------------------------------------------------------
     // Orbital plane.  This is centered at origin.
     //---------------------------------------------------------------------------------
-    v->push_back(-s._orbitalRadius * 1.2);   v->push_back(-s._orbitalRadius * 1.2);   v->push_back(0);   v->push_back(s._orbitalPlaneColor.r*0.3);  v->push_back(s._orbitalPlaneColor.g*0.3); v->push_back(s._orbitalPlaneColor.b*0.3);    v->push_back(1.0);
-    v->push_back(+s._orbitalRadius * 1.2);   v->push_back(-s._orbitalRadius * 1.2);   v->push_back(0);   v->push_back(s._orbitalPlaneColor.r*0.3);  v->push_back(s._orbitalPlaneColor.g*0.3); v->push_back(s._orbitalPlaneColor.b*0.3);    v->push_back(1.0);
-    v->push_back(+s._orbitalRadius * 1.2);   v->push_back(+s._orbitalRadius * 1.2);   v->push_back(0);   v->push_back(s._orbitalPlaneColor.r*0.3);  v->push_back(s._orbitalPlaneColor.g*0.3); v->push_back(s._orbitalPlaneColor.b*0.3);    v->push_back(1.0);
-    v->push_back(+s._orbitalRadius * 1.2);   v->push_back(+s._orbitalRadius * 1.2);   v->push_back(0);   v->push_back(s._orbitalPlaneColor.r*0.3);  v->push_back(s._orbitalPlaneColor.g*0.3); v->push_back(s._orbitalPlaneColor.b*0.3);    v->push_back(1.0);
-    v->push_back(-s._orbitalRadius * 1.2);   v->push_back(+s._orbitalRadius * 1.2);   v->push_back(0);   v->push_back(s._orbitalPlaneColor.r*0.3);  v->push_back(s._orbitalPlaneColor.g*0.3); v->push_back(s._orbitalPlaneColor.b*0.3);    v->push_back(1.0);
-    v->push_back(-s._orbitalRadius * 1.2);   v->push_back(-s._orbitalRadius * 1.2);   v->push_back(0);   v->push_back(s._orbitalPlaneColor.r*0.3);  v->push_back(s._orbitalPlaneColor.g*0.3); v->push_back(s._orbitalPlaneColor.b*0.3);    v->push_back(1.0);
+    v->push_back(-s._orbitalRadius * 1.2);   v->push_back(-s._orbitalRadius * 1.2);   v->push_back(0);   v->push_back(s._orbitalPlaneColor.r*m);  v->push_back(s._orbitalPlaneColor.g*m); v->push_back(s._orbitalPlaneColor.b*m);    v->push_back(1.0);
+    v->push_back(+s._orbitalRadius * 1.2);   v->push_back(-s._orbitalRadius * 1.2);   v->push_back(0);   v->push_back(s._orbitalPlaneColor.r*m);  v->push_back(s._orbitalPlaneColor.g*m); v->push_back(s._orbitalPlaneColor.b*m);    v->push_back(1.0);
+    v->push_back(+s._orbitalRadius * 1.2);   v->push_back(+s._orbitalRadius * 1.2);   v->push_back(0);   v->push_back(s._orbitalPlaneColor.r*m);  v->push_back(s._orbitalPlaneColor.g*m); v->push_back(s._orbitalPlaneColor.b*m);    v->push_back(1.0);
+    v->push_back(+s._orbitalRadius * 1.2);   v->push_back(+s._orbitalRadius * 1.2);   v->push_back(0);   v->push_back(s._orbitalPlaneColor.r*m);  v->push_back(s._orbitalPlaneColor.g*m); v->push_back(s._orbitalPlaneColor.b*m);    v->push_back(1.0);
+    v->push_back(-s._orbitalRadius * 1.2);   v->push_back(+s._orbitalRadius * 1.2);   v->push_back(0);   v->push_back(s._orbitalPlaneColor.r*m);  v->push_back(s._orbitalPlaneColor.g*m); v->push_back(s._orbitalPlaneColor.b*m);    v->push_back(1.0);
+    v->push_back(-s._orbitalRadius * 1.2);   v->push_back(-s._orbitalRadius * 1.2);   v->push_back(0);   v->push_back(s._orbitalPlaneColor.r*m);  v->push_back(s._orbitalPlaneColor.g*m); v->push_back(s._orbitalPlaneColor.b*m);    v->push_back(1.0);
 
     return v;
 }
@@ -242,22 +243,23 @@ std::vector<float>* SphereRenderer::_constructOrbitalPlaneGridVertices()
     //inc = std::max(inc, 50.0f);
     printf("inc = %f\n", inc);
     float x, y;
+    float m = 0.3;      // color multiplier
     x = y = -s._orbitalRadius * 1.2;
     for (int i = 0; i <= maxGridLines; i++)
     {
-        v->push_back(x);   v->push_back(-s._orbitalRadius * 1.2);   v->push_back(+1);   v->push_back(s._orbitalPlaneColor.r*1.2);  v->push_back(s._orbitalPlaneColor.g*1.2); v->push_back(s._orbitalPlaneColor.b*1.2);    v->push_back(1.0);
-        v->push_back(x);   v->push_back( s._orbitalRadius * 1.2);   v->push_back(+1);   v->push_back(s._orbitalPlaneColor.r*1.2);  v->push_back(s._orbitalPlaneColor.g*1.2); v->push_back(s._orbitalPlaneColor.b*1.2);    v->push_back(1.0);
-        v->push_back(x);   v->push_back(-s._orbitalRadius * 1.2);   v->push_back(-1);   v->push_back(s._orbitalPlaneColor.r*1.2);  v->push_back(s._orbitalPlaneColor.g*1.2); v->push_back(s._orbitalPlaneColor.b*1.2);    v->push_back(1.0);
-        v->push_back(x);   v->push_back( s._orbitalRadius * 1.2);   v->push_back(-1);   v->push_back(s._orbitalPlaneColor.r*1.2);  v->push_back(s._orbitalPlaneColor.g*1.2); v->push_back(s._orbitalPlaneColor.b*1.2);    v->push_back(1.0);
+        v->push_back(x);   v->push_back(-s._orbitalRadius * 1.2);   v->push_back(+1);   v->push_back(s._orbitalPlaneColor.r*m);  v->push_back(s._orbitalPlaneColor.g*m); v->push_back(s._orbitalPlaneColor.b*m);    v->push_back(1.0);
+        v->push_back(x);   v->push_back( s._orbitalRadius * 1.2);   v->push_back(+1);   v->push_back(s._orbitalPlaneColor.r*m);  v->push_back(s._orbitalPlaneColor.g*m); v->push_back(s._orbitalPlaneColor.b*m);    v->push_back(1.0);
+        v->push_back(x);   v->push_back(-s._orbitalRadius * 1.2);   v->push_back(-1);   v->push_back(s._orbitalPlaneColor.r*m);  v->push_back(s._orbitalPlaneColor.g*m); v->push_back(s._orbitalPlaneColor.b*m);    v->push_back(1.0);
+        v->push_back(x);   v->push_back( s._orbitalRadius * 1.2);   v->push_back(-1);   v->push_back(s._orbitalPlaneColor.r*m);  v->push_back(s._orbitalPlaneColor.g*m); v->push_back(s._orbitalPlaneColor.b*m);    v->push_back(1.0);
 
         x += inc;
     }
     for (int i = 0; i <= maxGridLines; i++)
     {
-        v->push_back(-s._orbitalRadius * 1.2);   v->push_back(y);   v->push_back(+1);   v->push_back(s._orbitalPlaneColor.r*1.2);  v->push_back(s._orbitalPlaneColor.g*1.2); v->push_back(s._orbitalPlaneColor.b*1.2);    v->push_back(1.0);
-        v->push_back(+s._orbitalRadius * 1.2);   v->push_back(y);   v->push_back(+1);   v->push_back(s._orbitalPlaneColor.r*1.2);  v->push_back(s._orbitalPlaneColor.g*1.2); v->push_back(s._orbitalPlaneColor.b*1.2);    v->push_back(1.0);
-        v->push_back(-s._orbitalRadius * 1.2);   v->push_back(y);   v->push_back(-1);   v->push_back(s._orbitalPlaneColor.r*1.2);  v->push_back(s._orbitalPlaneColor.g*1.2); v->push_back(s._orbitalPlaneColor.b*1.2);    v->push_back(1.0);
-        v->push_back(+s._orbitalRadius * 1.2);   v->push_back(y);   v->push_back(-1);   v->push_back(s._orbitalPlaneColor.r*1.2);  v->push_back(s._orbitalPlaneColor.g*1.2); v->push_back(s._orbitalPlaneColor.b*1.2);    v->push_back(1.0);
+        v->push_back(-s._orbitalRadius * 1.2);   v->push_back(y);   v->push_back(+1);   v->push_back(s._orbitalPlaneColor.r*m);  v->push_back(s._orbitalPlaneColor.g*m); v->push_back(s._orbitalPlaneColor.b*m);    v->push_back(1.0);
+        v->push_back(+s._orbitalRadius * 1.2);   v->push_back(y);   v->push_back(+1);   v->push_back(s._orbitalPlaneColor.r*m);  v->push_back(s._orbitalPlaneColor.g*m); v->push_back(s._orbitalPlaneColor.b*m);    v->push_back(1.0);
+        v->push_back(-s._orbitalRadius * 1.2);   v->push_back(y);   v->push_back(-1);   v->push_back(s._orbitalPlaneColor.r*m);  v->push_back(s._orbitalPlaneColor.g*m); v->push_back(s._orbitalPlaneColor.b*m);    v->push_back(1.0);
+        v->push_back(+s._orbitalRadius * 1.2);   v->push_back(y);   v->push_back(-1);   v->push_back(s._orbitalPlaneColor.r*m);  v->push_back(s._orbitalPlaneColor.g*m); v->push_back(s._orbitalPlaneColor.b*m);    v->push_back(1.0);
 
         y += inc;
     }

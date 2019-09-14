@@ -106,7 +106,7 @@ void Universe::initSceneObjects()
         0,                                  // orbital rotation angle
         glm::radians(30.0)                  // orbital tilt
     );
-    moon.setOrbitalPlaneColor(glm::vec3(0.3, 0.5, 0.3));
+    moon.setOrbitalPlaneColor(glm::vec3(0.8, 0.8, 0.8));
 
     moon.setParentSphere(&earth);
     earth.setParentSphere(&sun);
@@ -1231,6 +1231,48 @@ void Universe::ShowDemo(int nParam)
         bUpdateUI = true;
 
         break;
+    
+    case UDemo_TotalSolarEclipseOnNorthPole:
+        // Set earth at (0,R,0)
+        Earth_SetOrbitalPositionAngle(M_PI / 2);
+
+        Earth_OrbitalPlane(UCmdParam_Off);
+        Moon_OrbitalPlane(UCmdParam_Off);
+
+        // Adjust navigation view locks on earth and sun
+        NavigationLockOntoEarth(UCmdParam_On);
+        NavigationLockOntoSun(UCmdParam_Off);
+
+        // Set S
+        //newS = PNT(earth.getCenter().x + 500, earth.getCenter().y - 700, earth.getCenter().z + 150);
+        newS = PNT(733.4838, 817.9659, 297.3985);
+        space.setFrame(AT_POINT,
+            newS,
+            VECTOR(newS, earth.getCenter()),
+            PNT(newS.x, newS.y, newS.z - 100));
+
+        /* Set proper moon's position so that the moon's shadow will
+           fall on the earth shortly */
+        Moon_SetOrbitalPositionAngle(-3.7 * M_PI / 5);
+        Earth_SetOrbitalPositionAngle(0.69 * M_PI / 2);
+
+        // Adjust earth's motions
+        Earth_RotationMotion(UCmdParam_On);
+        Earth_RevolutionMotion(UCmdParam_Off);
+        Earth_PrecessionMotion(UCmdParam_Reset);
+
+        // Adjust Moon's motions
+        Moon_RevolutionMotion(UCmdParam_On);
+
+        // Increase the dot density
+        SetDotDensity(UDotDensity_High);
+        SetSimulationSpeed(USimulationSpeed_Low);
+        SimulationPause(UCmdParam_Off);
+
+        F_REFERENCE_VECTOR_ALONG_Z = 1;
+
+        bUpdateUI = true;
+        break;
 
     case UDemo_AnnularSolarEclipseFromSpace:
         // Set earth at (0,R,0)
@@ -1271,6 +1313,48 @@ void Universe::ShowDemo(int nParam)
 
         F_REFERENCE_VECTOR_ALONG_Z = 0;
         bSidewaysMotionMode = false;
+
+        bUpdateUI = true;
+        break;
+
+    case UDemo_PartialLunarEclipse:
+        // Set earth at (0,R,0)
+        Earth_SetOrbitalPositionAngle(M_PI / 2);
+
+        Earth_OrbitalPlane(UCmdParam_On);
+        Moon_OrbitalPlane(UCmdParam_Off);
+
+        // Adjust navigation view locks on earth and sun
+        NavigationLockOntoEarth(UCmdParam_On);
+        NavigationLockOntoSun(UCmdParam_Off);
+
+        // Set S
+        //newS = PNT(earth.getCenter().x + 500, earth.getCenter().y - 700, earth.getCenter().z + 150);
+        newS = PNT(1196.26, 462.93, -60.55);
+        space.setFrame(AT_POINT,
+            newS,
+            VECTOR(newS, earth.getCenter()),
+            PNT(newS.x, newS.y, newS.z - 100));
+
+        /* Set proper moon's position so that the moon's shadow will
+           fall on the earth shortly */
+        Moon_SetOrbitalPositionAngle(0.35 * M_PI / 2);
+        Earth_SetOrbitalPositionAngle(0.59 * M_PI / 2);
+
+        // Adjust earth's motions
+        Earth_RotationMotion(UCmdParam_On);
+        Earth_RevolutionMotion(UCmdParam_Off);
+        Earth_PrecessionMotion(UCmdParam_Reset);
+
+        // Adjust Moon's motions
+        Moon_RevolutionMotion(UCmdParam_On);
+
+        // Increase the dot density
+        SetDotDensity(UDotDensity_High);
+        SetSimulationSpeed(USimulationSpeed_Low);
+        SimulationPause(UCmdParam_Off);
+
+        F_REFERENCE_VECTOR_ALONG_Z = 1;
 
         bUpdateUI = true;
         break;
@@ -1695,7 +1779,7 @@ void Universe::generateImGuiWidgets()
                 ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings
             );
             static float f = 0.0f;
-            ImGui::PushFont(appFontSmallMedium);
+            ImGui::PushFont(appFontSmall);
             if (ImGui::CollapsingHeader("Demos", ImGuiTreeNodeFlags_DefaultOpen)) {
                 ImGui::PushFont(appFontSmall);
                 ImGui::Indent();
@@ -1703,10 +1787,16 @@ void Universe::generateImGuiWidgets()
                 if (ImGui::Button("Total Solar Eclipse## demo"))
                     ShowDemo(UDemo_TotalSolarEclipse);
 
+                if (ImGui::Button("Total Solar Eclipse on north pole## demo"))
+                    ShowDemo(UDemo_TotalSolarEclipseOnNorthPole);
+
                 if (ImGui::Button("Annular Solar Eclipse from space## demo"))
                     ShowDemo(UDemo_AnnularSolarEclipseFromSpace);
                 ImGui::SameLine();
                 HelpMarker("Also shows umbra touching the earth");
+
+                if (ImGui::Button("Partial Lunar Eclipse## demo"))
+                    ShowDemo(UDemo_PartialLunarEclipse);
 
                 ImGui::SetNextItemWidth(190);
                 if (ImGui::Button("Tilted orbital planes## demo"))
@@ -1735,7 +1825,7 @@ void Universe::generateImGuiWidgets()
 
             //-----------------------------------------------------
 
-            ImGui::PushFont(appFontSmallMedium);
+            ImGui::PushFont(appFontSmall);
             ImGui::Text("Earth:");               // Display some text (you can use a format strings too)
             ImGui::PopFont();
             ImGui::Indent();
@@ -1751,7 +1841,7 @@ void Universe::generateImGuiWidgets()
 
             //-----------------------------------------------------
 
-            ImGui::PushFont(appFontSmallMedium);
+            ImGui::PushFont(appFontSmall);
             ImGui::Text("Moon:");               // Display some text (you can use a format strings too)
             ImGui::PopFont();
 
@@ -1767,7 +1857,7 @@ void Universe::generateImGuiWidgets()
 
             //-----------------------------------------------------
 
-            ImGui::PushFont(appFontSmallMedium);
+            ImGui::PushFont(appFontSmall);
             ImGui::Text("Navigation:");
             ImGui::PopFont();
 
@@ -1791,7 +1881,7 @@ void Universe::generateImGuiWidgets()
 
             //-----------------------------------------------------
 
-            ImGui::PushFont(appFontSmallMedium);
+            ImGui::PushFont(appFontSmall);
             ImGui::Text("Time:");
             ImGui::PopFont();
             ImGui::Indent();
@@ -1821,6 +1911,7 @@ void Universe::generateImGuiWidgets()
             ImGui::Separator();
             ImGui::Text("S: %.4f, %.4f, %.4f", space.S.x, space.S.y, space.S.z);
             ImGui::Text("D: %.4f, %.4f, %.4f", space.D.x, space.D.y, space.D.z);
+            ImGui::Text("E orbital angle: %.4f", earth._orbitalAngle);
             ImGui::End();
         }
 
