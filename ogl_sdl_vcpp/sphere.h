@@ -197,10 +197,10 @@ public:
             _orbitalAngle += _orbitalAngularVelocity * stepMultiplier;
 
         if (bPrecessionMotion)
-            _axisRotationAngle += 0.01;      // todo - use step multiplier and a new internal velocity variable.
+            _axisRotationAngle += 0.005;      // todo - use step multiplier and a new internal velocity variable.
 
         if (bOrbitalPlaneRotation)
-            _orbitalPlaneRotationAngle += 0.01;     // todo - use step multiplier and velocity
+            _orbitalPlaneRotationAngle += 0.005;     // todo - use step multiplier and velocity
 
         calculateCenterPosition();
     }
