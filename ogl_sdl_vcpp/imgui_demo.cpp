@@ -387,7 +387,7 @@ void ImGui::ShowDemoWindow(bool* p_open)
         }
     }
 
-    if (ImGui::CollapsingHeader("Window options"))
+    if (ImGui::CollapsingHeader("Window options", ImGuiTreeNodeFlags_DefaultOpen))
     {
         ImGui::Checkbox("No titlebar", &no_titlebar); ImGui::SameLine(150);
         ImGui::Checkbox("No scrollbar", &no_scrollbar); ImGui::SameLine(300);

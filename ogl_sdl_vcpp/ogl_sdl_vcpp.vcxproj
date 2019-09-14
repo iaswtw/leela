@@ -179,6 +179,7 @@
     <ClInclude Include="SphereRenderer.h" />
     <ClInclude Include="Universe.h" />
     <ClInclude Include="Utils.h" />
+    <ClInclude Include="OneShotBoolean.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Class.cpp" />

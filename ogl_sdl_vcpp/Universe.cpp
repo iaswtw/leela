@@ -10,6 +10,24 @@
 #include "Utils.h"
 #include <stdio.h>
 
+
+// Following function was copied from imgui_demo.cpp
+// Helper to display a little (?) mark which shows a tooltip when hovered.
+// In your own code you may want to display an actual icon if you are using a merged icon fonts (see misc/fonts/README.txt)
+static void HelpMarker(const char* desc)
+{
+    ImGui::TextDisabled("(?)");
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::TextUnformatted(desc);
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
+}
+
+
 Universe::Universe() :
     sunRenderer(sun),
     earthRenderer(earth),
@@ -21,8 +39,6 @@ Universe::Universe() :
 Universe::~Universe()
 {
 }
-
-
 
 /*************************************************************************************************
 
@@ -907,6 +923,14 @@ void Universe::SetSimulationSpeed(int nParam)
         _stepMultiplier = 0.005;
         break;
 
+    case USimulationSpeed_Low2:
+        _stepMultiplier = 0.015;
+        break;
+
+    case USimulationSpeed_Low1:
+        _stepMultiplier = 0.03;
+        break;
+
     case USimulationSpeed_Low:
         _stepMultiplier = 0.05;
         break;
@@ -1173,7 +1197,8 @@ void Universe::ShowDemo(int nParam)
         NavigationLockOntoSun(UCmdParam_Off);
 
         // Set S
-        newS = PNT(earth.getCenter().x + 500, earth.getCenter().y - 700, earth.getCenter().z + 150);
+        //newS = PNT(earth.getCenter().x + 500, earth.getCenter().y - 700, earth.getCenter().z + 150);
+        newS = PNT(-323.5104, 957.3688, 296.3317);
         space.setFrame(AT_POINT,
             newS,
             VECTOR(newS, earth.getCenter()),
@@ -1181,7 +1206,7 @@ void Universe::ShowDemo(int nParam)
 
         /* Set proper moon's position so that the moon's shadow will
            fall on the earth shortly */
-        Moon_SetOrbitalPositionAngle(-3 * M_PI / 5);
+        Moon_SetOrbitalPositionAngle(-3.2 * M_PI / 5);
 
         // Adjust earth's motions
         Earth_RotationMotion(UCmdParam_On);
@@ -1193,7 +1218,7 @@ void Universe::ShowDemo(int nParam)
 
         // Increase the dot density
         SetDotDensity(UDotDensity_High);
-        SetSimulationSpeed(USimulationSpeed_Low);
+        SetSimulationSpeed(USimulationSpeed_Low1);
         SimulationPause(UCmdParam_Off);
 
         /* F_REFERENCE_VECTOR_ALONG_Z is checked before bLockOntoEarth
@@ -1205,6 +1230,49 @@ void Universe::ShowDemo(int nParam)
 
         bUpdateUI = true;
 
+        break;
+
+    case UDemo_AnnularSolarEclipseFromSpace:
+        // Set earth at (0,R,0)
+        Earth_SetOrbitalPositionAngle(M_PI / 2);
+
+        Earth_OrbitalPlane(UCmdParam_Off);
+        Moon_OrbitalPlane(UCmdParam_Off);
+
+        // Adjust navigation view locks on earth and sun
+        NavigationLockOntoEarth(UCmdParam_Off);
+        NavigationLockOntoSun(UCmdParam_Off);
+
+        // Set S
+        // the hardcoded values here were found by printing the value of S & D on screen using ImGui
+        // while manually going to that position.
+        newS = PNT(-92.2673, 1435.5368, 52.9889);
+        space.setFrame(AT_POINT,
+            newS,
+            VECTOR(newS, PNT(641.3813, -2678.9711, -409.2932)),
+            PNT(newS.x, newS.y, newS.z - 100));
+
+        /* Set proper moon's position so that the moon's shadow will
+           fall on the earth shortly */
+        Moon_SetOrbitalPositionAngle(-3.3 * M_PI / 5);
+
+        // Adjust earth's motions
+        Earth_RotationMotion(UCmdParam_On);
+        Earth_RevolutionMotion(UCmdParam_Off);
+        Earth_PrecessionMotion(UCmdParam_Reset);
+
+        // Adjust Moon's motions
+        Moon_RevolutionMotion(UCmdParam_On);
+
+        // Increase the dot density
+        SetDotDensity(UDotDensity_High);
+        SetSimulationSpeed(USimulationSpeed_Low2);
+        SimulationPause(UCmdParam_Off);
+
+        F_REFERENCE_VECTOR_ALONG_Z = 0;
+        bSidewaysMotionMode = false;
+
+        bUpdateUI = true;
         break;
 
     case UDemo_PrecessionMotion:
@@ -1279,6 +1347,7 @@ void Universe::ShowDemo(int nParam)
 
         // Adjust Moon's motions
         Moon_RevolutionMotion(UCmdParam_On);
+        Moon_SetOrbitalPositionAngle(0.0f);
 
         SetSimulationSpeed(USimulationSpeed_Normal);
         SetDotDensity(UDotDensity_Normal);
@@ -1299,7 +1368,9 @@ void Universe::toggleFullScreen()
         bIsWindowFullScreen = false;
     }
     else {
-        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+        printf("  Changing to fullscreen\n");
+        //SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);        
         bIsWindowFullScreen = true;
     }
 }
@@ -1579,11 +1650,11 @@ void Universe::generateImGuiWidgets()
 
     if (bMouseGrabbed)
     {
-        ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x / 2.0f, 25.0f), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+        ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x / 2.0f, 10.0f), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
         ImGui::SetNextWindowBgAlpha(0.35f);
         if (ImGui::Begin("Escape message", &bShowFlagsOverlay, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
         {
-            ImGui::Text("Escape key / doubleclick to restore control panel");
+            ImGui::Text("Escape key / double-click to get mouse back");
         }
         ImGui::End();
     }
@@ -1596,7 +1667,7 @@ void Universe::generateImGuiWidgets()
             {
                 if (ImGui::MenuItem("Show Fullscreen", "F11"))
                     toggleFullScreen();
-                ImGui::MenuItem("Always show Control Panel", nullptr, &bAlwaysShowControlPanel, true);
+                ImGui::MenuItem("Persistent Control Panel", nullptr, &bAlwaysShowControlPanel, true);
                 if (ImGui::MenuItem("Exit Application"))
                     bQuit = true;
 
@@ -1612,7 +1683,7 @@ void Universe::generateImGuiWidgets()
         if (show_demo_window)
             ImGui::ShowDemoWindow(&show_demo_window);
 
-        ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - 5.0f, 25.0f), ImGuiCond_Always, ImVec2(1.0f, 0.0f));
+        ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - 5.0f, 27.0f), ImGuiCond_Always, ImVec2(1.0f, 0.0f));
         //ImGui::SetNextWindowSize(ImVec2(250.0f, curHeight - 25.0f));
         ImGui::SetNextWindowBgAlpha(0.8f);
 
@@ -1623,54 +1694,133 @@ void Universe::generateImGuiWidgets()
                 nullptr,
                 ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings
             );
+            static float f = 0.0f;
+            ImGui::PushFont(appFontSmallMedium);
+            if (ImGui::CollapsingHeader("Demos", ImGuiTreeNodeFlags_DefaultOpen)) {
+                ImGui::PushFont(appFontSmall);
+                ImGui::Indent();
+                ImGui::SetNextItemWidth(190);
+                if (ImGui::Button("Total Solar Eclipse## demo"))
+                    ShowDemo(UDemo_TotalSolarEclipse);
 
-            ImGui::Text("Demos:");
-            ImGui::PushItemWidth(-1);
-            if (ImGui::Button("Total Solar Eclipse## demo"))
-                ShowDemo(UDemo_TotalSolarEclipse);
-            if (ImGui::Button("Tilted orbital planes## demo"))
-                ShowDemo(UDemo_TiltedOrbitalPlanes);
-            if (ImGui::Button("Precession motion## demo"))
-                ShowDemo(UDemo_PrecessionMotion);
-            ImGui::PopItemWidth();
+                if (ImGui::Button("Annular Solar Eclipse from space## demo"))
+                    ShowDemo(UDemo_AnnularSolarEclipseFromSpace);
+                ImGui::SameLine();
+                HelpMarker("Also shows umbra touching the earth");
+
+                ImGui::SetNextItemWidth(190);
+                if (ImGui::Button("Tilted orbital planes## demo"))
+                    ShowDemo(UDemo_TiltedOrbitalPlanes);
+
+                ImGui::SetNextItemWidth(190);
+                if (ImGui::Button("Precession motion## demo"))
+                    ShowDemo(UDemo_PrecessionMotion);
+
+                //ImGui::SetNextItemWidth(-10);
+                //ImGui::DragFloat("##float5a", &f);
+
+                //ImGui::SetNextItemWidth(-10);
+                //ImGui::DragFloat("##float5b", &f);
+
+                //ImGui::SetNextItemWidth(-10);
+                //ImGui::DragFloat("##float5c", &f);
+
+                //ImGui::SetNextItemWidth(-10);
+                //ImGui::Text("All the way");
+                ImGui::Unindent();
+                ImGui::PopFont();
+            }
+            ImGui::PopFont();
             ImGui::Separator();
 
+            //-----------------------------------------------------
+
+            ImGui::PushFont(appFontSmallMedium);
             ImGui::Text("Earth:");               // Display some text (you can use a format strings too)
-            ImGui::Checkbox("Revolution motion## earth", &earth.bRevolutionMotion);
-            ImGui::Checkbox("Orbital plane## earth", &earthRenderer.bShowOrbitalPlane);
-            ImGui::Checkbox("Precession motion## earth", &earth.bPrecessionMotion);
+            ImGui::PopFont();
+            ImGui::Indent();
+            ImGui::Checkbox("Revolution motion (0)## earth", &earth.bRevolutionMotion);
+            ImGui::Checkbox("Orbital plane (g)## earth", &earthRenderer.bShowOrbitalPlane);
+            ImGui::Checkbox("Precession motion (F6)## earth", &earth.bPrecessionMotion);
             ImGui::SameLine();
             if (ImGui::Button("Reset## earth precession motion"))
                 Earth_PrecessionMotion(UCmdParam_Reset);
+            ImGui::Unindent();
 
             ImGui::Separator();
 
+            //-----------------------------------------------------
+
+            ImGui::PushFont(appFontSmallMedium);
             ImGui::Text("Moon:");               // Display some text (you can use a format strings too)
+            ImGui::PopFont();
+
+            ImGui::Indent();
             ImGui::Checkbox("Revolution motion", &moon.bRevolutionMotion);
-            ImGui::Checkbox("Orbital plane##moon", &moonRenderer.bShowOrbitalPlane);
-            ImGui::Checkbox("Orbital plane rotation", &moon.bOrbitalPlaneRotation);
+            ImGui::Checkbox("Orbital plane (m)##moon", &moonRenderer.bShowOrbitalPlane);
+            ImGui::Checkbox("Orbital plane rotation (F5)", &moon.bOrbitalPlaneRotation);
             ImGui::SameLine();
             if (ImGui::Button("Reset## moon orbital plane rotation"))
                 Moon_OrbitalPlaneRotation(UCmdParam_Reset);
+            ImGui::Unindent();
             ImGui::Separator();
 
-            ImGui::Text("Navigation Flags:");
-            ImGui::Checkbox("Sideways motion mode (v)", &bSidewaysMotionMode);
+            //-----------------------------------------------------
+
+            ImGui::PushFont(appFontSmallMedium);
+            ImGui::Text("Navigation:");
+            ImGui::PopFont();
+
+            ImGui::Indent();
+            ImGui::Checkbox("Shift mode (v)", &bSidewaysMotionMode);
+            ImGui::SameLine(); HelpMarker("When checked, Shift left/right/up/down on mouse movements.\nWhen unchecked, rotate instead.");
             ImGui::Checkbox("Lock on earth's position (z)", &bLockOntoEarth);
             if (ImGui::IsItemEdited())
                 NavigationLockOntoEarth(bLockOntoEarth ? UCmdParam_On : UCmdParam_Off);
+            ImGui::SameLine(); HelpMarker("Also pauses earth's revolution. Activate this mode and\nthen use mouse to view earth from different angles.");
 
             ImGui::Checkbox("Lock on sun's position (c)", &bLockOntoSun);
             if (ImGui::IsItemEdited())
                 NavigationLockOntoSun(bLockOntoSun ? UCmdParam_On : UCmdParam_Off);
 
-            ImGui::Checkbox("Time pause (space)", &bSimulationPause);
-
-            if (ImGui::Button("Default view"))
+            if (ImGui::Button("Default view (d)"))
                 SetDefaultView();
+            ImGui::Unindent();
+
+            ImGui::Separator();
+
+            //-----------------------------------------------------
+
+            ImGui::PushFont(appFontSmallMedium);
+            ImGui::Text("Time:");
+            ImGui::PopFont();
+            ImGui::Indent();
+
+            ImGui::Checkbox("Time pause (space bar)", &bSimulationPause);
+
+            ImGui::Button("Fast Rewind (r)");
+            if (ImGui::IsItemActivated())       Rewind(UCmdParam_On);
+            if (ImGui::IsItemDeactivated())     Rewind(UCmdParam_Off);
+
+            ImGui::SameLine();
+            ImGui::Button("Fast Forward (f)");
+            if (ImGui::IsItemActivated())       FastForward(UCmdParam_On);
+            if (ImGui::IsItemDeactivated())     FastForward(UCmdParam_Off);
+
+            static int timeSpeed = 0;
+            ImGui::SetNextItemWidth(100);
+            ImGui::Combo("Time Speed", &timeSpeed, "Very Slow\0Slow\0Normal\0Fast\0Very Fast\0\0");
+            // todo - actually apply this value in the app
+
+            ImGui::Unindent();
+
+            //-----------------------------------------------------
 
             ImGui::Separator();
             ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            ImGui::Separator();
+            ImGui::Text("S: %.4f, %.4f, %.4f", space.S.x, space.S.y, space.S.z);
+            ImGui::Text("D: %.4f, %.4f, %.4f", space.D.x, space.D.y, space.D.z);
             ImGui::End();
         }
 
@@ -1708,7 +1858,7 @@ int Universe::run()
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
-    window = SDL_CreateWindow("OpenGL", 100, 100, 800, 600, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED);
+    window = SDL_CreateWindow("Universe3d", 100, 100, 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED);
 
     printf("Created SDL GL window\n");
     context = SDL_GL_CreateContext(window);
@@ -1720,6 +1870,14 @@ int Universe::run()
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
+    
+    appFontSmall        = io.Fonts->AddFontFromFileTTF("..\\ogl_sdl_vcpp\\misc\\fonts\\Roboto-Medium.ttf", 16);
+    appFontSmallMedium  = io.Fonts->AddFontFromFileTTF("..\\ogl_sdl_vcpp\\misc\\fonts\\Roboto-Medium.ttf", 18);
+    appFontMedium       = io.Fonts->AddFontFromFileTTF("..\\ogl_sdl_vcpp\\misc\\fonts\\Roboto-Medium.ttf", 20);
+    appFontLarge        = io.Fonts->AddFontFromFileTTF("..\\ogl_sdl_vcpp\\misc\\fonts\\Roboto-Medium.ttf", 24);
+    //if (!font1)
+    //    printf("ERROR: Could not load font Cousine-Regular\n");
+
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
@@ -1793,18 +1951,21 @@ int Universe::run()
                     switch (event.button.button) {
                     case SDL_BUTTON_LEFT:
                         if (event.button.clicks == 1) {
-                            if (!bMouseGrabbed) {
+                            if (!doubleClicked.get() && !bMouseGrabbed) {
                                 resetWidgetControlMode();
                                 bMouseGrabbed = true;
                             }
                         }
                         if (event.button.clicks == 2) {
                             if (bMouseGrabbed) {
+                                doubleClicked.set(50);
                                 setWidgetControlMode();
                                 bMouseGrabbed = false;
                             }
                         }
                         bLeftMouseButtonDown = true;
+                        break;
+                    case SDL_BUTTON_RIGHT:
                         break;
                     }
                     break;
@@ -1840,6 +2001,7 @@ int Universe::run()
         if (bQuit)
             break;
 
+        doubleClicked.tick();
         processFlags();
         render();
 

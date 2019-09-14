@@ -17,6 +17,8 @@
 #include <iostream>
 #include <string>
 
+#include "imgui.h"
+#include "OneShotBoolean.h"
 
 #define MAXSTARS 1800
 #define MAXGALAXYSTARS 10000
@@ -112,6 +114,8 @@ typedef enum
 typedef enum
 {
     USimulationSpeed_VeryLow = 0,
+    USimulationSpeed_Low2,
+    USimulationSpeed_Low1,
     USimulationSpeed_Low,
     USimulationSpeed_Normal,
     USimulationSpeed_High,
@@ -147,6 +151,7 @@ typedef enum
 typedef enum
 {
     UDemo_TotalSolarEclipse,
+    UDemo_AnnularSolarEclipseFromSpace,
     UDemo_TiltedOrbitalPlanes,
     UDemo_PrecessionMotion
 } UDemoType;
@@ -328,8 +333,15 @@ private:
     SDL_Window *window = nullptr;
     SDL_GLContext context;
 
-    bool bAlwaysShowControlPanel = false;
+    bool bAlwaysShowControlPanel = true;
     bool bIsWindowFullScreen = false;
     bool bShowFlagsOverlay = true;
+
+    ImFont *appFontSmall = nullptr;
+    ImFont *appFontSmallMedium = nullptr;
+    ImFont *appFontMedium = nullptr;
+    ImFont *appFontLarge = nullptr;
+
+    OneShotBoolean doubleClicked = OneShotBoolean();
 };
 
