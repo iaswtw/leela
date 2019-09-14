@@ -1871,10 +1871,10 @@ int Universe::run()
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     
-    appFontSmall        = io.Fonts->AddFontFromFileTTF("..\\ucore\\misc\\fonts\\Roboto-Medium.ttf", 16);
-    appFontSmallMedium  = io.Fonts->AddFontFromFileTTF("..\\ucore\\misc\\fonts\\Roboto-Medium.ttf", 18);
-    appFontMedium       = io.Fonts->AddFontFromFileTTF("..\\ucore\\misc\\fonts\\Roboto-Medium.ttf", 20);
-    appFontLarge        = io.Fonts->AddFontFromFileTTF("..\\ucore\\misc\\fonts\\Roboto-Medium.ttf", 24);
+    appFontSmall        = io.Fonts->AddFontFromFileTTF("..\\external\\fonts\\Roboto-Medium.ttf", 16);
+    appFontSmallMedium  = io.Fonts->AddFontFromFileTTF("..\\external\\fonts\\Roboto-Medium.ttf", 18);
+    appFontMedium       = io.Fonts->AddFontFromFileTTF("..\\external\\fonts\\Roboto-Medium.ttf", 20);
+    appFontLarge        = io.Fonts->AddFontFromFileTTF("..\\external\\fonts\\Roboto-Medium.ttf", 24);
     //if (!font1)
     //    printf("ERROR: Could not load font Cousine-Regular\n");
 
