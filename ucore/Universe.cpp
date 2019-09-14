@@ -27,6 +27,22 @@ static void HelpMarker(const char* desc)
     }
 }
 
+static std::string FindFontFile(const char * fileName)
+{
+    struct stat fileStat;
+    std::string fullPath;
+    
+    fullPath = std::string("fonts\\") + fileName;
+    if (stat(fullPath.c_str(), &fileStat) == 0)
+        return std::string(fullPath);
+
+    fullPath = std::string("..\\external\\fonts\\") + fileName;
+    if (stat(fullPath.c_str(), &fileStat) == 0)
+        return std::string(fullPath);
+
+    // File not found
+    return std::string("");
+}
 
 Universe::Universe() :
     sunRenderer(sun),
@@ -1725,9 +1741,42 @@ void Universe::generateImGuiWidgets()
     ImGuiIO& io = ImGui::GetIO();
     ImGui::SetNextWindowPos(ImVec2(5.0f, io.DisplaySize.y - 5.0f), ImGuiCond_Always, ImVec2(0.0f, 1.0f));
     ImGui::SetNextWindowBgAlpha(0.35f);
-    if (ImGui::Begin("Flags", &bShowFlagsOverlay, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
+    if (ImGui::Begin("Flags", &bShowFlagsOverlay, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoMouseInputs))
     {
-        ImGui::Text("V this is some text");
+
+        ImVec4 onColor  = ImColor(0.3f, 0.7f, 0.3f);
+        ImVec4 offColor = ImColor(0.0f, 0.0f, 0.0f);
+        ImVec4 color;
+
+        if (bSidewaysMotionMode) color = onColor; else color = offColor;
+        ImGui::PushStyleColor(ImGuiCol_Button, color);
+        ImGui::Button("V"); ImGui::SameLine();
+        ImGui::PopStyleColor();
+
+        if (bLockOntoEarth) color = onColor; else color = offColor;
+        ImGui::PushStyleColor(ImGuiCol_Button, color);
+        ImGui::Button("Z"); ImGui::SameLine();
+        ImGui::PopStyleColor();
+
+        if (!earth.bRevolutionMotion) color = onColor; else color = offColor;
+        ImGui::PushStyleColor(ImGuiCol_Button, color);
+        ImGui::Button("0"); ImGui::SameLine();
+        ImGui::PopStyleColor();
+
+        if (bSimulationPause) color = onColor; else color = offColor;
+        ImGui::PushStyleColor(ImGuiCol_Button, color);
+        ImGui::Button("Pause"); ImGui::SameLine();
+        ImGui::PopStyleColor();
+
+        if (earthRenderer.bShowOrbitalPlane) color = onColor; else color = offColor;
+        ImGui::PushStyleColor(ImGuiCol_Button, color);
+        ImGui::Button("G"); ImGui::SameLine();
+        ImGui::PopStyleColor();
+
+        if (moonRenderer.bShowOrbitalPlane) color = onColor; else color = offColor;
+        ImGui::PushStyleColor(ImGuiCol_Button, color);
+        ImGui::Button("M");
+        ImGui::PopStyleColor();
     }
     ImGui::End();
 
@@ -1962,10 +2011,11 @@ int Universe::run()
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     
-    appFontSmall        = io.Fonts->AddFontFromFileTTF("..\\external\\fonts\\Roboto-Medium.ttf", 16);
-    appFontSmallMedium  = io.Fonts->AddFontFromFileTTF("..\\external\\fonts\\Roboto-Medium.ttf", 18);
-    appFontMedium       = io.Fonts->AddFontFromFileTTF("..\\external\\fonts\\Roboto-Medium.ttf", 20);
-    appFontLarge        = io.Fonts->AddFontFromFileTTF("..\\external\\fonts\\Roboto-Medium.ttf", 24);
+    std::string fullFontFilePath = FindFontFile("Roboto-Medium.ttf");
+    appFontSmall        = io.Fonts->AddFontFromFileTTF(fullFontFilePath.c_str(), 16);
+    appFontSmallMedium  = io.Fonts->AddFontFromFileTTF(fullFontFilePath.c_str(), 18);
+    appFontMedium       = io.Fonts->AddFontFromFileTTF(fullFontFilePath.c_str(), 20);
+    appFontLarge        = io.Fonts->AddFontFromFileTTF(fullFontFilePath.c_str(), 24);
     //if (!font1)
     //    printf("ERROR: Could not load font Cousine-Regular\n");
 
