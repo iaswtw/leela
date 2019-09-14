@@ -209,7 +209,8 @@ public:
     void onMouseMotion(int xrel, int yrel);
 
     void toggleFullScreen();
-    void toggleWidgetControlMode();
+    void setWidgetControlMode();
+    void resetWidgetControlMode();
     void cleanupAndExitApplication();
     void generateImGuiWidgets();
 
@@ -327,7 +328,7 @@ private:
     SDL_Window *window = nullptr;
     SDL_GLContext context;
 
-    bool bControlPanelActive = true;
+    bool bAlwaysShowControlPanel = false;
     bool bIsWindowFullScreen = false;
     bool bShowFlagsOverlay = true;
 };

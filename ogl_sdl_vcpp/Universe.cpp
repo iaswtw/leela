@@ -1342,21 +1342,16 @@ void Universe::Earth_SetOrbitalPositionAngle(double fAngle)
 }
 
 
-void Universe::toggleWidgetControlMode()
+void Universe::setWidgetControlMode()
 {
-    bControlPanelActive = !bControlPanelActive;
-    if (bMouseGrabbed)
-    {
-        bMouseGrabbed = false;
-        SDL_ShowCursor(SDL_ENABLE);
-        SDL_SetRelativeMouseMode(SDL_FALSE);
-    }
-    else {
-        bMouseGrabbed = true;
-        SDL_ShowCursor(SDL_DISABLE);
-        SDL_SetRelativeMouseMode(SDL_TRUE);
-    }
+    SDL_ShowCursor(SDL_ENABLE);
+    SDL_SetRelativeMouseMode(SDL_FALSE);
+}
 
+void Universe::resetWidgetControlMode()
+{
+    SDL_ShowCursor(SDL_DISABLE);
+    SDL_SetRelativeMouseMode(SDL_TRUE);
 }
 
 /*************************************************************************************************
@@ -1582,61 +1577,81 @@ void Universe::generateImGuiWidgets()
     ImGui::End();
 
 
-    float upperMargin = bControlPanelActive ? 35.0f : 25.0f;
-    ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x / 2.0f, upperMargin), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-    ImGui::SetNextWindowBgAlpha(0.35f);
-    if (ImGui::Begin("Escape message", &bShowFlagsOverlay, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
+    if (bMouseGrabbed)
     {
-        ImGui::Text(
-            bControlPanelActive ?
-            "Escape key / double rightclick to dismiss control panel" :
-            "Escape key / double rightclick to restore control panel"
-        );
+        ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x / 2.0f, 25.0f), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+        ImGui::SetNextWindowBgAlpha(0.35f);
+        if (ImGui::Begin("Escape message", &bShowFlagsOverlay, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
+        {
+            ImGui::Text("Escape key / doubleclick to restore control panel");
+        }
+        ImGui::End();
     }
-    ImGui::End();
+    else
+    {
+        // Show menu bar
+        if (ImGui::BeginMainMenuBar())
+        {
+            if (ImGui::BeginMenu("Universe3d"))
+            {
+                if (ImGui::MenuItem("Show Fullscreen", "F11"))
+                    toggleFullScreen();
+                ImGui::MenuItem("Always show Control Panel", nullptr, &bAlwaysShowControlPanel, true);
+                if (ImGui::MenuItem("Exit Application"))
+                    bQuit = true;
 
+                ImGui::EndMenu();
+            }
+            ImGui::EndMainMenuBar();
+        }
+    }
 
     // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-    if (bControlPanelActive)
+    if (!bMouseGrabbed || bAlwaysShowControlPanel)
     {
         if (show_demo_window)
             ImGui::ShowDemoWindow(&show_demo_window);
 
-        ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - 5.0f, 20.0f), ImGuiCond_Always, ImVec2(1.0f, 0.0f));
+        ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - 5.0f, 25.0f), ImGuiCond_Always, ImVec2(1.0f, 0.0f));
         //ImGui::SetNextWindowSize(ImVec2(250.0f, curHeight - 25.0f));
         ImGui::SetNextWindowBgAlpha(0.8f);
 
-        // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
         {
-            static float f = 0.0f;
-            static int counter = 0;
-
             // Create a window called "Hello, world!" and append into it.
             ImGui::Begin(
-                "Hello, world!",
+                "Control Panel",
                 nullptr,
-                ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing
+                ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings
             );
 
             ImGui::Text("Demos:");
-            if (ImGui::Button("Total Solar Eclipse"))
+            ImGui::PushItemWidth(-1);
+            if (ImGui::Button("Total Solar Eclipse## demo"))
                 ShowDemo(UDemo_TotalSolarEclipse);
-            if (ImGui::Button("Tilted orbital planes"))
+            if (ImGui::Button("Tilted orbital planes## demo"))
                 ShowDemo(UDemo_TiltedOrbitalPlanes);
-            if (ImGui::Button("Precession motion"))
+            if (ImGui::Button("Precession motion## demo"))
                 ShowDemo(UDemo_PrecessionMotion);
+            ImGui::PopItemWidth();
             ImGui::Separator();
 
             ImGui::Text("Earth:");               // Display some text (you can use a format strings too)
-            ImGui::Checkbox("Revolution motion", &earth.bRevolutionMotion);
-            ImGui::Checkbox("Orbital plane##earth", &earthRenderer.bShowOrbitalPlane);
-            ImGui::Checkbox("Precession motion", &earth.bPrecessionMotion);
+            ImGui::Checkbox("Revolution motion## earth", &earth.bRevolutionMotion);
+            ImGui::Checkbox("Orbital plane## earth", &earthRenderer.bShowOrbitalPlane);
+            ImGui::Checkbox("Precession motion## earth", &earth.bPrecessionMotion);
+            ImGui::SameLine();
+            if (ImGui::Button("Reset## earth precession motion"))
+                Earth_PrecessionMotion(UCmdParam_Reset);
+
             ImGui::Separator();
 
             ImGui::Text("Moon:");               // Display some text (you can use a format strings too)
             ImGui::Checkbox("Revolution motion", &moon.bRevolutionMotion);
             ImGui::Checkbox("Orbital plane##moon", &moonRenderer.bShowOrbitalPlane);
             ImGui::Checkbox("Orbital plane rotation", &moon.bOrbitalPlaneRotation);
+            ImGui::SameLine();
+            if (ImGui::Button("Reset## moon orbital plane rotation"))
+                Moon_OrbitalPlaneRotation(UCmdParam_Reset);
             ImGui::Separator();
 
             ImGui::Text("Navigation Flags:");
@@ -1654,33 +1669,11 @@ void Universe::generateImGuiWidgets()
             if (ImGui::Button("Default view"))
                 SetDefaultView();
 
-            //ImGui::Checkbox("Another Window", &show_another_window);
-
-            //ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            //ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-            //if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-            //    counter++;
-            //ImGui::SameLine();
-            //ImGui::Text("counter = %d", counter);
-
-            //ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            ImGui::Separator();
+            ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::End();
         }
 
-        if (ImGui::BeginMainMenuBar())
-        {
-            if (ImGui::BeginMenu("Universe3d"))
-            {
-                if (ImGui::MenuItem("Show Fullscreen", "F11"))
-                    toggleFullScreen();
-                if (ImGui::MenuItem("Exit Application"))
-                    bQuit = true;
-
-                ImGui::EndMenu();
-            }
-            ImGui::EndMainMenuBar();
-        }
         // 3. Show another simple window.
         //if (show_another_window)
         //{
@@ -1693,7 +1686,6 @@ void Universe::generateImGuiWidgets()
 
         // Rendering
     }
-
 
     ImGui::Render();
 }
@@ -1768,17 +1760,15 @@ int Universe::run()
             {
             case SDL_QUIT:           bQuit = true;                  break;
             case SDL_KEYDOWN:
-                onKeyDown(&event);
-                break;
-            case SDL_KEYUP:
-                if (event.key.keysym.sym == SDLK_ESCAPE)
-                {
-                    toggleWidgetControlMode();
+                if (event.key.keysym.sym == SDLK_ESCAPE) {
+                    setWidgetControlMode();
+                    bMouseGrabbed = false;
                 }
                 else
-                {
-                    onKeyUp(&event);
-                }
+                    onKeyDown(&event);
+                break;
+            case SDL_KEYUP:
+                onKeyUp(&event);
                 break;
             case SDL_WINDOWEVENT:
                 if ((event.window.event == SDL_WINDOWEVENT_RESIZED) || 
@@ -1793,74 +1783,53 @@ int Universe::run()
                 break;
             }
 
-            if (event.type == SDL_MOUSEBUTTONDOWN ||
-                event.type == SDL_MOUSEBUTTONUP ||
-                event.type == SDL_MOUSEMOTION ||
-                event.type == SDL_MOUSEWHEEL)
+            //----------------------------------------------------
+            // Pass mouse events to universe3d application only if ImGui isn't using them.
+            if (!io.WantCaptureMouse)
             {
-                if (!bControlPanelActive)
+                switch (event.type)
                 {
-                    //----------------------------------------------------
-                    // Mouse events
-                    switch (event.type)
-                    {
-                    case SDL_MOUSEBUTTONDOWN:
-                        switch (event.button.button) {
-                        case SDL_BUTTON_LEFT:
-                            if (event.button.clicks == 2) {
-                                toggleWidgetControlMode();
-                                break;
+                case SDL_MOUSEBUTTONDOWN:
+                    switch (event.button.button) {
+                    case SDL_BUTTON_LEFT:
+                        if (event.button.clicks == 1) {
+                            if (!bMouseGrabbed) {
+                                resetWidgetControlMode();
+                                bMouseGrabbed = true;
                             }
-                            bLeftMouseButtonDown = true;
-                            break;
-                        case SDL_BUTTON_RIGHT:
-                            if (event.button.clicks == 2) {
-                                toggleWidgetControlMode();
-                                break;
+                        }
+                        if (event.button.clicks == 2) {
+                            if (bMouseGrabbed) {
+                                setWidgetControlMode();
+                                bMouseGrabbed = false;
                             }
-                            bRightMouseButtonDown = true;
-                            break;
                         }
-                        break;
-                    case SDL_MOUSEBUTTONUP:
-                        switch (event.button.button) {
-                        case SDL_BUTTON_LEFT:   bLeftMouseButtonDown = false;   break;
-                        case SDL_BUTTON_RIGHT:  bRightMouseButtonDown = false;  break;
-                        }
-                        break;
-                    case SDL_MOUSEMOTION:
-                        printf("mouse motion event\n");
-                        if (bMouseGrabbed)
-                            onMouseMotion(event.motion.xrel, event.motion.yrel);
-                        break;
-                    case SDL_MOUSEWHEEL:
-                        printf("mouse scroll event: %d, %d\n", event.wheel.x, event.wheel.y);
-                        if (bMouseGrabbed) {
-                            // Hack
-                            bool oldValue = bLeftMouseButtonDown;
-                            bLeftMouseButtonDown = true;
-                            onMouseMotion(-event.wheel.x * 10, -event.wheel.y * 10);
-                            bLeftMouseButtonDown = oldValue;
-                        }
+                        bLeftMouseButtonDown = true;
                         break;
                     }
+                    break;
+                case SDL_MOUSEBUTTONUP:
+                    switch (event.button.button) {
+                    case SDL_BUTTON_LEFT:   bLeftMouseButtonDown = false;   break;
+                    case SDL_BUTTON_RIGHT:  bRightMouseButtonDown = false;  break;
+                    }
+                    break;
+                case SDL_MOUSEMOTION:
+                    if (bMouseGrabbed)
+                        onMouseMotion(event.motion.xrel, event.motion.yrel);
+                    break;
+                case SDL_MOUSEWHEEL:
+                    if (bMouseGrabbed) {
+                        // Hack
+                        bool oldValue = bLeftMouseButtonDown;
+                        bLeftMouseButtonDown = true;
+                        onMouseMotion(-event.wheel.x * 10, -event.wheel.y * 10);
+                        bLeftMouseButtonDown = oldValue;
+                    }
+                    break;
                 }
-                else   // if (!bControlPanelActive)
-                {
-                    switch (event.type)
-                    {
-                    case SDL_MOUSEBUTTONDOWN:
-                        switch (event.button.button)
-                        {
-                        case SDL_BUTTON_RIGHT:
-                            if (event.button.clicks == 2) {
-                                toggleWidgetControlMode();
-                            }
-                        }                        
-                    }
-                }     // else of if (!bControlPanelActive)
             }
-            
+
             if (bQuit)
                 break;
 
