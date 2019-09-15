@@ -427,6 +427,8 @@ void Universe::initializeGL()
     oglHandles.uniView = getUniformLocation(oglHandles.shaderProgram, "view");
     oglHandles.uniProj = getUniformLocation(oglHandles.shaderProgram, "proj");
 
+    oglHandles.uniNightColorMultiplier = getUniformLocation(oglHandles.shaderProgram, "nightColorMultiplier");
+
     oglHandles.uniMyCenterTransformed  = getUniformLocation(oglHandles.shaderProgram, "sphereInfo.centerTransformed");
     oglHandles.uniMyRadius             = getUniformLocation(oglHandles.shaderProgram, "sphereInfo.radius");
     oglHandles.uniMyIsValud            = getUniformLocation(oglHandles.shaderProgram, "sphereInfo.isValid");
@@ -506,18 +508,20 @@ void Universe::initializeGL()
 
 
 	sunRenderer.setAsLightSource();
+    sunRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
+    sunRenderer.constructVerticesAndSendToGpu(oglHandles);
 
-	sunRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
-	earthRenderer.setPolygonCountLevel(PolygonCountLevel_High);
-	moonRenderer.setPolygonCountLevel(PolygonCountLevel_Medium);
-
-
-
-	sunRenderer.constructVerticesAndSendToGpu(oglHandles);
+    
+    earthRenderer.setPolygonCountLevel(PolygonCountLevel_High);
     earthRenderer.constructVerticesAndSendToGpu(oglHandles);
-    moonRenderer.constructVerticesAndSendToGpu(oglHandles);
-
     earthRenderer.bShowLatitudesAndLongitudes = true;
+    earthRenderer.setNightColorDarkness(NightColorDarkness_Medium);
+
+    
+    moonRenderer.setPolygonCountLevel(PolygonCountLevel_Medium);
+    moonRenderer.constructVerticesAndSendToGpu(oglHandles);
+    moonRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
+
 
     glBindVertexArray(0);       // Disable VBO
 
@@ -1073,7 +1077,7 @@ void Universe::Earth_RotationMotion(int nParam)
 void Universe::Earth_RevolutionMotion(int nParam)
 {
     ChangeBoolean(&earth.bRevolutionMotion, nParam);
-    F_REFERENCE_VECTOR_ALONG_Z = 0;
+    //F_REFERENCE_VECTOR_ALONG_Z = 0;
     //bLockOntoEarth = false;
 
     bUpdateUI = true;
