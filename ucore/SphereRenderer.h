@@ -18,6 +18,17 @@ enum PolygonCountLevel
 	PolygonCountLevel_High
 } ;
 
+enum NightColorDarkness
+{
+    NightColorDarkness_Black,
+    NightColorDarkness_VeryHigh,        // close to black
+    NightColorDarkness_High,
+    NightColorDarkness_Medium,
+    NightColorDarkness_Low,             
+    NightColorDarkness_VeryLow,         // close to day color
+    NightColorDarkness_None,            // night vertex color same as day color
+};
+
 class SphereRenderer
 {
 public:
@@ -25,6 +36,7 @@ public:
     ~SphereRenderer();
 
     void setAsLightSource();
+    void setNightColorDarkness(NightColorDarkness darkness);
 	void setPolygonCountLevel(PolygonCountLevel polygonCountLevel);
     void constructVerticesAndSendToGpu(OglHandles oglHandles);
     void render(OglHandles oglHandles, Sphere* otherSphere = nullptr);
@@ -60,6 +72,8 @@ private:
     int numOrbitVertices = -1;
 
 	PolygonCountLevel _polygonCountLevel;
+    NightColorDarkness _nightColorDarkness;
+    float _nightColorMultiplier;
 
     bool _bIsLightSource = false;
 };

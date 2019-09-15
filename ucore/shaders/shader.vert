@@ -9,6 +9,8 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 proj;
 
+uniform float nightColorMultiplier;
+
 uniform vec3  sunCenterTransformed;
 uniform float sunRadius;
 
@@ -83,7 +85,7 @@ void main()
             {
                 // point is on the night side of this sphere.
                 // todo - this is only true if radius of sun is same as radius of this planet
-                Color = vec4(in_color.xyz*0.05, in_color.a);
+                Color = vec4(in_color.xyz * nightColorMultiplier, in_color.a);
             }
             else
             {

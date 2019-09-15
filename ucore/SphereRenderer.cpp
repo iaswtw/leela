@@ -17,9 +17,22 @@
 #include <iostream>
 #include <string>
 
+
+static inline void vector_push_back_7(std::vector<float>& v, float f1, float f2, float f3, float f4, float f5, float f6, float f7)
+{
+    v.push_back(f1);
+    v.push_back(f2);
+    v.push_back(f3);
+    v.push_back(f4);
+    v.push_back(f5);
+    v.push_back(f6);
+    v.push_back(f7);
+}
+
 SphereRenderer::SphereRenderer(Sphere& sphere) :
     _sphere(sphere)
 {
+    setNightColorDarkness(NightColorDarkness_High);
 }
 
 
@@ -30,6 +43,21 @@ SphereRenderer::~SphereRenderer()
 void SphereRenderer::setAsLightSource()
 {
     _bIsLightSource = True;
+}
+
+void SphereRenderer::setNightColorDarkness(NightColorDarkness darkness)
+{
+    _nightColorDarkness = darkness;
+    switch (_nightColorDarkness)
+    {
+    case NightColorDarkness_Black:      _nightColorMultiplier = 0.0f;   break;
+    case NightColorDarkness_VeryHigh:   _nightColorMultiplier = 0.05f;  break;
+    case NightColorDarkness_High:       _nightColorMultiplier = 0.15f;  break;
+    case NightColorDarkness_Medium:     _nightColorMultiplier = 0.2f;   break;
+    case NightColorDarkness_Low:        _nightColorMultiplier = 0.5f;   break;
+    case NightColorDarkness_VeryLow:    _nightColorMultiplier = 0.8f;   break;
+    case NightColorDarkness_None:       _nightColorMultiplier = 1.0f;   break;
+    }
 }
 
 void SphereRenderer::setPolygonCountLevel(PolygonCountLevel polygonCountLevel)
@@ -73,12 +101,12 @@ std::vector<float>* SphereRenderer::_constructMainSphereVertices()
             float y4 = s._radius * sin(theta + theat_inc) * sin(alpha + alpha_inc);
             float z4 = s._radius * cos(theta + theat_inc);
 
-            v->push_back(x1);   v->push_back(y1);   v->push_back(z1);   v->push_back(s._r);  v->push_back(s._g); v->push_back(s._b);  v->push_back(1.0);
-            v->push_back(x2);   v->push_back(y2);   v->push_back(z2);   v->push_back(s._r);  v->push_back(s._g); v->push_back(s._b);  v->push_back(1.0);
-            v->push_back(x3);   v->push_back(y3);   v->push_back(z3);   v->push_back(s._r);  v->push_back(s._g); v->push_back(s._b);  v->push_back(1.0);
-            v->push_back(x3);   v->push_back(y3);   v->push_back(z3);   v->push_back(s._r);  v->push_back(s._g); v->push_back(s._b);  v->push_back(1.0);
-            v->push_back(x2);   v->push_back(y2);   v->push_back(z2);   v->push_back(s._r);  v->push_back(s._g); v->push_back(s._b);  v->push_back(1.0);
-            v->push_back(x4);   v->push_back(y4);   v->push_back(z4);   v->push_back(s._r);  v->push_back(s._g); v->push_back(s._b);  v->push_back(1.0);
+            vector_push_back_7(*v, x1, y1, z1, s._r, s._g, s._b, 1.0);
+            vector_push_back_7(*v, x2, y2, z2, s._r, s._g, s._b, 1.0);
+            vector_push_back_7(*v, x3, y3, z3, s._r, s._g, s._b, 1.0);
+            vector_push_back_7(*v, x3, y3, z3, s._r, s._g, s._b, 1.0);
+            vector_push_back_7(*v, x2, y2, z2, s._r, s._g, s._b, 1.0);
+            vector_push_back_7(*v, x4, y4, z4, s._r, s._g, s._b, 1.0);
 
             //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
         }
@@ -120,8 +148,8 @@ std::vector<float>* SphereRenderer::_constructLatitudesAndLongitudeVertices()
             else
                 cMult = 0.9;
 
-            v->push_back(x1);   v->push_back(y1);   v->push_back(z1);   v->push_back(s._r*cMult);  v->push_back(s._g*cMult); v->push_back(s._b*cMult);  v->push_back(1.0);
-            v->push_back(x2);   v->push_back(y2);   v->push_back(z2);   v->push_back(s._r*cMult);  v->push_back(s._g*cMult); v->push_back(s._b*cMult);  v->push_back(1.0);
+            vector_push_back_7(*v, x1, y1, z1, s._r*cMult, s._g*cMult, s._b*cMult, 1.0);
+            vector_push_back_7(*v, x2, y2, z2, s._r*cMult, s._g*cMult, s._b*cMult, 1.0);
 
             //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
         }
@@ -146,8 +174,8 @@ std::vector<float>* SphereRenderer::_constructLatitudesAndLongitudeVertices()
             float y2 = 1.001 * s._radius * sin(theta) * sin(alpha + inc);
             float z2 = 1.001 * s._radius * cos(theta);
 
-            v->push_back(x1);   v->push_back(y1);   v->push_back(z1);   v->push_back(s._r*0.9);  v->push_back(s._g*0.5); v->push_back(s._b*0.5);  v->push_back(1.0);
-            v->push_back(x2);   v->push_back(y2);   v->push_back(z2);   v->push_back(s._r*0.9);  v->push_back(s._g*0.5); v->push_back(s._b*0.5);  v->push_back(1.0);
+            vector_push_back_7(*v, x1, y1, z1, s._r*0.9, s._g*0.5, s._b*0.5, 1.0);
+            vector_push_back_7(*v, x2, y2, z2, s._r*0.9, s._g*0.5, s._b*0.5, 1.0);
 
             //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
         }
@@ -159,6 +187,7 @@ std::vector<float>* SphereRenderer::_constructLatitudesAndLongitudeVertices()
     for (float thetas = 0; thetas < 180; thetas += 10)
     {
         float theta = glm::radians(thetas);
+        float cMult = 0.9;
 
         for (float alpha = 0; alpha < float(2 * M_PI) - inc; alpha += inc)
         {
@@ -170,8 +199,8 @@ std::vector<float>* SphereRenderer::_constructLatitudesAndLongitudeVertices()
             float y2 = 1.001 * s._radius * sin(theta) * sin(alpha + inc);
             float z2 = 1.001 * s._radius * cos(theta);
 
-            v->push_back(x1);  v->push_back(y1);   v->push_back(z1);  v->push_back(s._r*0.9); v->push_back(s._g*0.9); v->push_back(s._b*0.9);  v->push_back(1.0);
-            v->push_back(x2);  v->push_back(y2);   v->push_back(z2);  v->push_back(s._r*0.9); v->push_back(s._g*0.9); v->push_back(s._b*0.9);  v->push_back(1.0);
+            vector_push_back_7(*v, x1, y1, z1, s._r*cMult, s._g*cMult, s._b*cMult, 1.0);
+            vector_push_back_7(*v, x2, y2, z2, s._r*cMult, s._g*cMult, s._b*cMult, 1.0);
 
             //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
         }
@@ -186,6 +215,7 @@ std::vector<float>* SphereRenderer::_constructOrbit()
 {
     std::vector<float>* v = new std::vector<float>();
     Sphere& s = _sphere;
+    glm::vec3& color = s._orbitalPlaneColor;
 
     float alpha_inc = float(2 * M_PI) / 500;
 
@@ -202,8 +232,8 @@ std::vector<float>* SphereRenderer::_constructOrbit()
         float y2 = s._orbitalRadius * sin(alpha + alpha_inc);
         float z2 = 0;
 
-        v->push_back(x1);  v->push_back(y1);  v->push_back(z1);   v->push_back(s._orbitalPlaneColor.r); v->push_back(s._orbitalPlaneColor.g); v->push_back(s._orbitalPlaneColor.b);  v->push_back(0.8);
-        v->push_back(x2);  v->push_back(y2);  v->push_back(z2);   v->push_back(s._orbitalPlaneColor.r); v->push_back(s._orbitalPlaneColor.g); v->push_back(s._orbitalPlaneColor.b);  v->push_back(0.8);
+        vector_push_back_7(*v, x1, y1, z1, color.r, color.g, color.b, 0.8);
+        vector_push_back_7(*v, x2, y2, z2, color.r, color.g, color.b, 0.8);
     }
 
     return v;
@@ -211,19 +241,21 @@ std::vector<float>* SphereRenderer::_constructOrbit()
 
 std::vector<float>* SphereRenderer::_constructOrbitalPlaneVertices()
 {
-    std::vector<float>* v = new std::vector<float>();
-    Sphere& s = _sphere;
-    float m = 0.2;      // color multiplier
+    std::vector<float>* v   = new std::vector<float>();
+    Sphere& s               = _sphere;
+    float m                 = 0.3;                          // color multiplier
+    float radius            = s._orbitalRadius;
+    glm::vec3& color        = s._orbitalPlaneColor;
 
     //---------------------------------------------------------------------------------
     // Orbital plane.  This is centered at origin.
     //---------------------------------------------------------------------------------
-    v->push_back(-s._orbitalRadius * 1.2);   v->push_back(-s._orbitalRadius * 1.2);   v->push_back(0);   v->push_back(s._orbitalPlaneColor.r*m);  v->push_back(s._orbitalPlaneColor.g*m); v->push_back(s._orbitalPlaneColor.b*m);    v->push_back(1.0);
-    v->push_back(+s._orbitalRadius * 1.2);   v->push_back(-s._orbitalRadius * 1.2);   v->push_back(0);   v->push_back(s._orbitalPlaneColor.r*m);  v->push_back(s._orbitalPlaneColor.g*m); v->push_back(s._orbitalPlaneColor.b*m);    v->push_back(1.0);
-    v->push_back(+s._orbitalRadius * 1.2);   v->push_back(+s._orbitalRadius * 1.2);   v->push_back(0);   v->push_back(s._orbitalPlaneColor.r*m);  v->push_back(s._orbitalPlaneColor.g*m); v->push_back(s._orbitalPlaneColor.b*m);    v->push_back(1.0);
-    v->push_back(+s._orbitalRadius * 1.2);   v->push_back(+s._orbitalRadius * 1.2);   v->push_back(0);   v->push_back(s._orbitalPlaneColor.r*m);  v->push_back(s._orbitalPlaneColor.g*m); v->push_back(s._orbitalPlaneColor.b*m);    v->push_back(1.0);
-    v->push_back(-s._orbitalRadius * 1.2);   v->push_back(+s._orbitalRadius * 1.2);   v->push_back(0);   v->push_back(s._orbitalPlaneColor.r*m);  v->push_back(s._orbitalPlaneColor.g*m); v->push_back(s._orbitalPlaneColor.b*m);    v->push_back(1.0);
-    v->push_back(-s._orbitalRadius * 1.2);   v->push_back(-s._orbitalRadius * 1.2);   v->push_back(0);   v->push_back(s._orbitalPlaneColor.r*m);  v->push_back(s._orbitalPlaneColor.g*m); v->push_back(s._orbitalPlaneColor.b*m);    v->push_back(1.0);
+    vector_push_back_7(*v, -radius * 1.2, -radius * 1.2, 0, color.r*m, color.g*m, color.b*m, 1.0);
+    vector_push_back_7(*v, +radius * 1.2, -radius * 1.2, 0, color.r*m, color.g*m, color.b*m, 1.0);
+    vector_push_back_7(*v, +radius * 1.2, +radius * 1.2, 0, color.r*m, color.g*m, color.b*m, 1.0);
+    vector_push_back_7(*v, +radius * 1.2, +radius * 1.2, 0, color.r*m, color.g*m, color.b*m, 1.0);
+    vector_push_back_7(*v, -radius * 1.2, +radius * 1.2, 0, color.r*m, color.g*m, color.b*m, 1.0);
+    vector_push_back_7(*v, -radius * 1.2, -radius * 1.2, 0, color.r*m, color.g*m, color.b*m, 1.0);
 
     return v;
 }
@@ -238,28 +270,33 @@ std::vector<float>* SphereRenderer::_constructOrbitalPlaneGridVertices()
     // generate parallel lines along Y axis in the orbital plane
     //float inc = float(_orbitalRadius) / int(_orbitalRadius / 50.0);
 
-    float maxGridLines = 20;
-    float inc = (s._orbitalRadius * 2 * 1.2) / maxGridLines;
+    float maxGridLines      = 20;
+    float inc               = (s._orbitalRadius * 2 * 1.2) / maxGridLines;
     //inc = std::max(inc, 50.0f);
     printf("inc = %f\n", inc);
+
     float x, y;
-    float m = 0.3;      // color multiplier
-    x = y = -s._orbitalRadius * 1.2;
+    float m                 = 0.4;      // color multiplier
+    float radius            = s._orbitalRadius;
+    glm::vec3& color        = s._orbitalPlaneColor;
+
+    x = y = -radius * 1.2;
+
     for (int i = 0; i <= maxGridLines; i++)
     {
-        v->push_back(x);   v->push_back(-s._orbitalRadius * 1.2);   v->push_back(+1);   v->push_back(s._orbitalPlaneColor.r*m);  v->push_back(s._orbitalPlaneColor.g*m); v->push_back(s._orbitalPlaneColor.b*m);    v->push_back(1.0);
-        v->push_back(x);   v->push_back( s._orbitalRadius * 1.2);   v->push_back(+1);   v->push_back(s._orbitalPlaneColor.r*m);  v->push_back(s._orbitalPlaneColor.g*m); v->push_back(s._orbitalPlaneColor.b*m);    v->push_back(1.0);
-        v->push_back(x);   v->push_back(-s._orbitalRadius * 1.2);   v->push_back(-1);   v->push_back(s._orbitalPlaneColor.r*m);  v->push_back(s._orbitalPlaneColor.g*m); v->push_back(s._orbitalPlaneColor.b*m);    v->push_back(1.0);
-        v->push_back(x);   v->push_back( s._orbitalRadius * 1.2);   v->push_back(-1);   v->push_back(s._orbitalPlaneColor.r*m);  v->push_back(s._orbitalPlaneColor.g*m); v->push_back(s._orbitalPlaneColor.b*m);    v->push_back(1.0);
+        vector_push_back_7(*v, x, -radius * 1.2, +1, color.r*m, color.g*m, color.b*m, 1.0);
+        vector_push_back_7(*v, x, +radius * 1.2, +1, color.r*m, color.g*m, color.b*m, 1.0);
+        vector_push_back_7(*v, x, -radius * 1.2, -1, color.r*m, color.g*m, color.b*m, 1.0);
+        vector_push_back_7(*v, x, +radius * 1.2, -1, color.r*m, color.g*m, color.b*m, 1.0);
 
         x += inc;
     }
     for (int i = 0; i <= maxGridLines; i++)
     {
-        v->push_back(-s._orbitalRadius * 1.2);   v->push_back(y);   v->push_back(+1);   v->push_back(s._orbitalPlaneColor.r*m);  v->push_back(s._orbitalPlaneColor.g*m); v->push_back(s._orbitalPlaneColor.b*m);    v->push_back(1.0);
-        v->push_back(+s._orbitalRadius * 1.2);   v->push_back(y);   v->push_back(+1);   v->push_back(s._orbitalPlaneColor.r*m);  v->push_back(s._orbitalPlaneColor.g*m); v->push_back(s._orbitalPlaneColor.b*m);    v->push_back(1.0);
-        v->push_back(-s._orbitalRadius * 1.2);   v->push_back(y);   v->push_back(-1);   v->push_back(s._orbitalPlaneColor.r*m);  v->push_back(s._orbitalPlaneColor.g*m); v->push_back(s._orbitalPlaneColor.b*m);    v->push_back(1.0);
-        v->push_back(+s._orbitalRadius * 1.2);   v->push_back(y);   v->push_back(-1);   v->push_back(s._orbitalPlaneColor.r*m);  v->push_back(s._orbitalPlaneColor.g*m); v->push_back(s._orbitalPlaneColor.b*m);    v->push_back(1.0);
+        vector_push_back_7(*v, -radius * 1.2, y, +1, color.r*m, color.g*m, color.b*m, 1.0);
+        vector_push_back_7(*v, +radius * 1.2, y, +1, color.r*m, color.g*m, color.b*m, 1.0);
+        vector_push_back_7(*v, -radius * 1.2, y, -1, color.r*m, color.g*m, color.b*m, 1.0);
+        vector_push_back_7(*v, +radius * 1.2, y, -1, color.r*m, color.g*m, color.b*m, 1.0);
 
         y += inc;
     }
@@ -408,6 +445,8 @@ void SphereRenderer::render(OglHandles oglHandles, Sphere* otherSphere)
     glUniform3fv(oglHandles.uniMyCenterTransformed, 1, glm::value_ptr(_sphere.getCenter()));
     glUniform1f(oglHandles.uniMyRadius, _sphere.getRadius());
     glUniform1i(oglHandles.uniMyIsValud, true);
+    glUniform1f(oglHandles.uniNightColorMultiplier, _nightColorMultiplier);
+
 
     if (otherSphere != nullptr)
     {
