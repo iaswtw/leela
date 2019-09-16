@@ -9,12 +9,13 @@
 #include "Utils.h"
 #include <stdio.h>
 
+#include "Mantle.h"
 
 class U3d
 {
 public:
-    U3d(Universe& ucore) :
-        _ucore(ucore)
+    U3d(Universe& ucore, Mantle& mantle) :
+        _ucore(ucore), _mantle(mantle)
     {
     }
 
@@ -36,6 +37,8 @@ public:
 
 private:
     Universe& _ucore;
+    Mantle& _mantle;
+
     bool bQuit = false;
 
     //=================================================================

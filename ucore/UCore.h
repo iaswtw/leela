@@ -9,7 +9,6 @@
 #include <SDL_opengl.h>
 
 #include "sphere.h"
-#include "SphereRenderer.h"
 #include "Space.h"
 #include "OglHandles.h"
 
@@ -166,116 +165,27 @@ public:
     ~Universe();
 
     void generateStars();
-    int run();
-
-    void processFlags();
-    void render();
-    void initializeGL();
     void initSceneObjects();
-    void printGlError();
-    void printShaderCompileStatus(GLuint shader);
-    void readAndCompileShader(std::string filePath, GLuint &shaderId);
-    void compileShaders();
-    void linkShaders();
-    void useShaderProgram();
-    void unuseShaderProgram();
+    void processFlags();
 
-    void ChangeSidewaysMotionMode();
-    void SetDefaultView();
-    void NavigationLockOntoEarth(int nParam);
-    void NavigationLockOntoSun(int nParam);
-    void LookAtEarth();
-    void LookAtSun();
-
-    void SetSimulationSpeed(int nParam);
-    void SetTimeDirection(int nParam);
-    void FastForward(int nParam);
-    void Rewind(int nParam);
-    void SimulationPause(int nParam);
-    void Earth_RotationMotion(int nParam);
-    void Earth_RevolutionMotion(int nParam);
-    void Earth_PrecessionMotion(int nParam);
-
-    void Earth_OrbitalPlane(int nParam);
-    void Earth_SetOrbitalPositionAngle(double fAngle);
-    void Moon_OrbitalPlane(int nParam);
-    void Moon_OrbitalPlaneRotation(int nParam);
-    void Moon_RevolutionMotion(int nParam);
-    void Moon_SetOrbitalPositionAngle(double fAngle);
-
-    void SetDotDensity(int nParam);
-    void ShowDemo(int nParam);
-
-    void ChangeBoolean(bool *pBool, int nParam);
 
     void advance(float stepMultiplier);
 
 
-    void setWidgetControlMode();
-    void resetWidgetControlMode();
-
-    void seCurrenttScreenSize(int width, int height);
-
 public:
-    bool bMouseGrabbed = false;
-    bool bFastForward = false;
-    bool bFastReverse = false;
-
-    int curWidth = 0;
-    int curHeight = 0;
 
     int dx = 0;
     int dy = 0;
     float _stepMultiplier = 1;
-
-
-    bool bLeftMouseButtonDown = false;
-    bool bRightMouseButtonDown = false;
-    bool bMiddleMouseButtonDown = false;
-
-    bool bMoveForward = false;
-    bool bMoveBackward = false;
-    bool bRotateRight = false;
-    bool bRotateLeft = false;
-    bool bRotateRightSd = false;
-    bool bRotateLeftSd = false;
-
-
-    const float noYaw               = 0.0f;
-    const float noPitch             = 0.0f;
-    const float noRoll              = 0.0f;
-    const float noThrottle          = 0.0f;
-
-    const float nominalYaw          = 0.5f;
-    const float nominalPitch        = 0.5f;
-    const float nominalRoll         = 0.5f;
-    const float nominalThrottle     = 30.0f;
-
-
-    float yaw       = 0.0f;
-    float pitch     = 0.0f;
-    float roll      = 0.0f;
-    float throttle  = 0.0f;
-
-
-    bool bCtrlModifier = false;
-    bool bAltModifier = false;
-    bool bShiftModifier = false;
-
-    bool bSidewaysMotionMode = true;
-    bool bLockOntoEarth = false;
-    bool bLockOntoSun = false;
-
+    
     bool bStars = true;
-
-
+    
     /*! \todo F_REFERENCE_VECTOR_ALONG_Z is checked before bLockOntoEarth
         or bLockOntoSun in the function on_MouseMotion().  Need
         to consider if the priority of this check should be reversed.
         Without the setting this flag to 1, the Lock on earth or sun won't
         work. */
     char F_REFERENCE_VECTOR_ALONG_Z = 0;
-
 
     bool bSimulationPause = false;
 
@@ -286,30 +196,21 @@ public:
 
     float angle = 0.0f;
 
-
-    OglHandles oglHandles;
-
-    GLuint vbo;                 // Create for 
     
     // Texture handles
     GLuint tex1;
     GLuint tex2;
 
-    GLint uniOverrideColor;
+    Axis axis;
 
     glm::mat4 viewMatrix;
     glm::mat4 projectionMatrix;
 
 
     // Sphere and other objects to be drawn on the screen. Instantiate them here. Their data (vertices) will be created later.
-    Axis axis;
     Sphere earth;
     Sphere sun;
     Sphere moon;
-
-    SphereRenderer earthRenderer;
-    SphereRenderer sunRenderer;
-    SphereRenderer moonRenderer;
 
     Space space;
 

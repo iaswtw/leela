@@ -6,6 +6,8 @@
 
 #include "U3d.h"
 #include "UCore.h"
+#include "Renderer.h"
+#include "Controller.h"
 
 #undef main
 
@@ -368,12 +370,12 @@ void U3d::generateImGuiWidgets()
         ImGui::Button("Pause"); ImGui::SameLine();
         ImGui::PopStyleColor();
 
-        if (_ucore.earthRenderer.bShowOrbitalPlane) color = onColor; else color = offColor;
+        if (_mantle.earthRenderer.bShowOrbitalPlane) color = onColor; else color = offColor;
         ImGui::PushStyleColor(ImGuiCol_Button, color);
         ImGui::Button("G"); ImGui::SameLine();
         ImGui::PopStyleColor();
 
-        if (_ucore.moonRenderer.bShowOrbitalPlane) color = onColor; else color = offColor;
+        if (_mantle.moonRenderer.bShowOrbitalPlane) color = onColor; else color = offColor;
         ImGui::PushStyleColor(ImGuiCol_Button, color);
         ImGui::Button("M");
         ImGui::PopStyleColor();
@@ -479,7 +481,7 @@ void U3d::generateImGuiWidgets()
             ImGui::PopFont();
             ImGui::Indent();
             ImGui::Checkbox("Revolution motion (0)## earth", &_ucore.earth.bRevolutionMotion);
-            ImGui::Checkbox("Orbital plane (g)## earth", &_ucore.earthRenderer.bShowOrbitalPlane);
+            ImGui::Checkbox("Orbital plane (g)## earth", &_mantle.earthRenderer.bShowOrbitalPlane);
             ImGui::Checkbox("Precession motion (F6)## earth", &_ucore.earth.bPrecessionMotion);
             ImGui::SameLine();
             if (ImGui::Button("Reset## earth precession motion"))
@@ -496,7 +498,7 @@ void U3d::generateImGuiWidgets()
 
             ImGui::Indent();
             ImGui::Checkbox("Revolution motion", &_ucore.moon.bRevolutionMotion);
-            ImGui::Checkbox("Orbital plane (m)##moon", &_ucore.moonRenderer.bShowOrbitalPlane);
+            ImGui::Checkbox("Orbital plane (m)##moon", &_mantle.moonRenderer.bShowOrbitalPlane);
             ImGui::Checkbox("Orbital plane rotation (F5)", &_ucore.moon.bOrbitalPlaneRotation);
             ImGui::SameLine();
             if (ImGui::Button("Reset## moon orbital plane rotation"))
@@ -639,7 +641,7 @@ int U3d::run()
 
     printf("initializing scene objects... ");
     _ucore.initSceneObjects();
-    _ucore.initializeGL();
+    _mantle.initializeGL();
     printf("done\n");
 
 
@@ -675,7 +677,7 @@ int U3d::run()
                     curWidth = event.window.data1;
                     curHeight = event.window.data2;
 
-                    _ucore.seCurrenttScreenSize(curWidth, curHeight);
+                    _mantle.seCurrenttScreenSize(curWidth, curHeight);
 
                     printf("width = %d\n", curWidth);
                     printf("height = %d\n", curHeight);
@@ -706,7 +708,7 @@ int U3d::run()
                                 _ucore.bMouseGrabbed = false;
                             }
                         }
-                        _ucore.bLeftMouseButtonDown = true;
+                        bLeftMouseButtonDown = true;
                         break;
                     case SDL_BUTTON_RIGHT:
                         break;
@@ -714,8 +716,8 @@ int U3d::run()
                     break;
                 case SDL_MOUSEBUTTONUP:
                     switch (event.button.button) {
-                    case SDL_BUTTON_LEFT:   _ucore.bLeftMouseButtonDown = false;   break;
-                    case SDL_BUTTON_RIGHT:  _ucore.bRightMouseButtonDown = false;  break;
+                    case SDL_BUTTON_LEFT:   bLeftMouseButtonDown = false;   break;
+                    case SDL_BUTTON_RIGHT:  bRightMouseButtonDown = false;  break;
                     }
                     break;
                 case SDL_MOUSEMOTION:
@@ -725,10 +727,10 @@ int U3d::run()
                 case SDL_MOUSEWHEEL:
                     if (_ucore.bMouseGrabbed) {
                         // Hack
-                        bool oldValue = _ucore.bLeftMouseButtonDown;
-                        _ucore.bLeftMouseButtonDown = true;
+                        bool oldValue = bLeftMouseButtonDown;
+                        bLeftMouseButtonDown = true;
                         onMouseMotion(-event.wheel.x * 10, -event.wheel.y * 10);
-                        _ucore.bLeftMouseButtonDown = oldValue;
+                        bLeftMouseButtonDown = oldValue;
                     }
                     break;
                 }
@@ -746,7 +748,7 @@ int U3d::run()
 
         doubleClicked.tick();
         _ucore.processFlags();
-        _ucore.render();
+        _mantle.render();
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -760,8 +762,10 @@ int U3d::run()
 
 int main()
 {
-    Universe app;
-    U3d u3d(app);
+    Universe core;
+    Renderer renderer(core);
+    Controller controller(core, renderer);
+    U3d u3d(core, renderer, controller);
     return u3d.run();
 }
 
