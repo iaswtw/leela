@@ -14,16 +14,22 @@
 // Following function was copied from imgui_demo.cpp
 // Helper to display a little (?) mark which shows a tooltip when hovered.
 // In your own code you may want to display an actual icon if you are using a merged icon fonts (see misc/fonts/README.txt)
-static void HelpMarker(const char* desc)
+void Universe::HelpMarker(const char* desc)
 {
     ImGui::TextDisabled("(?)");
     if (ImGui::IsItemHovered())
     {
+        ImGui::PushStyleColor(ImGuiCol_PopupBg, ImVec4(0.2f, 0.2f, 0.2f, 1));
         ImGui::BeginTooltip();
+        ImGui::PushFont(fixedWidthSmall);
+
         ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
         ImGui::TextUnformatted(desc);
         ImGui::PopTextWrapPos();
+        
+        ImGui::PopFont();
         ImGui::EndTooltip();
+        ImGui::PopStyleColor();
     }
 }
 
@@ -148,41 +154,57 @@ void Universe::generateStars()
     double max_radius;
     double max_theta;
     double max_z;
-    double r, theta, phi;
+    double radius, theta, phi;
     double w;
     unsigned char color;  // one component of color
+    float c;
+    float x, y, z, r, g, b;
 
+    srand(20);
+
+    //---------------------------------------------------------------------
     // generate cubically distributed stars
+    //---------------------------------------------------------------------
     i = 0;
     max_dist = 500000.0;
     printf("Starting to generate stars\n");
     while (1) {
         if (i == MAXSTARS)
             break;
-
         
-        int r1 = rand();
-        int r2 = rand();
-        int r3 = rand();
-        //printf("r: %d, %d, %d\n", r1, r2, r3);
-        star[i].x = max_dist * (double(r1) / RAND_MAX) - (max_dist / 2);
-        star[i].y = max_dist * (double(r2) / RAND_MAX) - (max_dist / 2);
-        star[i].z = max_dist * (double(r3) / RAND_MAX) - (max_dist / 2);
-        color = static_cast<unsigned char>(55) + static_cast<unsigned char>((double(rand()) / RAND_MAX) * 200);
-        //star[i].c = SDL_MapRGB ( space.surface->format, color, color, color );
-        star[i].set_color(color, color, color);
+        x = max_dist * (double(rand()) / RAND_MAX) - (max_dist / 2);
+        y = max_dist * (double(rand()) / RAND_MAX) - (max_dist / 2);
+        z = max_dist * (double(rand()) / RAND_MAX) - (max_dist / 2);
+        c = 0.1 + (0.8 * ((float(rand()) / RAND_MAX)));
 
-        if (fabs(star[i].x) > 50000 ||
-            fabs(star[i].y) > 50000 ||
-            fabs(star[i].z) > 50000)
+        r = g = b = c;
+
+        int anotherRandom = int(10 * (float(rand()) / RAND_MAX));
+        if (anotherRandom == 5)
+            r *= 1.5;
+        if (anotherRandom == 6)
+            b *= 1.2;
+        if (anotherRandom == 7)
         {
-            starVertices.push_back(star[i].x);  starVertices.push_back(star[i].y);  starVertices.push_back(star[i].z);   starVertices.push_back(0.8);  starVertices.push_back(0.8);  starVertices.push_back(0.8);  starVertices.push_back(1.0);
-            //printf("star: %.3f, %.3f, %.3f\n", star[i].x, star[i].y, star[i].z);
+            r *= 1.5;
+            g *= 1.5;
+        }
+
+
+        // Discard starts too close to the solar system
+        if (fabs(x) > 50000 ||  fabs(y) > 50000 ||  fabs(z) > 50000)
+        {
+            std::vector<float>* v = (i < 0.75*MAXSTARS) ? &starVertices : &twoPixelWideStarVertices;
+
+            v->push_back(x);  v->push_back(y);  v->push_back(z);   v->push_back(r);  v->push_back(g);  v->push_back(b);  v->push_back(1.0);
             i++;
         }
     }
 
+
+    //---------------------------------------------------------------------
     // generate stars for the galaxy
+    //---------------------------------------------------------------------
     max_radius = 1000000.0;
     max_theta = 2 * M_PI;
     i = 0;
@@ -190,19 +212,19 @@ void Universe::generateStars()
         if (i == .7 * MAXGALAXYSTARS)
             break;
 
-        r = max_radius * (double(rand()) / RAND_MAX);
+        radius = max_radius * (double(rand()) / RAND_MAX);
         theta = max_theta * (double(rand()) / RAND_MAX);
-        w = r / max_radius;
-        if (r < 40000)
-            max_z = r;
+        w = radius / max_radius;
+        if (radius < 40000)
+            max_z = radius;
         else
             max_z = 400000 * (1 / sqrt(1 + 20 * w*w));
 
-        gstar[i].x = r * cos(theta);
-        gstar[i].y = r * sin(theta);
+        gstar[i].x = radius * cos(theta);
+        gstar[i].y = radius * sin(theta);
         gstar[i].z = max_z * double(rand()) / RAND_MAX - max_z / 2;
         color = static_cast<unsigned char>(55) + static_cast<unsigned char>((double(rand()) / RAND_MAX) * 200);
-        //gstar[i].c = SDL_MapRGB ( space.surface->format, color, color, color );
+        //c = SDL_MapRGB ( space.surface->format, color, color, color );
         gstar[i].set_color(color, color, color);
                
         if (fabs(gstar[i].x) > 1000 ||
@@ -215,12 +237,12 @@ void Universe::generateStars()
         if (i == MAXGALAXYSTARS)
             break;
 
-        r = 200000 * (double(rand()) / RAND_MAX);
+        radius = 200000 * (double(rand()) / RAND_MAX);
         theta = M_PI * (double(rand()) / RAND_MAX);
         phi = 2 * M_PI * (double(rand()) / RAND_MAX);
-        gstar[i].x = r * sin(theta) * cos(phi);
-        gstar[i].y = r * sin(theta) * sin(phi);
-        gstar[i].z = r * cos(theta);
+        gstar[i].x = radius * sin(theta) * cos(phi);
+        gstar[i].y = radius * sin(theta) * sin(phi);
+        gstar[i].z = radius * cos(theta);
         color = static_cast<unsigned char>((double(rand()) / RAND_MAX) * 255);
         //gstar[i].c = SDL_MapRGB ( space.surface->format, color, color, color );
         gstar[i].set_color(color, color, color);
@@ -434,6 +456,7 @@ void Universe::initializeGL()
     oglHandles.uniProj = getUniformLocation(oglHandles.shaderProgram, "proj");
 
     oglHandles.uniIsStar               = getUniformLocation(oglHandles.shaderProgram, "isStar");
+    oglHandles.uniStarPointSize        = getUniformLocation(oglHandles.shaderProgram, "starPointSize");
     oglHandles.uniNightColorMultiplier = getUniformLocation(oglHandles.shaderProgram, "nightColorMultiplier");
 
     oglHandles.uniMyCenterTransformed  = getUniformLocation(oglHandles.shaderProgram, "sphereInfo.centerTransformed");
@@ -473,7 +496,7 @@ void Universe::initializeGL()
     glEnableVertexAttribArray(oglHandles.colAttrib);
 
     //---------------------------------------------------------------------------------------------------
-    // Cube stars
+    // Cube stars - 1 pixel
     glGenVertexArrays(1, &oglHandles.starsVao);
     glBindVertexArray(oglHandles.starsVao);
 
@@ -490,6 +513,26 @@ void Universe::initializeGL()
 
     glVertexAttribPointer(oglHandles.colAttrib, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(oglHandles.colAttrib);
+
+    //---------------------------------------------------------------------------------------------------
+    // Cube stars - 2 pixel
+    glGenVertexArrays(1, &oglHandles.twoPixelWideStarsVao);
+    glBindVertexArray(oglHandles.twoPixelWideStarsVao);
+
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        sizeof(float) * twoPixelWideStarVertices.size(),
+        twoPixelWideStarVertices.data(),
+        GL_STATIC_DRAW);
+
+    glVertexAttribPointer(oglHandles.posAttrib, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), nullptr);
+    glEnableVertexAttribArray(oglHandles.posAttrib);
+
+    glVertexAttribPointer(oglHandles.colAttrib, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(oglHandles.colAttrib);
+
 
     //---------------------------------------------------------------------------------------------------
     // galaxy stars
@@ -1743,6 +1786,12 @@ void Universe::render()
 
 
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    glUniform1i(oglHandles.uniIsStar, true);
+    glUniform1i(oglHandles.uniMyIsValud, false);
+    glEnable(GL_PROGRAM_POINT_SIZE);
+    //glPointParameterf(GL_POINT_FADE_THRESHOLD_SIZE, 1.0f);
+
     if (!bGalaxyStars)
     {
         //----------------------------------------------
@@ -1755,16 +1804,13 @@ void Universe::render()
             glm::value_ptr(glm::mat4(1.0))
         );
 
-        glUniform1i(oglHandles.uniMyIsValud, false);
-        glUniform1i(oglHandles.uniIsStar, true);
-        glEnable(GL_PROGRAM_POINT_SIZE);
-        //glPointParameterf(GL_POINT_FADE_THRESHOLD_SIZE, 1.0f);
+        glUniform1ui(oglHandles.uniStarPointSize, 1);
         glBindVertexArray(oglHandles.starsVao);
-
-
-        //printf("num points in startVertices = %d\n", starVertices.size());
         // Draw vertices
         glDrawArrays(GL_POINTS, 0, starVertices.size() / 7);
+
+        glUniform1ui(oglHandles.uniStarPointSize, 2);
+        glDrawArrays(GL_POINTS, 0, twoPixelWideStarVertices.size() / 7);
     }
     else
     {
@@ -1779,12 +1825,16 @@ void Universe::render()
         );
 
         glUniform1i(oglHandles.uniMyIsValud, false);
-        glUniform1i(oglHandles.uniIsStar, true);
         glBindVertexArray(oglHandles.gstarsVao);
+        glUniform1ui(oglHandles.uniStarPointSize, 1);
 
         // Draw vertices
         glDrawArrays(GL_POINTS, 0, gstarVertices.size() / 7);
     }
+
+    glDisable(GL_PROGRAM_POINT_SIZE);
+    glUniform1i(oglHandles.uniIsStar, false);
+
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -1978,8 +2028,8 @@ void Universe::generateImGuiWidgets()
     // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
     if (!bMouseGrabbed || bAlwaysShowControlPanel)
     {
-        //if (show_demo_window)
-        //    ImGui::ShowDemoWindow(&show_demo_window);
+        if (show_demo_window)
+            ImGui::ShowDemoWindow(&show_demo_window);
 
         ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - 5.0f, 27.0f), ImGuiCond_Always, ImVec2(1.0f, 0.0f));
         //ImGui::SetNextWindowSize(ImVec2(250.0f, curHeight - 25.0f));
@@ -2007,7 +2057,7 @@ void Universe::generateImGuiWidgets()
                 if (ImGui::Button("Annular Solar Eclipse from space## demo"))
                     ShowDemo(UDemo_AnnularSolarEclipseFromSpace);
                 ImGui::SameLine();
-                HelpMarker("Also shows umbra touching the earth");
+                HelpMarker("This also shows umbra starting to travel over the earth near the bottom left of the screen. This happens roughly halfway between 3rd and 4th contact for a duration of about 2 to 3 seconds. So watch out!");
 
                 if (ImGui::Button("Partial Lunar Eclipse## demo"))
                     ShowDemo(UDemo_PartialLunarEclipse);
@@ -2018,7 +2068,7 @@ void Universe::generateImGuiWidgets()
                 if (ImGui::Button("6 month long day/night on north pole"))
                     ShowDemo(UDemo_SixMonthLongDayAndNightOnNorthPole);
 
-                if (ImGui::Button("6 month long day/night on north pole (another angle)"))
+                if (ImGui::Button("6 month long day/night on\nnorth pole (another angle)"))
                     ShowDemo(UDemo_SixMonthLongDayAndNightOnNorthPole_AnotherAngle);
 
                 if (ImGui::Button("Precession motion## demo"))
@@ -2082,18 +2132,18 @@ void Universe::generateImGuiWidgets()
             ImGui::Indent();
             ImGui::Checkbox("Shift mode (v)", &bSidewaysMotionMode);
             ImGui::SameLine(); HelpMarker("When checked, Shift left/right/up/down on mouse movements.\nWhen unchecked, rotate instead.");
-            ImGui::Checkbox("Lock on earth's position (z)", &bLockOntoEarth);
+            ImGui::Checkbox("Lock on earth (z)", &bLockOntoEarth);
             if (ImGui::IsItemEdited())
                 NavigationLockOntoEarth(bLockOntoEarth ? UCmdParam_On : UCmdParam_Off);
             ImGui::SameLine(); HelpMarker("Also pauses earth's revolution. Activate this mode and\nthen use mouse to view earth from different angles.");
 
-            ImGui::Checkbox("Directional lock on earth's position (b)", &bEarthFollowMode);
+            ImGui::Checkbox("Directional lock on earth (b)", &bEarthFollowMode);
             if (ImGui::IsItemEdited())
                 NavigationLockOntoEarthWithConstantDirection(bEarthFollowMode ? UCmdParam_On : UCmdParam_Off);
             ImGui::SameLine();
             HelpMarker("Earth follow mode");
 
-            ImGui::Checkbox("Lock on sun's position (c)", &bLockOntoSun);
+            ImGui::Checkbox("Lock on sun (c)", &bLockOntoSun);
             if (ImGui::IsItemEdited())
                 NavigationLockOntoSun(bLockOntoSun ? UCmdParam_On : UCmdParam_Off);
 
@@ -2192,6 +2242,10 @@ int Universe::run()
     appFontSmallMedium  = io.Fonts->AddFontFromFileTTF(fullFontFilePath.c_str(), 18);
     appFontMedium       = io.Fonts->AddFontFromFileTTF(fullFontFilePath.c_str(), 20);
     appFontLarge        = io.Fonts->AddFontFromFileTTF(fullFontFilePath.c_str(), 24);
+
+    fullFontFilePath = FindFontFile("ProggyClean.ttf");
+    fixedWidthSmall     = io.Fonts->AddFontFromFileTTF(fullFontFilePath.c_str(), 13);
+
     //if (!font1)
     //    printf("ERROR: Could not load font Cousine-Regular\n");
 

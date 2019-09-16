@@ -19,10 +19,12 @@ struct OglHandles
     GLint uniProj;
 
     GLint uniIsStar;
+    GLint uniStarPointSize;
     GLint uniNightColorMultiplier;                
 
     GLuint axisVao;
     GLuint starsVao;
+    GLuint twoPixelWideStarsVao;
     GLuint gstarsVao;
 
     GLint uniMyCenterTransformed;
