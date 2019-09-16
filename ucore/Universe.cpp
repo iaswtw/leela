@@ -155,23 +155,30 @@ void Universe::generateStars()
     // generate cubically distributed stars
     i = 0;
     max_dist = 500000.0;
+    printf("Starting to generate stars\n");
     while (1) {
         if (i == MAXSTARS)
             break;
 
-        star[i].x = max_dist * double(rand()) / RAND_MAX - max_dist / 2;
-        star[i].y = max_dist * double(rand()) / RAND_MAX - max_dist / 2;
-        star[i].z = max_dist * double(rand()) / RAND_MAX - max_dist / 2;
+        
+        int r1 = rand();
+        int r2 = rand();
+        int r3 = rand();
+        //printf("r: %d, %d, %d\n", r1, r2, r3);
+        star[i].x = max_dist * (double(r1) / RAND_MAX) - (max_dist / 2);
+        star[i].y = max_dist * (double(r2) / RAND_MAX) - (max_dist / 2);
+        star[i].z = max_dist * (double(r3) / RAND_MAX) - (max_dist / 2);
         color = static_cast<unsigned char>(55) + static_cast<unsigned char>((double(rand()) / RAND_MAX) * 200);
         //star[i].c = SDL_MapRGB ( space.surface->format, color, color, color );
         star[i].set_color(color, color, color);
 
-        if (fabs(star[i].x) > 10000 ||
-            fabs(star[i].y) > 10000 ||
-            fabs(star[i].z) > 10000)
+        if (fabs(star[i].x) > 50000 ||
+            fabs(star[i].y) > 50000 ||
+            fabs(star[i].z) > 50000)
         {
-            i++;
             starVertices.push_back(star[i].x);  starVertices.push_back(star[i].y);  starVertices.push_back(star[i].z);   starVertices.push_back(0.8);  starVertices.push_back(0.8);  starVertices.push_back(0.8);  starVertices.push_back(1.0);
+            //printf("star: %.3f, %.3f, %.3f\n", star[i].x, star[i].y, star[i].z);
+            i++;
         }
     }
 
@@ -197,9 +204,7 @@ void Universe::generateStars()
         color = static_cast<unsigned char>(55) + static_cast<unsigned char>((double(rand()) / RAND_MAX) * 200);
         //gstar[i].c = SDL_MapRGB ( space.surface->format, color, color, color );
         gstar[i].set_color(color, color, color);
-
-
-
+               
         if (fabs(gstar[i].x) > 1000 ||
             fabs(gstar[i].y) > 1000 ||
             fabs(gstar[i].z) > 1000)
@@ -234,7 +239,8 @@ void Universe::generateStars()
         gstar[i] = space.rotate(PNT(0, 0, 0), PNT(100, 0, 0), gstar[i], 80.0);
 
 
-    gstarVertices.push_back(gstar[i].x);  gstarVertices.push_back(gstar[i].y);  gstarVertices.push_back(gstar[i].z);   gstarVertices.push_back(0.8);  gstarVertices.push_back(0.8);  gstarVertices.push_back(0.8);  gstarVertices.push_back(1.0);
+    for (i = 0; i < MAXGALAXYSTARS; i++)
+        gstarVertices.push_back(gstar[i].x);  gstarVertices.push_back(gstar[i].y);  gstarVertices.push_back(gstar[i].z);   gstarVertices.push_back(0.8);  gstarVertices.push_back(0.8);  gstarVertices.push_back(0.8);  gstarVertices.push_back(1.0);
 
 }
 
@@ -332,14 +338,14 @@ void Universe::compileShaders()
     //-------------------------------------------------------------
     oglHandles.vertexShader = glCreateShader(GL_VERTEX_SHADER);
     printf("Loading and Compiling Vertex shader.\n");
-    readAndCompileShader("shaders/shader.vert", oglHandles.vertexShader);
+    readAndCompileShader("../ucore/shaders/shader.vert", oglHandles.vertexShader);
 
     //-------------------------------------------------------------
     // Fragment shader
     //-------------------------------------------------------------
     oglHandles.fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     printf("Loading and Compiling Fragment shader.\n");
-    readAndCompileShader("shaders/shader.frag", oglHandles.fragmentShader);
+    readAndCompileShader("../ucore/shaders/shader.frag", oglHandles.fragmentShader);
 
     //-------------------------------------------------------------
     // Shader program
@@ -427,6 +433,7 @@ void Universe::initializeGL()
     oglHandles.uniView = getUniformLocation(oglHandles.shaderProgram, "view");
     oglHandles.uniProj = getUniformLocation(oglHandles.shaderProgram, "proj");
 
+    oglHandles.uniIsStar               = getUniformLocation(oglHandles.shaderProgram, "isStar");
     oglHandles.uniNightColorMultiplier = getUniformLocation(oglHandles.shaderProgram, "nightColorMultiplier");
 
     oglHandles.uniMyCenterTransformed  = getUniformLocation(oglHandles.shaderProgram, "sphereInfo.centerTransformed");
@@ -581,6 +588,9 @@ void Universe::onKeyDown(SDL_Event* event)
         break;
     case SDLK_r:
         Rewind(UCmdParam_Start);
+        break;
+    case SDLK_s:
+        ChangeBoolean(&bGalaxyStars, UCmdParam_Toggle);
         break;
     case SDLK_v:
         ChangeSidewaysMotionMode();
@@ -1597,46 +1607,48 @@ void Universe::render()
 
 
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    //----------------------------------------------
-    // Cubic stars model transformation
-    //----------------------------------------------
-    glUniformMatrix4fv(
-        oglHandles.uniModel,
-        1,
-        GL_FALSE,
-        glm::value_ptr(glm::mat4(1.0))
-    );
+    if (!bGalaxyStars)
+    {
+        //----------------------------------------------
+        // Cubic stars model transformation
+        //----------------------------------------------
+        glUniformMatrix4fv(
+            oglHandles.uniModel,
+            1,
+            GL_FALSE,
+            glm::value_ptr(glm::mat4(1.0))
+        );
 
-    glUniform1i(oglHandles.uniMyIsValud, false);
-    glBindVertexArray(oglHandles.starsVao);
+        glUniform1i(oglHandles.uniMyIsValud, false);
+        glUniform1i(oglHandles.uniIsStar, true);
+        glEnable(GL_PROGRAM_POINT_SIZE);
+        //glPointParameterf(GL_POINT_FADE_THRESHOLD_SIZE, 1.0f);
+        glBindVertexArray(oglHandles.starsVao);
 
-    //printf("num points in startVertices = %d\n", starVertices.size());
-    // Draw vertices
-    glDrawArrays(GL_POINTS, 0, starVertices.size() / 7);
 
-    ////%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    ////----------------------------------------------
-    //// Galaxy stars model transformation
-    ////----------------------------------------------
-    //glUniformMatrix4fv(
-    //    oglHandles.uniModel,
-    //    1,
-    //    GL_FALSE,
-    //    glm::value_ptr(glm::mat4(1.0))
-    //);
+        //printf("num points in startVertices = %d\n", starVertices.size());
+        // Draw vertices
+        glDrawArrays(GL_POINTS, 0, starVertices.size() / 7);
+    }
+    else
+    {
+        //----------------------------------------------
+        // Galaxy stars model transformation
+        //----------------------------------------------
+        glUniformMatrix4fv(
+            oglHandles.uniModel,
+            1,
+            GL_FALSE,
+            glm::value_ptr(glm::mat4(1.0))
+        );
 
-    //glUniform1i(oglHandles.uniMyIsValud, false);
-    //glUniform3fv(
-    //    oglHandles.uniOtherSphereCenterTransformed,
-    //    1,
-    //    glm::value_ptr(moon.getModelTransformedCenter())
-    //);
+        glUniform1i(oglHandles.uniMyIsValud, false);
+        glUniform1i(oglHandles.uniIsStar, true);
+        glBindVertexArray(oglHandles.gstarsVao);
 
-    //glBindVertexArray(oglHandles.gstarsVao);
-
-    //// Draw vertices
-    //glDrawArrays(GL_POINT, 0, gstarVertices.size() / 7);
-
+        // Draw vertices
+        glDrawArrays(GL_POINTS, 0, gstarVertices.size() / 7);
+    }
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -2001,6 +2013,7 @@ int Universe::run()
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    //SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 
     window = SDL_CreateWindow("Universe3d", 100, 100, 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED);
 

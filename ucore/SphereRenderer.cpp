@@ -446,7 +446,7 @@ void SphereRenderer::render(OglHandles oglHandles, Sphere* otherSphere)
     glUniform1f(oglHandles.uniMyRadius, _sphere.getRadius());
     glUniform1i(oglHandles.uniMyIsValud, true);
     glUniform1f(oglHandles.uniNightColorMultiplier, _nightColorMultiplier);
-
+    //glEnable(GL_MULTISAMPLE);
 
     if (otherSphere != nullptr)
     {
