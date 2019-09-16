@@ -17,7 +17,6 @@
 #include <iostream>
 #include <string>
 
-#include "imgui.h"
 #include "OneShotBoolean.h"
 
 #define MAXSTARS 1800
@@ -211,26 +210,22 @@ public:
 
     void advance(float stepMultiplier);
 
-    void onKeyDown(SDL_Event* event);
-    void onKeyUp(SDL_Event* event);
-    void onMouseMotion(int xrel, int yrel);
 
-    void toggleFullScreen();
     void setWidgetControlMode();
     void resetWidgetControlMode();
-    void cleanupAndExitApplication();
-    void generateImGuiWidgets();
 
-private:
-    bool bQuit = false;
+    void seCurrenttScreenSize(int width, int height);
+
+public:
     bool bMouseGrabbed = false;
     bool bFastForward = false;
     bool bFastReverse = false;
 
+    int curWidth = 0;
+    int curHeight = 0;
+
     int dx = 0;
     int dy = 0;
-    int previousX = 0;
-    int previousY = 0;
     float _stepMultiplier = 1;
 
 
@@ -291,9 +286,6 @@ private:
 
     float angle = 0.0f;
 
-    int curWidth = 0;
-    int curHeight = 0;
-
 
     OglHandles oglHandles;
 
@@ -330,20 +322,5 @@ private:
 
     bool bUpdateUI;
 
-    //=================================================================
-    // IMGUI, SDL related
-    SDL_Window *window = nullptr;
-    SDL_GLContext context;
-
-    bool bAlwaysShowControlPanel = true;
-    bool bIsWindowFullScreen = false;
-    bool bShowFlagsOverlay = true;
-
-    ImFont *appFontSmall = nullptr;
-    ImFont *appFontSmallMedium = nullptr;
-    ImFont *appFontMedium = nullptr;
-    ImFont *appFontLarge = nullptr;
-
-    OneShotBoolean doubleClicked = OneShotBoolean();
 };
 
