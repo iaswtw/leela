@@ -155,6 +155,8 @@ typedef enum
     UDemo_AnnularSolarEclipseFromSpace,
     UDemo_PartialLunarEclipse,
     UDemo_TiltedOrbitalPlanes,
+    UDemo_SixMonthLongDayAndNightOnNorthPole,
+    UDemo_SixMonthLongDayAndNightOnNorthPole_AnotherAngle,
     UDemo_PrecessionMotion
 } UDemoType;
 
@@ -185,7 +187,9 @@ public:
     void SetDefaultView();
     void NavigationLockOntoEarth(int nParam);
     void NavigationLockOntoSun(int nParam);
+    void NavigationLockOntoEarthWithConstantDirection(int nParam);
     void LookAtEarth();
+    void LookAtEarthFromSavedVector();
     void LookAtSun();
 
     void SetSimulationSpeed(int nParam);
@@ -280,6 +284,10 @@ private:
         Without the setting this flag to 1, the Lock on earth or sun won't
         work. */
     char F_REFERENCE_VECTOR_ALONG_Z = 0;
+    
+    bool bEarthFollowMode = false;
+    VECTOR earthFollowVector = VECTOR(1.0, 1.0, 1.0);
+    float earthFollowDistance = 0.0f;
 
 
     bool bSimulationPause = false;
