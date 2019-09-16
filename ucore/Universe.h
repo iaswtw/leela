@@ -20,7 +20,7 @@
 #include "imgui.h"
 #include "OneShotBoolean.h"
 
-#define MAXSTARS 1800
+#define MAXSTARS 3500
 #define MAXGALAXYSTARS 10000
 
 
@@ -165,8 +165,10 @@ typedef enum
 class Universe
 {
 public:
-    Universe();
+    Universe();    
     ~Universe();
+
+    void HelpMarker(const char* desc);
 
     void generateStars();
     int run();
@@ -329,10 +331,10 @@ private:
 
     Space space;
 
-    PNT star[MAXSTARS];
     PNT gstar[MAXGALAXYSTARS];
 
     std::vector<float> starVertices;
+    std::vector<float> twoPixelWideStarVertices;
     std::vector<float> gstarVertices;
 
 
@@ -351,6 +353,7 @@ private:
     ImFont *appFontSmallMedium = nullptr;
     ImFont *appFontMedium = nullptr;
     ImFont *appFontLarge = nullptr;
+    ImFont *fixedWidthSmall = nullptr;
 
     OneShotBoolean doubleClicked = OneShotBoolean();
 };

@@ -10,6 +10,7 @@ uniform mat4 view;
 uniform mat4 proj;
 
 uniform bool isStar = false;
+uniform uint starPointSize;
 
 uniform float nightColorMultiplier;
 
@@ -69,7 +70,12 @@ vec3 nearestPtL(vec3 modelTransformedPosition)
 
 void main()
 {
-    if (!sphereInfo.isLightSource)
+    if (isStar)
+    {
+        gl_PointSize = starPointSize;
+        Color = in_color;
+    }
+    else if (!sphereInfo.isLightSource)
     {
         if (sphereInfo.isValid)
         {
@@ -186,9 +192,8 @@ void main()
     }
     else
     {
+        // vertex is a non-star light source.
         Color = in_color;
-        if (isStar)
-            gl_PointSize = 1;
     }
             
     // apply all 3 transformations to the original point
