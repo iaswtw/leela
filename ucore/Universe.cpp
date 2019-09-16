@@ -566,6 +566,9 @@ void Universe::advance(float stepMultiplier)
 void Universe::onKeyDown(SDL_Event* event)
 {
     switch (event->key.keysym.sym) {
+    case SDLK_b:
+        NavigationLockOntoEarthWithConstantDirection(UCmdParam_Toggle);
+        break;
     case SDLK_c:
         NavigationLockOntoSun(UCmdParam_Toggle);
         break;
@@ -746,60 +749,66 @@ void Universe::onMouseMotion(int xrel, int yrel)
 
     //printf("dx = %d, dy = %d\n", dx, dy);
 
-    if (F_REFERENCE_VECTOR_ALONG_Z == 1)
-    {
-        if (bLeftMouseButtonDown) {
-            space.moveFrame(Movement_Forward, -dy * 5);
-            if (bLockOntoEarth)
-                space.rotateFrame(earth.getCenter(), dx / 10., 0);
-            else if (bLockOntoSun)
-                space.rotateFrame(sun.getCenter(), dx / 10., 0);
+    if (!bEarthFollowMode) {
+        if (F_REFERENCE_VECTOR_ALONG_Z == 1)
+        {
+            if (bLeftMouseButtonDown) {
+                space.moveFrame(Movement_Forward, -dy * 5);
+                if (bLockOntoEarth)
+                    space.rotateFrame(earth.getCenter(), dx / 10., 0);
+                else if (bLockOntoSun)
+                    space.rotateFrame(sun.getCenter(), dx / 10., 0);
+            }
+            else {
+                if (bLockOntoEarth)
+                    space.rotateFrame(earth.getCenter(), dx / 10., -dy / 10.);
+                else if (bLockOntoSun)
+                    space.rotateFrame(sun.getCenter(), dx / 10., -dy / 10.);
+            }
+            return;
         }
-        else {
-            if (bLockOntoEarth)
-                space.rotateFrame(earth.getCenter(), dx / 10., -dy / 10.);
-            else if (bLockOntoSun)
-                space.rotateFrame(sun.getCenter(), dx / 10., -dy / 10.);
-        }
-        return;
     }
-
 
     while (1)
     {
         if (bLeftMouseButtonDown) {
             space.moveFrame(Movement_Forward, -dy * 5);
 
+            if (bEarthFollowMode)
+                earthFollowDistance += dy * 5;
 
-            if (bSidewaysMotionMode == 1) {
+            if (!bEarthFollowMode) {
+                if (bSidewaysMotionMode == 1) {
+                    space.moveFrame(Movement_RotateRight, 90);
+                    space.moveFrame(Movement_Forward, dx);
+                    space.moveFrame(Movement_RotateLeft, 90);
+                }
+                else {
+                    space.moveFrame(Movement_RotateRight, dx / 10.0);
+                }
+            }
+            break;
+        }
+        if (!bEarthFollowMode) {
+            if (bRightMouseButtonDown) {
+                space.moveFrame(Movement_RightAlongSD, dx / 10.0);
+                break;
+            }
+
+            if (bSidewaysMotionMode) {
                 space.moveFrame(Movement_RotateRight, 90);
                 space.moveFrame(Movement_Forward, dx);
                 space.moveFrame(Movement_RotateLeft, 90);
+
+                space.moveFrame(Movement_RotateUp, 90);
+                space.moveFrame(Movement_Forward, -dy);
+                space.moveFrame(Movement_RotateDown, 90);
+
             }
             else {
-                space.moveFrame(Movement_RotateRight, dx / 10.0);
+                space.moveFrame(Movement_RotateRight, (dx / 10.0));
+                space.moveFrame(Movement_RotateUp, -(dy / 10.0));
             }
-            break;
-        }
-
-        if (bRightMouseButtonDown) {
-            space.moveFrame(Movement_RightAlongSD, dx / 10.0);
-            break;
-        }
-
-        if (bSidewaysMotionMode) {
-            space.moveFrame(Movement_RotateRight, 90);
-            space.moveFrame(Movement_Forward, dx);
-            space.moveFrame(Movement_RotateLeft, 90);
-
-            space.moveFrame(Movement_RotateUp, 90);
-            space.moveFrame(Movement_Forward, -dy);
-            space.moveFrame(Movement_RotateDown, 90);
-
-        }
-        else {
-            space.moveFrame(Movement_RotateRight, (dx / 10.0));
-            space.moveFrame(Movement_RotateUp, -(dy / 10.0));
         }
         break;
     }
@@ -919,11 +928,57 @@ void Universe::NavigationLockOntoSun(int nParam)
 
 }
 
+void Universe::NavigationLockOntoEarthWithConstantDirection(int nParam)
+{
+    switch (nParam)
+    {
+    case UCmdParam_On:
+        bEarthFollowMode = true;
+        break;
+
+    case UCmdParam_Off:
+        bEarthFollowMode = false;
+        break;
+
+    case UCmdParam_Toggle:
+        ChangeBoolean(&bEarthFollowMode, UCmdParam_Toggle);
+        break;
+    }
+
+    if (bEarthFollowMode)
+    {
+        bLockOntoSun = false;
+        bLockOntoEarth = false;
+
+        earthFollowVector = VECTOR(space.S, earth.getCenter());
+        PNT p = earth.getCenter();
+        earthFollowDistance = space.S.distanceTo(p);
+        bSidewaysMotionMode = false;
+    }
+    else
+    {
+        F_REFERENCE_VECTOR_ALONG_Z = 0;
+    }
+
+    bUpdateUI = true;
+}
+
+
+
 void Universe::LookAtEarth()
 {
     space.setFrame(AT_POINT,
         space.S,
         VECTOR(space.S, earth.getCenter()),
+        PNT(space.S.x, space.S.y, space.S.z - 100));
+
+}
+
+void Universe::LookAtEarthFromSavedVector()
+{
+    space.setFrame(AT_POINT,
+        PNT(earth.getCenter()).translated(-earthFollowDistance, earthFollowVector),
+        earthFollowVector,
         PNT(space.S.x, space.S.y, space.S.z - 100));
 
 }
@@ -1225,6 +1280,7 @@ void Universe::ShowDemo(int nParam)
         // Adjust navigation view locks on earth and sun
         NavigationLockOntoEarth(UCmdParam_On);
         NavigationLockOntoSun(UCmdParam_Off);
+        NavigationLockOntoEarthWithConstantDirection(UCmdParam_Off);
 
         // Set S
         //newS = PNT(earth.getCenter().x + 500, earth.getCenter().y - 700, earth.getCenter().z + 150);
@@ -1272,6 +1328,7 @@ void Universe::ShowDemo(int nParam)
         // Adjust navigation view locks on earth and sun
         NavigationLockOntoEarth(UCmdParam_On);
         NavigationLockOntoSun(UCmdParam_Off);
+        NavigationLockOntoEarthWithConstantDirection(UCmdParam_Off);
 
         // Set S
         //newS = PNT(earth.getCenter().x + 500, earth.getCenter().y - 700, earth.getCenter().z + 150);
@@ -1314,6 +1371,7 @@ void Universe::ShowDemo(int nParam)
         // Adjust navigation view locks on earth and sun
         NavigationLockOntoEarth(UCmdParam_Off);
         NavigationLockOntoSun(UCmdParam_Off);
+        NavigationLockOntoEarthWithConstantDirection(UCmdParam_Off);
 
         // Set S
         // the hardcoded values here were found by printing the value of S & D on screen using ImGui
@@ -1357,6 +1415,7 @@ void Universe::ShowDemo(int nParam)
         // Adjust navigation view locks on earth and sun
         NavigationLockOntoEarth(UCmdParam_On);
         NavigationLockOntoSun(UCmdParam_Off);
+        NavigationLockOntoEarthWithConstantDirection(UCmdParam_Off);
 
         // Set S
         //newS = PNT(earth.getCenter().x + 500, earth.getCenter().y - 700, earth.getCenter().z + 150);
@@ -1400,6 +1459,7 @@ void Universe::ShowDemo(int nParam)
         // Adjust navigation view locks on earth and sun
         NavigationLockOntoEarth(UCmdParam_On);
         NavigationLockOntoSun(UCmdParam_Off);
+        NavigationLockOntoEarthWithConstantDirection(UCmdParam_Off);
 
         // Set S
         newS = PNT(earth.getCenter().x + 300, earth.getCenter().y - 400, earth.getCenter().z + 300);
@@ -1436,6 +1496,81 @@ void Universe::ShowDemo(int nParam)
 
         break;
 
+    case UDemo_SixMonthLongDayAndNightOnNorthPole:
+
+        // Set earth at (0,R,0)
+        Earth_SetOrbitalPositionAngle(M_PI / 2);
+
+        // Set S
+        newS = PNT(earth.getCenter().x + 250, earth.getCenter().y - 350, earth.getCenter().z + 300);
+        space.setFrame(AT_POINT,
+            newS,
+            VECTOR(newS, earth.getCenter()),
+            PNT(newS.x, newS.y, newS.z - 100));
+
+        NavigationLockOntoEarthWithConstantDirection(UCmdParam_On);
+        // Adjust navigation view locks on earth and sun
+
+        // Adjust earth's motions
+        Earth_RotationMotion(UCmdParam_On);
+        Earth_RevolutionMotion(UCmdParam_On);
+        Earth_PrecessionMotion(UCmdParam_Reset);
+
+        //// Adjust Moon's motions
+        //Moon_RevolutionMotion(UCmdParam_Off);
+
+        //// Adjust orbital planes
+        Earth_OrbitalPlane(UCmdParam_On);
+        Moon_OrbitalPlane(UCmdParam_Off);
+
+        SetDotDensity(UDotDensity_Normal);
+        SetSimulationSpeed(USimulationSpeed_High);
+        SimulationPause(UCmdParam_Off);
+
+        ///* F_REFERENCE_VECTOR_ALONG_Z is checked before bLockOntoEarth
+        //   or bLockOntoSun in the function on_MouseMotion().  Need
+        //   to consider if the priority of this check should be reversed.
+        //   Without the setting below, the Lock on earth or sun won't
+        //   work. */
+        //F_REFERENCE_VECTOR_ALONG_Z = 1;
+
+        bUpdateUI = true;
+
+        break;
+
+    case UDemo_SixMonthLongDayAndNightOnNorthPole_AnotherAngle:
+
+        // Set earth at (0,R,0)
+        Earth_SetOrbitalPositionAngle(M_PI + M_PI / 4);
+
+        // Set S
+        newS = PNT(earth.getCenter().x, earth.getCenter().y - 350, earth.getCenter().z + 100);
+        space.setFrame(AT_POINT,
+            newS,
+            VECTOR(newS, earth.getCenter()),
+            PNT(newS.x, newS.y, newS.z - 100));
+
+        NavigationLockOntoEarthWithConstantDirection(UCmdParam_On);
+        // Adjust navigation view locks on earth and sun
+
+        // Adjust earth's motions
+        Earth_RotationMotion(UCmdParam_On);
+        Earth_RevolutionMotion(UCmdParam_On);
+        Earth_PrecessionMotion(UCmdParam_Reset);
+
+        //// Adjust Moon's motions
+        //Moon_RevolutionMotion(UCmdParam_Off);
+
+        //// Adjust orbital planes
+        Earth_OrbitalPlane(UCmdParam_On);
+        Moon_OrbitalPlane(UCmdParam_Off);
+
+        SetDotDensity(UDotDensity_Normal);
+        SetSimulationSpeed(USimulationSpeed_High);
+        SimulationPause(UCmdParam_Off);
+
+        break;
+
     case UDemo_TiltedOrbitalPlanes:
         Earth_SetOrbitalPositionAngle(M_PI / 2 - M_PI / 10);
 
@@ -1446,6 +1581,7 @@ void Universe::ShowDemo(int nParam)
         // Adjust navigation view locks on earth and sun
         NavigationLockOntoEarth(UCmdParam_Off);
         NavigationLockOntoSun(UCmdParam_Off);
+        NavigationLockOntoEarthWithConstantDirection(UCmdParam_Off);
 
         newS = PNT(earth.getCenter().x + 0, earth.getCenter().y + 1300, earth.getCenter().z + 200);
         space.setFrame(AT_POINT,
@@ -1699,8 +1835,12 @@ void Universe::processFlags()
         __roll *= 100;
 
     // Finally, Apply the motion value.
-    if (__throttle != 0.0f)
+    if (__throttle != 0.0f) {
         space.moveFrame(Movement_Forward, __throttle);
+        if (bEarthFollowMode)
+            earthFollowDistance -= __throttle;
+    }
+
     if ((__yaw != 0.0f) || (__pitch != 0.0f))
     {
         if (bSidewaysMotionMode) {
@@ -1737,6 +1877,9 @@ void Universe::processFlags()
         LookAtEarth();
     if (bLockOntoSun)
         LookAtSun();
+    if (bEarthFollowMode)
+        LookAtEarthFromSavedVector();
+
 
 }
 
@@ -1791,8 +1934,14 @@ void Universe::generateImGuiWidgets()
 
         if (moonRenderer.bShowOrbitalPlane) color = onColor; else color = offColor;
         ImGui::PushStyleColor(ImGuiCol_Button, color);
-        ImGui::Button("M");
+        ImGui::Button("M"); ImGui::SameLine();
         ImGui::PopStyleColor();
+
+        if (bEarthFollowMode) color = onColor; else color = offColor;
+        ImGui::PushStyleColor(ImGuiCol_Button, color);
+        ImGui::Button("B");
+        ImGui::PopStyleColor();
+
     }
     ImGui::End();
 
@@ -1829,8 +1978,8 @@ void Universe::generateImGuiWidgets()
     // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
     if (!bMouseGrabbed || bAlwaysShowControlPanel)
     {
-        if (show_demo_window)
-            ImGui::ShowDemoWindow(&show_demo_window);
+        //if (show_demo_window)
+        //    ImGui::ShowDemoWindow(&show_demo_window);
 
         ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - 5.0f, 27.0f), ImGuiCond_Always, ImVec2(1.0f, 0.0f));
         //ImGui::SetNextWindowSize(ImVec2(250.0f, curHeight - 25.0f));
@@ -1863,11 +2012,15 @@ void Universe::generateImGuiWidgets()
                 if (ImGui::Button("Partial Lunar Eclipse## demo"))
                     ShowDemo(UDemo_PartialLunarEclipse);
 
-                ImGui::SetNextItemWidth(190);
                 if (ImGui::Button("Tilted orbital planes## demo"))
                     ShowDemo(UDemo_TiltedOrbitalPlanes);
 
-                ImGui::SetNextItemWidth(190);
+                if (ImGui::Button("6 month long day/night on north pole"))
+                    ShowDemo(UDemo_SixMonthLongDayAndNightOnNorthPole);
+
+                if (ImGui::Button("6 month long day/night on north pole (another angle)"))
+                    ShowDemo(UDemo_SixMonthLongDayAndNightOnNorthPole_AnotherAngle);
+
                 if (ImGui::Button("Precession motion## demo"))
                     ShowDemo(UDemo_PrecessionMotion);
 
@@ -1933,6 +2086,12 @@ void Universe::generateImGuiWidgets()
             if (ImGui::IsItemEdited())
                 NavigationLockOntoEarth(bLockOntoEarth ? UCmdParam_On : UCmdParam_Off);
             ImGui::SameLine(); HelpMarker("Also pauses earth's revolution. Activate this mode and\nthen use mouse to view earth from different angles.");
+
+            ImGui::Checkbox("Directional lock on earth's position (b)", &bEarthFollowMode);
+            if (ImGui::IsItemEdited())
+                NavigationLockOntoEarthWithConstantDirection(bEarthFollowMode ? UCmdParam_On : UCmdParam_Off);
+            ImGui::SameLine();
+            HelpMarker("Earth follow mode");
 
             ImGui::Checkbox("Lock on sun's position (c)", &bLockOntoSun);
             if (ImGui::IsItemEdited())
@@ -2091,9 +2250,6 @@ int Universe::run()
                     (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)) {
                     curWidth = event.window.data1;
                     curHeight = event.window.data2;
-
-                    printf("width = %d\n", curWidth);
-                    printf("height = %d\n", curHeight);
                     glViewport(0, 0, curWidth, curHeight);
                 }
                 break;
@@ -2124,6 +2280,7 @@ int Universe::run()
                         bLeftMouseButtonDown = true;
                         break;
                     case SDL_BUTTON_RIGHT:
+                        bRightMouseButtonDown = true;
                         break;
                     }
                     break;

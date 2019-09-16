@@ -69,6 +69,7 @@ public:
     PNT translatedY(double amount);
     PNT translatedZ(double amount);
     double squaredDistanceTo(PNT& p);
+    double distanceTo(PNT& p);
 
     void disp()
     {

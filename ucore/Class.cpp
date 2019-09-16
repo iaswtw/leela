@@ -66,3 +66,9 @@ double PNT::squaredDistanceTo(PNT& p)
         (p.y - y) * (p.y - y) +
         (p.z - z) * (p.z - z);
 }
+
+double PNT::distanceTo(PNT& p)
+{
+    double sq_dist = squaredDistanceTo(p);
+    return sqrt(sq_dist);
+}
