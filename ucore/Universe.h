@@ -271,7 +271,7 @@ private:
     bool bLockOntoEarth = false;
     bool bLockOntoSun = false;
 
-    bool bStars = true;
+    bool bGalaxyStars = false;
 
 
     /*! \todo F_REFERENCE_VECTOR_ALONG_Z is checked before bLockOntoEarth

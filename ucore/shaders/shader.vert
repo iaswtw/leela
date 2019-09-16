@@ -9,6 +9,8 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 proj;
 
+uniform bool isStar = false;
+
 uniform float nightColorMultiplier;
 
 uniform vec3  sunCenterTransformed;
@@ -185,6 +187,8 @@ void main()
     else
     {
         Color = in_color;
+        if (isStar)
+            gl_PointSize = 1;
     }
             
     // apply all 3 transformations to the original point

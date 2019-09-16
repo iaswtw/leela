@@ -18,6 +18,7 @@ struct OglHandles
     GLint uniView;
     GLint uniProj;
 
+    GLint uniIsStar;
     GLint uniNightColorMultiplier;                
 
     GLuint axisVao;
