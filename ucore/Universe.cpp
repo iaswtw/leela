@@ -1,7 +1,6 @@
-#ifdef WINDOWS
 #include "pch.h"
-#include <windows.h>
-#else
+
+#ifndef _WIN32
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
