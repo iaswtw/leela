@@ -278,7 +278,7 @@ private:
     bool bLockOntoSun = false;
 
     bool bGalaxyStars = false;
-
+    bool bShowAxis = true;
 
     /*! \todo F_REFERENCE_VECTOR_ALONG_Z is checked before bLockOntoEarth
         or bLockOntoSun in the function on_MouseMotion().  Need

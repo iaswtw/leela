@@ -612,6 +612,9 @@ void Universe::advance(float stepMultiplier)
 void Universe::onKeyDown(SDL_Event* event)
 {
     switch (event->key.keysym.sym) {
+    case SDLK_a:
+        ChangeBoolean(&bShowAxis, UCmdParam_Toggle);
+        break;
     case SDLK_b:
         NavigationLockOntoEarthWithConstantDirection(UCmdParam_Toggle);
         break;
@@ -621,11 +624,11 @@ void Universe::onKeyDown(SDL_Event* event)
     case SDLK_d:
         SetDefaultView();
         break;
+    case SDLK_e:
+        Earth_OrbitalPlane(UCmdParam_Toggle);
+        break;
     case SDLK_f:
         FastForward(UCmdParam_Start);
-        break;
-    case SDLK_g:
-        Earth_OrbitalPlane(UCmdParam_Toggle);
         break;
     case SDLK_m:
         Moon_OrbitalPlane(UCmdParam_Toggle);
@@ -1767,26 +1770,29 @@ void Universe::render()
     //=====================================================================================
 
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    //----------------------------------------------
-    // Axis model transformation
-    //----------------------------------------------
-    glUniformMatrix4fv(
-        oglHandles.uniModel,
-        1,
-        GL_FALSE,
-        glm::value_ptr(glm::mat4(1.0))
-    );
 
-    glUniform1i(oglHandles.uniMyIsValud, false);
-    // ideally, after setting IsValid to false, no need to set the other variables to draw the axis.
-    glUniform1i(oglHandles.uniMyIsLightSource, 0);
-    glUniform3f(oglHandles.uniMyCenterTransformed, 0.0f, 0.0f, 0.0f);
+    if (bShowAxis)
+    {
+        //----------------------------------------------
+        // Axis model transformation
+        //----------------------------------------------
+        glUniformMatrix4fv(
+            oglHandles.uniModel,
+            1,
+            GL_FALSE,
+            glm::value_ptr(glm::mat4(1.0))
+        );
 
-    glBindVertexArray(oglHandles.axisVao);
+        glUniform1i(oglHandles.uniMyIsValud, false);
+        // ideally, after setting IsValid to false, no need to set the other variables to draw the axis.
+        glUniform1i(oglHandles.uniMyIsLightSource, 0);
+        glUniform3f(oglHandles.uniMyCenterTransformed, 0.0f, 0.0f, 0.0f);
 
-    // Draw vertices
-    glDrawArrays(GL_LINES, 0, axis.getVertices().size() / 7);
+        glBindVertexArray(oglHandles.axisVao);
 
+        // Draw vertices
+        glDrawArrays(GL_LINES, 0, axis.getVertices().size() / 7);
+    }
 
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -1963,12 +1969,12 @@ void Universe::generateImGuiWidgets()
 
         if (bSidewaysMotionMode) color = onColor; else color = offColor;
         ImGui::PushStyleColor(ImGuiCol_Button, color);
-        ImGui::Button("V"); ImGui::SameLine();
+        ImGui::Button("v"); ImGui::SameLine();
         ImGui::PopStyleColor();
 
         if (bLockOntoEarth) color = onColor; else color = offColor;
         ImGui::PushStyleColor(ImGuiCol_Button, color);
-        ImGui::Button("Z"); ImGui::SameLine();
+        ImGui::Button("z"); ImGui::SameLine();
         ImGui::PopStyleColor();
 
         if (!earth.bRevolutionMotion) color = onColor; else color = offColor;
@@ -1983,17 +1989,17 @@ void Universe::generateImGuiWidgets()
 
         if (earthRenderer.bShowOrbitalPlane) color = onColor; else color = offColor;
         ImGui::PushStyleColor(ImGuiCol_Button, color);
-        ImGui::Button("G"); ImGui::SameLine();
+        ImGui::Button("e"); ImGui::SameLine();
         ImGui::PopStyleColor();
 
         if (moonRenderer.bShowOrbitalPlane) color = onColor; else color = offColor;
         ImGui::PushStyleColor(ImGuiCol_Button, color);
-        ImGui::Button("M"); ImGui::SameLine();
+        ImGui::Button("m"); ImGui::SameLine();
         ImGui::PopStyleColor();
 
         if (bEarthFollowMode) color = onColor; else color = offColor;
         ImGui::PushStyleColor(ImGuiCol_Button, color);
-        ImGui::Button("B");
+        ImGui::Button("b");
         ImGui::PopStyleColor();
 
     }
@@ -2027,20 +2033,25 @@ void Universe::generateImGuiWidgets()
                                 "Releasing this key shall restore the forward movement of time at the speed it was just before pressing this key."},
             { "Up arrow",       "Speeds up the simulation time passage by roughly 66% each time this key is pressed."},
             { "Down arrow",     "Slows down the simulation time passage by roughly 66% each time this key is pressed."},
-
+            { "d",              "Bring the camera to the default position and look in the direction of the sun. From this position, the entire earth's orbit is visible. "
+                                " It is a convenient starting position for the simulation.  If you get lost navigating, you can hit this key to get your bearings."},
             { nullptr, nullptr },
 
-            { "g",              "Show/Hide earth's orbital plane." },
-            { "m",              "Show/Hide moon's orbital plane." },
+            { "a",              "Toggle visibility of the XYZ coordinate axis.  When looking from the default view position, +ve X direction is towards bottom left from origin (blue color),"
+                                "+ve Y is towards bottom right from origin (green color), and +ve Z is upwards from origin (cyan color)." },
+            { "e",              "Toggle visibility of earth's orbital plane." },
+            { "m",              "Toggle visibility of moon's orbital plane." },
             
-            { "z",              "Turn on/off lock on earth's position. When turned on, the earth will appear at the center of the screen. Left/right/up/down mouse movements shall rotate the camera around the earth at a constant distance. "
+            { "z",              "Toggle lock on earth's position. When turned on, the earth will appear at the center of the screen. Left/right/up/down mouse movements shall rotate the camera around the earth at a constant distance. "
                                 "Zoom in and zoom out will work as expected.  Turning lock on will also cause the earth to pause in its orbit." },
-            { "c",              "Turn on/off lock on sun's position. When turned on, the sun will appear at the center of the screen." },
-            { "b",              "Turn on/off Directional Lock on earth. The direction vector from the camera to the earth will be noted at the time of turning this mode on. "
+            { "c",              "Toggle lock on sun's position. When turned on, the sun will appear at the center of the screen." },
+            { "b",              "Toggle directional lock on earth. The direction vector from the camera to the earth will be noted at the time of turning this mode on. "
                                 "After that, the camera will follow the earth as the earth moves in its orbit, all the while maintaining the original direction vector."
-                                "This mode is used in the 6 month long day and night demo." },
+                                "This mode is used in the 6 month long day and night demo.  Use this mode when you want to observe the earth from a fixed angle as it "
+                                "revolves around the sun.  Contrast this mode with the normal lock on earth (z) mode where the camera stays put while only changing its viewing direction. "
+                                "While in this mode, only zoom in/out navigation will work." },
+            { "0 (zero)",       "Toggle earth's revolution motion.  Use this to pause the earth in its orbit so that you can observe various things such as the tilted orbit, shadows, etc." },
 
-            { "v",              "Turn on/off 'Shift mode' navigation." },
 
             { nullptr, nullptr },
 
@@ -2052,6 +2063,10 @@ void Universe::generateImGuiWidgets()
             { "Insert",         "Rotate doen (or shift down in Shift mode"},
             { "Alt + Page Up",  "Rotate right along the axis the camera is looking at. This will result in the object in front being rotated left."},
             { "Alt + Insert",   "Rotate left along the axis the camera is looking at. This will result in the object in front being rotated right."},
+            { "v",              "Toggle 'Shift mode' navigation.  In this mode, left/right/up/down mouse movements will result in the camera being shifted in those directions as "
+                                "as opposed to rotating in those directions.  When the camera shifts, the viewing direction vector does not change. It is as if the camera is looking at a point at infinity. "
+                                "If you want to look at how the background stars shift due to parallex as the earth moves in its orbit, turn this mode on, go to default "
+                                "view (d), and then move the mouse left and right." },
 
 
             { nullptr, nullptr },
@@ -2186,7 +2201,7 @@ void Universe::generateImGuiWidgets()
             ImGui::PopFont();
             ImGui::Indent();
             ImGui::Checkbox("Revolution motion (0)## earth", &earth.bRevolutionMotion);
-            ImGui::Checkbox("Orbital plane (g)## earth", &earthRenderer.bShowOrbitalPlane);
+            ImGui::Checkbox("Orbital plane (e)## earth", &earthRenderer.bShowOrbitalPlane);
             ImGui::Checkbox("Precession motion (F6)## earth", &earth.bPrecessionMotion);
             ImGui::SameLine();
             if (ImGui::Button("Reset## earth precession motion"))
@@ -2235,7 +2250,7 @@ void Universe::generateImGuiWidgets()
             if (ImGui::IsItemEdited())
                 NavigationLockOntoSun(bLockOntoSun ? UCmdParam_On : UCmdParam_Off);
 
-            if (ImGui::Button("Default view (d)"))
+            if (ImGui::Button("Show default view (d)"))
                 SetDefaultView();
             ImGui::Unindent();
 
