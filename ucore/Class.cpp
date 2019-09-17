@@ -1,6 +1,6 @@
 #include "pch.h"
 
-#include "class.h"
+#include "Class.h"
 
 /*****************************************************************************************
  NOTE on translate and translated family of functions:
