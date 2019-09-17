@@ -21,6 +21,7 @@ bld/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
+ucore/universe3d
 
 # Visual Studio 2015 cache/options directory
 .vs/
@@ -51,6 +52,8 @@ artifacts/
 *.ilk
 *.meta
 *.obj
+*.o
+*.d
 *.pch
 *.pdb
 *.pgc
