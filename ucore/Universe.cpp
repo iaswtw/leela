@@ -13,6 +13,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+
 // Following function was copied from imgui_demo.cpp
 // Helper to display a little (?) mark which shows a tooltip when hovered.
 // In your own code you may want to display an actual icon if you are using a merged icon fonts (see misc/fonts/README.txt)
@@ -651,19 +652,19 @@ void Universe::onKeyDown(SDL_Event* event)
         Earth_RevolutionMotion(UCmdParam_Toggle);
         break;
     case SDLK_1:
-        Earth_SetOrbitalPositionAngle(M_PI / 2);
+        Earth_SetOrbitalPositionAngle(0);
         Earth_RevolutionMotion(UCmdParam_Off);
         break;
     case SDLK_2:
-        Earth_SetOrbitalPositionAngle(M_PI);
+        Earth_SetOrbitalPositionAngle(M_PI / 2);
         Earth_RevolutionMotion(UCmdParam_Off);
         break;
     case SDLK_3:
-        Earth_SetOrbitalPositionAngle(3 * M_PI / 2);
+        Earth_SetOrbitalPositionAngle(M_PI);
         Earth_RevolutionMotion(UCmdParam_Off);
         break;
     case SDLK_4:
-        Earth_SetOrbitalPositionAngle(0);
+        Earth_SetOrbitalPositionAngle(3 * M_PI / 2);
         Earth_RevolutionMotion(UCmdParam_Off);
         break;
 
@@ -711,13 +712,13 @@ void Universe::onKeyDown(SDL_Event* event)
         if (!bAltModifier)
             pitch = nominalPitch;
         else
-            roll = nominalRoll;
+            roll = -nominalRoll;
         break;
     case SDLK_INSERT:
         if (!bAltModifier)
             pitch = -nominalPitch; 
         else
-            roll = -nominalRoll;
+            roll = nominalRoll;
         break;
 
     // Modifiers
@@ -2001,30 +2002,83 @@ void Universe::generateImGuiWidgets()
     if (bShowKeyboardShortcuts)
     {
         //ImGuiCond_FirstUseEver
-        ImGui::SetNextWindowContentWidth(800);
-        if (ImGui::Begin("Keyboard Shortcuts", &bShowKeyboardShortcuts, ImGuiWindowFlags_NoSavedSettings))
+        ImGui::SetNextWindowSizeConstraints(ImVec2(800, 600), ImVec2(1024, 768));
+        if (ImGui::Begin("Keyboard Shortcuts", &bShowKeyboardShortcuts))
         {
+            auto populateShortcutWindow = [](const char *arr[][2], int numRows) {
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.8f, 0.8f, 1));
+                for (int i = 0; i < numRows; i++)
+                {
+                    if (arr[i][0] == nullptr) {
+                        ImGui::Separator();
+                    }
+                    else {
+                        ImGui::Text(arr[i][0]);  ImGui::NextColumn();  ImGui::SetColumnOffset(-1, 100);
+                        ImGui::TextWrapped(arr[i][1]);  ImGui::NextColumn();
+                    }
+                }
+                ImGui::PopStyleColor();
+            };
+
+            const char * shortcutHelp[][2] = {
+            { "Space bar",      "Pause time. Navigation will still work." },
+            { "f",              "Pressing this key and keeping it pressed will cause simulation time to elapse faster by about 10 times."},
+            { "r",              "Pressing this key and keeping it pressed with cause simulation time to run in reverse by about 10 times the nominal forward speed. "
+                                "Releasing this key shall restore the forward movement of time at the speed it was just before pressing this key."},
+            { "Up arrow",       "Speeds up the simulation time passage by roughly 66% each time this key is pressed."},
+            { "Down arrow",     "Slows down the simulation time passage by roughly 66% each time this key is pressed."},
+
+            { nullptr, nullptr },
+
+            { "g",              "Show/Hide earth's orbital plane." },
+            { "m",              "Show/Hide moon's orbital plane." },
+            
+            { "z",              "Turn on/off lock on earth's position. When turned on, the earth will appear at the center of the screen. Left/right/up/down mouse movements shall rotate the camera around the earth at a constant distance. "
+                                "Zoom in and zoom out will work as expected.  Turning lock on will also cause the earth to pause in its orbit." },
+            { "c",              "Turn on/off lock on sun's position. When turned on, the sun will appear at the center of the screen." },
+            { "b",              "Turn on/off Directional Lock on earth. The direction vector from the camera to the earth will be noted at the time of turning this mode on. "
+                                "After that, the camera will follow the earth as the earth moves in its orbit, all the while maintaining the original direction vector."
+                                "This mode is used in the 6 month long day and night demo." },
+
+            { "v",              "Turn on/off 'Shift mode' navigation." },
+
+            { nullptr, nullptr },
+
+            { "Home",           "Zoom in" },
+            { "End",            "Zoom out" },
+            { "Del",            "Turn left (or shift left in Shift mode)"},
+            { "Page Down",      "Turn right (or shift right in Shift mode)"},
+            { "Page Up",        "Rotate up (or shift up in Shift mode)"},
+            { "Insert",         "Rotate doen (or shift down in Shift mode"},
+            { "Alt + Page Up",  "Rotate right along the axis the camera is looking at. This will result in the object in front being rotated left."},
+            { "Alt + Insert",   "Rotate left along the axis the camera is looking at. This will result in the object in front being rotated right."},
+
+
+            { nullptr, nullptr },
+
+            { "F5",             "Start/Stop rotation of moon's orbital plane. This is best seen if moon's orbital plane is also visible." },
+            { "Shift + F5",     "Reset moon's orbital plane tilt to default." },
+
+            { "F6",             "Start/Stop earth's precession motion." },
+            { "Shift + F6",     "Reset earth's axis tilt direction to default." },
+
+            { nullptr, nullptr },
+
+            { "1",              "Set earth's position at 0 degrees measured from the positive X axis (blue)." },
+            { "2",              "Set earth's position at 90 degrees measured from the positive X axis (blue)." },
+            { "3",              "Set earth's position at 180 degrees measured from the positive X axis (blue)." },
+            { "4",              "Set earth's position at 270 degrees measured from the positive X axis (blue)." },
+
+            {nullptr, nullptr },
+
+            };
+
             ImGui::Columns(2, "mycolumn");
-            ImGui::Text("Shortcut"); ImGui::NextColumn();
-            ImGui::SetColumnOffset(-1, 100);
+            ImGui::Text("Shortcut"); ImGui::NextColumn();  ImGui::SetColumnOffset(-1, 100);
             ImGui::Text("Description"); ImGui::NextColumn();
             ImGui::Separator();
 
-            ImGui::Text("z");  ImGui::NextColumn();
-            ImGui::SetColumnOffset(-1, 100);
-            ImGui::Text("Lock on earth");  ImGui::NextColumn();
-
-            ImGui::Text("c");  ImGui::NextColumn();
-            ImGui::SetColumnOffset(-1, 100);
-            ImGui::Text("Lock on sun");  ImGui::NextColumn();
-
-            ImGui::Text("v");  ImGui::NextColumn();
-            ImGui::SetColumnOffset(-1, 100);
-            ImGui::Text("Shift mode navigation");  ImGui::NextColumn();
-
-            ImGui::Text("Space bar");  ImGui::NextColumn();
-            ImGui::SetColumnOffset(-1, 100);
-            ImGui::Text("Pause time. Navigation will still work.");  ImGui::NextColumn();
+            populateShortcutWindow(shortcutHelp, sizeof(shortcutHelp) / sizeof(shortcutHelp[0]));
         }
         ImGui::End();
 
@@ -2078,7 +2132,7 @@ void Universe::generateImGuiWidgets()
             ImGui::ShowDemoWindow(&show_demo_window);
 
         ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - 5.0f, 27.0f), ImGuiCond_Always, ImVec2(1.0f, 0.0f));
-        //ImGui::SetNextWindowSize(ImVec2(250.0f, curHeight - 25.0f));
+        //ImGui::SetNextWindowSize(ImVec2(350.0f, curHeight - 25.0f));
         ImGui::SetNextWindowBgAlpha(0.8f);
 
         {
@@ -2086,13 +2140,13 @@ void Universe::generateImGuiWidgets()
             ImGui::Begin(
                 "Control Panel",
                 nullptr,
-                ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings
+                ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse |  ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings
             );
             static float f = 0.0f;
             ImGui::PushFont(appFontSmall);
             if (ImGui::CollapsingHeader("Demos", ImGuiTreeNodeFlags_DefaultOpen)) {
                 ImGui::PushFont(appFontSmall);
-                ImGui::Indent();
+
                 ImGui::SetNextItemWidth(190);
                 if (ImGui::Button("Total Solar Eclipse## demo"))
                     ShowDemo(UDemo_TotalSolarEclipse);
@@ -2111,16 +2165,15 @@ void Universe::generateImGuiWidgets()
                 if (ImGui::Button("Tilted orbital planes## demo"))
                     ShowDemo(UDemo_TiltedOrbitalPlanes);
 
-                if (ImGui::Button("6 month long day &\n6 month long night on north pole"))
+                if (ImGui::Button("6 month long day & 6 month long\nnight on north pole"))
                     ShowDemo(UDemo_SixMonthLongDayAndNightOnNorthPole);
 
-                if (ImGui::Button("6 month long day &\n 6 month long night on north pole\n(another angle)"))
+                if (ImGui::Button("6 month long day & 6 month long\nnight on north pole (another angle)"))
                     ShowDemo(UDemo_SixMonthLongDayAndNightOnNorthPole_AnotherAngle);
 
                 if (ImGui::Button("Precession motion## demo"))
                     ShowDemo(UDemo_PrecessionMotion);
 
-                ImGui::Unindent();
                 ImGui::PopFont();
             }
             ImGui::PopFont();
@@ -2281,8 +2334,8 @@ int Universe::run()
     fullFontFilePath = FindFontFile("ProggyClean.ttf");
     fixedWidthSmall     = io.Fonts->AddFontFromFileTTF(fullFontFilePath.c_str(), 13);
 
-    //if (!font1)
-    //    printf("ERROR: Could not load font Cousine-Regular\n");
+    if (!appFontSmall || !appFontSmallMedium || !appFontMedium || !appFontLarge || !fixedWidthSmall)
+        printf("WARNING: Could not load fonts.  Will use default fixed width font.");
 
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
