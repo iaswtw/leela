@@ -1939,6 +1939,7 @@ void Universe::generateImGuiWidgets()
     // Our state
     bool show_demo_window = true;
     bool show_another_window = false;
+
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     // Start the Dear ImGui frame
@@ -1995,6 +1996,38 @@ void Universe::generateImGuiWidgets()
     }
     ImGui::End();
 
+    if (bShowKeyboardShortcuts)
+    {
+        //ImGuiCond_FirstUseEver
+        ImGui::SetNextWindowContentWidth(800);
+        if (ImGui::Begin("Keyboard Shortcuts", &bShowKeyboardShortcuts, ImGuiWindowFlags_NoSavedSettings))
+        {
+            ImGui::Columns(2, "mycolumn");
+            ImGui::Text("Shortcut"); ImGui::NextColumn();
+            ImGui::SetColumnOffset(-1, 100);
+            ImGui::Text("Description"); ImGui::NextColumn();
+            ImGui::Separator();
+
+            ImGui::Text("z");  ImGui::NextColumn();
+            ImGui::SetColumnOffset(-1, 100);
+            ImGui::Text("Lock on earth");  ImGui::NextColumn();
+
+            ImGui::Text("c");  ImGui::NextColumn();
+            ImGui::SetColumnOffset(-1, 100);
+            ImGui::Text("Lock on sun");  ImGui::NextColumn();
+
+            ImGui::Text("v");  ImGui::NextColumn();
+            ImGui::SetColumnOffset(-1, 100);
+            ImGui::Text("Shift mode navigation");  ImGui::NextColumn();
+
+            ImGui::Text("Space bar");  ImGui::NextColumn();
+            ImGui::SetColumnOffset(-1, 100);
+            ImGui::Text("Pause time. Navigation will still work.");  ImGui::NextColumn();
+        }
+        ImGui::End();
+
+    }
+
 
     if (bMouseGrabbed)
     {
@@ -2013,14 +2046,25 @@ void Universe::generateImGuiWidgets()
         {
             if (ImGui::BeginMenu("Universe3d"))
             {
-                if (ImGui::MenuItem("Show Fullscreen", "F11"))
-                    toggleFullScreen();
-                ImGui::MenuItem("Persistent Control Panel", nullptr, &bAlwaysShowControlPanel, true);
                 if (ImGui::MenuItem("Exit Application"))
                     bQuit = true;
 
                 ImGui::EndMenu();
             }
+            if (ImGui::BeginMenu("View"))
+            {
+                if (ImGui::MenuItem("Show Fullscreen", "F11"))
+                    toggleFullScreen();
+                ImGui::MenuItem("Show Control Panel in Navigation mode", nullptr, &bAlwaysShowControlPanel, true);
+                ImGui::EndMenu();
+            }
+
+            if (ImGui::BeginMenu("Help"))
+            {
+                ImGui::MenuItem("Show Keyboard Shortcuts", nullptr, &bShowKeyboardShortcuts);
+                ImGui::EndMenu();
+            }
+
             ImGui::EndMainMenuBar();
         }
     }
@@ -2065,26 +2109,15 @@ void Universe::generateImGuiWidgets()
                 if (ImGui::Button("Tilted orbital planes## demo"))
                     ShowDemo(UDemo_TiltedOrbitalPlanes);
 
-                if (ImGui::Button("6 month long day/night on north pole"))
+                if (ImGui::Button("6 month long day &\n6 month long night on north pole"))
                     ShowDemo(UDemo_SixMonthLongDayAndNightOnNorthPole);
 
-                if (ImGui::Button("6 month long day/night on\nnorth pole (another angle)"))
+                if (ImGui::Button("6 month long day &\n 6 month long night on north pole\n(another angle)"))
                     ShowDemo(UDemo_SixMonthLongDayAndNightOnNorthPole_AnotherAngle);
 
                 if (ImGui::Button("Precession motion## demo"))
                     ShowDemo(UDemo_PrecessionMotion);
 
-                //ImGui::SetNextItemWidth(-10);
-                //ImGui::DragFloat("##float5a", &f);
-
-                //ImGui::SetNextItemWidth(-10);
-                //ImGui::DragFloat("##float5b", &f);
-
-                //ImGui::SetNextItemWidth(-10);
-                //ImGui::DragFloat("##float5c", &f);
-
-                //ImGui::SetNextItemWidth(-10);
-                //ImGui::Text("All the way");
                 ImGui::Unindent();
                 ImGui::PopFont();
             }

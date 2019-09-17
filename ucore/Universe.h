@@ -348,6 +348,7 @@ private:
     bool bAlwaysShowControlPanel = true;
     bool bIsWindowFullScreen = false;
     bool bShowFlagsOverlay = true;
+    bool bShowKeyboardShortcuts = false;
 
     ImFont *appFontSmall = nullptr;
     ImFont *appFontSmallMedium = nullptr;
