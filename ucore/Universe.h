@@ -20,8 +20,8 @@
 #include "imgui.h"
 #include "OneShotBoolean.h"
 
-#define MAXSTARS 3500
-#define MAXGALAXYSTARS 10000
+constexpr auto MAXSTARS = 3500;
+constexpr auto MAXGALAXYSTARS = 10000;
 
 
 
