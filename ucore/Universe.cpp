@@ -10,6 +10,8 @@
 #include "Utils.h"
 #include <stdio.h>
 
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 // Following function was copied from imgui_demo.cpp
 // Helper to display a little (?) mark which shows a tooltip when hovered.
@@ -126,9 +128,9 @@ void Universe::initSceneObjects()
         0.0f,                               // initial orbital angle
         0.01f,                             // revolution velocity
         0,                                  // orbital rotation angle
-        glm::radians(30.0)                  // orbital tilt
+        glm::radians(30.0f)                  // orbital tilt
     );
-    moon.setOrbitalPlaneColor(glm::vec3(0.8, 0.8, 0.8));
+    moon.setOrbitalPlaneColor(glm::vec3(0.8f, 0.8f, 0.8f));
 
     moon.setParentSphere(&earth);
     earth.setParentSphere(&sun);
@@ -172,22 +174,22 @@ void Universe::generateStars()
         if (i == MAXSTARS)
             break;
         
-        x = max_dist * (double(rand()) / RAND_MAX) - (max_dist / 2);
-        y = max_dist * (double(rand()) / RAND_MAX) - (max_dist / 2);
-        z = max_dist * (double(rand()) / RAND_MAX) - (max_dist / 2);
-        c = 0.1 + (0.8 * ((float(rand()) / RAND_MAX)));
+        x = float(max_dist * (double(rand()) / RAND_MAX) - (max_dist / 2));
+        y = float(max_dist * (double(rand()) / RAND_MAX) - (max_dist / 2));
+        z = float(max_dist * (double(rand()) / RAND_MAX) - (max_dist / 2));
+        c = 0.1f + (0.8f * ((float(rand()) / RAND_MAX)));
 
         r = g = b = c;
 
         int anotherRandom = int(10 * (float(rand()) / RAND_MAX));
         if (anotherRandom == 5)
-            r *= 1.5;
+            r *= 1.5f;
         if (anotherRandom == 6)
-            b *= 1.2;
+            b *= 1.2f;
         if (anotherRandom == 7)
         {
-            r *= 1.5;
-            g *= 1.5;
+            r *= 1.5f;
+            g *= 1.5f;
         }
 
 
@@ -686,10 +688,10 @@ void Universe::onKeyDown(SDL_Event* event)
 
     // Arrow keys
     case SDLK_UP:
-        _stepMultiplier *= 1.6666;
+        _stepMultiplier *= 1.6666f;
         break;
     case SDLK_DOWN:
-        _stepMultiplier *= 0.6;
+        _stepMultiplier *= 0.6f;
         break;
 
 
@@ -781,8 +783,8 @@ void Universe::onKeyUp(SDL_Event* event)
 
 void Universe::onMouseMotion(int xrel, int yrel)
 {
-    float dx = xrel;
-    float dy = yrel;
+    float dx = float(xrel);
+    float dy = float(yrel);
 
     if (bCtrlModifier)
     {
@@ -995,7 +997,7 @@ void Universe::NavigationLockOntoEarthWithConstantDirection(int nParam)
 
         earthFollowVector = VECTOR(space.S, earth.getCenter());
         PNT p = earth.getCenter();
-        earthFollowDistance = space.S.distanceTo(p);
+        earthFollowDistance = float(space.S.distanceTo(p));
         bSidewaysMotionMode = false;
     }
     else
@@ -1048,31 +1050,31 @@ void Universe::SetSimulationSpeed(int nParam)
     switch (eSimulationSpeed)
     {
     case USimulationSpeed_VeryLow:
-        _stepMultiplier = 0.005;
+        _stepMultiplier = 0.005f;
         break;
 
     case USimulationSpeed_Low2:
-        _stepMultiplier = 0.015;
+        _stepMultiplier = 0.015f;
         break;
 
     case USimulationSpeed_Low1:
-        _stepMultiplier = 0.03;
+        _stepMultiplier = 0.03f;
         break;
 
     case USimulationSpeed_Low:
-        _stepMultiplier = 0.05;
+        _stepMultiplier = 0.05f;
         break;
 
     case USimulationSpeed_Normal:
-        _stepMultiplier = 0.36;
+        _stepMultiplier = 0.36f;
         break;
 
     case USimulationSpeed_High:
-        _stepMultiplier = 3;
+        _stepMultiplier = 3.0f;
         break;
 
     case USimulationSpeed_VeryHigh:
-        _stepMultiplier = 10;
+        _stepMultiplier = 10.0f;
         break;
     }
 
@@ -1335,7 +1337,7 @@ void Universe::ShowDemo(int nParam)
 
         /* Set proper moon's position so that the moon's shadow will
            fall on the earth shortly */
-        Moon_SetOrbitalPositionAngle(-3.2 * M_PI / 5);
+        Moon_SetOrbitalPositionAngle(-3.2f * M_PI / 5);
 
         // Adjust earth's motions
         Earth_RotationMotion(UCmdParam_On);
@@ -1383,8 +1385,8 @@ void Universe::ShowDemo(int nParam)
 
         /* Set proper moon's position so that the moon's shadow will
            fall on the earth shortly */
-        Moon_SetOrbitalPositionAngle(-3.7 * M_PI / 5);
-        Earth_SetOrbitalPositionAngle(0.69 * M_PI / 2);
+        Moon_SetOrbitalPositionAngle(-3.7f * M_PI / 5);
+        Earth_SetOrbitalPositionAngle(0.69f * M_PI / 2);
 
         // Adjust earth's motions
         Earth_RotationMotion(UCmdParam_On);
@@ -1427,7 +1429,7 @@ void Universe::ShowDemo(int nParam)
 
         /* Set proper moon's position so that the moon's shadow will
            fall on the earth shortly */
-        Moon_SetOrbitalPositionAngle(-3.3 * M_PI / 5);
+        Moon_SetOrbitalPositionAngle(-3.3f * M_PI / 5);
 
         // Adjust earth's motions
         Earth_RotationMotion(UCmdParam_On);
@@ -1470,8 +1472,8 @@ void Universe::ShowDemo(int nParam)
 
         /* Set proper moon's position so that the moon's shadow will
            fall on the earth shortly */
-        Moon_SetOrbitalPositionAngle(0.35 * M_PI / 2);
-        Earth_SetOrbitalPositionAngle(0.59 * M_PI / 2);
+        Moon_SetOrbitalPositionAngle(0.35f * M_PI / 2);
+        Earth_SetOrbitalPositionAngle(0.59f * M_PI / 2);
 
         // Adjust earth's motions
         Earth_RotationMotion(UCmdParam_On);
@@ -1689,7 +1691,7 @@ void Universe::cleanupAndExitApplication()
 ****************************************************************************/
 void Universe::Moon_SetOrbitalPositionAngle(double fAngle)
 {
-    moon.setOrbitalAngle(fAngle);
+    moon.setOrbitalAngle(float(fAngle));
     moon.calculateCenterPosition();
 }
 
@@ -1701,7 +1703,7 @@ void Universe::Moon_SetOrbitalPositionAngle(double fAngle)
 ****************************************************************************/
 void Universe::Earth_SetOrbitalPositionAngle(double fAngle)
 {
-    earth.setOrbitalAngle(fAngle);
+    earth.setOrbitalAngle(float(fAngle));
     earth.calculateCenterPosition();
 }
 

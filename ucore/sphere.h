@@ -197,10 +197,10 @@ public:
             _orbitalAngle += _orbitalAngularVelocity * stepMultiplier;
 
         if (bPrecessionMotion)
-            _axisRotationAngle += 0.005;      // todo - use step multiplier and a new internal velocity variable.
+            _axisRotationAngle += 0.005f;      // todo - use step multiplier and a new internal velocity variable.
 
         if (bOrbitalPlaneRotation)
-            _orbitalPlaneRotationAngle += 0.005;     // todo - use step multiplier and velocity
+            _orbitalPlaneRotationAngle += 0.005f;     // todo - use step multiplier and velocity
 
         calculateCenterPosition();
     }
@@ -296,14 +296,14 @@ public:
 
     void generateVertices(float xAxisLength, float yAxisLength, float zAxisLength, glm::vec3 xAxisColor, glm::vec3 yAxisColor, glm::vec3 zAxisColor)
     {
-        _vertices.push_back(-xAxisLength);  _vertices.push_back(0.0);  _vertices.push_back(0.0);   _vertices.push_back(xAxisColor.r);  _vertices.push_back(xAxisColor.g);  _vertices.push_back(xAxisColor.b); _vertices.push_back(0.8);
-        _vertices.push_back(xAxisLength);  _vertices.push_back(0.0);  _vertices.push_back(0.0);   _vertices.push_back(xAxisColor.r);  _vertices.push_back(xAxisColor.g);  _vertices.push_back(xAxisColor.b);  _vertices.push_back(0.8);
+        _vertices.push_back(-xAxisLength);  _vertices.push_back(0.0f);  _vertices.push_back(0.0f);   _vertices.push_back(xAxisColor.r);  _vertices.push_back(xAxisColor.g);  _vertices.push_back(xAxisColor.b);  _vertices.push_back(0.8f);
+        _vertices.push_back(+xAxisLength);  _vertices.push_back(0.0f);  _vertices.push_back(0.0f);   _vertices.push_back(xAxisColor.r);  _vertices.push_back(xAxisColor.g);  _vertices.push_back(xAxisColor.b);  _vertices.push_back(0.8f);
 
-        _vertices.push_back(0.0);  _vertices.push_back(-yAxisLength);  _vertices.push_back(0.0);   _vertices.push_back(yAxisColor.r);  _vertices.push_back(yAxisColor.g);  _vertices.push_back(yAxisColor.b); _vertices.push_back(0.8);
-        _vertices.push_back(0.0);  _vertices.push_back(yAxisLength);  _vertices.push_back(0.0);   _vertices.push_back(yAxisColor.r);  _vertices.push_back(yAxisColor.g);  _vertices.push_back(yAxisColor.b);  _vertices.push_back(0.8);
+        _vertices.push_back(0.0f);  _vertices.push_back(-yAxisLength);  _vertices.push_back(0.0f);   _vertices.push_back(yAxisColor.r);  _vertices.push_back(yAxisColor.g);  _vertices.push_back(yAxisColor.b);  _vertices.push_back(0.8f);
+        _vertices.push_back(0.0f);  _vertices.push_back(+yAxisLength);  _vertices.push_back(0.0f);   _vertices.push_back(yAxisColor.r);  _vertices.push_back(yAxisColor.g);  _vertices.push_back(yAxisColor.b);  _vertices.push_back(0.8f);
 
-        _vertices.push_back(0.0);  _vertices.push_back(0.0);  _vertices.push_back(-zAxisLength);   _vertices.push_back(zAxisColor.r);  _vertices.push_back(zAxisColor.g);  _vertices.push_back(zAxisColor.b); _vertices.push_back(0.8);
-        _vertices.push_back(0.0);  _vertices.push_back(0.0);  _vertices.push_back(zAxisLength);   _vertices.push_back(zAxisColor.r);  _vertices.push_back(zAxisColor.g);  _vertices.push_back(zAxisColor.b);  _vertices.push_back(0.8);
+        _vertices.push_back(0.0f);  _vertices.push_back(0.0f);  _vertices.push_back(-zAxisLength);   _vertices.push_back(zAxisColor.r);  _vertices.push_back(zAxisColor.g);  _vertices.push_back(zAxisColor.b);  _vertices.push_back(0.8f);
+        _vertices.push_back(0.0f);  _vertices.push_back(0.0f);  _vertices.push_back(+zAxisLength);   _vertices.push_back(zAxisColor.r);  _vertices.push_back(zAxisColor.g);  _vertices.push_back(zAxisColor.b);  _vertices.push_back(0.8f);
     }
 
     std::vector<float>& getVertices()

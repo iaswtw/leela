@@ -101,12 +101,12 @@ std::vector<float>* SphereRenderer::_constructMainSphereVertices()
             float y4 = s._radius * sin(theta + theat_inc) * sin(alpha + alpha_inc);
             float z4 = s._radius * cos(theta + theat_inc);
 
-            vector_push_back_7(*v, x1, y1, z1, s._r, s._g, s._b, 1.0);
-            vector_push_back_7(*v, x2, y2, z2, s._r, s._g, s._b, 1.0);
-            vector_push_back_7(*v, x3, y3, z3, s._r, s._g, s._b, 1.0);
-            vector_push_back_7(*v, x3, y3, z3, s._r, s._g, s._b, 1.0);
-            vector_push_back_7(*v, x2, y2, z2, s._r, s._g, s._b, 1.0);
-            vector_push_back_7(*v, x4, y4, z4, s._r, s._g, s._b, 1.0);
+            vector_push_back_7(*v, x1, y1, z1, s._r, s._g, s._b, 1.0f);
+            vector_push_back_7(*v, x2, y2, z2, s._r, s._g, s._b, 1.0f);
+            vector_push_back_7(*v, x3, y3, z3, s._r, s._g, s._b, 1.0f);
+            vector_push_back_7(*v, x3, y3, z3, s._r, s._g, s._b, 1.0f);
+            vector_push_back_7(*v, x2, y2, z2, s._r, s._g, s._b, 1.0f);
+            vector_push_back_7(*v, x4, y4, z4, s._r, s._g, s._b, 1.0f);
 
             //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
         }
@@ -134,19 +134,19 @@ std::vector<float>* SphereRenderer::_constructLatitudesAndLongitudeVertices()
 
         for (float theta = 0; theta < float(2 * M_PI); theta += inc)
         {
-            float x1 = 1.001 * s._radius * sin(theta) * cos(alpha);
-            float y1 = 1.001 * s._radius * sin(theta) * sin(alpha);
-            float z1 = 1.001 * s._radius * cos(theta);
+            float x1 = 1.001f * s._radius * sin(theta) * cos(alpha);
+            float y1 = 1.001f * s._radius * sin(theta) * sin(alpha);
+            float z1 = 1.001f * s._radius * cos(theta);
 
-            float x2 = 1.001 * s._radius * sin(theta + inc) * cos(alpha);
-            float y2 = 1.001 * s._radius * sin(theta + inc) * sin(alpha);
-            float z2 = 1.001 * s._radius * cos(theta + inc);
+            float x2 = 1.001f * s._radius * sin(theta + inc) * cos(alpha);
+            float y2 = 1.001f * s._radius * sin(theta + inc) * sin(alpha);
+            float z2 = 1.001f * s._radius * cos(theta + inc);
 
             float cMult;
             if (alpha == 0.0f)
-                cMult = 0.8;
+                cMult = 0.8f;
             else
-                cMult = 0.9;
+                cMult = 0.9f;
 
             vector_push_back_7(*v, x1, y1, z1, s._r*cMult, s._g*cMult, s._b*cMult, 1.0);
             vector_push_back_7(*v, x2, y2, z2, s._r*cMult, s._g*cMult, s._b*cMult, 1.0);
@@ -158,7 +158,7 @@ std::vector<float>* SphereRenderer::_constructLatitudesAndLongitudeVertices()
     //---------------------------------------------------------------------------------
     // Special Latitudes
     //---------------------------------------------------------------------------------
-    std::list<float> thetas = { 0, 66.5, 23.5, 90, 90 + 23.5, 90 + 66.5 };          // 0 = +z axis, 90 is equator, 90+66.5 is antarctic circle
+    std::list<float> thetas = { 0, 66.5f, 23.5f, 90, 90 + 23.5f, 90 + 66.5f };          // 0 = +z axis, 90 is equator, 90+66.5 is antarctic circle
 
     for (float theta : thetas)
     {
@@ -166,16 +166,16 @@ std::vector<float>* SphereRenderer::_constructLatitudesAndLongitudeVertices()
 
         for (float alpha = 0; alpha < float(2 * M_PI); alpha += inc)
         {
-            float x1 = 1.001 * s._radius * sin(theta) * cos(alpha);
-            float y1 = 1.001 * s._radius * sin(theta) * sin(alpha);
-            float z1 = 1.001 * s._radius * cos(theta);
+            float x1 = 1.001f * s._radius * sin(theta) * cos(alpha);
+            float y1 = 1.001f * s._radius * sin(theta) * sin(alpha);
+            float z1 = 1.001f * s._radius * cos(theta);
 
-            float x2 = 1.001 * s._radius * sin(theta) * cos(alpha + inc);
-            float y2 = 1.001 * s._radius * sin(theta) * sin(alpha + inc);
-            float z2 = 1.001 * s._radius * cos(theta);
+            float x2 = 1.001f * s._radius * sin(theta) * cos(alpha + inc);
+            float y2 = 1.001f * s._radius * sin(theta) * sin(alpha + inc);
+            float z2 = 1.001f * s._radius * cos(theta);
 
-            vector_push_back_7(*v, x1, y1, z1, s._r*0.9, s._g*0.5, s._b*0.5, 1.0);
-            vector_push_back_7(*v, x2, y2, z2, s._r*0.9, s._g*0.5, s._b*0.5, 1.0);
+            vector_push_back_7(*v, x1, y1, z1, s._r*0.9f, s._g*0.5f, s._b*0.5f, 1.0f);
+            vector_push_back_7(*v, x2, y2, z2, s._r*0.9f, s._g*0.5f, s._b*0.5f, 1.0f);
 
             //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
         }
@@ -187,20 +187,20 @@ std::vector<float>* SphereRenderer::_constructLatitudesAndLongitudeVertices()
     for (float thetas = 0; thetas < 180; thetas += 10)
     {
         float theta = glm::radians(thetas);
-        float cMult = 0.9;
+        float cMult = 0.9f;
 
         for (float alpha = 0; alpha < float(2 * M_PI) - inc; alpha += inc)
         {
-            float x1 = 1.001 * s._radius * sin(theta) * cos(alpha);
-            float y1 = 1.001 * s._radius * sin(theta) * sin(alpha);
-            float z1 = 1.001 * s._radius * cos(theta);
+            float x1 = 1.001f * s._radius * sin(theta) * cos(alpha);
+            float y1 = 1.001f * s._radius * sin(theta) * sin(alpha);
+            float z1 = 1.001f * s._radius * cos(theta);
 
-            float x2 = 1.001 * s._radius * sin(theta) * cos(alpha + inc);
-            float y2 = 1.001 * s._radius * sin(theta) * sin(alpha + inc);
-            float z2 = 1.001 * s._radius * cos(theta);
+            float x2 = 1.001f * s._radius * sin(theta) * cos(alpha + inc);
+            float y2 = 1.001f * s._radius * sin(theta) * sin(alpha + inc);
+            float z2 = 1.001f * s._radius * cos(theta);
 
-            vector_push_back_7(*v, x1, y1, z1, s._r*cMult, s._g*cMult, s._b*cMult, 1.0);
-            vector_push_back_7(*v, x2, y2, z2, s._r*cMult, s._g*cMult, s._b*cMult, 1.0);
+            vector_push_back_7(*v, x1, y1, z1, s._r*cMult, s._g*cMult, s._b*cMult, 1.0f);
+            vector_push_back_7(*v, x2, y2, z2, s._r*cMult, s._g*cMult, s._b*cMult, 1.0f);
 
             //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
         }
@@ -232,8 +232,8 @@ std::vector<float>* SphereRenderer::_constructOrbit()
         float y2 = s._orbitalRadius * sin(alpha + alpha_inc);
         float z2 = 0;
 
-        vector_push_back_7(*v, x1, y1, z1, color.r, color.g, color.b, 0.8);
-        vector_push_back_7(*v, x2, y2, z2, color.r, color.g, color.b, 0.8);
+        vector_push_back_7(*v, x1, y1, z1, color.r, color.g, color.b, 0.8f);
+        vector_push_back_7(*v, x2, y2, z2, color.r, color.g, color.b, 0.8f);
     }
 
     return v;
@@ -243,19 +243,19 @@ std::vector<float>* SphereRenderer::_constructOrbitalPlaneVertices()
 {
     std::vector<float>* v   = new std::vector<float>();
     Sphere& s               = _sphere;
-    float m                 = 0.3;                          // color multiplier
+    float m                 = 0.3f;                          // color multiplier
     float radius            = s._orbitalRadius;
     glm::vec3& color        = s._orbitalPlaneColor;
 
     //---------------------------------------------------------------------------------
     // Orbital plane.  This is centered at origin.
     //---------------------------------------------------------------------------------
-    vector_push_back_7(*v, -radius * 1.2, -radius * 1.2, 0, color.r*m, color.g*m, color.b*m, 1.0);
-    vector_push_back_7(*v, +radius * 1.2, -radius * 1.2, 0, color.r*m, color.g*m, color.b*m, 1.0);
-    vector_push_back_7(*v, +radius * 1.2, +radius * 1.2, 0, color.r*m, color.g*m, color.b*m, 1.0);
-    vector_push_back_7(*v, +radius * 1.2, +radius * 1.2, 0, color.r*m, color.g*m, color.b*m, 1.0);
-    vector_push_back_7(*v, -radius * 1.2, +radius * 1.2, 0, color.r*m, color.g*m, color.b*m, 1.0);
-    vector_push_back_7(*v, -radius * 1.2, -radius * 1.2, 0, color.r*m, color.g*m, color.b*m, 1.0);
+    vector_push_back_7(*v, -radius * 1.2f, -radius * 1.2f, 0, color.r*m, color.g*m, color.b*m, 1.0f);
+    vector_push_back_7(*v, +radius * 1.2f, -radius * 1.2f, 0, color.r*m, color.g*m, color.b*m, 1.0f);
+    vector_push_back_7(*v, +radius * 1.2f, +radius * 1.2f, 0, color.r*m, color.g*m, color.b*m, 1.0f);
+    vector_push_back_7(*v, +radius * 1.2f, +radius * 1.2f, 0, color.r*m, color.g*m, color.b*m, 1.0f);
+    vector_push_back_7(*v, -radius * 1.2f, +radius * 1.2f, 0, color.r*m, color.g*m, color.b*m, 1.0f);
+    vector_push_back_7(*v, -radius * 1.2f, -radius * 1.2f, 0, color.r*m, color.g*m, color.b*m, 1.0f);
 
     return v;
 }
@@ -271,32 +271,32 @@ std::vector<float>* SphereRenderer::_constructOrbitalPlaneGridVertices()
     //float inc = float(_orbitalRadius) / int(_orbitalRadius / 50.0);
 
     float maxGridLines      = 20;
-    float inc               = (s._orbitalRadius * 2 * 1.2) / maxGridLines;
+    float inc               = (s._orbitalRadius * 2 * 1.2f) / maxGridLines;
     //inc = std::max(inc, 50.0f);
     printf("inc = %f\n", inc);
 
     float x, y;
-    float m                 = 0.4;      // color multiplier
+    float m                 = 0.4f;      // color multiplier
     float radius            = s._orbitalRadius;
     glm::vec3& color        = s._orbitalPlaneColor;
 
-    x = y = -radius * 1.2;
+    x = y = -radius * 1.2f;
 
     for (int i = 0; i <= maxGridLines; i++)
     {
-        vector_push_back_7(*v, x, -radius * 1.2, +1, color.r*m, color.g*m, color.b*m, 1.0);
-        vector_push_back_7(*v, x, +radius * 1.2, +1, color.r*m, color.g*m, color.b*m, 1.0);
-        vector_push_back_7(*v, x, -radius * 1.2, -1, color.r*m, color.g*m, color.b*m, 1.0);
-        vector_push_back_7(*v, x, +radius * 1.2, -1, color.r*m, color.g*m, color.b*m, 1.0);
+        vector_push_back_7(*v, x, -radius * 1.2f, +1, color.r*m, color.g*m, color.b*m, 1.0f);
+        vector_push_back_7(*v, x, +radius * 1.2f, +1, color.r*m, color.g*m, color.b*m, 1.0f);
+        vector_push_back_7(*v, x, -radius * 1.2f, -1, color.r*m, color.g*m, color.b*m, 1.0f);
+        vector_push_back_7(*v, x, +radius * 1.2f, -1, color.r*m, color.g*m, color.b*m, 1.0f);
 
         x += inc;
     }
     for (int i = 0; i <= maxGridLines; i++)
     {
-        vector_push_back_7(*v, -radius * 1.2, y, +1, color.r*m, color.g*m, color.b*m, 1.0);
-        vector_push_back_7(*v, +radius * 1.2, y, +1, color.r*m, color.g*m, color.b*m, 1.0);
-        vector_push_back_7(*v, -radius * 1.2, y, -1, color.r*m, color.g*m, color.b*m, 1.0);
-        vector_push_back_7(*v, +radius * 1.2, y, -1, color.r*m, color.g*m, color.b*m, 1.0);
+        vector_push_back_7(*v, -radius * 1.2f, y, +1, color.r*m, color.g*m, color.b*m, 1.0f);
+        vector_push_back_7(*v, +radius * 1.2f, y, +1, color.r*m, color.g*m, color.b*m, 1.0f);
+        vector_push_back_7(*v, -radius * 1.2f, y, -1, color.r*m, color.g*m, color.b*m, 1.0f);
+        vector_push_back_7(*v, +radius * 1.2f, y, -1, color.r*m, color.g*m, color.b*m, 1.0f);
 
         y += inc;
     }
