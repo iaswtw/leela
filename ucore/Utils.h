@@ -7,6 +7,7 @@
 #include <GL/glew.h>
 
 #include <vector>
+#include <string>
 
 GLint getUniformLocation(GLuint shaderProgram, const std::string& uniformName);
 GLint getAttribLocation(GLuint shaderProgram, const std::string& attribName);

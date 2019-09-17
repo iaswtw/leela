@@ -1,5 +1,11 @@
+#ifdef WINDOWS
 #include "pch.h"
 #include <windows.h>
+#else
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#endif
 
 #include "imgui.h"
 #include "imgui_impl_sdl.h"
@@ -41,11 +47,11 @@ static std::string FindFontFile(const char * fileName)
     struct stat fileStat;
     std::string fullPath;
     
-    fullPath = std::string("fonts\\") + fileName;
+    fullPath = std::string("fonts/") + fileName;
     if (stat(fullPath.c_str(), &fileStat) == 0)
         return std::string(fullPath);
 
-    fullPath = std::string("..\\external\\fonts\\") + fileName;
+    fullPath = std::string("../external/fonts/") + fileName;
     if (stat(fullPath.c_str(), &fileStat) == 0)
         return std::string(fullPath);
 
