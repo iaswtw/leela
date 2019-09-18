@@ -350,11 +350,13 @@ private:
     bool bIsWindowFullScreen = false;
     bool bShowFlagsOverlay = true;
     bool bShowKeyboardShortcuts = false;
+    bool bShowIntroduction = false;
 
     ImFont *appFontSmall = nullptr;
     ImFont *appFontSmallMedium = nullptr;
     ImFont *appFontMedium = nullptr;
     ImFont *appFontLarge = nullptr;
+    ImFont *appFontGiant = nullptr;
     ImFont *fixedWidthSmall = nullptr;
 
     OneShotBoolean doubleClicked = OneShotBoolean();
