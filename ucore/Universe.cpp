@@ -1430,10 +1430,10 @@ void Universe::ShowDemo(int nParam)
         // Set S
         // the hardcoded values here were found by printing the value of S & D on screen using ImGui
         // while manually going to that position.
-        newS = PNT(-92.2673, 1435.5368, 52.9889);
+        newS = PNT(-90.1736, 1423.7947, 51.6696);
         space.setFrame(AT_POINT,
             newS,
-            VECTOR(newS, PNT(641.3813, -2678.9711, -409.2932)),
+            VECTOR(newS, PNT(1220.0681, -2517.4311, -572.8346)),
             PNT(newS.x, newS.y, newS.z - 100));
 
         /* Set proper moon's position so that the moon's shadow will
@@ -1725,7 +1725,7 @@ void Universe::setWidgetControlMode()
 
 void Universe::resetWidgetControlMode()
 {
-    SDL_ShowCursor(SDL_DISABLE);
+    //SDL_ShowCursor(SDL_DISABLE);
     SDL_SetRelativeMouseMode(SDL_TRUE);
 }
 
@@ -2010,6 +2010,43 @@ void Universe::generateImGuiWidgets()
     }
     ImGui::End();
 
+    if (bShowIntroduction)
+    {
+        float width = 800.0f;
+        float height = 600.0f;
+        //float x = io.DisplaySize.x - (width / 2);
+        //float y = io.DisplaySize.y - (height / 2);
+       
+        ImGui::SetNextWindowSizeConstraints(ImVec2(width, height), ImVec2(width, height));
+        //ImGui::SetNextWindowPos(ImVec2(, y), 0, ImVec2(0.5, 0.5));
+        //ImGui::SetCursorPos(ImVec2(io.DisplaySize.x / 2.0f, io.DisplaySize.y / 2.0f));
+        if (ImGui::Begin("Introduction", &bShowIntroduction))
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.8f, 0.8f, 1));
+
+            ImGui::PushFont(appFontGiant);
+            ImGui::TextWrapped("Universe3d\n\n");
+            ImGui::PopFont();
+
+            ImGui::PushFont(appFontMedium);
+            ImGui::TextWrapped(
+                "This program is intended to be a teaching aid in explaining various celestial concepts to whoever is interested in learning about them. "
+                "It primarily intends to explain phenomenon related to earth, moon and sun. \n\n"
+                
+                "The program doesn't make any effort to show sizes or distances to scale.  In fact, if it did, it will hinder its ability to "
+                "explain concepts due to the impracticality of showing the earth, moon and sun on the screen at the same time. They will only be a few pixels wide.\n\n"
+
+                "With distances and sizes not to scale, angles have to be exagerated to show the same effect.  For example, to show why solar eclipses don't occurr every "
+                "new moon day, the tilt of the moons's orbital plane with respect to earth's orbital plane had to be exagerated to roughly 30 degrees from about 5 degrees."
+                            
+            );
+            ImGui::PopFont();
+
+            ImGui::PopStyleColor();
+        }
+        ImGui::End();
+    }
+
     if (bShowKeyboardShortcuts)
     {
         //ImGuiCond_FirstUseEver
@@ -2042,8 +2079,8 @@ void Universe::generateImGuiWidgets()
                                 " It is a convenient starting position for the simulation.  If you get lost navigating, you can hit this key to get your bearings."},
             { nullptr, nullptr },
 
-            { "a",              "Toggle visibility of the XYZ coordinate axis.  When looking from the default view position, +ve X direction is towards bottom left from origin (blue color),"
-                                "+ve Y is towards bottom right from origin (green color), and +ve Z is upwards from origin (cyan color)." },
+            { "a",              "Toggle visibility of the XYZ coordinate axis.  When looking from the default view position, +ve X direction is towards bottom left from origin (blue),"
+                                "+ve Y is towards bottom right from origin (green), and +ve Z is upwards from origin (cyan)." },
             { "e",              "Toggle visibility of earth's orbital plane." },
             { "m",              "Toggle visibility of moon's orbital plane." },
             
@@ -2137,6 +2174,7 @@ void Universe::generateImGuiWidgets()
 
             if (ImGui::BeginMenu("Help"))
             {
+                ImGui::MenuItem("Introduction", nullptr, &bShowIntroduction);
                 ImGui::MenuItem("Show Keyboard Shortcuts", nullptr, &bShowKeyboardShortcuts);
                 ImGui::EndMenu();
             }
@@ -2350,6 +2388,7 @@ int Universe::run()
     appFontSmallMedium  = io.Fonts->AddFontFromFileTTF(fullFontFilePath.c_str(), 18);
     appFontMedium       = io.Fonts->AddFontFromFileTTF(fullFontFilePath.c_str(), 20);
     appFontLarge        = io.Fonts->AddFontFromFileTTF(fullFontFilePath.c_str(), 24);
+    appFontGiant        = io.Fonts->AddFontFromFileTTF(fullFontFilePath.c_str(), 36);
 
     fullFontFilePath = FindFontFile("ProggyClean.ttf");
     fixedWidthSmall     = io.Fonts->AddFontFromFileTTF(fullFontFilePath.c_str(), 13);
@@ -2392,7 +2431,9 @@ int Universe::run()
     {
         while (SDL_PollEvent(&event))
         {
-            ImGui_ImplSDL2_ProcessEvent(&event);
+            if (!bMouseGrabbed)
+                ImGui_ImplSDL2_ProcessEvent(&event);
+
             switch (event.type)
             {
             case SDL_QUIT:           bQuit = true;                  break;
