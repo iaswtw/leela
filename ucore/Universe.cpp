@@ -2030,13 +2030,14 @@ void Universe::generateImGuiWidgets()
 
             ImGui::PushFont(appFontMedium);
             ImGui::TextWrapped(
-                "This program is intended to be a teaching aid in explaining various celestial concepts to whoever is interested in learning about them. "
-                "It primarily intends to explain phenomenon related to earth, moon and sun. \n\n"
+                "This program is intended to be a teaching aid to explain various celestial concepts. "
+                "It primarily intends to explain phenomenon related to orbital mechanics of planetary motion. \n\n"
                 
-                "The program doesn't make any effort to show sizes or distances to scale.  In fact, if it did, it will hinder its ability to "
-                "explain concepts due to the impracticality of showing the earth, moon and sun on the screen at the same time. They will only be a few pixels wide.\n\n"
+                "The program doesn't make any effort to show the various parameters such as sizes, distances, rotation & revolution speeds, etc. to scale. "
+                "If it did, it will hinder its ability to help explain concepts due to the impracticality of showing the earth, moon and sun on the screen at "
+                "the same time. They will only be a few pixels wide.\n\n"
 
-                "With distances and sizes not to scale, angles have to be exagerated to show the same effect.  For example, to show why solar eclipses don't occurr every "
+                "With distances and sizes not to scale, angles have to be exagerated to show the same effect.  For example, to show why solar eclipses don't occurr on every "
                 "new moon day, the tilt of the moons's orbital plane with respect to earth's orbital plane had to be exagerated to roughly 30 degrees from about 5 degrees."
                             
             );
