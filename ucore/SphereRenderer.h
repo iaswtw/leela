@@ -9,6 +9,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <GL/glew.h>
 
+#include "GlslProgram.h"
 #include "OglHandles.h"
 
 
@@ -40,7 +41,7 @@ public:
     void setNightColorDarkness(NightColorDarkness darkness);
 	void setPolygonCountLevel(PolygonCountLevel polygonCountLevel);
     void constructVerticesAndSendToGpu(OglHandles oglHandles);
-    void render(OglHandles oglHandles, Sphere* otherSphere = nullptr);
+
 
 public:
     bool bShowOrbitalPlane = false;
@@ -57,7 +58,7 @@ private:
 
 	float _getPolygonIncrement();
 
-private:
+protected:
     Sphere& _sphere;
 
     GLuint _mainVao;
@@ -79,3 +80,26 @@ private:
     bool _bIsLightSource = false;
 };
 
+
+class PlanetRenderer : public SphereRenderer
+{
+public:
+	PlanetRenderer(Sphere& sphere);
+	~PlanetRenderer();
+
+	void renderSphere(GlslProgram& glslProgram, Sphere* otherSphere = nullptr);
+	void renderLatitudeAndLongitudes(GlslProgram& glslProgram);
+	void renderOrbitalPlane(GlslProgram& glslProgram);
+	void renderOrbit(GlslProgram& glslProgram);
+
+};
+
+class SunRenderer : public SphereRenderer
+{
+public:
+	SunRenderer(Sphere& sphere);
+	~SunRenderer();
+
+	void renderSphere(GlslProgram& glslProgram);
+
+};

@@ -20,6 +20,7 @@
 
 #include "imgui.h"
 #include "OneShotBoolean.h"
+#include "GlslProgram.h"
 
 constexpr auto MAXSTARS = 3500;
 constexpr auto MAXGALAXYSTARS = 10000;
@@ -173,18 +174,20 @@ public:
 
     void generateStars();
     int run();
+    int runMainLoop();
 
     void processFlags();
     void render();
+    void renderUsingPlanetGlslProgram();
+	void renderUsingStarGlslProgram();
+	void renderUsingSunGlslProgram();
+    void renderUsingSimpleGlslProgram();
+
+
+
     void initializeGL();
     void initSceneObjects();
     void printGlError();
-    void printShaderCompileStatus(GLuint shader);
-    void readAndCompileShader(std::string filePath, GLuint &shaderId);
-    void compileShaders();
-    void linkShaders();
-    void useShaderProgram();
-    void unuseShaderProgram();
 
     void ChangeSidewaysMotionMode();
     void SetDefaultView();
@@ -326,10 +329,10 @@ private:
     Sphere sun;
     Sphere moon;
 
-    SphereRenderer earthRenderer;
-    SphereRenderer sunRenderer;
-    SphereRenderer moonRenderer;
-
+    PlanetRenderer earthRenderer;
+    PlanetRenderer moonRenderer;
+    SunRenderer sunRenderer;
+    
     Space space;
 
     PNT gstar[MAXGALAXYSTARS];
@@ -338,6 +341,10 @@ private:
     std::vector<float> twoPixelWideStarVertices;
     std::vector<float> gstarVertices;
 
+	GlslProgram planetGlslProgram;
+	GlslProgram sunGlslProgram;
+	GlslProgram starGlslProgram;
+    GlslProgram simpleGlslProgram;
 
     bool bUpdateUI;
 

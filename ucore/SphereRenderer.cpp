@@ -16,7 +16,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-using namespace std;
+#include <vector>
 
 static inline void vector_push_back_7(std::vector<float>& v, float f1, float f2, float f3, float f4, float f5, float f6, float f7)
 {
@@ -325,11 +325,11 @@ void SphereRenderer::constructVerticesAndSendToGpu(OglHandles oglHandles)
         v->data(),
         GL_STATIC_DRAW);
 
-    glVertexAttribPointer(oglHandles.posAttrib, 3, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), nullptr);
-    glEnableVertexAttribArray(oglHandles.posAttrib);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), nullptr);
+    glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(oglHandles.colAttrib, 4, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(oglHandles.colAttrib);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     numMainSphereVertices = v->size() / VERTEX_STRIDE_IN_VBO;
     delete v;
@@ -348,11 +348,11 @@ void SphereRenderer::constructVerticesAndSendToGpu(OglHandles oglHandles)
         v->data(),
         GL_STATIC_DRAW);
 
-    glVertexAttribPointer(oglHandles.posAttrib, 3, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), nullptr);
-    glEnableVertexAttribArray(oglHandles.posAttrib);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), nullptr);
+    glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(oglHandles.colAttrib, 4, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(oglHandles.colAttrib);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     numLatAndLongVertices = v->size() / VERTEX_STRIDE_IN_VBO;
     delete v;
@@ -371,11 +371,11 @@ void SphereRenderer::constructVerticesAndSendToGpu(OglHandles oglHandles)
         v->data(),
         GL_STATIC_DRAW);
 
-    glVertexAttribPointer(oglHandles.posAttrib, 3, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), nullptr);
-    glEnableVertexAttribArray(oglHandles.posAttrib);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), nullptr);
+    glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(oglHandles.colAttrib, 4, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(oglHandles.colAttrib);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     numOrbitalPlaneVertices = v->size() / VERTEX_STRIDE_IN_VBO;
     delete v;
@@ -394,11 +394,11 @@ void SphereRenderer::constructVerticesAndSendToGpu(OglHandles oglHandles)
         v->data(),
         GL_STATIC_DRAW);
 
-    glVertexAttribPointer(oglHandles.posAttrib, 3, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), nullptr);
-    glEnableVertexAttribArray(oglHandles.posAttrib);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), nullptr);
+    glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(oglHandles.colAttrib, 4, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(oglHandles.colAttrib);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     numOrbitalPlaneGridVertices = v->size() / VERTEX_STRIDE_IN_VBO;
     delete v;
@@ -417,115 +417,16 @@ void SphereRenderer::constructVerticesAndSendToGpu(OglHandles oglHandles)
         v->data(),
         GL_STATIC_DRAW);
 
-    glVertexAttribPointer(oglHandles.posAttrib, 3, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), nullptr);
-    glEnableVertexAttribArray(oglHandles.posAttrib);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), nullptr);
+    glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(oglHandles.colAttrib, 4, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(oglHandles.colAttrib);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     numOrbitVertices = v->size() / VERTEX_STRIDE_IN_VBO;
     delete v;
-
-
 }
 
-void SphereRenderer::render(OglHandles oglHandles, Sphere* otherSphere)
-{
-    //----------------------------------------------------------------------------------------------------
-    // Main sphere
-    //----------------------------------------------------------------------------------------------------
-    glUniformMatrix4fv(
-        oglHandles.uniModel,
-        1,
-        GL_FALSE,
-        glm::value_ptr(_sphere.getModelMatrix())
-    );
-
-    glUniform1i(oglHandles.uniMyIsLightSource, _bIsLightSource);
-    glUniform3fv(oglHandles.uniMyCenterTransformed, 1, glm::value_ptr(_sphere.getCenter()));
-    glUniform1f(oglHandles.uniMyRadius, _sphere.getRadius());
-    glUniform1i(oglHandles.uniMyIsValud, true);
-    glUniform1f(oglHandles.uniNightColorMultiplier, _nightColorMultiplier);
-    //glEnable(GL_MULTISAMPLE);
-
-    if (otherSphere != nullptr)
-    {
-        // When drawing earth, other sphere is moon.
-        glUniform1f(oglHandles.uniOtherSphereRadius, otherSphere->getRadius());
-        glUniform3fv(
-            oglHandles.uniOtherSphereCenterTransformed,
-            1,
-            glm::value_ptr(otherSphere->getModelTransformedCenter())
-        );
-    }
-
-    glBindVertexArray(_mainVao);
-
-    // Draw vertices
-    glDrawArrays(GL_TRIANGLES, 0, numMainSphereVertices);
-
-    //----------------------------------------------------------------------------------------------------
-    // Latitude and longitude
-    //----------------------------------------------------------------------------------------------------
-    if (bShowLatitudesAndLongitudes)
-    {
-        glBindVertexArray(_latAndLongVao);
-
-        // Draw vertices
-        glDrawArrays(GL_LINES, 0, numLatAndLongVertices);
-    }
-
-
-    //----------------------------------------------------------------------------------------------------
-    // Orbital plane
-    //----------------------------------------------------------------------------------------------------
-    // orbital plane has its own model transform different from the sphere itself.
-    if (bShowOrbitalPlane)
-    {
-        glUniformMatrix4fv(
-            oglHandles.uniModel,
-            1,
-            GL_FALSE,
-            glm::value_ptr(_sphere.getOrbitalPlaneModelMatrix())
-        );
-
-        glUniform1i(oglHandles.uniMyIsValud, false);
-
-
-        // Draw orbital plane grid
-        glBindVertexArray(_orbitalPlaneGridVao);
-        glDrawArrays(GL_LINES, 0, numOrbitalPlaneGridVertices);
-
-        // Draw vertices
-//        glDepthMask(GL_FALSE);
-        glBindVertexArray(_orbitalPlaneVao);
-        glDrawArrays(GL_TRIANGLES, 0, numOrbitalPlaneVertices);
-//        glDepthMask(GL_TRUE);
-
-
-    }
-
-    //----------------------------------------------------------------------------------------------------
-    // Orbital itself
-    //----------------------------------------------------------------------------------------------------
-    // Uses same transform as that of orbital plane. But orbital plane may not be drawn depending on flags. Hence
-    // set the model matrix again.
-    if (bShowOrbit)
-    {
-        glUniformMatrix4fv(
-            oglHandles.uniModel,
-            1,
-            GL_FALSE,
-            glm::value_ptr(_sphere.getOrbitalPlaneModelMatrix())
-        );
-
-        glUniform1i(oglHandles.uniMyIsValud, false);
-
-        glBindVertexArray(_orbitVao);
-        glDrawArrays(GL_LINES, 0, numOrbitVertices);
-    }
-
-}
 
 float SphereRenderer::_getPolygonIncrement()
 {
@@ -538,4 +439,123 @@ float SphereRenderer::_getPolygonIncrement()
 	case PolygonCountLevel_High:
 		return 1800.0;
 	}
+}
+
+
+//############################################################################################################
+
+PlanetRenderer::PlanetRenderer(Sphere& sphere)
+	: SphereRenderer(sphere)
+{
+}
+
+PlanetRenderer::~PlanetRenderer()
+{
+
+}
+
+void PlanetRenderer::renderSphere(GlslProgram& glslProgram, Sphere* otherSphere)
+{
+	//----------------------------------------------------------------------------------------------------
+	// Main sphere
+	//----------------------------------------------------------------------------------------------------
+	glslProgram.setMat4("model", glm::value_ptr(_sphere.getModelMatrix()));
+	glslProgram.setVec3("sphereInfo.centerTransformed", glm::value_ptr(_sphere.getCenter()));
+	glslProgram.setFloat("sphereInfo.radius", _sphere.getRadius());
+	glslProgram.setFloat("nightColorMultiplier", _nightColorMultiplier);
+
+	//glEnable(GL_MULTISAMPLE);
+
+	if (otherSphere != nullptr)
+	{
+		// When drawing earth, other sphere is moon.
+		glslProgram.setFloat("otherSphereRadius", otherSphere->getRadius());
+		glslProgram.setVec3("otherSphereCenterTransformed", glm::value_ptr(otherSphere->getModelTransformedCenter()));
+	}
+
+	glBindVertexArray(_mainVao);
+
+	// Draw vertices
+	glDrawArrays(GL_TRIANGLES, 0, numMainSphereVertices);
+
+}
+
+void PlanetRenderer::renderLatitudeAndLongitudes(GlslProgram& glslProgram)
+{
+	//----------------------------------------------------------------------------------------------------
+	// Latitude and longitude
+	//----------------------------------------------------------------------------------------------------
+	if (bShowLatitudesAndLongitudes)
+	{
+        glslProgram.setMat4("model", glm::value_ptr(_sphere.getModelMatrix()));
+        glBindVertexArray(_latAndLongVao);
+
+		// Draw vertices
+		glDrawArrays(GL_LINES, 0, numLatAndLongVertices);
+	}
+}
+
+void PlanetRenderer::renderOrbitalPlane(GlslProgram& glslProgram)
+{
+	//----------------------------------------------------------------------------------------------------
+	// Orbital plane
+	//----------------------------------------------------------------------------------------------------
+	// orbital plane has its own model transform different from the sphere itself.
+	if (bShowOrbitalPlane)
+	{
+		glslProgram.setMat4("model", glm::value_ptr(_sphere.getOrbitalPlaneModelMatrix()));
+
+		// Draw orbital plane grid
+		glBindVertexArray(_orbitalPlaneGridVao);
+		glDrawArrays(GL_LINES, 0, numOrbitalPlaneGridVertices);
+
+		// Draw vertices
+        //glDepthMask(GL_FALSE);
+		glBindVertexArray(_orbitalPlaneVao);
+		glDrawArrays(GL_TRIANGLES, 0, numOrbitalPlaneVertices);
+        //glDepthMask(GL_TRUE);
+	}
+}
+
+void PlanetRenderer::renderOrbit(GlslProgram& glslProgram)
+{
+	//----------------------------------------------------------------------------------------------------
+	// Orbital itself
+	//----------------------------------------------------------------------------------------------------
+	// Uses same transform as that of orbital plane. But orbital plane may not be drawn depending on flags. Hence
+	// set the model matrix again.
+	if (bShowOrbit)
+	{
+		glslProgram.setMat4("model", glm::value_ptr(_sphere.getOrbitalPlaneModelMatrix()));
+
+		glBindVertexArray(_orbitVao);
+		glDrawArrays(GL_LINES, 0, numOrbitVertices);
+	}
+}
+
+
+
+//############################################################################################################
+
+
+
+SunRenderer::SunRenderer(Sphere& sphere)
+	: SphereRenderer(sphere)
+{
+}
+
+SunRenderer::~SunRenderer()
+{
+
+}
+
+void SunRenderer::renderSphere(GlslProgram& glslProgram)
+{
+    glslProgram.setMat4("model", glm::value_ptr(_sphere.getModelMatrix()));
+
+	glBindVertexArray(_mainVao);
+
+	// Draw vertices
+	glDrawArrays(GL_TRIANGLES, 0, numMainSphereVertices);
+
 }
