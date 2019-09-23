@@ -29,6 +29,21 @@ static inline void vector_push_back_7(std::vector<float>& v, float f1, float f2,
     v.push_back(f7);
 }
 
+static inline void vector_push_back_10(std::vector<float>& v, float f1, float f2, float f3, float f4, float f5, float f6, float f7, float f8, float f9, float f10)
+{
+    v.push_back(f1);
+    v.push_back(f2);
+    v.push_back(f3);
+    v.push_back(f4);
+    v.push_back(f5);
+    v.push_back(f6);
+    v.push_back(f7);
+    v.push_back(f8);
+    v.push_back(f9);
+    v.push_back(f10);
+}
+
+
 SphereRenderer::SphereRenderer(Sphere& sphere) :
     _sphere(sphere)
 {
@@ -76,7 +91,7 @@ std::vector<float>* SphereRenderer::_constructMainSphereVertices()
 	float alpha_inc = float(2 * M_PI) / polygonIncrement;
     float theat_inc = float(M_PI) / (polygonIncrement / 2);
 
-    int numFloats = int((2 * M_PI / alpha_inc) * (M_PI / theat_inc)) * 7;
+    int numFloats = int((2 * M_PI / alpha_inc) * (M_PI / theat_inc)) * 10;
     printf("numFloats = %d\n", numFloats);
 
     v->reserve(numFloats);
@@ -88,25 +103,29 @@ std::vector<float>* SphereRenderer::_constructMainSphereVertices()
             float x1 = s._radius * sin(theta) * cos(alpha);
             float y1 = s._radius * sin(theta) * sin(alpha);
             float z1 = s._radius * cos(theta);
+            glm::vec3 N1 = glm::normalize(glm::vec3(x1, y1, z1) - glm::vec3(0.0f, 0.0f, 0.0f));
 
             float x2 = s._radius * sin(theta + theat_inc) * cos(alpha);
             float y2 = s._radius * sin(theta + theat_inc) * sin(alpha);
             float z2 = s._radius * cos(theta + theat_inc);
+            glm::vec3 N2 = glm::normalize(glm::vec3(x2, y2, z2) - glm::vec3(0.0f, 0.0f, 0.0f));
 
             float x3 = s._radius * sin(theta) * cos(alpha + alpha_inc);
             float y3 = s._radius * sin(theta) * sin(alpha + alpha_inc);
             float z3 = s._radius * cos(theta);
+            glm::vec3 N3 = glm::normalize(glm::vec3(x3, y3, z3) - glm::vec3(0.0f, 0.0f, 0.0f));
 
             float x4 = s._radius * sin(theta + theat_inc) * cos(alpha + alpha_inc);
             float y4 = s._radius * sin(theta + theat_inc) * sin(alpha + alpha_inc);
             float z4 = s._radius * cos(theta + theat_inc);
+            glm::vec3 N4 = glm::normalize(glm::vec3(x4, y4, z4) - glm::vec3(0.0f, 0.0f, 0.0f));
 
-            vector_push_back_7(*v, x1, y1, z1, s._r, s._g, s._b, 1.0f);
-            vector_push_back_7(*v, x2, y2, z2, s._r, s._g, s._b, 1.0f);
-            vector_push_back_7(*v, x3, y3, z3, s._r, s._g, s._b, 1.0f);
-            vector_push_back_7(*v, x3, y3, z3, s._r, s._g, s._b, 1.0f);
-            vector_push_back_7(*v, x2, y2, z2, s._r, s._g, s._b, 1.0f);
-            vector_push_back_7(*v, x4, y4, z4, s._r, s._g, s._b, 1.0f);
+            vector_push_back_10(*v, x1, y1, z1, s._r, s._g, s._b, 1.0f, N1.x, N1.y, N1.z);
+            vector_push_back_10(*v, x2, y2, z2, s._r, s._g, s._b, 1.0f, N2.x, N2.y, N2.z);
+            vector_push_back_10(*v, x3, y3, z3, s._r, s._g, s._b, 1.0f, N3.x, N3.y, N3.z);
+            vector_push_back_10(*v, x3, y3, z3, s._r, s._g, s._b, 1.0f, N3.x, N3.y, N3.z);
+            vector_push_back_10(*v, x2, y2, z2, s._r, s._g, s._b, 1.0f, N2.x, N2.y, N2.z);
+            vector_push_back_10(*v, x4, y4, z4, s._r, s._g, s._b, 1.0f, N4.x, N4.y, N4.z);
 
             //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
         }
@@ -137,10 +156,12 @@ std::vector<float>* SphereRenderer::_constructLatitudesAndLongitudeVertices()
             float x1 = 1.001f * s._radius * sin(theta) * cos(alpha);
             float y1 = 1.001f * s._radius * sin(theta) * sin(alpha);
             float z1 = 1.001f * s._radius * cos(theta);
+            glm::vec3 N1 = glm::normalize(glm::vec3(x1, y1, z1) - glm::vec3(0.0f, 0.0f, 0.0f));
 
             float x2 = 1.001f * s._radius * sin(theta + inc) * cos(alpha);
             float y2 = 1.001f * s._radius * sin(theta + inc) * sin(alpha);
             float z2 = 1.001f * s._radius * cos(theta + inc);
+            glm::vec3 N2 = glm::normalize(glm::vec3(x2, y2, z2) - glm::vec3(0.0f, 0.0f, 0.0f));
 
             float cMult;
             if (alpha == 0.0f)
@@ -148,8 +169,8 @@ std::vector<float>* SphereRenderer::_constructLatitudesAndLongitudeVertices()
             else
                 cMult = 0.9f;
 
-            vector_push_back_7(*v, x1, y1, z1, s._r*cMult, s._g*cMult, s._b*cMult, 1.0);
-            vector_push_back_7(*v, x2, y2, z2, s._r*cMult, s._g*cMult, s._b*cMult, 1.0);
+            vector_push_back_10(*v, x1, y1, z1, s._r*cMult, s._g*cMult, s._b*cMult, 1.0, N1.x, N1.y, N1.z);
+            vector_push_back_10(*v, x2, y2, z2, s._r*cMult, s._g*cMult, s._b*cMult, 1.0, N2.x, N2.y, N2.z);
 
             //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
         }
@@ -169,13 +190,15 @@ std::vector<float>* SphereRenderer::_constructLatitudesAndLongitudeVertices()
             float x1 = 1.001f * s._radius * sin(theta) * cos(alpha);
             float y1 = 1.001f * s._radius * sin(theta) * sin(alpha);
             float z1 = 1.001f * s._radius * cos(theta);
+            glm::vec3 N1 = glm::normalize(glm::vec3(x1, y1, z1) - glm::vec3(0.0f, 0.0f, 0.0f));
 
             float x2 = 1.001f * s._radius * sin(theta) * cos(alpha + inc);
             float y2 = 1.001f * s._radius * sin(theta) * sin(alpha + inc);
             float z2 = 1.001f * s._radius * cos(theta);
+            glm::vec3 N2 = glm::normalize(glm::vec3(x2, y2, z2) - glm::vec3(0.0f, 0.0f, 0.0f));
 
-            vector_push_back_7(*v, x1, y1, z1, s._r*0.9f, s._g*0.5f, s._b*0.5f, 1.0f);
-            vector_push_back_7(*v, x2, y2, z2, s._r*0.9f, s._g*0.5f, s._b*0.5f, 1.0f);
+            vector_push_back_10(*v, x1, y1, z1, s._r*0.9f, s._g*0.5f, s._b*0.5f, 1.0f, N1.x, N1.y, N1.z);
+            vector_push_back_10(*v, x2, y2, z2, s._r*0.9f, s._g*0.5f, s._b*0.5f, 1.0f, N2.x, N2.y, N2.z);
 
             //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
         }
@@ -194,13 +217,15 @@ std::vector<float>* SphereRenderer::_constructLatitudesAndLongitudeVertices()
             float x1 = 1.001f * s._radius * sin(theta) * cos(alpha);
             float y1 = 1.001f * s._radius * sin(theta) * sin(alpha);
             float z1 = 1.001f * s._radius * cos(theta);
+            glm::vec3 N1 = glm::normalize(glm::vec3(x1, y1, z1) - glm::vec3(0.0f, 0.0f, 0.0f));
 
             float x2 = 1.001f * s._radius * sin(theta) * cos(alpha + inc);
             float y2 = 1.001f * s._radius * sin(theta) * sin(alpha + inc);
             float z2 = 1.001f * s._radius * cos(theta);
+            glm::vec3 N2 = glm::normalize(glm::vec3(x2, y2, z2) - glm::vec3(0.0f, 0.0f, 0.0f));
 
-            vector_push_back_7(*v, x1, y1, z1, s._r*cMult, s._g*cMult, s._b*cMult, 1.0f);
-            vector_push_back_7(*v, x2, y2, z2, s._r*cMult, s._g*cMult, s._b*cMult, 1.0f);
+            vector_push_back_10(*v, x1, y1, z1, s._r*cMult, s._g*cMult, s._b*cMult, 1.0f, N1.x, N1.y, N1.z);
+            vector_push_back_10(*v, x2, y2, z2, s._r*cMult, s._g*cMult, s._b*cMult, 1.0f, N2.x, N2.y, N2.z);
 
             //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
         }
@@ -326,13 +351,16 @@ void SphereRenderer::constructVerticesAndSendToGpu()
         v->data(),
         GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), nullptr);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), nullptr);
     glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    numMainSphereVertices = v->size() / VERTEX_STRIDE_IN_VBO;
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(7 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    numMainSphereVertices = v->size() / PLANET_STRIDE_IN_VBO;
     delete v;
 
     //---------------------------------------------------------------------------------------------------
@@ -349,13 +377,16 @@ void SphereRenderer::constructVerticesAndSendToGpu()
         v->data(),
         GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), nullptr);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), nullptr);
     glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    numLatAndLongVertices = v->size() / VERTEX_STRIDE_IN_VBO;
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(7 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    numLatAndLongVertices = v->size() / PLANET_STRIDE_IN_VBO;
     delete v;
 
     //---------------------------------------------------------------------------------------------------
