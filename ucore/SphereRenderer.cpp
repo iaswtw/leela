@@ -486,15 +486,22 @@ PlanetRenderer::~PlanetRenderer()
 
 }
 
-void PlanetRenderer::renderSphere(GlslProgram& glslProgram, Sphere* otherSphere)
+void PlanetRenderer::renderSphere(GlslProgram& glslProgram, Sphere* sun, Sphere* otherSphere)
 {
 	//----------------------------------------------------------------------------------------------------
 	// Main sphere
 	//----------------------------------------------------------------------------------------------------
+    PNT sphereCenter = PNT(_sphere.getCenter());
+    float distSunToThisSphere = PNT(sun->getCenter()).distanceTo(sphereCenter);
+    float selfUmbraLength = (_sphere.getRadius() * distSunToThisSphere) / (sun->getRadius() - _sphere.getRadius());
+    float sineOfSelfUmbraConeHalfAngle = asin(_sphere.getRadius() / selfUmbraLength);
+
+
 	glslProgram.setMat4("model", glm::value_ptr(_sphere.getModelMatrix()));
 	glslProgram.setVec3("sphereInfo.centerTransformed", glm::value_ptr(_sphere.getCenter()));
 	glslProgram.setFloat("sphereInfo.radius", _sphere.getRadius());
 	glslProgram.setFloat("nightColorMultiplier", _nightColorMultiplier);
+    glslProgram.setFloat("sphereInfo.sineOfSelfUmbraConeHalfAngle", sineOfSelfUmbraConeHalfAngle);
 
 	//glEnable(GL_MULTISAMPLE);
 

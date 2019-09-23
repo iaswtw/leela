@@ -21,6 +21,7 @@ uniform float otherSphereRadius;
 struct SphereInfo {
     vec3 centerTransformed;
     float radius;
+    float sineOfSelfUmbraConeHalfAngle;
 };
 
 uniform SphereInfo sphereInfo;
@@ -69,22 +70,26 @@ void main()
     // default out color to in color.
     Color = in_color;
     float dist_sun_thisSphere       = distance(sunCenterTransformed, sphereInfo.centerTransformed);
-    float selfUmbraLength           = (sphereInfo.radius * dist_sun_thisSphere) / (sunRadius - sphereInfo.radius);
-    float selfUmbraConeHalfAngle    = asin(sphereInfo.radius / selfUmbraLength);
+    //float selfUmbraLength           = (sphereInfo.radius * dist_sun_thisSphere) / (sunRadius - sphereInfo.radius);
+    //float selfUmbraConeHalfAngle    = asin(sphereInfo.radius / selfUmbraLength);
 
     vec3 x_normal   = normalize(vec3(model * vec4(normal, 0.0)));
-    vec3 x_position = vec3(model * vec4(position, 1.0));
+    //vec3 x_normal   = normal;
+    //vec3 x_position = vec3(model * vec4(position, 1.0));
     float dotProduct = dot(normalize(sunCenterTransformed - sphereInfo.centerTransformed), x_normal);
-    float compareValue = sin(selfUmbraConeHalfAngle);
+    //float compareValue = sin(selfUmbraConeHalfAngle);
     
-    if (dotProduct < -compareValue)
+    //if (dotProduct < -compareValue)
+    if (dotProduct < -sphereInfo.sineOfSelfUmbraConeHalfAngle)
     {
         //Color = vec4(in_color.rgb * nightColorMultiplier, in_color.a);
         Color = vec4(in_color.rgb * 0.0, in_color.a);
     }
     else
     {
-        vec4 tempColor = vec4(in_color.rgb * min(1.0, dotProduct+compareValue), 1.0);
+        //float multiplier = sqrt(min(1.0, dotProduct+compareValue));
+        float multiplier = sqrt(min(1.0, dotProduct + sphereInfo.sineOfSelfUmbraConeHalfAngle));
+        vec4 tempColor = vec4(in_color.rgb * multiplier, 1.0);
   
         vec3 modelTransformedPosition   = vec3((model * vec4(position, 1.0)));
         float dist_sun_thisPoint        = distance(sunCenterTransformed, modelTransformedPosition);
