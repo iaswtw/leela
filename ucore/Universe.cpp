@@ -14,6 +14,7 @@
 #include "Universe.h"
 #include "Utils.h"
 #include <stdio.h>
+#include <string>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -305,183 +306,30 @@ void Universe::printGlError()
 
 
 **************************************************************************************************/
-void Universe::printShaderCompileStatus(GLuint shader)
-{
-    GLint status;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-    printf("Shader compile status = %d\n", status);
-    if (status == GL_TRUE)
-    {
-        printf("Compile successful.\n\n");
-    }
-    else
-    {
-        printf("!!! === Compile failed === !!!\n");
-
-        char buffer[512];
-        glGetShaderInfoLog(shader, 512, NULL, buffer);
-        printf("Log:\n%s\n", buffer);
-
-        SDL_Quit();
-        exit(1);
-    }
-}
-
-/*************************************************************************************************
-
-
-**************************************************************************************************/
-void Universe::readAndCompileShader(std::string filePath, GLuint &shaderId)
-{
-    std::string fileContents;
-    std::string line;
-
-    std::ifstream shaderFile(filePath);
-    if (shaderFile.fail())
-    {
-        perror(filePath.c_str());
-        printf("Failed to open %s\n", filePath.c_str());
-        SDL_Quit();
-        exit(1);
-    }
-    while (std::getline(shaderFile, line))
-    {
-        fileContents += line + "\n";
-    }
-
-    const char *contentsPtr = fileContents.c_str();
-    glShaderSource(shaderId, 1, &contentsPtr, nullptr);
-    glCompileShader(shaderId);
-
-    // Check compile status
-    printShaderCompileStatus(shaderId);
-}
-
-/*************************************************************************************************
-
-
-**************************************************************************************************/
-void Universe::compileShaders()
-{
-    //-------------------------------------------------------------
-    // Vertex shader
-    //-------------------------------------------------------------
-    oglHandles.vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    printf("Loading and Compiling Vertex shader.\n");
-    readAndCompileShader("../ucore/shaders/shader.vert", oglHandles.vertexShader);
-
-    //-------------------------------------------------------------
-    // Fragment shader
-    //-------------------------------------------------------------
-    oglHandles.fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    printf("Loading and Compiling Fragment shader.\n");
-    readAndCompileShader("../ucore/shaders/shader.frag", oglHandles.fragmentShader);
-
-    //-------------------------------------------------------------
-    // Shader program
-    oglHandles.shaderProgram = glCreateProgram();
-    glAttachShader(oglHandles.shaderProgram, oglHandles.vertexShader);
-    glAttachShader(oglHandles.shaderProgram, oglHandles.fragmentShader);
-}
-
-/*************************************************************************************************
-
-
-**************************************************************************************************/
-void Universe::linkShaders()
-{
-    glLinkProgram(oglHandles.shaderProgram);
-
-    // todo perform check to see if linking was successful
-    GLint isLinked = 0;
-    glGetProgramiv(oglHandles.shaderProgram, GL_LINK_STATUS, (int *)&isLinked);
-    if (isLinked == GL_FALSE)
-    {
-        GLint maxLength = 0;
-        glGetProgramiv(oglHandles.shaderProgram, GL_INFO_LOG_LENGTH, &maxLength);
-
-        // The maxLength includes the NULL character
-        std::vector<GLchar> infoLog(maxLength);
-        glGetProgramInfoLog(oglHandles.shaderProgram, maxLength, &maxLength, &infoLog[0]);
-
-        printf("Linker error log:\n");
-        printf("%s\n", infoLog.data());
-
-        // We don't need the program anymore.
-        glDeleteProgram(oglHandles.shaderProgram);
-    }
-    else
-    {
-        printf("\nShader program link successful\n");
-        glDetachShader(oglHandles.shaderProgram, oglHandles.vertexShader);
-        glDetachShader(oglHandles.shaderProgram, oglHandles.fragmentShader);
-    }
-
-    // Don't leak shaders either.
-    glDeleteShader(oglHandles.vertexShader);
-    glDeleteShader(oglHandles.fragmentShader);
-
-}
-
-
-/*************************************************************************************************
-
-
-**************************************************************************************************/
-void Universe::useShaderProgram()
-{
-    glUseProgram(oglHandles.shaderProgram);
-}
-
-/*************************************************************************************************
-
-
-**************************************************************************************************/
-void Universe::unuseShaderProgram()
-{
-    glUseProgram(0);
-}
-
-/*************************************************************************************************
-
-
-**************************************************************************************************/
 void Universe::initializeGL()
 {
     printf("Inside initializeGL\n");
 
-    compileShaders();
-
-    glBindAttribLocation(oglHandles.shaderProgram, 0, "position");
-    glBindAttribLocation(oglHandles.shaderProgram, 1, "in_color");
-
-    linkShaders();
+	std::string vertFilename("../ucore/shaders/shader.vert");
+	std::string fragFilename("../ucore/shaders/shader.frag");
+	planetGlslProgram.compileShadersFromFile(vertFilename, fragFilename);
+	planetGlslProgram.link();
 
 
-    //---------------------------------------------------------------------------------------------------
-    oglHandles.uniModel = getUniformLocation(oglHandles.shaderProgram, "model");
-    oglHandles.uniView = getUniformLocation(oglHandles.shaderProgram, "view");
-    oglHandles.uniProj = getUniformLocation(oglHandles.shaderProgram, "proj");
+	vertFilename = "../ucore/shaders/sun.vert.glsl";
+	fragFilename = "../ucore/shaders/sun.frag.glsl";
+	sunGlslProgram.compileShadersFromFile(vertFilename, fragFilename);
+	sunGlslProgram.link();
 
-    oglHandles.uniIsStar               = getUniformLocation(oglHandles.shaderProgram, "isStar");
-    oglHandles.uniStarPointSize        = getUniformLocation(oglHandles.shaderProgram, "starPointSize");
-    oglHandles.uniNightColorMultiplier = getUniformLocation(oglHandles.shaderProgram, "nightColorMultiplier");
+	vertFilename = "../ucore/shaders/star.vert.glsl";
+	fragFilename = "../ucore/shaders/star.frag.glsl";
+	starGlslProgram.compileShadersFromFile(vertFilename, fragFilename);
+	starGlslProgram.link();
 
-    oglHandles.uniMyCenterTransformed  = getUniformLocation(oglHandles.shaderProgram, "sphereInfo.centerTransformed");
-    oglHandles.uniMyRadius             = getUniformLocation(oglHandles.shaderProgram, "sphereInfo.radius");
-    oglHandles.uniMyIsValud            = getUniformLocation(oglHandles.shaderProgram, "sphereInfo.isValid");
-    oglHandles.uniMyIsLightSource      = getUniformLocation(oglHandles.shaderProgram, "sphereInfo.isLightSource");
-
-    oglHandles.uniSunCenterTransformed = getUniformLocation(oglHandles.shaderProgram, "sunCenterTransformed");
-    oglHandles.uniSunRadius            = getUniformLocation(oglHandles.shaderProgram, "sunRadius");
-
-    oglHandles.uniOtherSphereCenterTransformed = getUniformLocation(oglHandles.shaderProgram, "otherSphereCenterTransformed");
-    oglHandles.uniOtherSphereRadius            = getUniformLocation(oglHandles.shaderProgram, "otherSphereRadius");
-
-
-    oglHandles.posAttrib = getAttribLocation(oglHandles.shaderProgram, "position");
-    oglHandles.colAttrib = getAttribLocation(oglHandles.shaderProgram, "in_color");
-
+    vertFilename = "../ucore/shaders/simple.vert.glsl";
+    fragFilename = "../ucore/shaders/simple.frag.glsl";
+    simpleGlslProgram.compileShadersFromFile(vertFilename, fragFilename);
+    simpleGlslProgram.link();
 
 
     //---------------------------------------------------------------------------------------------------
@@ -497,11 +345,11 @@ void Universe::initializeGL()
         axis.getVertices().data(),
         GL_STATIC_DRAW);
 
-    glVertexAttribPointer(oglHandles.posAttrib, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), nullptr);
-    glEnableVertexAttribArray(oglHandles.posAttrib);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), nullptr);
+    glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(oglHandles.colAttrib, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(oglHandles.colAttrib);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     //---------------------------------------------------------------------------------------------------
     // Cube stars - 1 pixel
@@ -516,11 +364,11 @@ void Universe::initializeGL()
         starVertices.data(),
         GL_STATIC_DRAW);
 
-    glVertexAttribPointer(oglHandles.posAttrib, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), nullptr);
-    glEnableVertexAttribArray(oglHandles.posAttrib);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), nullptr);
+    glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(oglHandles.colAttrib, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(oglHandles.colAttrib);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     //---------------------------------------------------------------------------------------------------
     // Cube stars - 2 pixel
@@ -535,11 +383,11 @@ void Universe::initializeGL()
         twoPixelWideStarVertices.data(),
         GL_STATIC_DRAW);
 
-    glVertexAttribPointer(oglHandles.posAttrib, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), nullptr);
-    glEnableVertexAttribArray(oglHandles.posAttrib);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), nullptr);
+    glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(oglHandles.colAttrib, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(oglHandles.colAttrib);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
 
     //---------------------------------------------------------------------------------------------------
@@ -555,15 +403,13 @@ void Universe::initializeGL()
         gstarVertices.data(),
         GL_STATIC_DRAW);
 
-    glVertexAttribPointer(oglHandles.posAttrib, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), nullptr);
-    glEnableVertexAttribArray(oglHandles.posAttrib);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), nullptr);
+    glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(oglHandles.colAttrib, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(oglHandles.colAttrib);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     //---------------------------------------------------------------------------------------------------
-
-
 
 	sunRenderer.setAsLightSource();
     sunRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
@@ -580,27 +426,7 @@ void Universe::initializeGL()
     moonRenderer.constructVerticesAndSendToGpu(oglHandles);
     moonRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
 
-
     glBindVertexArray(0);       // Disable VBO
-
-
-    // Was using the below commented before switching to Space class of the old universe program
-    //viewMatrix = glm::lookAt(
-    //    glm::vec3(1600.0f, 1600.0f, 1600.0f),
-    //    glm::vec3(0.0f, 0.0f, 0.0f),
-    //    glm::vec3(0.0f, 0.0f, 1.0f));
-
-
-
-    // The following can be used to look at earth at roughly 270 degree position for the purpose of viewing hybrid eclipse.
-    //viewMatrix = glm::lookAt(
-    //    //            glm::vec3(1600.0f, 1600.0f, 1600.0f),
-    //    glm::vec3(-200.0f, -700.0f, 200.0f),
-    //    //glm::vec3(0.0f, 0.0f, 0.0f),
-    //    glm::vec3(-650.0f, -900.0f, -100.0f),
-    //    glm::vec3(0.0f, 0.0f, 1.0f));
-
-
 }
 
 
@@ -1738,92 +1564,103 @@ void Universe::render()
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
-    useShaderProgram();
-
-    glUniform3fv(
-        oglHandles.uniSunCenterTransformed,
-        1,
-        glm::value_ptr(sun.getModelTransformedCenter())
-    );
-
-    glUniform1f(oglHandles.uniSunRadius, sun.getRadius());
-
-
     //=====================================================================================
-    // View and projection remain same for the entire scene
+    // Create View and projection that remain the same for the entire scene
     //=====================================================================================
     // View transformation
     //----------------------------------------------
-    glUniformMatrix4fv(oglHandles.uniView, 1, GL_FALSE, glm::value_ptr(viewMatrix));
-
     // Create the initial View matrix
     viewMatrix = glm::lookAt(
         space.getSourcePoint(),
         space.getDirectionPoint(),
         space.getUpwardDirectionVector());
 
-    // perspective transformation
-    //----------------------------------------------
-    projectionMatrix = glm::perspective(
-        glm::radians(35.0f),
-        float(curWidth) / float(curHeight),
-        1.0f,
-        10000000.0f);
+	// perspective transformation
+	//----------------------------------------------
+	projectionMatrix = glm::perspective(
+		glm::radians(35.0f),
+		float(curWidth) / float(curHeight),
+		1.0f,
+		10000000.0f);
+    
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    glUniformMatrix4fv(oglHandles.uniProj, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
-    //=====================================================================================
+
+    planetGlslProgram.use();
+    planetGlslProgram.setMat4("view", glm::value_ptr(viewMatrix));
+    planetGlslProgram.setMat4("proj", glm::value_ptr(projectionMatrix));
+
+	renderUsingPlanetGlslProgram();
+
+    planetGlslProgram.unuse();
 
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    if (bShowAxis)
-    {
-        //----------------------------------------------
-        // Axis model transformation
-        //----------------------------------------------
-        glUniformMatrix4fv(
-            oglHandles.uniModel,
-            1,
-            GL_FALSE,
-            glm::value_ptr(glm::mat4(1.0))
-        );
+    starGlslProgram.use();
+    printGlError();
+    starGlslProgram.setMat4("view", glm::value_ptr(viewMatrix));
+    starGlslProgram.setMat4("proj", glm::value_ptr(projectionMatrix));
+    
+    renderUsingStarGlslProgram();
 
-        glUniform1i(oglHandles.uniMyIsValud, false);
-        // ideally, after setting IsValid to false, no need to set the other variables to draw the axis.
-        glUniform1i(oglHandles.uniMyIsLightSource, 0);
-        glUniform3f(oglHandles.uniMyCenterTransformed, 0.0f, 0.0f, 0.0f);
-
-        glBindVertexArray(oglHandles.axisVao);
-
-        // Draw vertices
-        glDrawArrays(GL_LINES, 0, axis.getVertices().size() / 7);
-    }
+    starGlslProgram.unuse();
 
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    glUniform1i(oglHandles.uniIsStar, true);
-    glUniform1i(oglHandles.uniMyIsValud, false);
+    sunGlslProgram.use();
+    sunGlslProgram.setMat4("view", glm::value_ptr(viewMatrix));
+    sunGlslProgram.setMat4("proj", glm::value_ptr(projectionMatrix));
+
+	renderUsingSunGlslProgram();
+
+    sunGlslProgram.unuse();
+
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    simpleGlslProgram.use();
+    simpleGlslProgram.setMat4("view", glm::value_ptr(viewMatrix));
+    simpleGlslProgram.setMat4("proj", glm::value_ptr(projectionMatrix));
+
+    renderUsingSimpleGlslProgram();
+
+    simpleGlslProgram.unuse();
+
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    glBindVertexArray(0);
+
+}
+
+void Universe::renderUsingPlanetGlslProgram()
+{
+    planetGlslProgram.setVec3("sunCenterTransformed", glm::value_ptr(sun.getModelTransformedCenter()));
+    planetGlslProgram.setFloat("sunRadius", sun.getRadius());
+
+    earthRenderer.renderSphere(planetGlslProgram , &moon);
+    earthRenderer.renderLatitudeAndLongitudes(planetGlslProgram);
+
+    moonRenderer.renderSphere(planetGlslProgram , &earth);
+    moonRenderer.renderLatitudeAndLongitudes(planetGlslProgram);
+
+}
+
+void Universe::renderUsingStarGlslProgram()
+{
     glEnable(GL_PROGRAM_POINT_SIZE);
     //glPointParameterf(GL_POINT_FADE_THRESHOLD_SIZE, 1.0f);
-
     if (!bGalaxyStars)
     {
         //----------------------------------------------
         // Cubic stars model transformation
         //----------------------------------------------
-        glUniformMatrix4fv(
-            oglHandles.uniModel,
-            1,
-            GL_FALSE,
-            glm::value_ptr(glm::mat4(1.0))
-        );
+        starGlslProgram.setMat4("model", glm::value_ptr(glm::mat4(1.0)));
 
-        glUniform1ui(oglHandles.uniStarPointSize, 1);
+        starGlslProgram.setUint("starPointSize", 1);
         glBindVertexArray(oglHandles.starsVao);
         // Draw vertices
         glDrawArrays(GL_POINTS, 0, starVertices.size() / 7);
 
-        glUniform1ui(oglHandles.uniStarPointSize, 2);
+        starGlslProgram.setUint("starPointSize", 2);
         glDrawArrays(GL_POINTS, 0, twoPixelWideStarVertices.size() / 7);
     }
     else
@@ -1831,36 +1668,40 @@ void Universe::render()
         //----------------------------------------------
         // Galaxy stars model transformation
         //----------------------------------------------
-        glUniformMatrix4fv(
-            oglHandles.uniModel,
-            1,
-            GL_FALSE,
-            glm::value_ptr(glm::mat4(1.0))
-        );
-
-        glUniform1i(oglHandles.uniMyIsValud, false);
+        starGlslProgram.setMat4("model", glm::value_ptr(glm::mat4(1.0)));
         glBindVertexArray(oglHandles.gstarsVao);
-        glUniform1ui(oglHandles.uniStarPointSize, 1);
+        starGlslProgram.setUint("starPointSize", 1);
 
         // Draw vertices
         glDrawArrays(GL_POINTS, 0, gstarVertices.size() / 7);
     }
 
     glDisable(GL_PROGRAM_POINT_SIZE);
-    glUniform1i(oglHandles.uniIsStar, false);
+}
 
-    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+void Universe::renderUsingSunGlslProgram()
+{
+    sunRenderer.renderSphere(sunGlslProgram);
+}
 
+void Universe::renderUsingSimpleGlslProgram()
+{
+    if (bShowAxis)
+    {
+        //----------------------------------------------
+        // Axis model transformation
+        //----------------------------------------------
+        simpleGlslProgram.setMat4("model", glm::value_ptr(glm::mat4(1.0)));
+        glBindVertexArray(oglHandles.axisVao);
+        // Draw vertices
+        glDrawArrays(GL_LINES, 0, axis.getVertices().size() / 7);
+    }
 
-    earthRenderer.render(oglHandles, &moon);
-    moonRenderer.render(oglHandles, &earth);
-    sunRenderer.render(oglHandles, nullptr);
+    earthRenderer.renderOrbitalPlane(simpleGlslProgram);
+    earthRenderer.renderOrbit(simpleGlslProgram);
 
-
-    glBindVertexArray(0);
-
-    unuseShaderProgram();
-
+    moonRenderer.renderOrbitalPlane(simpleGlslProgram);
+    moonRenderer.renderOrbit(simpleGlslProgram);
 }
 
 
@@ -2352,82 +2193,16 @@ void Universe::generateImGuiWidgets()
     ImGui::Render();
 }
 
+
 /*************************************************************************************************
 
 
 **************************************************************************************************/
-int Universe::run()
+int Universe::runMainLoop()
 {
-    setvbuf(stdout, 0, _IONBF, 0);
-    const char* glsl_version = "#version 130";
-
-    SDL_Init(SDL_INIT_EVERYTHING);
-
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
-    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    //SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
-
-    window = SDL_CreateWindow("Universe3d", 100, 100, 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED);
-
-    printf("Created SDL GL window\n");
-    context = SDL_GL_CreateContext(window);
-    SDL_GL_SetSwapInterval(1);
-
-    glewInit();
-
-    // Setup Dear ImGui context
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    
-    std::string fullFontFilePath = FindFontFile("Roboto-Medium.ttf");
-    appFontSmall        = io.Fonts->AddFontFromFileTTF(fullFontFilePath.c_str(), 16);
-    appFontSmallMedium  = io.Fonts->AddFontFromFileTTF(fullFontFilePath.c_str(), 18);
-    appFontMedium       = io.Fonts->AddFontFromFileTTF(fullFontFilePath.c_str(), 20);
-    appFontLarge        = io.Fonts->AddFontFromFileTTF(fullFontFilePath.c_str(), 24);
-    appFontGiant        = io.Fonts->AddFontFromFileTTF(fullFontFilePath.c_str(), 36);
-
-    fullFontFilePath = FindFontFile("ProggyClean.ttf");
-    fixedWidthSmall     = io.Fonts->AddFontFromFileTTF(fullFontFilePath.c_str(), 13);
-
-    if (!appFontSmall || !appFontSmallMedium || !appFontMedium || !appFontLarge || !fixedWidthSmall)
-        printf("WARNING: Could not load fonts.  Will use default fixed width font.");
-
-    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-
-    // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
-    //ImGui::StyleColorsClassic();
-
-    // Setup Platform/Renderer bindings
-    ImGui_ImplSDL2_InitForOpenGL(window, context);
-    ImGui_ImplOpenGL3_Init(glsl_version);
-
-
-    SDL_GetWindowSize(window, &curWidth, &curHeight);
-    printf("width = %d\n", curWidth);
-    printf("height = %d\n", curHeight);
-    
-    printf("initializing scene objects... ");
-    initSceneObjects();
-    initializeGL();
-    printf("done\n");
-
-
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    //glBlendFunc(GL_SRC_ALPHA, GL_SRC_ALPHA);
-
-
-    SDL_GetMouseState(&previousX, &previousY);
-
+	ImGuiIO& io = ImGui::GetIO();
     SDL_Event event;
+
     while (1)
     {
         while (SDL_PollEvent(&event))
@@ -2450,7 +2225,7 @@ int Universe::run()
                 onKeyUp(&event);
                 break;
             case SDL_WINDOWEVENT:
-                if ((event.window.event == SDL_WINDOWEVENT_RESIZED) || 
+                if ((event.window.event == SDL_WINDOWEVENT_RESIZED) ||
                     (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)) {
                     curWidth = event.window.data1;
                     curHeight = event.window.data2;
@@ -2514,7 +2289,7 @@ int Universe::run()
                 break;
 
         } // while SDL event poll
-        
+
         generateImGuiWidgets();
 
         if (bQuit)
@@ -2530,6 +2305,100 @@ int Universe::run()
         SDL_Delay(10);
     }
 
-    cleanupAndExitApplication();
-    return 0;
+	return 0;
+
+}
+
+
+/*************************************************************************************************
+
+
+**************************************************************************************************/
+int Universe::run()
+{
+    setvbuf(stdout, 0, _IONBF, 0);
+    const char* glsl_version = "#version 330";
+
+    SDL_Init(SDL_INIT_EVERYTHING);
+
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    //SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
+
+    window = SDL_CreateWindow("Universe3d", 100, 100, 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED);
+
+    printf("Created SDL GL window\n");
+    context = SDL_GL_CreateContext(window);
+    SDL_GL_SetSwapInterval(1);
+
+    glewInit();
+
+    // Setup Dear ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    
+    std::string fullFontFilePath = FindFontFile("Roboto-Medium.ttf");
+    appFontSmall        = io.Fonts->AddFontFromFileTTF(fullFontFilePath.c_str(), 16);
+    appFontSmallMedium  = io.Fonts->AddFontFromFileTTF(fullFontFilePath.c_str(), 18);
+    appFontMedium       = io.Fonts->AddFontFromFileTTF(fullFontFilePath.c_str(), 20);
+    appFontLarge        = io.Fonts->AddFontFromFileTTF(fullFontFilePath.c_str(), 24);
+    appFontGiant        = io.Fonts->AddFontFromFileTTF(fullFontFilePath.c_str(), 36);
+
+    fullFontFilePath = FindFontFile("ProggyClean.ttf");
+    fixedWidthSmall     = io.Fonts->AddFontFromFileTTF(fullFontFilePath.c_str(), 13);
+
+    if (!appFontSmall || !appFontSmallMedium || !appFontMedium || !appFontLarge || !fixedWidthSmall)
+        printf("WARNING: Could not load fonts.  Will use default fixed width font.");
+
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+    //ImGui::StyleColorsClassic();
+
+    // Setup Platform/Renderer bindings
+    ImGui_ImplSDL2_InitForOpenGL(window, context);
+    ImGui_ImplOpenGL3_Init(glsl_version);
+
+
+    SDL_GetWindowSize(window, &curWidth, &curHeight);
+    printf("width = %d\n", curWidth);
+    printf("height = %d\n", curHeight);
+    
+    printf("initializing scene objects... ");
+
+	int retval = 0;
+	try
+	{
+		initSceneObjects();
+		initializeGL();
+		printf("done\n");
+
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		//glBlendFunc(GL_SRC_ALPHA, GL_SRC_ALPHA);
+
+
+		SDL_GetMouseState(&previousX, &previousY);
+
+		/// todo
+		runMainLoop();
+	}
+	catch (exception& e)
+	{
+		retval = 1;
+	}
+
+
+	cout << "Cleaning up..." << endl;
+	cleanupAndExitApplication();
+
+    return retval;
 }
