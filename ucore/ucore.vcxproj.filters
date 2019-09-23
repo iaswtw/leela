@@ -42,9 +42,6 @@
     <ClInclude Include="Utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="OglHandles.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="imconfig.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -76,6 +73,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AxisRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StarsRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Stars.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -120,6 +123,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AxisRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StarsRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

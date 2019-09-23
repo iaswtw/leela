@@ -306,7 +306,7 @@ std::vector<float>* SphereRenderer::_constructOrbitalPlaneGridVertices()
 }
 
 
-void SphereRenderer::constructVerticesAndSendToGpu(OglHandles oglHandles)
+void SphereRenderer::constructVerticesAndSendToGpu()
 {
     GLuint vbo;
     std::vector<float> *v = nullptr;

@@ -12,9 +12,9 @@
 #include "sphere.h"
 #include "SphereRenderer.h"
 #include "AxisRenderer.h"
+#include "Stars.h"
+#include "StarsRenderer.h"
 #include "Space.h"
-#include "OglHandles.h"
-
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -23,7 +23,6 @@
 #include "OneShotBoolean.h"
 #include "GlslProgram.h"
 
-constexpr auto MAXSTARS = 3500;
 constexpr auto MAXGALAXYSTARS = 10000;
 
 
@@ -173,7 +172,6 @@ public:
 
     void HelpMarker(const char* desc);
 
-    void generateStars();
     int run();
     int runMainLoop();
 
@@ -310,10 +308,6 @@ private:
     int curHeight = 0;
 
 
-    OglHandles oglHandles;
-
-    GLuint vbo;                 // Create for 
-    
     // Texture handles
     GLuint tex1;
     GLuint tex2;
@@ -329,11 +323,13 @@ private:
     Sphere earth;
     Sphere sun;
     Sphere moon;
+    Stars stars;
 
     AxisRenderer axisRenderer;
     PlanetRenderer earthRenderer;
     PlanetRenderer moonRenderer;
     SunRenderer sunRenderer;
+    StarsRenderer starsRenderer;
     
     Space space;
 
