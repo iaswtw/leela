@@ -63,7 +63,8 @@ Universe::Universe() :
     sunRenderer(sun),
     earthRenderer(earth),
     moonRenderer(moon),
-    axisRenderer(axis)
+    axisRenderer(axis),
+    starsRenderer(stars)
 {
 }
 
@@ -79,7 +80,10 @@ Universe::~Universe()
 void Universe::initSceneObjects()
 {
     SetDefaultView();
-    generateStars();
+    stars.setCubeStarParameters(
+        3500,                               // total number of stars (single + double pixel)
+        0.6f                                // radio of single pixel starts to all stars
+    );
 
 
     axis.setSpan(1600, 1600, 800);
@@ -142,139 +146,10 @@ void Universe::initSceneObjects()
 
     moon.setParentSphere(&earth);
     earth.setParentSphere(&sun);
+
+
 }
 
-
-/*!
-****************************************************************************
-
-
-
-****************************************************************************/
-void Universe::generateStars()
-{
-    /*  NOTE:
-     *  max_z is the thickness of galaxy at a particular radius
-     *  it is dynamically calculated for every randomly generated 'r'
-     */
-
-
-    int i;
-    double max_dist;
-    double max_radius;
-    double max_theta;
-    double max_z;
-    double radius, theta, phi;
-    double w;
-    unsigned char color;  // one component of color
-    float c;
-    float x, y, z, r, g, b;
-
-    srand(20);
-
-    //---------------------------------------------------------------------
-    // generate cubically distributed stars
-    //---------------------------------------------------------------------
-    i = 0;
-    max_dist = 500000.0;
-    printf("Starting to generate stars\n");
-    while (1) {
-        if (i == MAXSTARS)
-            break;
-        
-        x = float(max_dist * (double(rand()) / RAND_MAX) - (max_dist / 2));
-        y = float(max_dist * (double(rand()) / RAND_MAX) - (max_dist / 2));
-        z = float(max_dist * (double(rand()) / RAND_MAX) - (max_dist / 2));
-        c = 0.1f + (0.8f * ((float(rand()) / RAND_MAX)));
-
-        r = g = b = c;
-
-        int anotherRandom = int(10 * (float(rand()) / RAND_MAX));
-        if (anotherRandom == 5)
-            r *= 1.5f;
-        if (anotherRandom == 6)
-            b *= 1.2f;
-        if (anotherRandom == 7)
-        {
-            r *= 1.5f;
-            g *= 1.5f;
-        }
-
-
-        // Discard starts too close to the solar system
-        if (fabs(x) > 50000 ||  fabs(y) > 50000 ||  fabs(z) > 50000)
-        {
-            std::vector<float>* v = (i < 0.75*MAXSTARS) ? &starVertices : &twoPixelWideStarVertices;
-
-            v->push_back(x);  v->push_back(y);  v->push_back(z);   v->push_back(r);  v->push_back(g);  v->push_back(b);  v->push_back(1.0);
-            i++;
-        }
-    }
-
-
-    //---------------------------------------------------------------------
-    // generate stars for the galaxy
-    //---------------------------------------------------------------------
-    max_radius = 1000000.0;
-    max_theta = 2 * M_PI;
-    i = 0;
-    while (1) {
-        if (i == .7 * MAXGALAXYSTARS)
-            break;
-
-        radius = max_radius * (double(rand()) / RAND_MAX);
-        theta = max_theta * (double(rand()) / RAND_MAX);
-        w = radius / max_radius;
-        if (radius < 40000)
-            max_z = radius;
-        else
-            max_z = 400000 * (1 / sqrt(1 + 20 * w*w));
-
-        gstar[i].x = radius * cos(theta);
-        gstar[i].y = radius * sin(theta);
-        gstar[i].z = max_z * double(rand()) / RAND_MAX - max_z / 2;
-        color = static_cast<unsigned char>(55) + static_cast<unsigned char>((double(rand()) / RAND_MAX) * 200);
-        //c = SDL_MapRGB ( space.surface->format, color, color, color );
-        gstar[i].set_color(color, color, color);
-               
-        if (fabs(gstar[i].x) > 1000 ||
-            fabs(gstar[i].y) > 1000 ||
-            fabs(gstar[i].z) > 1000)
-            i++;
-    }
-
-    while (1) {
-        if (i == MAXGALAXYSTARS)
-            break;
-
-        radius = 200000 * (double(rand()) / RAND_MAX);
-        theta = M_PI * (double(rand()) / RAND_MAX);
-        phi = 2 * M_PI * (double(rand()) / RAND_MAX);
-        gstar[i].x = radius * sin(theta) * cos(phi);
-        gstar[i].y = radius * sin(theta) * sin(phi);
-        gstar[i].z = radius * cos(theta);
-        color = static_cast<unsigned char>((double(rand()) / RAND_MAX) * 255);
-        //gstar[i].c = SDL_MapRGB ( space.surface->format, color, color, color );
-        gstar[i].set_color(color, color, color);
-        i++;
-
-    }
-
-    // shift the Galaxy stars along x axis
-    for (i = 0; i < MAXGALAXYSTARS; i++)
-        gstar[i].x += max_radius * .66;
-
-
-    // rotate all stars so that the the plane of the solar system
-    // is perpendicular to the plane of the galaxy
-    for (i = 0; i < MAXGALAXYSTARS; i++)
-        gstar[i] = space.rotate(PNT(0, 0, 0), PNT(100, 0, 0), gstar[i], 80.0);
-
-
-    for (i = 0; i < MAXGALAXYSTARS; i++)
-        gstarVertices.push_back(gstar[i].x);  gstarVertices.push_back(gstar[i].y);  gstarVertices.push_back(gstar[i].z);   gstarVertices.push_back(0.8);  gstarVertices.push_back(0.8);  gstarVertices.push_back(0.8);  gstarVertices.push_back(1.0);
-
-}
 
 /*************************************************************************************************
 
@@ -336,81 +211,23 @@ void Universe::initializeGL()
     //---------------------------------------------------------------------------------------------------
     // Axis
     axisRenderer.constructVerticesAndSendToGpu();
-
-
-    //---------------------------------------------------------------------------------------------------
-    // Cube stars - 1 pixel
-    glGenVertexArrays(1, &oglHandles.starsVao);
-    glBindVertexArray(oglHandles.starsVao);
-
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        sizeof(float) * starVertices.size(),
-        starVertices.data(),
-        GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), nullptr);
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    //---------------------------------------------------------------------------------------------------
-    // Cube stars - 2 pixel
-    glGenVertexArrays(1, &oglHandles.twoPixelWideStarsVao);
-    glBindVertexArray(oglHandles.twoPixelWideStarsVao);
-
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        sizeof(float) * twoPixelWideStarVertices.size(),
-        twoPixelWideStarVertices.data(),
-        GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), nullptr);
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-
-    //---------------------------------------------------------------------------------------------------
-    // galaxy stars
-    glGenVertexArrays(1, &oglHandles.gstarsVao);
-    glBindVertexArray(oglHandles.gstarsVao);
-
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        sizeof(float) * gstarVertices.size(),
-        gstarVertices.data(),
-        GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), nullptr);
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
+    starsRenderer.constructVerticesAndSendToGpu();
+    
     //---------------------------------------------------------------------------------------------------
 
 	sunRenderer.setAsLightSource();
     sunRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
-    sunRenderer.constructVerticesAndSendToGpu(oglHandles);
+    sunRenderer.constructVerticesAndSendToGpu();
 
     
     earthRenderer.setPolygonCountLevel(PolygonCountLevel_High);
-    earthRenderer.constructVerticesAndSendToGpu(oglHandles);
+    earthRenderer.constructVerticesAndSendToGpu();
     earthRenderer.bShowLatitudesAndLongitudes = true;
     earthRenderer.setNightColorDarkness(NightColorDarkness_Medium);
 
     
     moonRenderer.setPolygonCountLevel(PolygonCountLevel_Medium);
-    moonRenderer.constructVerticesAndSendToGpu(oglHandles);
+    moonRenderer.constructVerticesAndSendToGpu();
     moonRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
 
     glBindVertexArray(0);       // Disable VBO
@@ -1633,37 +1450,14 @@ void Universe::renderUsingPlanetGlslProgram()
 
 void Universe::renderUsingStarGlslProgram()
 {
-    glEnable(GL_PROGRAM_POINT_SIZE);
-    //glPointParameterf(GL_POINT_FADE_THRESHOLD_SIZE, 1.0f);
     if (!bGalaxyStars)
     {
-        //----------------------------------------------
-        // Cubic stars model transformation
-        //----------------------------------------------
-        starGlslProgram.setMat4("model", glm::value_ptr(glm::mat4(1.0)));
-
-        starGlslProgram.setUint("starPointSize", 1);
-        glBindVertexArray(oglHandles.starsVao);
-        // Draw vertices
-        glDrawArrays(GL_POINTS, 0, starVertices.size() / 7);
-
-        starGlslProgram.setUint("starPointSize", 2);
-        glDrawArrays(GL_POINTS, 0, twoPixelWideStarVertices.size() / 7);
+        starsRenderer.renderCubeStars(starGlslProgram);
     }
     else
     {
-        //----------------------------------------------
-        // Galaxy stars model transformation
-        //----------------------------------------------
-        starGlslProgram.setMat4("model", glm::value_ptr(glm::mat4(1.0)));
-        glBindVertexArray(oglHandles.gstarsVao);
-        starGlslProgram.setUint("starPointSize", 1);
-
-        // Draw vertices
-        glDrawArrays(GL_POINTS, 0, gstarVertices.size() / 7);
+        starsRenderer.renderGalaxyStars(starGlslProgram);
     }
-
-    glDisable(GL_PROGRAM_POINT_SIZE);
 }
 
 void Universe::renderUsingSunGlslProgram()

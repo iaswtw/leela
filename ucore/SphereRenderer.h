@@ -10,7 +10,6 @@
 #include <GL/glew.h>
 
 #include "GlslProgram.h"
-#include "OglHandles.h"
 
 
 enum PolygonCountLevel
@@ -40,7 +39,7 @@ public:
     void setAsLightSource();
     void setNightColorDarkness(NightColorDarkness darkness);
 	void setPolygonCountLevel(PolygonCountLevel polygonCountLevel);
-    void constructVerticesAndSendToGpu(OglHandles oglHandles);
+    void constructVerticesAndSendToGpu();
 
 
 public:
