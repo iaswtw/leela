@@ -310,8 +310,8 @@ void Universe::initializeGL()
 {
     printf("Inside initializeGL\n");
 
-	std::string vertFilename("../ucore/shaders/shader.vert");
-	std::string fragFilename("../ucore/shaders/shader.frag");
+	std::string vertFilename("../ucore/shaders/planet.vert.glsl");
+	std::string fragFilename("../ucore/shaders/planet.frag.glsl");
 	planetGlslProgram.compileShadersFromFile(vertFilename, fragFilename);
 	planetGlslProgram.link();
 
