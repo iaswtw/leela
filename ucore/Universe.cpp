@@ -1440,10 +1440,10 @@ void Universe::renderUsingPlanetGlslProgram()
     planetGlslProgram.setVec3("sunCenterTransformed", glm::value_ptr(sun.getModelTransformedCenter()));
     planetGlslProgram.setFloat("sunRadius", sun.getRadius());
 
-    earthRenderer.renderSphere(planetGlslProgram , &moon);
+    earthRenderer.renderSphere(planetGlslProgram , &sun, &moon);
     earthRenderer.renderLatitudeAndLongitudes(planetGlslProgram);
 
-    moonRenderer.renderSphere(planetGlslProgram , &earth);
+    moonRenderer.renderSphere(planetGlslProgram , &sun, &earth);
     moonRenderer.renderLatitudeAndLongitudes(planetGlslProgram);
 
 }
