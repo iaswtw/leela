@@ -62,7 +62,8 @@ static std::string FindFontFile(const char * fileName)
 Universe::Universe() :
     sunRenderer(sun),
     earthRenderer(earth),
-    moonRenderer(moon)
+    moonRenderer(moon),
+    axisRenderer(axis)
 {
 }
 
@@ -72,8 +73,8 @@ Universe::~Universe()
 }
 
 /*************************************************************************************************
-
-
+ Initialize various parameters of planets, stars, etc.  Parameters include radius of objects,
+ time periods of rotation and revolution, colors, etc.
 **************************************************************************************************/
 void Universe::initSceneObjects()
 {
@@ -81,8 +82,8 @@ void Universe::initSceneObjects()
     generateStars();
 
 
-    axis.generateVertices(
-        1600, 1600, 800,
+    axis.setSpan(1600, 1600, 800);
+    axis.setColors(
         glm::vec3(0.2f, 0.2f, 0.5f),        // X axis color
         glm::vec3(0.2f, 0.5f, 0.2f),        // Y axis color
         glm::vec3(0.2f, 0.5f, 0.5f)         // Z axis color
@@ -110,7 +111,7 @@ void Universe::initSceneObjects()
     earth.setColor(0.55f, 0.82f, 1.0f);
     earth.setRotationParameters(80,         // radius
         0,                                  // initial rotation angle
-        0.02f,                             // rotation velocity
+        0.02f,                              // rotation velocity
         glm::radians(270.0f),               // axis rotation angle
         glm::radians(23.5f)                 // axis tilt angle
     );
@@ -127,15 +128,15 @@ void Universe::initSceneObjects()
     moon.setColor(0.8f, 0.8f, 0.8f);
     moon.setRotationParameters(25,          // radius
         0,                                  // initial rotation angle
-        0.005f,                              // rotation velocity
+        0.005f,                             // rotation velocity
         glm::radians(0.0f),                 // axis rotation angle
         glm::radians(10.0f)                 // axis tilt angle
     );
     moon.setOrbitalParameters(260,          // radius of orbit
         0.0f,                               // initial orbital angle
-        0.01f,                             // revolution velocity
+        0.01f,                              // revolution velocity
         0,                                  // orbital rotation angle
-        glm::radians(30.0f)                  // orbital tilt
+        glm::radians(30.0f)                 // orbital tilt
     );
     moon.setOrbitalPlaneColor(glm::vec3(0.8f, 0.8f, 0.8f));
 
@@ -334,22 +335,8 @@ void Universe::initializeGL()
 
     //---------------------------------------------------------------------------------------------------
     // Axis
-    glGenVertexArrays(1, &oglHandles.axisVao);
-    glBindVertexArray(oglHandles.axisVao);
+    axisRenderer.constructVerticesAndSendToGpu();
 
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        sizeof(float) * axis.getVertices().size(),
-        axis.getVertices().data(),
-        GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), nullptr);
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
 
     //---------------------------------------------------------------------------------------------------
     // Cube stars - 1 pixel
@@ -1688,13 +1675,7 @@ void Universe::renderUsingSimpleGlslProgram()
 {
     if (bShowAxis)
     {
-        //----------------------------------------------
-        // Axis model transformation
-        //----------------------------------------------
-        simpleGlslProgram.setMat4("model", glm::value_ptr(glm::mat4(1.0)));
-        glBindVertexArray(oglHandles.axisVao);
-        // Draw vertices
-        glDrawArrays(GL_LINES, 0, axis.getVertices().size() / 7);
+        axisRenderer.render(simpleGlslProgram);
     }
 
     earthRenderer.renderOrbitalPlane(simpleGlslProgram);

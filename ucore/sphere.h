@@ -233,22 +233,12 @@ public:
         }
     }
 
-    void freeVertices()
-    {
-        _vertices.clear();
-        _latLongVertices.clear();
-    }
-
 public:
     bool bRevolutionMotion = true;
     bool bRotationMotion = true;
     bool bPrecessionMotion = false;
     bool bOrbitalPlaneRotation = false;
 
-
-private:
-
-public:
     // angles and angle velocities are in radians
 
     glm::vec3 _center = glm::vec3(0.0, 0.0, 0.0);
@@ -271,17 +261,11 @@ public:
     float _orbitalPlaneRotationAngle = 0;   // previously called 'alphao'
     float _orbitalPlaneTiltAngle = 0;       // previously called 'betao'
 
-
-
-    std::vector<float> _vertices;
-    std::vector<float> _latLongVertices;
-    std::vector<float> _orbitalPlaneVertices;
-    std::vector<float> _orbitalPlaneGridVertices;
-    std::vector<float> _orbitVertices;
-    Sphere *_parent;
+    Sphere *_parent = nullptr;
 };
 
 
+class AxisRenderer;
 
 class Axis
 {
@@ -294,31 +278,30 @@ public:
     {
     }
 
-    void generateVertices(float xAxisLength, float yAxisLength, float zAxisLength, glm::vec3 xAxisColor, glm::vec3 yAxisColor, glm::vec3 zAxisColor)
+    void setSpan(float xHalfSpan, float yHalfSpan, float zHalfSpan)
     {
-        _vertices.push_back(-xAxisLength);  _vertices.push_back(0.0f);  _vertices.push_back(0.0f);   _vertices.push_back(xAxisColor.r);  _vertices.push_back(xAxisColor.g);  _vertices.push_back(xAxisColor.b);  _vertices.push_back(0.8f);
-        _vertices.push_back(+xAxisLength);  _vertices.push_back(0.0f);  _vertices.push_back(0.0f);   _vertices.push_back(xAxisColor.r);  _vertices.push_back(xAxisColor.g);  _vertices.push_back(xAxisColor.b);  _vertices.push_back(0.8f);
-
-        _vertices.push_back(0.0f);  _vertices.push_back(-yAxisLength);  _vertices.push_back(0.0f);   _vertices.push_back(yAxisColor.r);  _vertices.push_back(yAxisColor.g);  _vertices.push_back(yAxisColor.b);  _vertices.push_back(0.8f);
-        _vertices.push_back(0.0f);  _vertices.push_back(+yAxisLength);  _vertices.push_back(0.0f);   _vertices.push_back(yAxisColor.r);  _vertices.push_back(yAxisColor.g);  _vertices.push_back(yAxisColor.b);  _vertices.push_back(0.8f);
-
-        _vertices.push_back(0.0f);  _vertices.push_back(0.0f);  _vertices.push_back(-zAxisLength);   _vertices.push_back(zAxisColor.r);  _vertices.push_back(zAxisColor.g);  _vertices.push_back(zAxisColor.b);  _vertices.push_back(0.8f);
-        _vertices.push_back(0.0f);  _vertices.push_back(0.0f);  _vertices.push_back(+zAxisLength);   _vertices.push_back(zAxisColor.r);  _vertices.push_back(zAxisColor.g);  _vertices.push_back(zAxisColor.b);  _vertices.push_back(0.8f);
+        this->xHalfSpan = xHalfSpan;
+        this->yHalfSpan = yHalfSpan;
+        this->zHalfSpan = zHalfSpan;
     }
 
-    std::vector<float>& getVertices()
+    void setColors(glm::vec3 xColor, glm::vec3 yColor, glm::vec3 zColor)
     {
-        return _vertices;
+        this->xColor = xColor;
+        this->yColor = yColor;
+        this->zColor = zColor;
     }
-
-    void freeVertices()
-    {
-        _vertices.clear();
-    }
-
 
 private:
-    std::vector<float> _vertices;
+    glm::vec3 xColor = glm::vec3(1.0f, 1.0f, 1.0f);
+    glm::vec3 yColor = glm::vec3(1.0f, 1.0f, 1.0f);;
+    glm::vec3 zColor = glm::vec3(1.0f, 1.0f, 1.0f);;
+
+    float xHalfSpan = 1000.0f;
+    float yHalfSpan = 1000.0f;
+    float zHalfSpan = 1000.0f;
+
+    friend AxisRenderer;
 
 };
 

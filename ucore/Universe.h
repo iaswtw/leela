@@ -11,6 +11,7 @@
 
 #include "sphere.h"
 #include "SphereRenderer.h"
+#include "AxisRenderer.h"
 #include "Space.h"
 #include "OglHandles.h"
 
@@ -329,6 +330,7 @@ private:
     Sphere sun;
     Sphere moon;
 
+    AxisRenderer axisRenderer;
     PlanetRenderer earthRenderer;
     PlanetRenderer moonRenderer;
     SunRenderer sunRenderer;

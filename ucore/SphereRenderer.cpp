@@ -213,9 +213,10 @@ std::vector<float>* SphereRenderer::_constructLatitudesAndLongitudeVertices()
 // Construct the circular/elliptical orbit
 std::vector<float>* SphereRenderer::_constructOrbit()
 {
-    std::vector<float>* v = new std::vector<float>();
-    Sphere& s = _sphere;
-    glm::vec3& color = s._orbitalPlaneColor;
+    std::vector<float>* v   = new std::vector<float>();
+    Sphere& s               = _sphere;
+    glm::vec3& color        = s._orbitalPlaneColor;
+    float m                 = 0.7f;
 
     float alpha_inc = float(2 * M_PI) / 500;
 
@@ -232,8 +233,8 @@ std::vector<float>* SphereRenderer::_constructOrbit()
         float y2 = s._orbitalRadius * sin(alpha + alpha_inc);
         float z2 = 0;
 
-        vector_push_back_7(*v, x1, y1, z1, color.r, color.g, color.b, 0.8f);
-        vector_push_back_7(*v, x2, y2, z2, color.r, color.g, color.b, 0.8f);
+        vector_push_back_7(*v, x1, y1, z1, color.r*m, color.g*m, color.b*m, 0.8f);
+        vector_push_back_7(*v, x2, y2, z2, color.r*m, color.g*m, color.b*m, 0.8f);
     }
 
     return v;
