@@ -14,6 +14,7 @@
 
 
 #define VERTEX_STRIDE_IN_VBO        7
+#define PLANET_STRIDE_IN_VBO        10
 
 typedef enum
 {
