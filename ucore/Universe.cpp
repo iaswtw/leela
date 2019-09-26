@@ -86,7 +86,7 @@ void Universe::initSceneObjects()
     );
 
 
-    axis.setSpan(1600, 1600, 800);
+    axis.setSpan(3600, 3600, 800);
     axis.setColors(
         glm::vec3(0.2f, 0.2f, 0.5f),        // X axis color
         glm::vec3(0.2f, 0.5f, 0.2f),        // Y axis color
@@ -96,7 +96,7 @@ void Universe::initSceneObjects()
     //---------------------------------------
     //sun.setColor(0.7f, 0.7f, 0.1f);
     sun.setColor(1.0f, 1.0f, 0.6f);
-    sun.setRotationParameters(140,          // radius
+    sun.setRotationParameters(160,          // radius
         0,                                  // initial rotation angle
         0.02f,                              // rotation velocity
         glm::radians(0.0f),                 // axis rotation angle
@@ -119,7 +119,7 @@ void Universe::initSceneObjects()
         glm::radians(270.0f),               // axis rotation angle
         glm::radians(23.5f)                 // axis tilt angle
     );
-    earth.setOrbitalParameters(1400,        // radius of orbit
+    earth.setOrbitalParameters(3000,        // radius of orbit
         glm::radians(0.0f),                 // initial orbital angle
         0.001f,                             // revolution velocity
         0.0f,                               // orbital rotation angle
@@ -130,13 +130,13 @@ void Universe::initSceneObjects()
     // Moon
     //---------------------------------------
     moon.setColor(0.8f, 0.8f, 0.8f);
-    moon.setRotationParameters(25,          // radius
+    moon.setRotationParameters(22,          // radius
         0,                                  // initial rotation angle
         0.005f,                             // rotation velocity
         glm::radians(0.0f),                 // axis rotation angle
         glm::radians(10.0f)                 // axis tilt angle
     );
-    moon.setOrbitalParameters(260,          // radius of orbit
+    moon.setOrbitalParameters(360,          // radius of orbit
         0.0f,                               // initial orbital angle
         0.01f,                              // revolution velocity
         0,                                  // orbital rotation angle
