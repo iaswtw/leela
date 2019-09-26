@@ -41,7 +41,7 @@ class Space
 {
 public:
     Space() :
-        DS_dist(4200)
+        DS_dist(7200)
     {
         // Initialise the origin and standard axis point
         O.set(0, 0, 0);

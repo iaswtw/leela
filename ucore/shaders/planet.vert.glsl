@@ -82,6 +82,7 @@ void main()
     //if (dotProduct < -compareValue)
     if (dotProduct < -sphereInfo.sineOfSelfUmbraConeHalfAngle)
     {
+        // vertex is in night
         //Color = vec4(in_color.rgb * nightColorMultiplier, in_color.a);
         Color = vec4(in_color.rgb * 0.0, in_color.a);
     }
@@ -132,7 +133,7 @@ void main()
                 // Penumbra specific calculation and check
                 //---------------------------------------------------------
                 // this is the length from the start of imginary cone, between the sun and the 'other' sphere, to otherSphere center.
-                float penumbraLength        = (sunRadius * dist_sun_otherSphere) / (sunRadius - otherSphereRadius);
+                float penumbraLength        = (otherSphereRadius * dist_sun_otherSphere) / (sunRadius + otherSphereRadius);
                 float penumbraConeHalfAngle = asin(otherSphereRadius / penumbraLength);
     
                 // y2 = radius of crosssection of penumbra at N
@@ -179,6 +180,23 @@ void main()
                         edgeCloseness = dist_N_thisPoint / y3;
                     }
                 }
+                
+                // TODO - after adding the below condition and the code in it, frame rate has gone down to 50 on home computer integrated graphics.
+                if (bInUmbra || bInPenumbra || bInAntumbra) {
+                    // make sure other sphere is above horizon. if not, show as if in full day light.
+                    vec3 x_position = vec3(model * vec4(position, 1.0));
+                    float dist_position_otherSphereCenter = distance(x_position, otherSphereCenterTransformed);
+                    float dotProduct_position_otherSphereCenter = dot(normalize(x_position - otherSphereCenterTransformed), x_normal);
+                    float angleAtPositionDueToOtherSphereRadius = 2 * asin(otherSphereRadius/2 / dist_position_otherSphereCenter);
+                    if (dotProduct_position_otherSphereCenter > sin(angleAtPositionDueToOtherSphereRadius)) {
+                        // TODO As per my calculations on paper, the above condition should have been:
+                        //          dotProduct_position_otherSphereCenter < -sin(angleAtPositionDueToOtherSphereRadius
+                        //      But if I use it, it doesn't work.  Investigate.  The if condition right now works.                        
+                        bInUmbra = false;
+                        bInPenumbra = false;
+                        bInAntumbra = false;
+                    }
+                }                
     
             } while (false);
     
