@@ -197,6 +197,8 @@ public:
     void LookAtEarthFromSavedVector();
     void LookAtSun();
 
+    void IncreaseSimulationSpeed();
+    void DecreaseSimulationSpeed();
     void SetSimulationSpeed(int nParam);
     void SetTimeDirection(int nParam);
     void FastForward(int nParam);
