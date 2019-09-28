@@ -79,14 +79,13 @@ Universe::~Universe()
 **************************************************************************************************/
 void Universe::initSceneObjects()
 {
-    SetDefaultView();
     stars.setCubeStarParameters(
         3500,                               // total number of stars (single + double pixel)
         0.6f                                // radio of single pixel starts to all stars
     );
 
 
-    axis.setSpan(3600, 3600, 800);
+    axis.setSpan(3600, 3600, 1200);
     axis.setColors(
         glm::vec3(0.2f, 0.2f, 0.5f),        // X axis color
         glm::vec3(0.2f, 0.5f, 0.2f),        // Y axis color
@@ -147,6 +146,7 @@ void Universe::initSceneObjects()
     moon.setParentSphere(&earth);
     earth.setParentSphere(&sun);
 
+    SetApplicationStartView();
 
 }
 
@@ -277,7 +277,16 @@ void Universe::onKeyDown(SDL_Event* event)
         Rewind(UCmdParam_Start);
         break;
     case SDLK_s:
-        ChangeBoolean(&bGalaxyStars, UCmdParam_Toggle);
+        if (bShiftModifier && bCtrlModifier && bAltModifier)
+        {
+            char buffer[100];
+            std::snprintf(buffer, 100, "%f, %f, %f", space.S.x, space.S.y, space.S.z);
+            logString = buffer;
+        }
+        else
+        {
+            ChangeBoolean(&bGalaxyStars, UCmdParam_Toggle);
+        }
         break;
     case SDLK_v:
         ChangeSidewaysMotionMode();
@@ -326,11 +335,11 @@ void Universe::onKeyDown(SDL_Event* event)
         break;
 
     // Arrow keys
-    case SDLK_UP:
-        IncreaseSimulationSpeed();
-        break;
-    case SDLK_DOWN:
+    case SDLK_LEFT:
         DecreaseSimulationSpeed();
+        break;
+    case SDLK_RIGHT:
+        IncreaseSimulationSpeed();
         break;
 
 
@@ -531,6 +540,36 @@ void Universe::SetDefaultView()
 
     bUpdateUI = true;
 }
+
+/*!
+****************************************************************************
+
+
+
+****************************************************************************/
+void Universe::SetApplicationStartView()
+{
+    space.pushFrame();
+    space.initFrame();
+
+    Earth_SetOrbitalPositionAngle(3 * M_PI / 8);
+
+    PNT newS = PNT(-266.775859, 2177.232389, 266.224952
+    );
+    space.setFrame(AT_POINT,
+        newS,
+        VECTOR(newS, earth.getCenter()),
+        PNT(newS.x, newS.y, newS.z - 100));
+
+    // Adjust navigation view locks on earth and sun
+    NavigationLockOntoEarth(UCmdParam_On);
+    earth.bRevolutionMotion = true;
+    NavigationLockOntoSun(UCmdParam_Off);
+    NavigationLockOntoEarthWithConstantDirection(UCmdParam_Off);
+
+    bUpdateUI = true;
+}
+
 
 /*!
 ****************************************************************************
@@ -1557,11 +1596,11 @@ void Universe::processFlags()
     if (!bSimulationPause)
     {
         if (bFastForward)
-            advance(5 * _stepMultiplier);
+            advance(5 * _stepMultiplier * _stepMultiplierFrameRateAdjustment);
         else if (bFastReverse)
-            advance(-5 * _stepMultiplier);
+            advance(-5 * _stepMultiplier * _stepMultiplierFrameRateAdjustment);
         else
-            advance(_stepMultiplier);
+            advance(_stepMultiplier * _stepMultiplierFrameRateAdjustment);
     }
 
 
@@ -1661,7 +1700,7 @@ void Universe::generateImGuiWidgets()
                 "This program is intended to be a teaching aid to explain various celestial concepts. "
                 "It primarily intends to explain phenomenon related to orbital mechanics of planetary motion. \n\n"
                 
-                "The program doesn't make any effort to show the various parameters such as sizes, distances, rotation & revolution speeds, etc. to scale. "
+                "The program doesn't make any effort to show sizes, distances, rotation & revolution speeds, etc. to scale. "
                 "If it did, it will hinder its ability to help explain concepts due to the impracticality of showing the earth, moon and sun on the screen at "
                 "the same time. They will only be a few pixels wide.\n\n"
 
@@ -1702,8 +1741,8 @@ void Universe::generateImGuiWidgets()
             { "f",              "Pressing this key and keeping it pressed will cause simulation time to elapse faster by about 10 times."},
             { "r",              "Pressing this key and keeping it pressed with cause simulation time to run in reverse by about 10 times the nominal forward speed. "
                                 "Releasing this key shall restore the forward movement of time at the speed it was just before pressing this key."},
-            { "Up arrow",       "Speeds up the simulation time passage by roughly 66% each time this key is pressed."},
-            { "Down arrow",     "Slows down the simulation time passage by roughly 66% each time this key is pressed."},
+            { "Right arrow",    "Speeds up the simulation time passage by roughly 66% each time this key is pressed."},
+            { "Left arrow",     "Slows down the simulation time passage by roughly 66% each time this key is pressed."},
             { "d",              "Bring the camera to the default position and look in the direction of the sun. From this position, the entire earth's orbit is visible. "
                                 " It is a convenient starting position for the simulation.  If you get lost navigating, you can hit this key to get your bearings."},
             { nullptr, nullptr },
@@ -1957,11 +1996,25 @@ void Universe::generateImGuiWidgets()
 
             ImGui::Separator();
             ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            _stepMultiplierFrameRateAdjustment = 60.0f / ImGui::GetIO().Framerate;
+
             ImGui::Separator();
             ImGui::Text("S: %.4f, %.4f, %.4f", space.S.x, space.S.y, space.S.z);
             ImGui::Text("D: %.4f, %.4f, %.4f", space.D.x, space.D.y, space.D.z);
             ImGui::Text("E orbital angle: %.4f", earth._orbitalAngle);
             ImGui::Text("_stepMultiplier: %f", _stepMultiplier);
+
+
+            
+            if (!logString.empty())
+            {
+                ImGui::LogToClipboard();
+                ImGui::LogText(logString.c_str());
+                logString = "";
+                //ImGui::LogText("%f, %f, %f", space.S.x, space.S.y, space.S.z);
+                ImGui::LogFinish();
+            }
+
             ImGui::End();
         }
 

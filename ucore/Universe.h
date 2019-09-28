@@ -190,6 +190,7 @@ public:
 
     void ChangeSidewaysMotionMode();
     void SetDefaultView();
+    void SetApplicationStartView();
     void NavigationLockOntoEarth(int nParam);
     void NavigationLockOntoSun(int nParam);
     void NavigationLockOntoEarthWithConstantDirection(int nParam);
@@ -242,7 +243,8 @@ private:
     int dy = 0;
     int previousX = 0;
     int previousY = 0;
-    float _stepMultiplier = 1;
+    float _stepMultiplier = 1.0f;
+    float _stepMultiplierFrameRateAdjustment = 0.0f;
 
 
     bool bLeftMouseButtonDown = false;
@@ -367,5 +369,7 @@ private:
     ImFont *fixedWidthSmall = nullptr;
 
     OneShotBoolean doubleClicked = OneShotBoolean();
+
+    std::string logString = "";
 };
 
