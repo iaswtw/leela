@@ -327,10 +327,10 @@ void Universe::onKeyDown(SDL_Event* event)
 
     // Arrow keys
     case SDLK_UP:
-        _stepMultiplier *= 1.6666f;
+        IncreaseSimulationSpeed();
         break;
     case SDLK_DOWN:
-        _stepMultiplier *= 0.6f;
+        DecreaseSimulationSpeed();
         break;
 
 
@@ -676,6 +676,18 @@ void Universe::LookAtSun()
 
 }
 
+
+void Universe::IncreaseSimulationSpeed()
+{
+    if (_stepMultiplier < 400.0f)
+        _stepMultiplier *= 1.6666f;
+}
+
+void Universe::DecreaseSimulationSpeed()
+{
+    if (_stepMultiplier > 0.0001666)
+        _stepMultiplier *= 0.6f;
+}
 
 /*!
 ****************************************************************************
@@ -1949,6 +1961,7 @@ void Universe::generateImGuiWidgets()
             ImGui::Text("S: %.4f, %.4f, %.4f", space.S.x, space.S.y, space.S.z);
             ImGui::Text("D: %.4f, %.4f, %.4f", space.D.x, space.D.y, space.D.z);
             ImGui::Text("E orbital angle: %.4f", earth._orbitalAngle);
+            ImGui::Text("_stepMultiplier: %f", _stepMultiplier);
             ImGui::End();
         }
 

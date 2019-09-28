@@ -192,17 +192,27 @@ public:
     void advance(float stepMultiplier)
     {
         if (bRotationMotion)
+        {
             _rotationAngle += _rotationAngularVelocity * stepMultiplier;
+            _rotationAngle = _normalizeAngle(_rotationAngle);
+        }
 
         if (bRevolutionMotion)
+        {
             _orbitalAngle += _orbitalAngularVelocity * stepMultiplier;
+            _orbitalAngle = _normalizeAngle(_orbitalAngle);
+        }
 
         if (bPrecessionMotion)
+        {
             _axisRotationAngle += 0.005f;      // todo - use step multiplier and a new internal velocity variable.
-
+            _axisRotationAngle = _normalizeAngle(_axisRotationAngle);
+        }
         if (bOrbitalPlaneRotation)
+        {
             _orbitalPlaneRotationAngle += 0.005f;     // todo - use step multiplier and velocity
-
+            _orbitalPlaneRotationAngle = _normalizeAngle(_orbitalPlaneRotationAngle);
+        }
         calculateCenterPosition();
     }
 
@@ -232,6 +242,19 @@ public:
             _center.y += _parent->getCenter().y;
             _center.z += _parent->getCenter().z;
         }
+    }
+
+    inline float _normalizeAngle(float angle)
+    {
+        
+        //if (angle > 2 * M_PI)
+        //    angle -= 2 * M_PI;
+        //
+        //if (angle < -2 * M_PI)
+        //    angle += 2 * M_PI;
+
+        angle = fmod(angle, 2 * M_PI);
+        return angle;
     }
 
 public:
