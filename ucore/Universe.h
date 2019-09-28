@@ -348,7 +348,13 @@ private:
 	GlslProgram starGlslProgram;
     GlslProgram simpleGlslProgram;
 
-    bool bUpdateUI;
+    bool bUpdateUI = false;
+
+    // Realistic day/night shading, shadow shading.
+    // Effect on day & nights:
+    //   When false, day & night hemispheres will he equal.
+    //   When true, night hemisphere will be smaller than depending on the size of the sun.
+    bool bRealisticShading = true;
 
     //=================================================================
     // IMGUI, SDL related
@@ -371,5 +377,6 @@ private:
     OneShotBoolean doubleClicked = OneShotBoolean();
 
     std::string logString = "";
+
 };
 
