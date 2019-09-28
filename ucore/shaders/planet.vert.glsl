@@ -17,6 +17,7 @@ uniform float sunRadius;
 
 uniform vec3  otherSphereCenterTransformed;
 uniform float otherSphereRadius;
+uniform bool  realisticShading;
 
 struct SphereInfo {
     vec3 centerTransformed;
@@ -69,7 +70,10 @@ void main()
 {
     // default out color to in color.
     Color = in_color;
+
+    vec3 modelTransformedPosition   = vec3((model * vec4(position, 1.0)));
     float dist_sun_thisSphere       = distance(sunCenterTransformed, sphereInfo.centerTransformed);
+    float dist_sun_thisPoint        = distance(sunCenterTransformed, modelTransformedPosition);
     //float selfUmbraLength           = (sphereInfo.radius * dist_sun_thisSphere) / (sunRadius - sphereInfo.radius);
     //float selfUmbraConeHalfAngle    = asin(sphereInfo.radius / selfUmbraLength);
 
@@ -79,144 +83,157 @@ void main()
     float dotProduct = dot(normalize(sunCenterTransformed - sphereInfo.centerTransformed), x_normal);
     //float compareValue = sin(selfUmbraConeHalfAngle);
     
-    //if (dotProduct < -compareValue)
-    if (dotProduct < -sphereInfo.sineOfSelfUmbraConeHalfAngle)
-    {
-        // vertex is in night
-        //Color = vec4(in_color.rgb * nightColorMultiplier, in_color.a);
-        Color = vec4(in_color.rgb * 0.0, in_color.a);
-    }
-    else
-    {
-        //float multiplier = sqrt(min(1.0, dotProduct+compareValue));
-        float multiplier = sqrt(min(1.0, dotProduct + sphereInfo.sineOfSelfUmbraConeHalfAngle));
-        vec4 tempColor = vec4(in_color.rgb * multiplier, 1.0);
-  
-        vec3 modelTransformedPosition   = vec3((model * vec4(position, 1.0)));
-        float dist_sun_thisPoint        = distance(sunCenterTransformed, modelTransformedPosition);
-        float dist_sun_thisSphere       = distance(sunCenterTransformed, sphereInfo.centerTransformed);
-        float dist_sun_otherSphere      = distance(sunCenterTransformed, vec3(otherSphereCenterTransformed));
-        
-        // calculate distance beyond which this point will be in the night side.  Regardless of the size of the sun,
-        // our calculations assume night side to be equal in size to the day side.
-        float longest_dist_of_point_in_day = length(vec2(dist_sun_thisSphere, sphereInfo.radius));
-        
+
     
-//        if (longest_dist_of_point_in_day < dist_sun_thisPoint)
-//        {
-//            // point is on the night side of this sphere.
-//            // todo - this is only true if radius of sun is same as radius of this planet
-//            Color = vec4(in_color.xyz * nightColorMultiplier, in_color.a);
-//        }
-//        else
+    do {
+        // Find if point is in night
+        if (realisticShading)
         {
-            //---------------------------------------------------------------------------------
-            // In this code block, check if point is in penumbra, antumbra, umbra or none.
-            // Provide color to the point accordingly.
-            //---------------------------------------------------------------------------------
-            bool bInUmbra               = false;
-            bool bInPenumbra            = false;
-            bool bInAntumbra            = false;
-            float edgeCloseness = 0.0;
-            do
+            //if (dotProduct < -compareValue)
+            if (dotProduct < -sphereInfo.sineOfSelfUmbraConeHalfAngle)
             {
-                if (dist_sun_thisPoint < dist_sun_otherSphere)
-                    break;                                              // point might be inside the 'other' sphere, but cannot be in shadow.
-    
-                // Calculate some important points and distances about umbra and penumbra.
-                vec3  N                     = nearestPtL(modelTransformedPosition);
-                float dist_N_thisPoint      = distance(N, modelTransformedPosition);
-                float dist_N_sun            = distance(N, sunCenterTransformed);
-                float dist_N_otherSphere    = distance(N, otherSphereCenterTransformed);
-    
-                //---------------------------------------------------------
-                // Penumbra specific calculation and check
-                //---------------------------------------------------------
-                // this is the length from the start of imginary cone, between the sun and the 'other' sphere, to otherSphere center.
-                float penumbraLength        = (otherSphereRadius * dist_sun_otherSphere) / (sunRadius + otherSphereRadius);
-                float penumbraConeHalfAngle = asin(otherSphereRadius / penumbraLength);
-    
-                // y2 = radius of crosssection of penumbra at N
-                float y1 = (penumbraLength + dist_N_otherSphere) * tan(penumbraConeHalfAngle);
-                if (dist_N_thisPoint < y1)
-                {
-                    bInPenumbra = true;
-                    edgeCloseness = dist_N_thisPoint / y1;
-                }
-                else
-                    break;      // no need to check for other shadow types.
-                
-                // Even if the point was determined to be in penumbra, it might actually be in umbra. So continue to check further.
-    
-                //---------------------------------------------------------
-                // Umbra specific calculation and check
-                //---------------------------------------------------------
-                // calculate length of umbral cone.
-                float umbraLength           = (otherSphereRadius * dist_sun_otherSphere) / (sunRadius - otherSphereRadius);
-    
-                // Find radius of shadow cone at a cross section taken at the nearest point
-                float umbraConeHalfAngle = asin(otherSphereRadius / umbraLength);
-                
-                // y2 = radius of crosssection of umbra at N
-                float y2 = (umbraLength - dist_N_otherSphere) * tan(umbraConeHalfAngle);
-                    
-                if (dist_N_thisPoint < y2)
-                {
-                    bInUmbra = true;
-                    edgeCloseness = dist_N_thisPoint / y2;
-                }
-    
-                //---------------------------------------------------------
-                // Antumbra specific calculation and check
-                //---------------------------------------------------------
-                // antumbra half angle cone is same as that umbra.  We will reuse umbraConeHalfAngle.
-                if (umbraLength < dist_N_otherSphere)
-                {
-                    // there is a chance the point is in antumbra.
-                    float y3 = (dist_N_otherSphere - umbraLength) * tan(umbraConeHalfAngle);
-                    if (dist_N_thisPoint < y3)
-                    {
-                        bInAntumbra = true;
-                        edgeCloseness = dist_N_thisPoint / y3;
-                    }
-                }
-                
-                // TODO - after adding the below condition and the code in it, frame rate has gone down to 50 on home computer integrated graphics.
-                if (bInUmbra || bInPenumbra || bInAntumbra) {
-                    // make sure other sphere is above horizon. if not, show as if in full day light.
-                    vec3 x_position = vec3(model * vec4(position, 1.0));
-                    float dist_position_otherSphereCenter = distance(x_position, otherSphereCenterTransformed);
-                    float dotProduct_position_otherSphereCenter = dot(normalize(x_position - otherSphereCenterTransformed), x_normal);
-                    float angleAtPositionDueToOtherSphereRadius = 2 * asin(otherSphereRadius/2 / dist_position_otherSphereCenter);
-                    if (dotProduct_position_otherSphereCenter > sin(angleAtPositionDueToOtherSphereRadius)) {
-                        // TODO As per my calculations on paper, the above condition should have been:
-                        //          dotProduct_position_otherSphereCenter < -sin(angleAtPositionDueToOtherSphereRadius
-                        //      But if I use it, it doesn't work.  Investigate.  The if condition right now works.                        
-                        bInUmbra = false;
-                        bInPenumbra = false;
-                        bInAntumbra = false;
-                    }
-                }                
-    
-            } while (false);
-    
-            //----------------------------------------------------------------
-            // Apply coloring based on the type of shadow the point is in.
-            if (bInUmbra)
-                //Color = vec4(in_color.rgb * 0.2, in_color.a);
-                Color = vec4(tempColor.rgb * 0.2, tempColor.a);
-            else if (bInAntumbra)
-                //Color = vec4(in_color.rgb * 0.4, in_color.a);
-                Color = vec4(tempColor.rgb * 0.4, tempColor.a);
-            else if (bInPenumbra)
-                //Color = vec4(in_color.rgb * 0.6, in_color.a);
-                Color = vec4(tempColor.rgb * 0.6, tempColor.a);
-            else
-                //Color = vec(1.0, 0.0, 0.0, 1.0);
-                //Color = in_color;
-                Color = tempColor;
+                // vertex is in night
+                //Color = vec4(in_color.rgb * nightColorMultiplier, in_color.a);
+                Color = vec4(in_color.rgb * 0.0, in_color.a);
+                break;
+            }
         }
-    }
+        else
+        {
+            // calculate distance beyond which this point will be in the night side.  Regardless of the size of the sun,
+            // our calculations assume night side to be equal in size to the day side.
+            float longest_dist_of_point_in_day = length(vec2(dist_sun_thisSphere, sphereInfo.radius));
+        
+            if (longest_dist_of_point_in_day < dist_sun_thisPoint)
+            {
+                // point is on the night side of this sphere.
+                // todo - this is only true if radius of sun is same as radius of this planet
+                Color = vec4(in_color.xyz * nightColorMultiplier, in_color.a);
+                break;
+            }
+        }
+        
+        // Point is in day.  Find if it is in shadow
+        {
+            //float multiplier = sqrt(min(1.0, dotProduct+compareValue));
+            vec4 tempColor = in_color;
+            if (realisticShading)
+            {
+                float multiplier = sqrt(min(1.0, dotProduct + sphereInfo.sineOfSelfUmbraConeHalfAngle));
+                tempColor = vec4(in_color.rgb * multiplier, 1.0);
+            }
+      
+            float dist_sun_otherSphere      = distance(sunCenterTransformed, vec3(otherSphereCenterTransformed));
+            
+            {
+                //---------------------------------------------------------------------------------
+                // In this code block, check if point is in penumbra, antumbra, umbra or none.
+                // Provide color to the point accordingly.
+                //---------------------------------------------------------------------------------
+                bool bInUmbra               = false;
+                bool bInPenumbra            = false;
+                bool bInAntumbra            = false;
+                float edgeCloseness = 0.0;
+                do
+                {
+                    if (dist_sun_thisPoint < dist_sun_otherSphere)
+                        break;                                              // point might be inside the 'other' sphere, but cannot be in shadow.
+        
+                    // Calculate some important points and distances about umbra and penumbra.
+                    vec3  N                     = nearestPtL(modelTransformedPosition);
+                    float dist_N_thisPoint      = distance(N, modelTransformedPosition);
+                    float dist_N_sun            = distance(N, sunCenterTransformed);
+                    float dist_N_otherSphere    = distance(N, otherSphereCenterTransformed);
+        
+                    //---------------------------------------------------------
+                    // Penumbra specific calculation and check
+                    //---------------------------------------------------------
+                    // this is the length from the start of imginary cone, between the sun and the 'other' sphere, to otherSphere center.
+                    float penumbraLength        = (otherSphereRadius * dist_sun_otherSphere) / (sunRadius + otherSphereRadius);
+                    float penumbraConeHalfAngle = asin(otherSphereRadius / penumbraLength);
+        
+                    // y2 = radius of crosssection of penumbra at N
+                    float y1 = (penumbraLength + dist_N_otherSphere) * tan(penumbraConeHalfAngle);
+                    if (dist_N_thisPoint < y1)
+                    {
+                        bInPenumbra = true;
+                        edgeCloseness = dist_N_thisPoint / y1;
+                    }
+                    else
+                        break;      // no need to check for other shadow types.
+                    
+                    // Even if the point was determined to be in penumbra, it might actually be in umbra. So continue to check further.
+        
+                    //---------------------------------------------------------
+                    // Umbra specific calculation and check
+                    //---------------------------------------------------------
+                    // calculate length of umbral cone.
+                    float umbraLength           = (otherSphereRadius * dist_sun_otherSphere) / (sunRadius - otherSphereRadius);
+        
+                    // Find radius of shadow cone at a cross section taken at the nearest point
+                    float umbraConeHalfAngle = asin(otherSphereRadius / umbraLength);
+                    
+                    // y2 = radius of crosssection of umbra at N
+                    float y2 = (umbraLength - dist_N_otherSphere) * tan(umbraConeHalfAngle);
+                        
+                    if (dist_N_thisPoint < y2)
+                    {
+                        bInUmbra = true;
+                        edgeCloseness = dist_N_thisPoint / y2;
+                    }
+        
+                    //---------------------------------------------------------
+                    // Antumbra specific calculation and check
+                    //---------------------------------------------------------
+                    // antumbra half angle cone is same as that umbra.  We will reuse umbraConeHalfAngle.
+                    if (umbraLength < dist_N_otherSphere)
+                    {
+                        // there is a chance the point is in antumbra.
+                        float y3 = (dist_N_otherSphere - umbraLength) * tan(umbraConeHalfAngle);
+                        if (dist_N_thisPoint < y3)
+                        {
+                            bInAntumbra = true;
+                            edgeCloseness = dist_N_thisPoint / y3;
+                        }
+                    }
+                    
+                    // TODO - after adding the below condition and the code in it, frame rate has gone down to 50 on home computer integrated graphics.
+                    if (bInUmbra || bInPenumbra || bInAntumbra) {
+                        // make sure other sphere is above horizon. if not, show as if in full day light.
+                        vec3 x_position = vec3(model * vec4(position, 1.0));
+                        float dist_position_otherSphereCenter = distance(x_position, otherSphereCenterTransformed);
+                        float dotProduct_position_otherSphereCenter = dot(normalize(x_position - otherSphereCenterTransformed), x_normal);
+                        float angleAtPositionDueToOtherSphereRadius = 2 * asin(otherSphereRadius/2 / dist_position_otherSphereCenter);
+                        if (dotProduct_position_otherSphereCenter > sin(angleAtPositionDueToOtherSphereRadius)) {
+                            // TODO As per my calculations on paper, the above condition should have been:
+                            //          dotProduct_position_otherSphereCenter < -sin(angleAtPositionDueToOtherSphereRadius
+                            //      But if I use it, it doesn't work.  Investigate.  The if condition right now works.                        
+                            bInUmbra = false;
+                            bInPenumbra = false;
+                            bInAntumbra = false;
+                        }
+                    }                
+        
+                } while (false);
+        
+                //----------------------------------------------------------------
+                // Apply coloring based on the type of shadow the point is in.
+                if (bInUmbra)
+                    //Color = vec4(in_color.rgb * 0.2, in_color.a);
+                    Color = vec4(tempColor.rgb * 0.2, tempColor.a);
+                else if (bInAntumbra)
+                    //Color = vec4(in_color.rgb * 0.4, in_color.a);
+                    Color = vec4(tempColor.rgb * 0.4, tempColor.a);
+                else if (bInPenumbra)
+                    //Color = vec4(in_color.rgb * 0.6, in_color.a);
+                    Color = vec4(tempColor.rgb * 0.6, tempColor.a);
+                else
+                    //Color = vec(1.0, 0.0, 0.0, 1.0);
+                    //Color = in_color;
+                    Color = tempColor;
+            }
+        }
+    } while (false);
     
     // apply all 3 transformations to the original point
     gl_Position = proj * view * model * vec4(position, 1.0);

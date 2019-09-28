@@ -1490,6 +1490,7 @@ void Universe::renderUsingPlanetGlslProgram()
 {
     planetGlslProgram.setVec3("sunCenterTransformed", glm::value_ptr(sun.getModelTransformedCenter()));
     planetGlslProgram.setFloat("sunRadius", sun.getRadius());
+    planetGlslProgram.setBool("realisticShading", bRealisticShading);
 
     earthRenderer.renderSphere(planetGlslProgram , &sun, &moon);
     earthRenderer.renderLatitudeAndLongitudes(planetGlslProgram);
@@ -1967,6 +1968,11 @@ void Universe::generateImGuiWidgets()
 
             ImGui::Separator();
 
+            //-----------------------------------------------------
+
+            ImGui::Checkbox("Realistic shading", &bRealisticShading);
+            ImGui::Separator();
+            
             //-----------------------------------------------------
 
             ImGui::PushFont(appFontSmall);
