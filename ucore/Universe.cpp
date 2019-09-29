@@ -215,17 +215,18 @@ void Universe::initializeGL()
     
     //---------------------------------------------------------------------------------------------------
 
-	sunRenderer.setAsLightSource();
+   
+    sunRenderer.setAsLightSource();
     sunRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
     sunRenderer.constructVerticesAndSendToGpu();
 
-    
+
     earthRenderer.setPolygonCountLevel(PolygonCountLevel_High);
     earthRenderer.constructVerticesAndSendToGpu();
     earthRenderer.bShowLatitudesAndLongitudes = true;
     earthRenderer.setNightColorDarkness(NightColorDarkness_Medium);
 
-    
+
     moonRenderer.setPolygonCountLevel(PolygonCountLevel_Medium);
     moonRenderer.constructVerticesAndSendToGpu();
     moonRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
