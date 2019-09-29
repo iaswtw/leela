@@ -11,6 +11,16 @@
 
 #include "GlslProgram.h"
 
+struct Triangle
+{
+    unsigned int vertex[3];
+    Triangle(unsigned int first, unsigned int second, unsigned int third)
+    {
+        vertex[0] = first;
+        vertex[1] = second;
+        vertex[2] = third;
+    }
+};
 
 enum PolygonCountLevel
 {
@@ -50,12 +60,14 @@ public:
 
 private:
     std::vector<float>* _constructMainSphereVertices();
+    std::pair<std::vector<float>*, std::vector<Triangle>*> _constructMainIcoSphereVertices();
     std::vector<float>* _constructLatitudesAndLongitudeVertices();
     std::vector<float>* _constructOrbit();
     std::vector<float>* _constructOrbitalPlaneVertices();
     std::vector<float>* _constructOrbitalPlaneGridVertices();
 
 	float _getPolygonIncrement();
+    int _getIcoSphereSubdivisionLevel();
 
 protected:
     Sphere& _sphere;
@@ -67,6 +79,7 @@ protected:
     GLuint _latAndLongVao;
 
     int numMainSphereVertices = -1;
+    int numMainSphereElements = -1;
     int numLatAndLongVertices = -1;
     int numOrbitalPlaneVertices = -1;
     int numOrbitalPlaneGridVertices = -1;

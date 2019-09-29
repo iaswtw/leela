@@ -17,6 +17,149 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <map>
+#include <array>
+
+
+using TriangleList = std::vector<Triangle>;
+using VertexList = std::vector<glm::vec3>;
+
+
+#define USE_ICOSPHERE
+
+namespace icosahedron
+{
+    const float X = .525731112119133606f;
+    const float Z = .850650808352039932f;
+    const float N = 0.f;
+
+    static const VertexList vertices =
+    {
+      {-X,N,Z}, {X,N,Z}, {-X,N,-Z}, {X,N,-Z},
+      {N,Z,X}, {N,Z,-X}, {N,-Z,X}, {N,-Z,-X},
+      {Z,X,N}, {-Z,X, N}, {Z,-X,N}, {-Z,-X, N}
+    };
+
+    void populateInitialVertices(VertexList* v)
+    {
+        v->push_back(glm::vec3(-X, +N, +Z));
+        v->push_back(glm::vec3(+X, +N, +Z));
+        v->push_back(glm::vec3(-X, +N, -Z));
+        v->push_back(glm::vec3(+X, +N, -Z));
+
+        v->push_back(glm::vec3(+N, +Z, +X));
+        v->push_back(glm::vec3(+N, +Z, -X));
+        v->push_back(glm::vec3(+N, -Z, +X));
+        v->push_back(glm::vec3(+N, -Z, -X));
+
+        v->push_back(glm::vec3(+Z, +X, +N));
+        v->push_back(glm::vec3(-Z, +X, +N));
+        v->push_back(glm::vec3(+Z, -X, +N));
+        v->push_back(glm::vec3(-Z, -X, +N));
+    }
+
+    static const TriangleList triangles =
+    {
+      {0,4,1},{0,9,4},{9,5,4},{4,5,8},{4,8,1},
+      {8,10,1},{8,3,10},{5,3,8},{5,2,3},{2,7,3},
+      {7,10,3},{7,6,10},{7,11,6},{11,0,6},{0,1,6},
+      {6,1,10},{9,0,11},{9,11,2},{9,2,5},{7,2,11}
+    };
+
+    void populateInitialTriangles(TriangleList* t)
+    {
+        t->push_back(Triangle(0, 4, 1));
+        t->push_back(Triangle(0, 9, 4));
+        t->push_back(Triangle(9, 5, 4));
+        t->push_back(Triangle(4, 5, 8));
+        t->push_back(Triangle(4, 8, 1));
+
+        t->push_back(Triangle(8, 10, 1));
+        t->push_back(Triangle(8, 3, 10));
+        t->push_back(Triangle(5, 3, 8));
+        t->push_back(Triangle(5, 2, 3));
+        t->push_back(Triangle(2, 7, 3));
+        
+        t->push_back(Triangle(7, 10, 3));
+        t->push_back(Triangle(7, 6, 10));
+        t->push_back(Triangle(7, 11, 6));
+        t->push_back(Triangle(11, 0, 6));
+        t->push_back(Triangle(0, 1, 6));
+        
+        t->push_back(Triangle(6, 1, 10));
+        t->push_back(Triangle(9, 0, 11));
+        t->push_back(Triangle(9, 11, 2));
+        t->push_back(Triangle(9, 2, 5));
+        t->push_back(Triangle(7, 2, 11));
+
+    }
+
+}
+
+using Lookup = std::map<std::pair<unsigned int, unsigned int>, unsigned int>;
+
+unsigned int vertex_for_edge(Lookup& lookup,
+    VertexList& vertices, unsigned int first, unsigned int second)
+{
+    Lookup::key_type key(first, second);
+    if (key.first > key.second)
+        std::swap(key.first, key.second);
+
+    auto inserted = lookup.insert({ key, vertices.size() });
+    if (inserted.second)
+    {
+        auto& edge0 = vertices[first];
+        auto& edge1 = vertices[second];
+        auto point = normalize(edge0 + edge1);
+        vertices.push_back(point);
+    }
+
+    return inserted.first->second;
+}
+
+TriangleList * subdivide(VertexList& vertices, TriangleList* triangles)
+{
+    Lookup lookup;
+    TriangleList *result = new TriangleList();
+
+    for (auto&& each : *triangles)
+    {
+        std::array<unsigned int, 3> mid;
+        for (int edge = 0; edge < 3; ++edge)
+        {
+            mid[edge] = vertex_for_edge(lookup, vertices,
+                each.vertex[edge], each.vertex[(edge + 1) % 3]);
+        }
+
+        result->push_back({ each.vertex[0], mid[0], mid[2] });
+        result->push_back({ each.vertex[1], mid[1], mid[0] });
+        result->push_back({ each.vertex[2], mid[2], mid[1] });
+        result->push_back({ mid[0], mid[1], mid[2] });
+    }
+
+    delete triangles;
+    return result;
+}
+
+
+using IndexedMesh = std::pair<VertexList*, TriangleList*>;
+
+IndexedMesh make_icosphere(int subdivisions)
+{
+    VertexList* vertices = new VertexList();
+    TriangleList* triangles = new TriangleList();
+
+    icosahedron::populateInitialVertices(vertices);
+    icosahedron::populateInitialTriangles(triangles);
+
+    for (int i = 0; i < subdivisions; ++i)
+    {
+        triangles = subdivide(*vertices, triangles);
+    }
+
+    return{ vertices, triangles };
+}
+
 
 static inline void vector_push_back_7(std::vector<float>& v, float f1, float f2, float f3, float f4, float f5, float f6, float f7)
 {
@@ -133,6 +276,35 @@ std::vector<float>* SphereRenderer::_constructMainSphereVertices()
 
     return v;
 }
+
+std::pair<std::vector<float>*, std::vector<Triangle>*>  SphereRenderer::_constructMainIcoSphereVertices()
+{
+    std::vector<float>* v = new std::vector<float>();
+    Sphere& s = _sphere;
+
+    IndexedMesh indexMesh = make_icosphere(_getIcoSphereSubdivisionLevel());
+    
+    // .first is VertexList; which is vector of glm::vec3
+    for (int i = 0; i < indexMesh.first->size(); i++)
+    {
+        glm::vec3& vertex = (*indexMesh.first)[i];
+
+        // Generate normal for this vertex
+        glm::vec3 N = glm::normalize(glm::vec3(vertex.x, vertex.y, vertex.z) - glm::vec3(0.0f, 0.0f, 0.0f));
+
+        // scale vertices with unit radius to the actual radius of sphere.
+        vertex *= s._radius;
+
+        vector_push_back_10(*v, vertex.x, vertex.y, vertex.z, s._r, s._g, s._b, 1.0f, N.x, N.y, N.z);
+    }
+
+    printf("=== Sphere: Num vertices = %d\n", v->size()/10);
+    printf("=== Sphere: Num elements = %d\n", indexMesh.second->size() / 6);
+
+    delete indexMesh.first;
+    return std::pair<std::vector<float>*, std::vector<Triangle>*>(v, indexMesh.second);
+}
+
 std::vector<float>* SphereRenderer::_constructLatitudesAndLongitudeVertices()
 {
     std::vector<float>* v = new std::vector<float>();
@@ -333,9 +505,12 @@ std::vector<float>* SphereRenderer::_constructOrbitalPlaneGridVertices()
 
 void SphereRenderer::constructVerticesAndSendToGpu()
 {
-    GLuint vbo;
+    GLuint vbo;     // vertex buffer object
+    GLuint ebo;     // element buffer object
     std::vector<float> *v = nullptr;
 
+
+#ifndef USE_ICOSPHERE
     //---------------------------------------------------------------------------------------------------
     // The sphere itself
     v = _constructMainSphereVertices();
@@ -362,6 +537,49 @@ void SphereRenderer::constructVerticesAndSendToGpu()
 
     numMainSphereVertices = v->size() / PLANET_STRIDE_IN_VBO;
     delete v;
+
+#else
+    //---------------------------------------------------------------------------------------------------
+    // The sphere itself (Icosphere)
+    auto pair = _constructMainIcoSphereVertices();
+
+    v = pair.first;
+    auto e = pair.second;
+
+    glGenVertexArrays(1, &_mainVao);
+    glBindVertexArray(_mainVao);
+
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        sizeof(float) * v->size(),
+        v->data(),
+        GL_STATIC_DRAW);
+
+    glGenBuffers(1, &ebo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(
+        GL_ELEMENT_ARRAY_BUFFER,
+        sizeof(unsigned int) * e->size() * 3,
+        e->data(),
+        GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), nullptr);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(7 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    numMainSphereVertices = v->size() / PLANET_STRIDE_IN_VBO;
+    numMainSphereElements = e->size() * 3;
+    
+    delete v;
+    delete e;
+#endif
 
     //---------------------------------------------------------------------------------------------------
     // latitude and longitude
@@ -473,6 +691,18 @@ float SphereRenderer::_getPolygonIncrement()
 	}
 }
 
+int SphereRenderer::_getIcoSphereSubdivisionLevel()
+{
+    switch (_polygonCountLevel)
+    {
+    case PolygonCountLevel_Low:
+        return 4;
+    case PolygonCountLevel_Medium:
+        return 6;
+    case PolygonCountLevel_High:
+        return 9;
+    }
+}
 
 //############################################################################################################
 
@@ -515,7 +745,11 @@ void PlanetRenderer::renderSphere(GlslProgram& glslProgram, Sphere* sun, Sphere*
 	glBindVertexArray(_mainVao);
 
 	// Draw vertices
+#ifndef USE_ICOSPHERE
 	glDrawArrays(GL_TRIANGLES, 0, numMainSphereVertices);
+#else
+    glDrawElements(GL_TRIANGLES, numMainSphereElements, GL_UNSIGNED_INT, 0);
+#endif
 
 }
 
@@ -595,6 +829,9 @@ void SunRenderer::renderSphere(GlslProgram& glslProgram)
 	glBindVertexArray(_mainVao);
 
 	// Draw vertices
-	glDrawArrays(GL_TRIANGLES, 0, numMainSphereVertices);
-
+#ifndef USE_ICOSPHERE
+    glDrawArrays(GL_TRIANGLES, 0, numMainSphereVertices);
+#else
+    glDrawElements(GL_TRIANGLES, numMainSphereElements, GL_UNSIGNED_INT, 0);
+#endif
 }
