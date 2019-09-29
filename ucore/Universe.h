@@ -115,13 +115,14 @@ typedef enum
  **************************************************************************/
 typedef enum
 {
-    USimulationSpeed_VeryLow = 0,
-    USimulationSpeed_Low2,
-    USimulationSpeed_Low1,
-    USimulationSpeed_Low,
-    USimulationSpeed_Normal,
-    USimulationSpeed_High,
-    USimulationSpeed_VeryHigh
+    USimulationSpeed_3p125_Percent = 0,
+    USimulationSpeed_6p25_Percent,
+    USimulationSpeed_12p5_Percent,
+    USimulationSpeed_25_Percent,
+    USimulationSpeed_50_Percent,
+    USimulationSpeed_100_Percent,
+    USimulationSpeed_400_Percent,
+    USimulationSpeed_1600_Percent
 } USimulationSpeedType;
 
 
@@ -161,7 +162,6 @@ typedef enum
     UDemo_SixMonthLongDayAndNightOnNorthPole_AnotherAngle,
     UDemo_PrecessionMotion
 } UDemoType;
-
 
 
 class Universe
@@ -286,6 +286,7 @@ private:
 
     bool bGalaxyStars = false;
     bool bShowAxis = true;
+    bool bShowOrbitsGlobalEnable = true;           // Individual orbit enables are in respective renderer classes.
 
     /*! \todo F_REFERENCE_VECTOR_ALONG_Z is checked before bLockOntoEarth
         or bLockOntoSun in the function on_MouseMotion().  Need
@@ -367,6 +368,7 @@ private:
     bool bShowKeyboardShortcuts = false;
     bool bShowIntroduction = false;
 
+    ImFont *appFontExtraSmall = nullptr;
     ImFont *appFontSmall = nullptr;
     ImFont *appFontSmallMedium = nullptr;
     ImFont *appFontMedium = nullptr;
