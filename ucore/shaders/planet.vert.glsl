@@ -144,47 +144,53 @@ void main()
                     float dist_N_thisPoint      = distance(N, modelTransformedPosition);
                     float dist_N_sun            = distance(N, sunCenterTransformed);
                     float dist_N_otherSphere    = distance(N, otherSphereCenterTransformed);
-        
-                    //---------------------------------------------------------
-                    // Penumbra specific calculation and check
-                    //---------------------------------------------------------
+
+
+                    //===================================================================
+                    // Calculate umbra, penumbra and antumbra radius at crosssection
+                    //===================================================================
+
+                    //----------------------------------------------
                     // this is the length from the start of imginary cone, between the sun and the 'other' sphere, to otherSphere center.
                     float penumbraLength        = (otherSphereRadius * dist_sun_otherSphere) / (sunRadius + otherSphereRadius);
                     float penumbraConeHalfAngle = asin(otherSphereRadius / penumbraLength);
         
-                    // y2 = radius of crosssection of penumbra at N
+                    // y1 = radius of crosssection of penumbra at N
                     float y1 = (penumbraLength + dist_N_otherSphere) * tan(penumbraConeHalfAngle);
+
+                    //----------------------------------------------
+                    // calculate length of umbral cone.
+                    float umbraLength           = (otherSphereRadius * dist_sun_otherSphere) / (sunRadius - otherSphereRadius);
+                    // Find radius of shadow cone at a cross section taken at the nearest point
+                    float umbraConeHalfAngle = asin(otherSphereRadius / umbraLength);
+                    // y2 = radius of crosssection of umbra at N
+                    float y2 = (umbraLength - dist_N_otherSphere) * tan(umbraConeHalfAngle);
+
+
+        
+                    //===================================================================
+                    // Perform checks to determine which shadow type this point is in.
+                    //===================================================================
+
+                    //---------------------------------------------------------
+                    // Penumbra specific calculation and check
                     if (dist_N_thisPoint < y1)
                     {
                         bInPenumbra = true;
-                        edgeCloseness = dist_N_thisPoint / y1;
+                        edgeCloseness = (dist_N_thisPoint - y2) / (y1 - y2);
                     }
-                    else
-                        break;      // no need to check for other shadow types.
                     
                     // Even if the point was determined to be in penumbra, it might actually be in umbra. So continue to check further.
-        
+       
                     //---------------------------------------------------------
                     // Umbra specific calculation and check
-                    //---------------------------------------------------------
-                    // calculate length of umbral cone.
-                    float umbraLength           = (otherSphereRadius * dist_sun_otherSphere) / (sunRadius - otherSphereRadius);
-        
-                    // Find radius of shadow cone at a cross section taken at the nearest point
-                    float umbraConeHalfAngle = asin(otherSphereRadius / umbraLength);
-                    
-                    // y2 = radius of crosssection of umbra at N
-                    float y2 = (umbraLength - dist_N_otherSphere) * tan(umbraConeHalfAngle);
-                        
                     if (dist_N_thisPoint < y2)
                     {
                         bInUmbra = true;
-                        edgeCloseness = dist_N_thisPoint / y2;
                     }
         
                     //---------------------------------------------------------
                     // Antumbra specific calculation and check
-                    //---------------------------------------------------------
                     // antumbra half angle cone is same as that umbra.  We will reuse umbraConeHalfAngle.
                     if (umbraLength < dist_N_otherSphere)
                     {
@@ -193,7 +199,6 @@ void main()
                         if (dist_N_thisPoint < y3)
                         {
                             bInAntumbra = true;
-                            edgeCloseness = dist_N_thisPoint / y3;
                         }
                     }
                     
@@ -218,19 +223,33 @@ void main()
         
                 //----------------------------------------------------------------
                 // Apply coloring based on the type of shadow the point is in.
-                if (bInUmbra)
+                if (bInUmbra) {
                     //Color = vec4(in_color.rgb * 0.2, in_color.a);
-                    Color = vec4(tempColor.rgb * 0.2, tempColor.a);
-                else if (bInAntumbra)
+                    Color = vec4(tempColor.rgb * 0.19, tempColor.a);
+                }
+                else if (bInAntumbra) {
                     //Color = vec4(in_color.rgb * 0.4, in_color.a);
                     Color = vec4(tempColor.rgb * 0.4, tempColor.a);
-                else if (bInPenumbra)
+                }
+                else if (bInPenumbra) {
                     //Color = vec4(in_color.rgb * 0.6, in_color.a);
-                    Color = vec4(tempColor.rgb * 0.6, tempColor.a);
-                else
+                    // simulate reduction in darkness using a shifted (by +1) cosine curve between 0 & 180 degrees
+                    float factor = 0;                    
+                    if (realisticShading) {
+                        edgeCloseness = sqrt(edgeCloseness);
+                        factor = 0.8 - 0.8 * ((1.0 + cos(edgeCloseness * PI) / 2.0));
+                        factor += 0.6;      // todo - 0.2 should have worked.  But it does not result in full color at the outer edge of penumbra.
+                    }
+                    else {
+                        factor = 0.6;
+                    }
+                    Color = vec4(tempColor.rgb * factor, tempColor.a);
+                }
+                else {
                     //Color = vec(1.0, 0.0, 0.0, 1.0);
                     //Color = in_color;
                     Color = tempColor;
+                }
             }
         }
     } while (false);

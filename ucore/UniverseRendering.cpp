@@ -513,6 +513,11 @@ void Universe::generateImGuiWidgets()
             ImGui::Separator();
 
             //-----------------------------------------------------
+
+            ImGui::Checkbox("Realistic shading", &bRealisticShading);
+            ImGui::Separator();
+
+            //-----------------------------------------------------
             // Common font for the content of all the below sections
             ImGui::PushFont(appFontExtraSmall);
 
@@ -602,7 +607,6 @@ void Universe::generateImGuiWidgets()
 
             //-----------------------------------------------------
 
-            ImGui::Checkbox("Realistic shading", &bRealisticShading);
             ImGui::Checkbox("Show orbits (o)", &bShowOrbitsGlobalEnable);
             ImGui::Checkbox("Show axis (a)", &bShowAxis);
             ImGui::Separator();
