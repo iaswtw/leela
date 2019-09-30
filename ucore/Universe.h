@@ -164,6 +164,20 @@ typedef enum
 } UDemoType;
 
 
+typedef enum
+{
+    NavigationLockTarget_None,
+    NavigationLockTarget_Earth,
+    NavigationLockTarget_Sun,
+    NavigationLockTarget_Moon,
+} NavigationLockTarget;
+
+typedef enum
+{
+    FollowMode_Normal,
+    FollowMode_ConstantDirection
+} FollowMode;
+
 class Universe
 {
 public:
@@ -176,6 +190,7 @@ public:
     int runMainLoop();
 
     void processFlags();
+    void navigate(float __throttle, float __yaw, float __pitch, float __roll);
     void render();
     void renderUsingPlanetGlslProgram();
 	void renderUsingStarGlslProgram();
@@ -191,12 +206,14 @@ public:
     void ChangeSidewaysMotionMode();
     void SetDefaultView();
     void SetApplicationStartView();
-    void NavigationLockOntoEarth(int nParam);
-    void NavigationLockOntoSun(int nParam);
-    void NavigationLockOntoEarthWithConstantDirection(int nParam);
-    void LookAtEarth();
-    void LookAtEarthFromSavedVector();
-    void LookAtSun();
+    
+    void SetFollowTargetAndMode(Sphere* target, FollowMode mode);
+    void SetFollowMode(FollowMode mode);
+    void ToggleConstantDirectionFollowMode();
+    void ResetFollowTargetAndMode();
+    void ToggleFollowTarget(Sphere* target, FollowMode mode);
+
+    void LookAtTarget();
 
     void IncreaseSimulationSpeed();
     void DecreaseSimulationSpeed();
@@ -281,8 +298,6 @@ private:
     bool bShiftModifier = false;
 
     bool bSidewaysMotionMode = true;
-    bool bLockOntoEarth = false;
-    bool bLockOntoSun = false;
 
     bool bGalaxyStars = false;
     bool bShowAxis = true;
@@ -295,9 +310,10 @@ private:
         work. */
     char F_REFERENCE_VECTOR_ALONG_Z = 0;
     
-    bool bEarthFollowMode = false;
-    VECTOR earthFollowVector = VECTOR(1.0, 1.0, 1.0);
-    float earthFollowDistance = 0.0f;
+    FollowMode followMode = FollowMode_Normal;
+    VECTOR followVector = VECTOR(1.0, 1.0, 1.0);
+    float followDistance = 0.0f;
+    Sphere* followTarget = nullptr;
 
 
     bool bSimulationPause = false;

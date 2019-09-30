@@ -188,18 +188,49 @@ public:
             DS.SET(D, S);
             PP.SET(D, S);
 
-            n = nearestptL(D, S, ref_pt);
-            n_ref_pt.SET(n, ref_pt);
+            //n = nearestptL(D, S, ref_pt);
+            //n_ref_pt.SET(n, ref_pt);
+            //R = D.translated(100, n_ref_pt);
 
-            R = D.translated(100, n_ref_pt);
+            VECTOR perpendicular = crossProduct(
+                crossProduct(DS, VECTOR(D, ref_pt)),
+                DS);
+
+            R = D.translated(100, perpendicular);
             DR.SET(D, R);
+            DR.disp();
             DL = crossProduct(DR, DS);
 
-            L = D;
-            L.translate(100, DL);
+            L = D.translated(100, DL);
 
             break;
         }
+    }
+
+
+    /*!
+    ****************************************************************************
+
+
+
+    ****************************************************************************/
+    void rotateFrameAboutD(double horizontal, double vertical)
+    {
+        // rotate horizontally, i.e. about DR 
+        S = rotate(D, R, S, horizontal);
+        DS.SET(D, S);
+        DL = crossProduct(DR, DS);
+        L.x = D.x + 600 * DL.l; L.y = D.y + 600 * DL.m; L.z = D.z + 600 * DL.n;
+
+        PP.SET(D, S);
+
+        // rotate vertically, i.e. about DL
+        S = rotate(D, L, S, vertical);
+        DS.SET(D, S);
+        DR = crossProduct(DL, DR);
+        R.x = D.x + 600 * DR.l; D.y = D.y + 600 * DR.m; D.z = D.z + 600 * DR.n;
+
+        PP.SET(D, S);
     }
 
     /*!
@@ -211,10 +242,10 @@ public:
     void rotateFrame(PNT along, double horizontal, double vertical)
     {
         // rotate horizontally
-        S = rotate(along, along.translatedZ(100), S, horizontal);
-        D = rotate(along, along.translatedZ(100), D, horizontal);
-        R = rotate(along, along.translatedZ(100), R, horizontal);
-        L = rotate(along, along.translatedZ(100), L, horizontal);
+        S = rotate(along, along.translated(100, DR), S, horizontal);
+        D = rotate(along, along.translated(100, DR), D, horizontal);
+        R = rotate(along, along.translated(100, DR), R, horizontal);
+        L = rotate(along, along.translated(100, DR), L, horizontal);
 
         DS.SET(D, S);
         DR.SET(D, R);
@@ -223,15 +254,10 @@ public:
 
         // rotate vertically
         // find the second point of the axis to rotate vertically
-        PNT P;
-        P.x = along.x + DL.l * 100;
-        P.y = along.y + DL.m * 100;
-        P.z = along.z + DL.n * 100;
-
-        S = rotate(along, P, S, vertical);
-        D = rotate(along, P, D, vertical);
-        R = rotate(along, P, R, vertical);
-        L = rotate(along, P, L, vertical);
+        S = rotate(along, along.translated(100, DL), S, vertical);
+        D = rotate(along, along.translated(100, DL), D, vertical);
+        R = rotate(along, along.translated(100, DL), R, vertical);
+        L = rotate(along, along.translated(100, DL), L, vertical);
 
         DS.SET(D, S);
         DR.SET(D, R);

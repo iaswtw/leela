@@ -8,10 +8,10 @@ void Universe::onKeyDown(SDL_Event* event)
         ChangeBoolean(&bShowAxis, UCmdParam_Toggle);
         break;
     case SDLK_b:
-        NavigationLockOntoEarthWithConstantDirection(UCmdParam_Toggle);
+        ToggleConstantDirectionFollowMode();
         break;
     case SDLK_c:
-        NavigationLockOntoSun(UCmdParam_Toggle);
+        ToggleFollowTarget(&sun, FollowMode_Normal);
         break;
     case SDLK_d:
         SetDefaultView();
@@ -52,9 +52,10 @@ void Universe::onKeyDown(SDL_Event* event)
         ChangeSidewaysMotionMode();
         break;
     case SDLK_z:
-        NavigationLockOntoEarth(UCmdParam_Toggle);
+        ToggleFollowTarget(&earth, FollowMode_Normal);
         break;
 
+    // ============= Digits ===============
     case SDLK_0:
         Earth_RevolutionMotion(UCmdParam_Toggle);
         break;
@@ -77,7 +78,7 @@ void Universe::onKeyDown(SDL_Event* event)
 
 
 
-        // Function keys
+    // ============ Function keys =============
     case SDLK_F6:
         if (bShiftModifier)
             Earth_PrecessionMotion(UCmdParam_Reset);
@@ -194,76 +195,21 @@ void Universe::onMouseMotion(int xrel, int yrel)
     float dx = float(xrel);
     float dy = float(yrel);
 
-    if (bCtrlModifier)
-    {
-        dx /= 15.0f;
-        dy /= 15.0f;
-    }
+    float l_throttle  = 0.0f;
+    float l_yaw       = 0.0f;
+    float l_pitch     = 0.0f;
+    float l_roll      = 0.0f;
 
-    //printf("dx = %d, dy = %d\n", dx, dy);
+    if (bLeftMouseButtonDown)
+        l_throttle = -dy * 5.0f;
+    else
+        l_pitch = -dy / 20.0f;
 
-    if (!bEarthFollowMode) {
-        if (F_REFERENCE_VECTOR_ALONG_Z == 1)
-        {
-            if (bLeftMouseButtonDown) {
-                space.moveFrame(Movement_Forward, double(-dy * 5.0f));
-                if (bLockOntoEarth)
-                    space.rotateFrame(earth.getCenter(), dx / 10., 0);
-                else if (bLockOntoSun)
-                    space.rotateFrame(sun.getCenter(), dx / 10., 0);
-            }
-            else {
-                if (bLockOntoEarth)
-                    space.rotateFrame(earth.getCenter(), dx / 10., -dy / 10.);
-                else if (bLockOntoSun)
-                    space.rotateFrame(sun.getCenter(), dx / 10., -dy / 10.);
-            }
-            return;
-        }
-    }
+    if (bRightMouseButtonDown)
+        l_roll = -dx / 20.0f;
+    else
+        l_yaw = dx / 20.0f;
 
-    while (1)
-    {
-        if (bLeftMouseButtonDown) {
-            space.moveFrame(Movement_Forward, -dy * 5);
-
-            if (bEarthFollowMode)
-                earthFollowDistance += dy * 5;
-
-            if (!bEarthFollowMode) {
-                if (bSidewaysMotionMode == 1) {
-                    space.moveFrame(Movement_RotateRight, 90);
-                    space.moveFrame(Movement_Forward, dx);
-                    space.moveFrame(Movement_RotateLeft, 90);
-                }
-                else {
-                    space.moveFrame(Movement_RotateRight, dx / 10.0);
-                }
-            }
-            break;
-        }
-        if (!bEarthFollowMode) {
-            if (bRightMouseButtonDown) {
-                space.moveFrame(Movement_RightAlongSD, dx / 10.0);
-                break;
-            }
-
-            if (bSidewaysMotionMode) {
-                space.moveFrame(Movement_RotateRight, 90);
-                space.moveFrame(Movement_Forward, dx);
-                space.moveFrame(Movement_RotateLeft, 90);
-
-                space.moveFrame(Movement_RotateUp, 90);
-                space.moveFrame(Movement_Forward, -dy);
-                space.moveFrame(Movement_RotateDown, 90);
-
-            }
-            else {
-                space.moveFrame(Movement_RotateRight, (dx / 10.0));
-                space.moveFrame(Movement_RotateUp, -(dy / 10.0));
-            }
-        }
-        break;
-    }
+    navigate(l_throttle, l_yaw, l_pitch, l_roll);
 }
 
