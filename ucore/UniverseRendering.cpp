@@ -216,10 +216,10 @@ void Universe::generateImGuiWidgets()
         ImGui::Button("v"); ImGui::SameLine();
         ImGui::PopStyleColor();
 
-        if (bLockOntoEarth) color = onColor; else color = offColor;
-        ImGui::PushStyleColor(ImGuiCol_Button, color);
-        ImGui::Button("z"); ImGui::SameLine();
-        ImGui::PopStyleColor();
+        //if (bLockOntoEarth) color = onColor; else color = offColor;
+        //ImGui::PushStyleColor(ImGuiCol_Button, color);
+        //ImGui::Button("z"); ImGui::SameLine();
+        //ImGui::PopStyleColor();
 
         if (!earth.bRevolutionMotion) color = onColor; else color = offColor;
         ImGui::PushStyleColor(ImGuiCol_Button, color);
@@ -241,10 +241,10 @@ void Universe::generateImGuiWidgets()
         ImGui::Button("m"); ImGui::SameLine();
         ImGui::PopStyleColor();
 
-        if (bEarthFollowMode) color = onColor; else color = offColor;
-        ImGui::PushStyleColor(ImGuiCol_Button, color);
-        ImGui::Button("b");
-        ImGui::PopStyleColor();
+        //if (bEarthFollowMode) color = onColor; else color = offColor;
+        //ImGui::PushStyleColor(ImGuiCol_Button, color);
+        //ImGui::Button("b");
+        //ImGui::PopStyleColor();
 
     }
     ImGui::End();
@@ -522,22 +522,22 @@ void Universe::generateImGuiWidgets()
             ImGui::PopFont();
 
             ImGui::Indent();
-            ImGui::Checkbox("Shift mode (v)", &bSidewaysMotionMode);
-            ImGui::SameLine(); HelpMarker("When checked, Shift left/right/up/down on mouse movements.\nWhen unchecked, rotate instead.");
-            ImGui::Checkbox("Lock on earth (z)", &bLockOntoEarth);
-            if (ImGui::IsItemEdited())
-                NavigationLockOntoEarth(bLockOntoEarth ? UCmdParam_On : UCmdParam_Off);
-            ImGui::SameLine(); HelpMarker("Also pauses earth's revolution. Activate this mode and\nthen use mouse to view earth from different angles.");
+            //ImGui::Checkbox("Shift mode (v)", &bSidewaysMotionMode);
+            //ImGui::SameLine(); HelpMarker("When checked, Shift left/right/up/down on mouse movements.\nWhen unchecked, rotate instead.");
+            //ImGui::Checkbox("Lock on earth (z)", &bLockOntoEarth);
+            //if (ImGui::IsItemEdited())
+            //    SetFollowTargetAndMode(bLockOntoEarth ? UCmdParam_On : UCmdParam_Off);
+            //ImGui::SameLine(); HelpMarker("Also pauses earth's revolution. Activate this mode and\nthen use mouse to view earth from different angles.");
 
-            ImGui::Checkbox("Directional lock on earth (b)", &bEarthFollowMode);
-            if (ImGui::IsItemEdited())
-                NavigationLockOntoEarthWithConstantDirection(bEarthFollowMode ? UCmdParam_On : UCmdParam_Off);
-            ImGui::SameLine();
-            HelpMarker("Earth follow mode");
+            //ImGui::Checkbox("Directional lock on earth (b)", &bEarthFollowMode);
+            //if (ImGui::IsItemEdited())
+            //    NavigationLockOntoEarthWithConstantDirection(bEarthFollowMode ? UCmdParam_On : UCmdParam_Off);
+            //ImGui::SameLine();
+            //HelpMarker("Earth follow mode");
 
-            ImGui::Checkbox("Lock on sun (c)", &bLockOntoSun);
-            if (ImGui::IsItemEdited())
-                NavigationLockOntoSun(bLockOntoSun ? UCmdParam_On : UCmdParam_Off);
+            //ImGui::Checkbox("Lock on sun (c)", &bLockOntoSun);
+            //if (ImGui::IsItemEdited())
+            //    NavigationLockOntoSun(bLockOntoSun ? UCmdParam_On : UCmdParam_Off);
 
             if (ImGui::Button("Show default view (d)"))
                 SetDefaultView();

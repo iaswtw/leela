@@ -217,8 +217,10 @@ void Universe::SetDefaultView()
     space.rotateFrame(PNT(0, 0, 0), -10.0, -15.0);
     //space.moveFrame(Movement_Backward, 3400);
 
-    bLockOntoSun = false;
-    bLockOntoEarth = false;
+    
+    //bLockOntoSun = false;
+    //bLockOntoEarth = false;
+    ResetFollowTargetAndMode();
     F_REFERENCE_VECTOR_ALONG_Z = 0;
 
     bUpdateUI = true;
@@ -244,10 +246,8 @@ void Universe::SetApplicationStartView()
         PNT(newS.x, newS.y, newS.z - 100));
 
     // Adjust navigation view locks on earth and sun
-    NavigationLockOntoEarth(UCmdParam_On);
+    SetFollowTargetAndMode(&earth, FollowMode_Normal);
     earth.bRevolutionMotion = true;
-    NavigationLockOntoSun(UCmdParam_Off);
-    NavigationLockOntoEarthWithConstantDirection(UCmdParam_Off);
 
     F_REFERENCE_VECTOR_ALONG_Z = 0;
 
@@ -258,154 +258,90 @@ void Universe::SetApplicationStartView()
 /*!
 ****************************************************************************
 
- Lock/Unlock/Toggle the earth at the center of the view.  Set the
- reference vector along -Z.
-
 ****************************************************************************/
-void Universe::NavigationLockOntoEarth(int nParam)
+void Universe::SetFollowTargetAndMode(Sphere* target, FollowMode mode)
 {
-    switch (nParam)
-    {
-    case UCmdParam_On:
-        bLockOntoEarth = true;
-        bLockOntoSun = false;
-        F_REFERENCE_VECTOR_ALONG_Z = 1;
+    followTarget = target;
 
-        ChangeBoolean(&earth.bRevolutionMotion, UCmdParam_Off);
-        LookAtEarth();
-        break;
+    // follow target has to be set before setting mode.
+    SetFollowMode(mode);
 
-    case UCmdParam_Off:
-        bLockOntoEarth = false;
-        F_REFERENCE_VECTOR_ALONG_Z = 0;
-        break;
-
-    case UCmdParam_Toggle:
-        if (bLockOntoEarth)
-        {
-            NavigationLockOntoEarth(UCmdParam_Off);
-        }
-        else
-        {
-            NavigationLockOntoEarth(UCmdParam_On);
-        }
-        break;
-    }
-
-    bUpdateUI = true;
-
+    F_REFERENCE_VECTOR_ALONG_Z = (target != nullptr) ? 1 : 0;
 }
 
-/*!
-****************************************************************************
-
- Lock/Unlock/Toggle the sun at the center of the view.  Set the
- reference vector along -Z.
-
-****************************************************************************/
-void Universe::NavigationLockOntoSun(int nParam)
+void Universe::SetFollowMode(FollowMode mode)
 {
-    switch (nParam)
+    followMode = mode;
+
+    if (followTarget != nullptr)
     {
-    case UCmdParam_On:
-        bLockOntoSun = true;
-        bLockOntoEarth = false;
-        F_REFERENCE_VECTOR_ALONG_Z = 1;
-        LookAtSun();
-        break;
-
-    case UCmdParam_Off:
-        bLockOntoSun = false;
-        F_REFERENCE_VECTOR_ALONG_Z = 0;
-        break;
-
-    case UCmdParam_Toggle:
-        if (bLockOntoSun)
+        if (mode == FollowMode_ConstantDirection)
         {
-            NavigationLockOntoSun(UCmdParam_Off);
+            PNT p = followTarget->getCenter();
+            followVector = VECTOR(space.S, p);
+            followDistance = float(space.S.distanceTo(p));
+            bSidewaysMotionMode = false;
+
+            followVector.disp();
         }
-        else
-        {
-            NavigationLockOntoSun(UCmdParam_On);
-        }
-        break;
     }
-
-    bUpdateUI = true;
-
 }
 
-void Universe::NavigationLockOntoEarthWithConstantDirection(int nParam)
+void Universe::ToggleConstantDirectionFollowMode()
 {
-    switch (nParam)
+    if (followMode == FollowMode_ConstantDirection)
+        SetFollowMode(FollowMode_Normal);
+    else
+        SetFollowMode(FollowMode_ConstantDirection);
+}
+
+void Universe::ResetFollowTargetAndMode()
+{
+    SetFollowTargetAndMode(nullptr, FollowMode_Normal);
+}
+
+void Universe::ToggleFollowTarget(Sphere* target, FollowMode mode)
+{
+    if (followTarget == target)
+        followTarget = nullptr;
+    else
+        followTarget = target;
+
+    SetFollowMode(mode);
+}
+
+void Universe::LookAtTarget()
+{
+    if (followMode == FollowMode_ConstantDirection)
     {
-    case UCmdParam_On:
-        bEarthFollowMode = true;
-        break;
-
-    case UCmdParam_Off:
-        bEarthFollowMode = false;
-        break;
-
-    case UCmdParam_Toggle:
-        ChangeBoolean(&bEarthFollowMode, UCmdParam_Toggle);
-        break;
-    }
-
-    if (bEarthFollowMode)
-    {
-        bLockOntoSun = false;
-        bLockOntoEarth = false;
-
-        earthFollowVector = VECTOR(space.S, earth.getCenter());
-        PNT p = earth.getCenter();
-        earthFollowDistance = float(space.S.distanceTo(p));
-        bSidewaysMotionMode = false;
+        space.setFrame(
+            AT_POINT,
+            PNT(followTarget->getCenter()).translated(-followDistance, followVector),
+            followVector,
+            PNT(space.S.x, space.S.y, space.S.z - 100));
     }
     else
     {
-        F_REFERENCE_VECTOR_ALONG_Z = 0;
+        space.setFrame(
+            AT_POINT,
+            space.S,
+            VECTOR(space.S, followTarget->getCenter()),
+            PNT(space.S.x, space.S.y, space.S.z - 100));
     }
-
-    bUpdateUI = true;
 }
 
-
-
-void Universe::LookAtEarth()
-{
-    space.setFrame(AT_POINT,
-        space.S,
-        VECTOR(space.S, earth.getCenter()),
-        PNT(space.S.x, space.S.y, space.S.z - 100));
-
-}
-
-void Universe::LookAtEarthFromSavedVector()
-{
-    space.setFrame(AT_POINT,
-        PNT(earth.getCenter()).translated(-earthFollowDistance, earthFollowVector),
-        earthFollowVector,
-        PNT(space.S.x, space.S.y, space.S.z - 100));
-
-}
-
-void Universe::LookAtSun()
-{
-    space.setFrame(AT_POINT,
-        space.S,
-        VECTOR(space.S, sun.getCenter()),
-        PNT(space.S.x, space.S.y, space.S.z - 100));
-
-}
-
-
+/*
+ Double the speed each time this is called.
+ */
 void Universe::IncreaseSimulationSpeed()
 {
     if (_stepMultiplier < 400.0f)
         _stepMultiplier *= 2.0f;
 }
 
+/*
+ Halve the speed each time this is called.
+ */
 void Universe::DecreaseSimulationSpeed()
 {
     if (_stepMultiplier > 0.0001666)
@@ -504,7 +440,6 @@ void Universe::ChangeBoolean(bool *pBool, int nParam)
     }
 
     bUpdateUI = true;
-
 }
 
 
@@ -730,14 +665,31 @@ void Universe::resetWidgetControlMode()
 **************************************************************************************************/
 void Universe::processFlags()
 {
-    // Accept the current values of the 4 motions into local variables
-    float __throttle = throttle;
-    float __yaw = yaw;
-    float __pitch = pitch;
-    float __roll = roll;
-    
+    navigate(throttle, yaw, pitch, roll);
 
-    // Amply or attenuate the value based on keyboard modifiers.
+    if (!bSimulationPause)
+    {
+        if (bFastForward)
+            advance(5 * _stepMultiplier * _stepMultiplierFrameRateAdjustment);
+        else if (bFastReverse)
+            advance(-5 * _stepMultiplier * _stepMultiplierFrameRateAdjustment);
+        else
+            advance(_stepMultiplier * _stepMultiplierFrameRateAdjustment);
+    }
+
+    if (followTarget != nullptr)
+        LookAtTarget();
+
+}
+
+/*
+  Immediately apply the given throttle, yaw, pitch & roll values to the Space frame.
+  This changes view only, not anything to do with model.
+ 
+ */
+void Universe::navigate(float __throttle, float __yaw, float __pitch, float __roll)
+{
+    // Amplify or attenuate the value based on keyboard modifiers.
     if (bCtrlModifier)
         __throttle /= 10;
     else if (bShiftModifier)
@@ -758,55 +710,49 @@ void Universe::processFlags()
     else if (bShiftModifier)
         __roll *= 100;
 
-    // Finally, Apply the motion value.
-    if (__throttle != 0.0f) {
-        space.moveFrame(Movement_Forward, __throttle);
-        if (bEarthFollowMode)
-            earthFollowDistance -= __throttle;
-    }
-
-    if ((__yaw != 0.0f) || (__pitch != 0.0f))
+    if (followTarget == nullptr)
     {
-        if (bSidewaysMotionMode) {
-            space.moveFrame(Movement_RotateRight, 90);
-            space.moveFrame(Movement_Forward, __yaw*50);
-            space.moveFrame(Movement_RotateLeft, 90);
+        // Finally, Apply the motion value.
+        if (__throttle != 0.0f)
+            space.moveFrame(Movement_Forward, __throttle);
 
-            space.moveFrame(Movement_RotateUp, 90);
-            space.moveFrame(Movement_Forward, __pitch*50);
-            space.moveFrame(Movement_RotateDown, 90);
+        if ((__yaw != 0.0f) || (__pitch != 0.0f))
+        {
+            if (bSidewaysMotionMode) {
+                space.moveFrame(Movement_RotateRight, 90);
+                space.moveFrame(Movement_Forward, __yaw * 50);
+                space.moveFrame(Movement_RotateLeft, 90);
+
+                space.moveFrame(Movement_RotateUp, 90);
+                space.moveFrame(Movement_Forward, __pitch * 50);
+                space.moveFrame(Movement_RotateDown, 90);
+            }
+            else {
+                space.moveFrame(Movement_RotateRight, __yaw);
+                space.moveFrame(Movement_RotateUp, __pitch);
+            }
         }
-        else {
-            space.moveFrame(Movement_RotateRight, __yaw);
-            space.moveFrame(Movement_RotateUp, __pitch);
-        }
+        if (__roll != 0.0f)
+            space.moveFrame(Movement_RightAlongSD, -__roll);        // todo - why the -ve sign?
     }
-    if (__roll != 0.0f)
-        space.moveFrame(Movement_RightAlongSD, -__roll);        // todo - why the -ve sign?
-
-
-
-    if (!bSimulationPause)
+    else
     {
-        if (bFastForward)
-            advance(5 * _stepMultiplier * _stepMultiplierFrameRateAdjustment);
-        else if (bFastReverse)
-            advance(-5 * _stepMultiplier * _stepMultiplierFrameRateAdjustment);
+        if (followMode != FollowMode_ConstantDirection)
+        {
+            if (__throttle != 0.0f)
+                space.moveFrame(Movement_Forward, __throttle);
+
+            // rotate frame about the target's center.
+            if ((__yaw != 0.0f) || (__pitch != 0.0f))
+                space.rotateFrame(followTarget->getCenter(), -__yaw * 3.0f, __pitch * 3.0f);
+        }
         else
-            advance(_stepMultiplier * _stepMultiplierFrameRateAdjustment);
+        {
+            if (__throttle != 0.0f)
+                followDistance -= __throttle;
+        }
     }
-
-
-    if (bLockOntoEarth)
-        LookAtEarth();
-    if (bLockOntoSun)
-        LookAtSun();
-    if (bEarthFollowMode)
-        LookAtEarthFromSavedVector();
-
-
 }
-
 
 
 /*************************************************************************************************
