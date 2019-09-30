@@ -507,6 +507,9 @@ void Universe::generateImGuiWidgets()
                 if (ImGui::Button("Precession motion## demo"))
                     ShowDemo(UDemo_PrecessionMotion);
 
+                if (ImGui::Button("Star Parallex## demo"))
+                    ShowDemo(UDemo_StarParallex);
+
                 ImGui::PopFont();
             }
             ImGui::PopFont();
@@ -515,6 +518,43 @@ void Universe::generateImGuiWidgets()
             //-----------------------------------------------------
 
             ImGui::Checkbox("Realistic shading", &bRealisticShading);
+            ImGui::Separator();
+
+            //-----------------------------------------------------
+
+            ImGui::PushFont(appFontSmall);
+            ImGui::Text("Time:");
+            ImGui::PopFont();
+            ImGui::Indent();
+
+            ImGui::Checkbox("Time pause (space bar)", &bSimulationPause);
+
+            ImGui::Button("Fast Rewind (r)");
+            if (ImGui::IsItemActivated())       Rewind(UCmdParam_On);
+            if (ImGui::IsItemDeactivated())     Rewind(UCmdParam_Off);
+
+            ImGui::SameLine();
+            ImGui::Button("Fast Forward (f)");
+            if (ImGui::IsItemActivated())       FastForward(UCmdParam_On);
+            if (ImGui::IsItemDeactivated())     FastForward(UCmdParam_Off);
+
+            // Arrow buttons with Repeater
+            float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
+            ImGui::Text("Time Speed:");
+            ImGui::SameLine();
+            ImGui::Text("%.3f%%", 100 * _stepMultiplier / 1.0);
+            ImGui::SameLine();
+            ImGui::PushButtonRepeat(true);
+            if (ImGui::ArrowButton("##left", ImGuiDir_Left))        DecreaseSimulationSpeed();
+            ImGui::SameLine(0.0f, spacing);
+            if (ImGui::ArrowButton("##right", ImGuiDir_Right))      IncreaseSimulationSpeed();
+            ImGui::PopButtonRepeat();
+            ImGui::SameLine(0.0f, spacing);
+            if (ImGui::Button("Reset"))
+                _stepMultiplier = 1.0f;
+
+
+            ImGui::Unindent();
             ImGui::Separator();
 
             //-----------------------------------------------------
@@ -528,6 +568,7 @@ void Universe::generateImGuiWidgets()
 
             ImGui::Indent();
             ImGui::Checkbox("Revolution motion (0)## earth", &earth.bRevolutionMotion);
+            ImGui::Checkbox("Orbit## earth", &earthRenderer.bShowOrbit);
             ImGui::Checkbox("Orbital plane (e)## earth", &earthRenderer.bShowOrbitalPlane);
             ImGui::Checkbox("Precession motion (F6)## earth", &earth.bPrecessionMotion);
             ImGui::SameLine();
@@ -545,6 +586,7 @@ void Universe::generateImGuiWidgets()
 
             ImGui::Indent();
             ImGui::Checkbox("Revolution motion", &moon.bRevolutionMotion);
+            ImGui::Checkbox("Orbit## moon", &moonRenderer.bShowOrbit);
             ImGui::Checkbox("Orbital plane (m)##moon", &moonRenderer.bShowOrbitalPlane);
             ImGui::Checkbox("Orbital plane rotation (F5)", &moon.bOrbitalPlaneRotation);
             ImGui::SameLine();
@@ -613,43 +655,6 @@ void Universe::generateImGuiWidgets()
 
             //-----------------------------------------------------
 
-            ImGui::PushFont(appFontSmall);
-            ImGui::Text("Time:");
-            ImGui::PopFont();
-            ImGui::Indent();
-
-            ImGui::Checkbox("Time pause (space bar)", &bSimulationPause);
-
-            ImGui::Button("Fast Rewind (r)");
-            if (ImGui::IsItemActivated())       Rewind(UCmdParam_On);
-            if (ImGui::IsItemDeactivated())     Rewind(UCmdParam_Off);
-
-            ImGui::SameLine();
-            ImGui::Button("Fast Forward (f)");
-            if (ImGui::IsItemActivated())       FastForward(UCmdParam_On);
-            if (ImGui::IsItemDeactivated())     FastForward(UCmdParam_Off);
-
-            // Arrow buttons with Repeater
-            float spacing = ImGui::GetStyle().ItemInnerSpacing.x; 
-            ImGui::Text("Time Speed:");
-            ImGui::SameLine();
-            ImGui::Text("%.3f%%", 100 * _stepMultiplier / 1.0);
-            ImGui::SameLine();            
-            ImGui::PushButtonRepeat(true);
-            if (ImGui::ArrowButton("##left", ImGuiDir_Left))        DecreaseSimulationSpeed();
-            ImGui::SameLine(0.0f, spacing);
-            if (ImGui::ArrowButton("##right", ImGuiDir_Right))      IncreaseSimulationSpeed();
-            ImGui::PopButtonRepeat();
-            ImGui::SameLine(0.0f, spacing);
-            if (ImGui::Button("Reset"))
-                _stepMultiplier = 1.0f;
-
-
-            ImGui::Unindent();
-
-            //-----------------------------------------------------
-
-            ImGui::Separator();
             ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             _stepMultiplierFrameRateAdjustment = 60.0f / ImGui::GetIO().Framerate;
 
