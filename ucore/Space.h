@@ -188,20 +188,19 @@ public:
             DS.SET(D, S);
             PP.SET(D, S);
 
-            //n = nearestptL(D, S, ref_pt);
-            //n_ref_pt.SET(n, ref_pt);
-            //R = D.translated(100, n_ref_pt);
+            n = nearestptL(D, S, ref_pt);
+            n_ref_pt.SET(n, ref_pt);
+            R = D.translated(100, n_ref_pt);
 
-            VECTOR perpendicular = crossProduct(
-                crossProduct(DS, VECTOR(D, ref_pt)),
-                DS);
+            //VECTOR perpendicular = crossProduct(
+            //    crossProduct(DS, VECTOR(D, ref_pt)),
+            //    DS);
+            //R = D.translated(100, perpendicular);
 
-            R = D.translated(100, perpendicular);
-            DR.SET(D, R);
-            DR.disp();
+            DR.SET(D, R);            
             DL = crossProduct(DR, DS);
 
-            L = D.translated(100, DL);
+            L = D.translated(600, DL);
 
             break;
         }

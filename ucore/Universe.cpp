@@ -281,8 +281,6 @@ void Universe::SetFollowMode(FollowMode mode)
             followVector = VECTOR(space.S, p);
             followDistance = float(space.S.distanceTo(p));
             bSidewaysMotionMode = false;
-
-            followVector.disp();
         }
     }
 }
@@ -314,11 +312,12 @@ void Universe::LookAtTarget()
 {
     if (followMode == FollowMode_ConstantDirection)
     {
+        PNT newS = PNT(followTarget->getCenter()).translated(-followDistance, followVector);
         space.setFrame(
             AT_POINT,
-            PNT(followTarget->getCenter()).translated(-followDistance, followVector),
+            newS,
             followVector,
-            PNT(space.S.x, space.S.y, space.S.z - 100));
+            PNT(newS.x, newS.y, newS.z - 100));
     }
     else
     {
