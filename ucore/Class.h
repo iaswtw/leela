@@ -73,7 +73,7 @@ public:
 
     void disp()
     {
-        cout << "\nx = " << x << " y = " << y << " z = " << z;
+        cout << "x = " << x << " y = " << y << " z = " << z << endl;
     }
     PNT operator +(PNT p)
     {
@@ -184,7 +184,7 @@ public:
     }
     void disp()
     {
-        printf("\nx=%.4f; y=%.4f; z=%.4f; d=%.4f; l=%.4f; m=%.4f; n=%.4f", x, y, z, d, l, m, n);
+        printf("x=%.4f; y=%.4f; z=%.4f; d=%.4f; l=%.4f; m=%.4f; n=%.4f\n", x, y, z, d, l, m, n);
     }
 
     PNT PointAt(double k) {
