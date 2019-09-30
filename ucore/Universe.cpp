@@ -200,7 +200,6 @@ void Universe::advance(float stepMultiplier)
 void Universe::ChangeSidewaysMotionMode()
 {
     bSidewaysMotionMode = !bSidewaysMotionMode;
-    bUpdateUI = true;
 }
 
 /*!
@@ -221,9 +220,6 @@ void Universe::SetDefaultView()
     //bLockOntoSun = false;
     //bLockOntoEarth = false;
     ResetFollowTargetAndMode();
-    F_REFERENCE_VECTOR_ALONG_Z = 0;
-
-    bUpdateUI = true;
 }
 
 /*!
@@ -248,10 +244,6 @@ void Universe::SetApplicationStartView()
     // Adjust navigation view locks on earth and sun
     SetFollowTargetAndMode(&earth, FollowMode_Normal);
     earth.bRevolutionMotion = true;
-
-    F_REFERENCE_VECTOR_ALONG_Z = 0;
-
-    bUpdateUI = true;
 }
 
 
@@ -265,8 +257,6 @@ void Universe::SetFollowTargetAndMode(Sphere* target, FollowMode mode)
 
     // follow target has to be set before setting mode.
     SetFollowMode(mode);
-
-    F_REFERENCE_VECTOR_ALONG_Z = (target != nullptr) ? 1 : 0;
 }
 
 void Universe::SetFollowMode(FollowMode mode)
@@ -358,6 +348,7 @@ void Universe::SetSimulationSpeed(int nParam)
     eSimulationSpeed = USimulationSpeedType(nParam);
     switch (eSimulationSpeed)
     {
+    case USimulationSpeed_1p5625_Percent:      _stepMultiplier = 1.0 / pow(2, 6);        break;
     case USimulationSpeed_3p125_Percent:       _stepMultiplier = 1.0 / pow(2, 5);        break;
     case USimulationSpeed_6p25_Percent:        _stepMultiplier = 1.0 / pow(2, 4);        break;
     case USimulationSpeed_12p5_Percent:        _stepMultiplier = 1.0 / pow(2, 3);        break;
@@ -367,8 +358,6 @@ void Universe::SetSimulationSpeed(int nParam)
     case USimulationSpeed_400_Percent:         _stepMultiplier = 1.0 / pow(2, -2);        break;
     case USimulationSpeed_1600_Percent:        _stepMultiplier = 1.0 / pow(2, -4);        break;
     }
-
-    bUpdateUI = true;
 }
 
 /*!
@@ -381,7 +370,6 @@ void Universe::SetSimulationSpeed(int nParam)
 void Universe::SetTimeDirection(int nParam)
 {
     eTimeDirection = (UTimeDirectionType)nParam;
-    bUpdateUI = true;
 }
 
 /*!
@@ -437,8 +425,6 @@ void Universe::ChangeBoolean(bool *pBool, int nParam)
         *pBool = false;
         break;
     }
-
-    bUpdateUI = true;
 }
 
 
@@ -451,7 +437,6 @@ void Universe::ChangeBoolean(bool *pBool, int nParam)
 void Universe::SimulationPause(int nParam)
 {
     ChangeBoolean(&bSimulationPause, nParam);
-    bUpdateUI = true;
 }
 
 
@@ -464,7 +449,6 @@ void Universe::SimulationPause(int nParam)
 void Universe::Earth_RotationMotion(int nParam)
 {
     ChangeBoolean(&earth.bRevolutionMotion, nParam);
-    bUpdateUI = true;
 }
 
 /*!
@@ -478,8 +462,6 @@ void Universe::Earth_RevolutionMotion(int nParam)
     ChangeBoolean(&earth.bRevolutionMotion, nParam);
     //F_REFERENCE_VECTOR_ALONG_Z = 0;
     //bLockOntoEarth = false;
-
-    bUpdateUI = true;
 }
 
 
@@ -500,8 +482,6 @@ void Universe::Earth_PrecessionMotion(int nParam)
     {
         ChangeBoolean(&earth.bPrecessionMotion, nParam);
     }
-
-    bUpdateUI = true;
 }
 
 
@@ -514,7 +494,6 @@ void Universe::Earth_PrecessionMotion(int nParam)
 void Universe::Earth_OrbitalPlane(int nParam)
 {
     ChangeBoolean(&earthRenderer.bShowOrbitalPlane, nParam);
-    bUpdateUI = true;
 }
 
 
@@ -527,8 +506,6 @@ void Universe::Earth_OrbitalPlane(int nParam)
 void Universe::Moon_OrbitalPlane(int nParam)
 {
     ChangeBoolean(&moonRenderer.bShowOrbitalPlane, nParam);
-    bUpdateUI = true;
-
 }
 
 
@@ -550,8 +527,6 @@ void Universe::Moon_OrbitalPlaneRotation(int nParam)
     {
         ChangeBoolean(&moon.bOrbitalPlaneRotation, nParam);
     }
-
-    bUpdateUI = true;
 }
 
 /*!
@@ -563,7 +538,6 @@ void Universe::Moon_OrbitalPlaneRotation(int nParam)
 void Universe::Moon_RevolutionMotion(int nParam)
 {
     ChangeBoolean(&moon.bRevolutionMotion, nParam);
-    bUpdateUI = true;
 }
 
 
