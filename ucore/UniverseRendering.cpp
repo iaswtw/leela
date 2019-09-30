@@ -91,9 +91,24 @@ void Universe::render()
         1.0f,
         10000000.0f);
 
+
+    //=====================================================================================
+    // Render all objects in t he scene
+    //=====================================================================================
+    renderAllNontransparentObjects();
+
+    // Ibjects with alpha < 1.0 have to be rendered after all objects with alpha = 1.0
+    // It still doesn't solve all problems.
+    renderAllTransparentObjects();
+
+    glBindVertexArray(0);
+
+}
+
+void Universe::renderAllNontransparentObjects()
+{
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
+    
     planetGlslProgram.use();
     planetGlslProgram.setMat4("view", glm::value_ptr(viewMatrix));
     planetGlslProgram.setMat4("proj", glm::value_ptr(projectionMatrix));
@@ -135,7 +150,24 @@ void Universe::render()
 
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    glBindVertexArray(0);
+}
+
+void Universe::renderAllTransparentObjects()
+{
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    simpleGlslProgram.use();
+    simpleGlslProgram.setMat4("view", glm::value_ptr(viewMatrix));
+    simpleGlslProgram.setMat4("proj", glm::value_ptr(projectionMatrix));
+
+    renderTransparentUsingSimpleGlslProgram();
+
+    simpleGlslProgram.unuse();
+
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    glDisable(GL_BLEND);
 
 }
 
@@ -177,15 +209,17 @@ void Universe::renderUsingSimpleGlslProgram()
         axisRenderer.render(simpleGlslProgram);
     }
 
-    earthRenderer.renderOrbitalPlane(simpleGlslProgram);
     if (bShowOrbitsGlobalEnable)
         earthRenderer.renderOrbit(simpleGlslProgram);
-
-    moonRenderer.renderOrbitalPlane(simpleGlslProgram);
     if (bShowOrbitsGlobalEnable)
         moonRenderer.renderOrbit(simpleGlslProgram);
 }
 
+void Universe::renderTransparentUsingSimpleGlslProgram()
+{
+    earthRenderer.renderOrbitalPlane(simpleGlslProgram);
+    moonRenderer.renderOrbitalPlane(simpleGlslProgram);
+}
 
 void Universe::generateImGuiWidgets()
 {

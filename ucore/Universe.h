@@ -115,7 +115,8 @@ typedef enum
  **************************************************************************/
 typedef enum
 {
-    USimulationSpeed_3p125_Percent = 0,
+    USimulationSpeed_1p5625_Percent = 0,
+    USimulationSpeed_3p125_Percent,
     USimulationSpeed_6p25_Percent,
     USimulationSpeed_12p5_Percent,
     USimulationSpeed_25_Percent,
@@ -192,10 +193,13 @@ public:
     void processFlags();
     void navigate(float __throttle, float __yaw, float __pitch, float __roll);
     void render();
+    void renderAllNontransparentObjects();
+    void renderAllTransparentObjects();
     void renderUsingPlanetGlslProgram();
 	void renderUsingStarGlslProgram();
 	void renderUsingSunGlslProgram();
     void renderUsingSimpleGlslProgram();
+    void renderTransparentUsingSimpleGlslProgram();
 
 
 
@@ -303,13 +307,6 @@ private:
     bool bShowAxis = true;
     bool bShowOrbitsGlobalEnable = true;           // Individual orbit enables are in respective renderer classes.
 
-    /*! \todo F_REFERENCE_VECTOR_ALONG_Z is checked before bLockOntoEarth
-        or bLockOntoSun in the function on_MouseMotion().  Need
-        to consider if the priority of this check should be reversed.
-        Without the setting this flag to 1, the Lock on earth or sun won't
-        work. */
-    char F_REFERENCE_VECTOR_ALONG_Z = 0;
-    
     FollowMode followMode = FollowMode_Normal;
     VECTOR followVector = VECTOR(1.0, 1.0, 1.0);
     float followDistance = 0.0f;
@@ -364,8 +361,6 @@ private:
 	GlslProgram sunGlslProgram;
 	GlslProgram starGlslProgram;
     GlslProgram simpleGlslProgram;
-
-    bool bUpdateUI = false;
 
     // Realistic day/night shading, shadow shading.
     // Effect on day & nights:

@@ -27,7 +27,7 @@ void Universe::ShowDemo(int nParam)
 
         // Set S
         //newS = PNT(earth.getCenter().x + 500, earth.getCenter().y - 700, earth.getCenter().z + 150);
-        newS = PNT(-244.983155, 2399.678632, 87.138090);
+        newS = PNT(-262.135429, 2403.108632, 54.783701);
         space.setFrame(AT_POINT,
             newS,
             VECTOR(newS, earth.getCenter()),
@@ -49,15 +49,6 @@ void Universe::ShowDemo(int nParam)
         SetDotDensity(UDotDensity_High);
         SetSimulationSpeed(USimulationSpeed_6p25_Percent);
         SimulationPause(UCmdParam_Off);
-
-        /* F_REFERENCE_VECTOR_ALONG_Z is checked before bLockOntoEarth
-           or bLockOntoSun in the function on_MouseMotion().  Need
-           to consider if the priority of this check should be reversed.
-           Without the setting below, the Lock on earth or sun won't
-           work. */
-        F_REFERENCE_VECTOR_ALONG_Z = 1;
-
-        bUpdateUI = true;
 
         break;
 
@@ -95,9 +86,6 @@ void Universe::ShowDemo(int nParam)
         SetSimulationSpeed(USimulationSpeed_6p25_Percent);
         SimulationPause(UCmdParam_Off);
 
-        F_REFERENCE_VECTOR_ALONG_Z = 1;
-
-        bUpdateUI = true;
         break;
 
     case UDemo_AnnularSolarEclipseFromSpace:
@@ -113,7 +101,7 @@ void Universe::ShowDemo(int nParam)
         // Set S
         // the hardcoded values here were found by printing the value of S & D on screen using ImGui
         // while manually going to that position.
-        newS = PNT(-90.1736, 1423.7947, 51.6696);
+        newS = PNT(-112.110907, 3115.794740, 64.879020);
         space.setFrame(AT_POINT,
             newS,
             VECTOR(newS, PNT(1220.0681, -2517.4311, -572.8346)),
@@ -133,13 +121,10 @@ void Universe::ShowDemo(int nParam)
 
         // Increase the dot density
         SetDotDensity(UDotDensity_High);
-        SetSimulationSpeed(USimulationSpeed_6p25_Percent);
+        SetSimulationSpeed(USimulationSpeed_1p5625_Percent);
         SimulationPause(UCmdParam_Off);
 
-        F_REFERENCE_VECTOR_ALONG_Z = 0;
         bSidewaysMotionMode = false;
-
-        bUpdateUI = true;
         break;
 
     case UDemo_PartialLunarEclipse:
@@ -179,9 +164,6 @@ void Universe::ShowDemo(int nParam)
         SetSimulationSpeed(USimulationSpeed_6p25_Percent);
         SimulationPause(UCmdParam_Off);
 
-        F_REFERENCE_VECTOR_ALONG_Z = 1;
-
-        bUpdateUI = true;
         break;
 
     case UDemo_PrecessionMotion:
@@ -219,15 +201,6 @@ void Universe::ShowDemo(int nParam)
         SetSimulationSpeed(USimulationSpeed_100_Percent);
         SimulationPause(UCmdParam_Off);
 
-        /* F_REFERENCE_VECTOR_ALONG_Z is checked before bLockOntoEarth
-           or bLockOntoSun in the function on_MouseMotion().  Need
-           to consider if the priority of this check should be reversed.
-           Without the setting below, the Lock on earth or sun won't
-           work. */
-        F_REFERENCE_VECTOR_ALONG_Z = 1;
-
-        bUpdateUI = true;
-
         break;
 
     case UDemo_SixMonthLongDayAndNightOnNorthPole:
@@ -261,15 +234,6 @@ void Universe::ShowDemo(int nParam)
         SetSimulationSpeed(USimulationSpeed_400_Percent);
         SimulationPause(UCmdParam_Off);
 
-        ///* F_REFERENCE_VECTOR_ALONG_Z is checked before bLockOntoEarth
-        //   or bLockOntoSun in the function on_MouseMotion().  Need
-        //   to consider if the priority of this check should be reversed.
-        //   Without the setting below, the Lock on earth or sun won't
-        //   work. */
-        F_REFERENCE_VECTOR_ALONG_Z = 1;
-
-        bUpdateUI = true;
-
         break;
 
     case UDemo_SixMonthLongDayAndNightOnNorthPole_AnotherAngle:
@@ -302,7 +266,6 @@ void Universe::ShowDemo(int nParam)
         SetDotDensity(UDotDensity_Normal);
         SetSimulationSpeed(USimulationSpeed_400_Percent);
         SimulationPause(UCmdParam_Off);
-        F_REFERENCE_VECTOR_ALONG_Z = 1;
 
         break;
 
@@ -338,9 +301,6 @@ void Universe::ShowDemo(int nParam)
         SetSimulationSpeed(USimulationSpeed_100_Percent);
         SetDotDensity(UDotDensity_Normal);
         SimulationPause(UCmdParam_Off);
-
-
-        bUpdateUI = true;
 
         break;
     }
