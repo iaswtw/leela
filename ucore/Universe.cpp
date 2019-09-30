@@ -213,12 +213,9 @@ void Universe::SetDefaultView()
     space.pushFrame();
 
     space.initFrame();
-    space.rotateFrame(PNT(0, 0, 0), -10.0, -15.0);
-    //space.moveFrame(Movement_Backward, 3400);
+    space.rotateFrame(PNT(0, 0, 0), 0, -15.0);
+    //space.rotateFrame(PNT(0, 0, 0), 0, 0);
 
-    
-    //bLockOntoSun = false;
-    //bLockOntoEarth = false;
     ResetFollowTargetAndMode();
 }
 
@@ -496,7 +493,10 @@ void Universe::Earth_OrbitalPlane(int nParam)
     ChangeBoolean(&earthRenderer.bShowOrbitalPlane, nParam);
 }
 
-
+void Universe::Earth_Orbit(int nParam)
+{
+    ChangeBoolean(&earthRenderer.bShowOrbit, nParam);
+}
 /*!
 ****************************************************************************
 
@@ -508,6 +508,11 @@ void Universe::Moon_OrbitalPlane(int nParam)
     ChangeBoolean(&moonRenderer.bShowOrbitalPlane, nParam);
 }
 
+
+void Universe::Moon_Orbit(int nParam)
+{
+    ChangeBoolean(&moonRenderer.bShowOrbit, nParam);
+}
 
 /*!
 ****************************************************************************

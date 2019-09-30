@@ -161,7 +161,8 @@ typedef enum
     UDemo_TiltedOrbitalPlanes,
     UDemo_SixMonthLongDayAndNightOnNorthPole,
     UDemo_SixMonthLongDayAndNightOnNorthPole_AnotherAngle,
-    UDemo_PrecessionMotion
+    UDemo_PrecessionMotion,
+    UDemo_StarParallex
 } UDemoType;
 
 
@@ -233,7 +234,10 @@ public:
     void Earth_OrbitalPlane(int nParam);
     void Earth_SetOrbitalPositionAngle(double fAngle);
     void Moon_OrbitalPlane(int nParam);
+    void Earth_Orbit(int nParam);
+
     void Moon_OrbitalPlaneRotation(int nParam);
+    void Moon_Orbit(int nParam);
     void Moon_RevolutionMotion(int nParam);
     void Moon_SetOrbitalPositionAngle(double fAngle);
 

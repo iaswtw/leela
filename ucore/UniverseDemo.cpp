@@ -44,6 +44,7 @@ void Universe::ShowDemo(int nParam)
 
         // Adjust Moon's motions
         Moon_RevolutionMotion(UCmdParam_On);
+        Moon_Orbit(UCmdParam_On);
 
         // Increase the dot density
         SetDotDensity(UDotDensity_High);
@@ -80,6 +81,7 @@ void Universe::ShowDemo(int nParam)
 
         // Adjust Moon's motions
         Moon_RevolutionMotion(UCmdParam_On);
+        Moon_Orbit(UCmdParam_On);
 
         // Increase the dot density
         SetDotDensity(UDotDensity_High);
@@ -118,6 +120,7 @@ void Universe::ShowDemo(int nParam)
 
         // Adjust Moon's motions
         Moon_RevolutionMotion(UCmdParam_On);
+        Moon_Orbit(UCmdParam_On);
 
         // Increase the dot density
         SetDotDensity(UDotDensity_High);
@@ -157,6 +160,7 @@ void Universe::ShowDemo(int nParam)
 
         // Adjust Moon's motions
         Moon_RevolutionMotion(UCmdParam_On);
+        Moon_Orbit(UCmdParam_On);
 
         // Increase the dot density
         SetDotDensity(UDotDensity_High);
@@ -191,6 +195,7 @@ void Universe::ShowDemo(int nParam)
 
         // Adjust Moon's motions
         Moon_RevolutionMotion(UCmdParam_Off);
+        Moon_Orbit(UCmdParam_On);
 
         // Adjust orbital planes
         Earth_OrbitalPlane(UCmdParam_On);
@@ -204,6 +209,7 @@ void Universe::ShowDemo(int nParam)
 
     case UDemo_SixMonthLongDayAndNightOnNorthPole:
 
+        Moon_SetOrbitalPositionAngle(0);
         // Set earth at (0,R,0)
         Earth_SetOrbitalPositionAngle(M_PI / 2);
 
@@ -224,6 +230,7 @@ void Universe::ShowDemo(int nParam)
 
         //// Adjust Moon's motions
         Moon_RevolutionMotion(UCmdParam_Off);
+        Moon_Orbit(UCmdParam_On);
 
         //// Adjust orbital planes
         Earth_OrbitalPlane(UCmdParam_On);
@@ -237,6 +244,7 @@ void Universe::ShowDemo(int nParam)
 
     case UDemo_SixMonthLongDayAndNightOnNorthPole_AnotherAngle:
 
+        Moon_SetOrbitalPositionAngle(0);
         // Set earth at (0,R,0)
         Earth_SetOrbitalPositionAngle(M_PI + M_PI / 4);
 
@@ -257,6 +265,7 @@ void Universe::ShowDemo(int nParam)
 
         //// Adjust Moon's motions
         Moon_RevolutionMotion(UCmdParam_Off);
+        Moon_Orbit(UCmdParam_On);
 
         //// Adjust orbital planes
         Earth_OrbitalPlane(UCmdParam_On);
@@ -293,12 +302,50 @@ void Universe::ShowDemo(int nParam)
         // Adjust Moon's motions
         Moon_RevolutionMotion(UCmdParam_On);
         Moon_SetOrbitalPositionAngle(0.0f);
+        Moon_Orbit(UCmdParam_On);
+
 
         SetSimulationSpeed(USimulationSpeed_50_Percent);
         SetDotDensity(UDotDensity_Normal);
         SimulationPause(UCmdParam_Off);
 
         break;
+
+    case UDemo_StarParallex:
+
+        Moon_SetOrbitalPositionAngle(0);
+        // Set earth at (0,R,0)
+        Earth_SetOrbitalPositionAngle(M_PI + M_PI / 4);
+
+        // Set S
+        newS = PNT(earth.getCenter().x, earth.getCenter().y - 700, earth.getCenter().z + 200);
+        space.setFrame(AT_POINT,
+            newS,
+            VECTOR(newS, earth.getCenter()),
+            PNT(newS.x, newS.y, newS.z - 100));
+
+        SetFollowTargetAndMode(&earth, FollowMode_FixedDirection);
+        // Adjust navigation view locks on earth and sun
+
+        // Adjust earth's motions
+        Earth_RotationMotion(UCmdParam_On);
+        Earth_RevolutionMotion(UCmdParam_On);
+        Earth_PrecessionMotion(UCmdParam_Reset);
+
+        //// Adjust Moon's motions
+        Moon_RevolutionMotion(UCmdParam_Off);
+        Moon_Orbit(UCmdParam_Off);
+
+        //// Adjust orbital planes
+        Earth_OrbitalPlane(UCmdParam_Off);
+        Moon_OrbitalPlane(UCmdParam_Off);
+
+        SetDotDensity(UDotDensity_Normal);
+        SetSimulationSpeed(USimulationSpeed_1600_Percent);
+        SimulationPause(UCmdParam_Off);
+
+        break;
     }
+
 }
 
