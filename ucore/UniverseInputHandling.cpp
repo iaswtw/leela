@@ -11,7 +11,7 @@ void Universe::onKeyDown(SDL_Event* event)
         ToggleConstantDirectionFollowMode();
         break;
     case SDLK_c:
-        ToggleFollowTarget(&sun, FollowMode_Normal);
+        ToggleFollowTarget(&sun, FollowMode_FixedPosition);
         break;
     case SDLK_d:
         SetDefaultView();
@@ -52,7 +52,7 @@ void Universe::onKeyDown(SDL_Event* event)
         ChangeSidewaysMotionMode();
         break;
     case SDLK_z:
-        ToggleFollowTarget(&earth, FollowMode_Normal);
+        ToggleFollowTarget(&earth, FollowMode_FixedPosition);
         break;
 
     // ============= Digits ===============

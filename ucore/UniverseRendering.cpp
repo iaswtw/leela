@@ -490,7 +490,7 @@ void Universe::generateImGuiWidgets()
                 if (ImGui::Button("Annular Solar Eclipse from space## demo"))
                     ShowDemo(UDemo_AnnularSolarEclipseFromSpace);
                 ImGui::SameLine();
-                HelpMarker("This also shows umbra starting to travel over the earth near the bottom left of the screen. This happens roughly halfway between 3rd and 4th contact for a duration of about 2 to 3 seconds. So watch out!");
+                HelpMarker("This also shows umbra starting to travel over the earth. This happens close to the 4th contact for a duration of about 2 seconds. So watch out!");
 
                 if (ImGui::Button("Partial Lunar Eclipse## demo"))
                     ShowDemo(UDemo_PartialLunarEclipse);
@@ -569,6 +569,27 @@ void Universe::generateImGuiWidgets()
             //ImGui::SameLine();
             //HelpMarker("Earth follow mode");
 
+            ImGui::Text("Follow target:");
+            int lock = (followTarget == &earth) ? 0 : (followTarget == &sun) ? 1 : (followTarget == &moon) ? 2 : 3;
+            int previousLock = lock;
+            ImGui::RadioButton("earth", &lock, 0); ImGui::SameLine();
+            ImGui::RadioButton("sun", &lock, 1); ImGui::SameLine();
+            ImGui::RadioButton("moon", &lock, 2); ImGui::SameLine();
+            ImGui::RadioButton("none", &lock, 3);
+            if (lock != previousLock)
+                SetFollowTargetAndMode(
+                (lock == 0) ? &earth : (lock == 1) ? &sun : (lock == 2) ? &moon : nullptr,
+                    FollowMode_FixedPosition);
+
+            const char* items[] = { "Fixed Position", "Fixed Direction" };
+            int currentItem = (followMode == FollowMode_FixedPosition) ? 0 : 1;
+            int previousCurrentItem = currentItem;
+            ImGui::SetNextItemWidth(120);
+            ImGui::Combo("Follow mode", &currentItem, items, IM_ARRAYSIZE(items));
+            if (currentItem != previousCurrentItem)
+                SetFollowMode((currentItem == 0) ? FollowMode_FixedPosition : FollowMode_FixedDirection);
+
+
             //ImGui::Checkbox("Lock on sun (c)", &bLockOntoSun);
             //if (ImGui::IsItemEdited())
             //    NavigationLockOntoSun(bLockOntoSun ? UCmdParam_On : UCmdParam_Off);
@@ -630,9 +651,9 @@ void Universe::generateImGuiWidgets()
 
             ImGui::Separator();
             ImGui::Text("S: %.4f, %.4f, %.4f", space.S.x, space.S.y, space.S.z);
-            ImGui::Text("D: %.4f, %.4f, %.4f", space.D.x, space.D.y, space.D.z);
-            ImGui::Text("E orbital angle: %.4f", earth._orbitalAngle);
-            ImGui::Text("_stepMultiplier: %f", _stepMultiplier);
+            //ImGui::Text("D: %.4f, %.4f, %.4f", space.D.x, space.D.y, space.D.z);
+            //ImGui::Text("E orbital angle: %.4f", earth._orbitalAngle);
+            //ImGui::Text("_stepMultiplier: %f", _stepMultiplier);
 
 
 
