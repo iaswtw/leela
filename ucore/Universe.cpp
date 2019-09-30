@@ -242,7 +242,7 @@ void Universe::SetApplicationStartView()
         PNT(newS.x, newS.y, newS.z - 100));
 
     // Adjust navigation view locks on earth and sun
-    SetFollowTargetAndMode(&earth, FollowMode_Normal);
+    SetFollowTargetAndMode(&earth, FollowMode_FixedPosition);
     earth.bRevolutionMotion = true;
 }
 
@@ -265,7 +265,7 @@ void Universe::SetFollowMode(FollowMode mode)
 
     if (followTarget != nullptr)
     {
-        if (mode == FollowMode_ConstantDirection)
+        if (mode == FollowMode_FixedDirection)
         {
             PNT p = followTarget->getCenter();
             followVector = VECTOR(space.S, p);
@@ -277,15 +277,15 @@ void Universe::SetFollowMode(FollowMode mode)
 
 void Universe::ToggleConstantDirectionFollowMode()
 {
-    if (followMode == FollowMode_ConstantDirection)
-        SetFollowMode(FollowMode_Normal);
+    if (followMode == FollowMode_FixedDirection)
+        SetFollowMode(FollowMode_FixedPosition);
     else
-        SetFollowMode(FollowMode_ConstantDirection);
+        SetFollowMode(FollowMode_FixedDirection);
 }
 
 void Universe::ResetFollowTargetAndMode()
 {
-    SetFollowTargetAndMode(nullptr, FollowMode_Normal);
+    SetFollowTargetAndMode(nullptr, FollowMode_FixedPosition);
 }
 
 void Universe::ToggleFollowTarget(Sphere* target, FollowMode mode)
@@ -300,7 +300,7 @@ void Universe::ToggleFollowTarget(Sphere* target, FollowMode mode)
 
 void Universe::LookAtTarget()
 {
-    if (followMode == FollowMode_ConstantDirection)
+    if (followMode == FollowMode_FixedDirection)
     {
         PNT newS = PNT(followTarget->getCenter()).translated(-followDistance, followVector);
         space.setFrame(
@@ -710,14 +710,35 @@ void Universe::navigate(float __throttle, float __yaw, float __pitch, float __ro
     }
     else
     {
-        if (followMode != FollowMode_ConstantDirection)
+        if (followMode != FollowMode_FixedDirection)
         {
             if (__throttle != 0.0f)
                 space.moveFrame(Movement_Forward, __throttle);
 
             // rotate frame about the target's center.
-            if ((__yaw != 0.0f) || (__pitch != 0.0f))
-                space.rotateFrame(followTarget->getCenter(), -__yaw * 3.0f, __pitch * 3.0f);
+            if ((__yaw != 0.0f) || (__pitch != 0.0f)) {
+                float horizontalAngle = -__yaw * 3.0f;
+                float verticalAngle = __pitch * 3.0f;
+                float currentAngle = space.deg(acos(glm::dot(glm::normalize(space.DS.getGlmVec3()),
+                                                      glm::normalize(glm::vec3(0, 0, 1)))));
+                
+                //printf("__pitch = %f\n", __pitch);
+                //printf("currentAngle = %f\n", currentAngle);
+                //printf("BEFORE verticalAngle = %f\n", verticalAngle);
+
+                // todo - come up with a better way to make sure angle doesn't get too close to vertical.
+                if (__pitch > 0)
+                    verticalAngle = glm::min(verticalAngle, currentAngle - 2);
+                if (__pitch < 0)
+                    if (currentAngle > 178)
+                        verticalAngle = 0;
+                    else
+                        verticalAngle = glm::min(verticalAngle, 180 - currentAngle - 2);
+
+                //printf("AFTER  verticalAngle = %f\n", verticalAngle);
+                
+                space.rotateFrame(followTarget->getCenter(), horizontalAngle, verticalAngle);
+            }
         }
         else
         {

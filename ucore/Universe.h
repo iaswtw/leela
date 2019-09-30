@@ -175,8 +175,8 @@ typedef enum
 
 typedef enum
 {
-    FollowMode_Normal,
-    FollowMode_ConstantDirection
+    FollowMode_FixedPosition,       // camera position remains fixed
+    FollowMode_FixedDirection       // camera moves with the object maintaining distance and direction
 } FollowMode;
 
 class Universe
@@ -307,7 +307,7 @@ private:
     bool bShowAxis = true;
     bool bShowOrbitsGlobalEnable = true;           // Individual orbit enables are in respective renderer classes.
 
-    FollowMode followMode = FollowMode_Normal;
+    FollowMode followMode = FollowMode_FixedPosition;
     VECTOR followVector = VECTOR(1.0, 1.0, 1.0);
     float followDistance = 0.0f;
     Sphere* followTarget = nullptr;

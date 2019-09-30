@@ -8,6 +8,7 @@
 
 #include <vector>
 #include <list>
+#include <string>
 #include <algorithm>
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -60,6 +61,11 @@ public:
         _r = r;
         _g = g;
         _b = b;
+    }
+
+    void setName(std::string name)
+    {
+        _name = name;
     }
     void setOrbitalPlaneColor(glm::vec3 orbitalPlaneColor)
     {
@@ -286,6 +292,7 @@ public:
     float _orbitalPlaneTiltAngle = 0;       // previously called 'betao'
 
     Sphere *_parent = nullptr;
+    std::string _name = "NoName";
 };
 
 

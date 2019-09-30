@@ -96,7 +96,6 @@ public:
         double zz = z - p.z;
         return PNT(xx, yy, zz);
     }
-
 };
 
 
@@ -199,6 +198,10 @@ public:
     double GetPhi() {
         SphPnt p(PNT(l, m, n));
         return p.phi;
+    }
+    glm::vec3 getGlmVec3()
+    {
+        return glm::vec3(x, y, z);
     }
 };
 
