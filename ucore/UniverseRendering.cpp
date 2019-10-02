@@ -635,6 +635,10 @@ void Universe::generateImGuiWidgets()
                 if (ImGui::Button("Total Solar Eclipse## demo"))
                     ShowDemo(UDemo_TotalSolarEclipse);
 
+                ImGui::SetNextItemWidth(190);
+                if (ImGui::Button("Total Solar Eclipse view from\nnear the sun## demo"))
+                    ShowDemo(UDemo_TotalSolarEclipseViewFromSun);
+
                 if (ImGui::Button("Total Solar Eclipse on north pole## demo"))
                     ShowDemo(UDemo_TotalSolarEclipseOnNorthPole);
 

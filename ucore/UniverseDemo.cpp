@@ -16,7 +16,7 @@ void Universe::ShowDemo(int nParam)
     case UDemo_TotalSolarEclipse:
 
         // Set earth at (0,R,0)
-        Earth_SetOrbitalPositionAngle(M_PI / 2);
+        Earth_SetOrbitalPositionAngle(1 * M_PI / 2);
 
         Earth_OrbitalPlane(UCmdParam_Off);
         Moon_OrbitalPlane(UCmdParam_Off);
@@ -39,7 +39,48 @@ void Universe::ShowDemo(int nParam)
 
         // Adjust earth's motions
         Earth_RotationMotion(UCmdParam_On);
-        Earth_RevolutionMotion(UCmdParam_Off);
+        Earth_RevolutionMotion(UCmdParam_On);
+        Earth_PrecessionMotion(UCmdParam_Reset);
+
+        // Adjust Moon's motions
+        Moon_RevolutionMotion(UCmdParam_On);
+        Moon_Orbit(UCmdParam_On);
+
+        // Increase the dot density
+        SetDotDensity(UDotDensity_High);
+        SetSimulationSpeed(USimulationSpeed_6p25_Percent);
+        SimulationPause(UCmdParam_Off);
+
+        break;
+
+    case UDemo_TotalSolarEclipseViewFromSun:
+        
+            // Set earth at (0,R,0)
+        Earth_SetOrbitalPositionAngle(1.04 * 3 * M_PI / 2);
+
+        Earth_OrbitalPlane(UCmdParam_Off);
+        Moon_OrbitalPlane(UCmdParam_Off);
+
+        // Adjust navigation view locks on earth and sun
+
+        SetLockTargetAndMode(&earth, TargetLockMode_ViewTarget);
+
+        // Set S
+        //newS = PNT(earth.getCenter().x + 500, earth.getCenter().y - 700, earth.getCenter().z + 150);
+        newS = PNT(-68.670399, 1972.622666, 875.368712
+        );
+        space.setFrame(AT_POINT,
+            newS,
+            VECTOR(newS, earth.getCenter()),
+            PNT(newS.x, newS.y, newS.z - 100));
+
+        /* Set proper moon's position so that the moon's shadow will
+           fall on the earth shortly */
+        Moon_SetOrbitalPositionAngle(0.8f * M_PI / 2);
+
+        // Adjust earth's motions
+        Earth_RotationMotion(UCmdParam_On);
+        Earth_RevolutionMotion(UCmdParam_On);
         Earth_PrecessionMotion(UCmdParam_Reset);
 
         // Adjust Moon's motions
