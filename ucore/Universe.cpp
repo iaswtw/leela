@@ -239,7 +239,7 @@ void Universe::SetApplicationStartView()
         PNT(newS.x, newS.y, newS.z - 100));
 
     // Adjust navigation view locks on earth and sun
-    SetFollowTargetAndMode(&earth, FollowMode_FixedPosition);
+    SetLockTargetAndMode(&earth, TargetLockMode_ViewTarget);
     earth.bRevolutionMotion = true;
 }
 
@@ -248,23 +248,23 @@ void Universe::SetApplicationStartView()
 ****************************************************************************
 
 ****************************************************************************/
-void Universe::SetFollowTargetAndMode(Sphere* target, FollowMode mode)
+void Universe::SetLockTargetAndMode(Sphere* target, TargetLockMode mode)
 {
-    followTarget = target;
+    lockTarget = target;
 
     // follow target has to be set before setting mode.
-    SetFollowMode(mode);
+    SetLockMode(mode);
 }
 
-void Universe::SetFollowMode(FollowMode mode)
+void Universe::SetLockMode(TargetLockMode mode)
 {
-    followMode = mode;
+    lockMode = mode;
 
-    if (followTarget != nullptr)
+    if (lockTarget != nullptr)
     {
-        if (mode == FollowMode_FixedDirection)
+        if (mode == TargetLockMode_FollowTarget)
         {
-            PNT p = followTarget->getCenter();
+            PNT p = lockTarget->getCenter();
             followVector = VECTOR(space.S, p);
             followDistance = float(space.S.distanceTo(p));
             bSidewaysMotionMode = false;
@@ -274,32 +274,32 @@ void Universe::SetFollowMode(FollowMode mode)
 
 void Universe::ToggleConstantDirectionFollowMode()
 {
-    if (followMode == FollowMode_FixedDirection)
-        SetFollowMode(FollowMode_FixedPosition);
+    if (lockMode == TargetLockMode_FollowTarget)
+        SetLockMode(TargetLockMode_ViewTarget);
     else
-        SetFollowMode(FollowMode_FixedDirection);
+        SetLockMode(TargetLockMode_FollowTarget);
 }
 
 void Universe::ResetFollowTargetAndMode()
 {
-    SetFollowTargetAndMode(nullptr, FollowMode_FixedPosition);
+    SetLockTargetAndMode(nullptr, TargetLockMode_ViewTarget);
 }
 
-void Universe::ToggleFollowTarget(Sphere* target, FollowMode mode)
+void Universe::ToggleFollowTarget(Sphere* target, TargetLockMode mode)
 {
-    if (followTarget == target)
-        followTarget = nullptr;
+    if (lockTarget == target)
+        lockTarget = nullptr;
     else
-        followTarget = target;
+        lockTarget = target;
 
-    SetFollowMode(mode);
+    SetLockMode(mode);
 }
 
 void Universe::LookAtTarget()
 {
-    if (followMode == FollowMode_FixedDirection)
+    if (lockMode == TargetLockMode_FollowTarget)
     {
-        PNT newS = PNT(followTarget->getCenter()).translated(-followDistance, followVector);
+        PNT newS = PNT(lockTarget->getCenter()).translated(-followDistance, followVector);
         space.setFrame(
             AT_POINT,
             newS,
@@ -311,7 +311,7 @@ void Universe::LookAtTarget()
         space.setFrame(
             AT_POINT,
             space.S,
-            VECTOR(space.S, followTarget->getCenter()),
+            VECTOR(space.S, lockTarget->getCenter()),
             PNT(space.S.x, space.S.y, space.S.z - 100));
     }
 }
@@ -655,7 +655,7 @@ void Universe::processFlags()
             advance(_stepMultiplier * _stepMultiplierFrameRateAdjustment);
     }
 
-    if (followTarget != nullptr)
+    if (lockTarget != nullptr)
         LookAtTarget();
 
 }
@@ -688,7 +688,7 @@ void Universe::navigate(float __throttle, float __yaw, float __pitch, float __ro
     else if (bShiftModifier)
         __roll *= 100;
 
-    if (followTarget == nullptr)
+    if (lockTarget == nullptr)
     {
         // Finally, Apply the motion value.
         if (__throttle != 0.0f)
@@ -715,7 +715,7 @@ void Universe::navigate(float __throttle, float __yaw, float __pitch, float __ro
     }
     else
     {
-        if (followMode != FollowMode_FixedDirection)
+        if (lockMode != TargetLockMode_FollowTarget)
         {
             if (__throttle != 0.0f)
                 space.moveFrame(Movement_Forward, __throttle);
@@ -742,7 +742,7 @@ void Universe::navigate(float __throttle, float __yaw, float __pitch, float __ro
 
                 //printf("AFTER  verticalAngle = %f\n", verticalAngle);
                 
-                space.rotateFrame(followTarget->getCenter(), horizontalAngle, verticalAngle);
+                space.rotateFrame(lockTarget->getCenter(), horizontalAngle, verticalAngle);
             }
         }
         else
