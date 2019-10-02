@@ -301,18 +301,21 @@ void Universe::generateImGuiWidgets()
             ImGui::TextWrapped("Universe3d\n\n");
             ImGui::PopFont();
 
-            //ImGui::PushFont(appFontMedium);
-            ImGui::PushFont(appFontExtraSmall);
+            ImGui::PushFont(appFontMedium);
             ImGui::TextWrapped(
-                "This program is intended to be a teaching aid to explain various celestial concepts. "
-                "It primarily intends to explain phenomenon related to orbital mechanics of planetary motion. \n\n"
+                "This program is intended to be a teaching aid for various celestial concepts. "
+                "It primarily intends to explain phenomenon related to orbital mechanics of the planetary motion. \n\n"
 
-                "The program doesn't make any effort to show sizes, distances, rotation & revolution speeds, etc. to scale. "
-                "If it did, it will hinder its ability to help explain concepts due to the impracticality of showing the earth, moon and sun on the screen at "
-                "the same time. They will only be a few pixels wide.\n\n"
+                "The program doesn't make any effort to show sizes, distances, rotation & revolution speeds, etc to scale. "
+                "If it did, it will hinder its ability to help explain concepts. Showing the earth, moon and sun on the screen at "
+                "the same time will be impractical, as they will only be a few pixels wide.\n\n"
 
-                "With distances and sizes not to scale, angles have to be exagerated to show the same effect.  For example, to show why solar eclipses don't occurr on every "
-                "new moon day, the tilt of the moons's orbital plane with respect to earth's orbital plane had to be exagerated to roughly 30 degrees from about 5 degrees."
+                "With distances and sizes not to scale, angles are exagerated to show the same effect.  For example, to show why solar eclipses don't occurr on every "
+                "new moon day, the tilt of the moons's orbital plane with respect to earth's orbital plane has been increased to roughly 30 degrees from about 5 degrees.\n\n"
+
+                "Use the demo buttons to see some of the phenomenon.\n\n"
+
+                "You can navigate in the 3D space using mouse and keyboard.  Look at the respective help window for details."
 
             );
             ImGui::PopFont();
@@ -322,13 +325,15 @@ void Universe::generateImGuiWidgets()
         ImGui::End();
     }
 
+
     if (bShowKeyboardShortcuts)
     {
         //ImGuiCond_FirstUseEver
         ImGui::SetNextWindowSizeConstraints(ImVec2(800, 600), ImVec2(1024, 768));
         if (ImGui::Begin("Keyboard Shortcuts", &bShowKeyboardShortcuts))
         {
-            auto populateShortcutWindow = [](const char* arr[][2], int numRows) {
+            // Helper function used later below
+            auto populateKeyboardShortcutTwoColumnTable = [](const char* arr[][2], int numRows) {
                 ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.8f, 0.8f, 1));
                 for (int i = 0; i < numRows; i++)
                 {
@@ -336,7 +341,7 @@ void Universe::generateImGuiWidgets()
                         ImGui::Separator();
                     }
                     else {
-                        ImGui::Text(arr[i][0]);  ImGui::NextColumn();  ImGui::SetColumnOffset(-1, 100);
+                        ImGui::Text(arr[i][0]);  ImGui::NextColumn();  ImGui::SetColumnOffset(-1, 150);
                         ImGui::TextWrapped(arr[i][1]);  ImGui::NextColumn();
                     }
                 }
@@ -344,14 +349,15 @@ void Universe::generateImGuiWidgets()
             };
 
             const char* shortcutHelp[][2] = {
-            { "Space bar",      "Pause time. Navigation will still work." },
-            { "f",              "Pressing this key and keeping it pressed will cause simulation time to elapse faster by about 10 times."},
-            { "r",              "Pressing this key and keeping it pressed with cause simulation time to run in reverse by about 10 times the nominal forward speed. "
+            { "Space bar",      "Pause time. All navigation will continue to work." },
+            { "f",              "Pressing and keeping it pressed will cause simulation time to elapse faster by about 10 times."},
+            { "r",              "Pressing and keeping it pressed with cause simulation time to run in reverse by about 10 times the current forward speed. "
                                 "Releasing this key shall restore the forward movement of time at the speed it was just before pressing this key."},
-            { "Right arrow",    "Speeds up the simulation time passage by roughly 66% each time this key is pressed."},
-            { "Left arrow",     "Slows down the simulation time passage by roughly 66% each time this key is pressed."},
-            { "d",              "Bring the camera to the default position and look in the direction of the sun. From this position, the entire earth's orbit is visible. "
-                                " It is a convenient starting position for the simulation.  If you get lost navigating, you can hit this key to get your bearings."},
+            { "Right arrow",    "Speeds up the time passage by 100%%."},
+            { "Left arrow",     "Slows down the time passage to 50%%."},
+            { "d",              "Show default view. Bring the camera to far away position so that the entire earth's orbit is visible. "
+                                "If you get lost navigating, press this key to reorient yourself."},
+            { "Escape",         "Get back mouse cursor control if in navigation mode." },
             { nullptr, nullptr },
 
             { "a",              "Toggle visibility of the XYZ coordinate axis.  When looking from the default view position, +ve X direction is towards bottom left from origin (blue),"
@@ -359,31 +365,68 @@ void Universe::generateImGuiWidgets()
             { "e",              "Toggle visibility of earth's orbital plane." },
             { "m",              "Toggle visibility of moon's orbital plane." },
 
-            { "z",              "Toggle lock on earth's position. When turned on, the earth will appear at the center of the screen. Left/right/up/down mouse movements shall rotate the camera around the earth at a constant distance. "
-                                "Zoom in and zoom out will work as expected.  Turning lock on will also cause the earth to pause in its orbit." },
-            { "c",              "Toggle lock on sun's position. When turned on, the sun will appear at the center of the screen." },
-            { "b",              "Toggle directional lock on earth. The direction vector from the camera to the earth will be noted at the time of turning this mode on. "
-                                "After that, the camera will follow the earth as the earth moves in its orbit, all the while maintaining the original direction vector."
+            { "z",              "Toggle earth lock mode. When turned on, the earth will appear at the center of the screen even as it moves in its orbit. "
+                                "The camera will stay at its position, but will always look towards the center of the earth. "
+                                "Left/right/up/down mouse movements shall rotate the camera around the earth at a constant distance. "
+                                "Zoom in and zoom out will work as expected." },
+            { "c",              "Toggle sun lock mode. This behavior is similar to earth lock mode, except that the sun will now appear at the center of the screen." },
+            
+            { "b",              "Toggle follow mode on the currently locked target. The camera will follow the target at a constant distance looking at it from a fixed angle. "
+                                "The distance from the target can be changed using zoom in and zoom out controls. But the viewing angle will be the same as it was when the mode was turned on.\n\n"
+
                                 "This mode is used in the 6 month long day and night demo.  Use this mode when you want to observe the earth from a fixed angle as it "
-                                "revolves around the sun.  Contrast this mode with the normal lock on earth (z) mode where the camera stays put while only changing its viewing direction. "
-                                "While in this mode, only zoom in/out navigation will work." },
+                                "revolves around the sun.  Contrast this mode with the normal lock mode where the camera stays put while only changing its viewing direction. "
+                                "Only zoom in/out navigation will work in this mode." },
             { "0 (zero)",       "Toggle earth's revolution motion.  Use this to pause the earth in its orbit so that you can observe various things such as the tilted orbit, shadows, etc." },
 
 
             { nullptr, nullptr },
+            { nullptr, nullptr },
 
-            { "Home",           "Zoom in" },
-            { "End",            "Zoom out" },
-            { "Del",            "Turn left (or shift left in Shift mode)"},
-            { "Page Down",      "Turn right (or shift right in Shift mode)"},
-            { "Page Up",        "Rotate up (or shift up in Shift mode)"},
-            { "Insert",         "Rotate doen (or shift down in Shift mode"},
-            { "Alt + Page Up",  "Rotate right along the axis the camera is looking at. This will result in the object in front being rotated left."},
-            { "Alt + Insert",   "Rotate left along the axis the camera is looking at. This will result in the object in front being rotated right."},
+            { "",               "The 6 keys -- Ins, Del, Home, End, Page Up and Page Down -- form the main keyboard navigation control.\n"
+                                "Note that mouse navigation is easier and is preferred."
+            },
+            { nullptr, nullptr },
+
+            { "Home",           "Zoom in"
+                                "\n\n"
+            },
+
+            { "End",            "Zoom out"
+                                "\n\n"
+            },
+            { "Del",            "Yaw left\n\n"
+                                "Turn left.  In Shift mode, shift left.  If there is a locked target, rotate left around it."
+                                "\n\n"
+            },
+            { "Page Down",      "Yaw right\n\n"
+                                "Turn right.  In Shift mode, shift right.  If there is a locked target, rotate right around it."
+                                "\n\n"
+            },
+            { "Page Up",        "Pitch up\n\n"
+                                "Rotate up.  In Shift mode, shift up.  If there is a locked target, rotate up around it. "
+                                "\n\n"
+            },
+            { "Insert",         "Pitch down\n\n"
+                                "Rotate down.  In Shift mode, shift down.  If there is a locked target, rotate down around it."
+                                "\n\n"
+            },
+            { "Alt + Page Up",  "Roll right\n\n"
+                                "Rotate right along the axis the camera is looking at. This will result in the object in front appear to being rotated left.\n"
+                                "If there is a locked target, this key combination is ignored."
+                                "\n\n"
+            },
+            { "Alt + Insert",   "Roll left\n\n"
+                                "Rotate left along the axis the camera is looking at. This will result in the object in front appear to being rotated right.\n"
+                                "If there is a locked target, this key combination is ignored."
+                                "\n\n"
+            },
+            { nullptr, nullptr },
             { "v",              "Toggle 'Shift mode' navigation.  In this mode, left/right/up/down mouse movements will result in the camera being shifted in those directions as "
                                 "as opposed to rotating in those directions.  When the camera shifts, the viewing direction vector does not change. It is as if the camera is looking at a point at infinity. "
                                 "If you want to look at how the background stars shift due to parallex as the earth moves in its orbit, turn this mode on, go to default "
-                                "view (d), and then move the mouse left and right." },
+                                "view (d), and then move the mouse left and right."
+            },
 
 
             { nullptr, nullptr },
@@ -405,30 +448,136 @@ void Universe::generateImGuiWidgets()
 
             };
 
+            ImGui::PushFont(appFontMedium);
             ImGui::Columns(2, "mycolumn");
-            ImGui::Text("Shortcut"); ImGui::NextColumn();  ImGui::SetColumnOffset(-1, 100);
+            ImGui::Text("Shortcut"); ImGui::NextColumn();  ImGui::SetColumnOffset(-1, 150);
             ImGui::Text("Description"); ImGui::NextColumn();
             ImGui::Separator();
 
-            populateShortcutWindow(shortcutHelp, sizeof(shortcutHelp) / sizeof(shortcutHelp[0]));
+            populateKeyboardShortcutTwoColumnTable(shortcutHelp, sizeof(shortcutHelp) / sizeof(shortcutHelp[0]));
+            ImGui::PopFont();
         }
         ImGui::End();
 
     }
 
+    if (bShowMouseNavigationHelp)
+    {
+        ImGui::SetNextWindowSizeConstraints(ImVec2(800, 600), ImVec2(1024, 768));
+        if (ImGui::Begin("Mouse Navigation Help", &bShowMouseNavigationHelp))
+        {
+            auto populateMouseNavigationTwoColumnTable = [](const char* arr[][2], int numRows) {
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.8f, 0.8f, 1));
+                for (int i = 0; i < numRows; i++)
+                {
+                    if (arr[i][0] == nullptr) {
+                        ImGui::Separator();
+                    }
+                    else {
+                        ImGui::Text(arr[i][0]);  ImGui::NextColumn();  ImGui::SetColumnOffset(-1, 300);
+                        ImGui::TextWrapped(arr[i][1]);  ImGui::NextColumn();
+                    }
+                }
+                ImGui::PopStyleColor();
+            };
+
+            const char* shortcutHelp[][2] = {
+            { "Click in the middle area of the screen",       "Mouse cursor will hide and will be grabbed by the application. "
+                                                              "You will gain navigation control of the camera / space ship. "
+                                                              "You won't be able to click on the menus, buttons, checkboxes, etc."
+            },
+            
+            {nullptr, nullptr },
+
+            { "Double click while in navigation mode\n"
+              "or press Escape key",                          "Mouse cursor will be visible and stop being grabbed. "
+                                                              "Buttons, checkboxes & menus can now be clicked."
+            },
+
+            {nullptr, nullptr },
+            {nullptr, nullptr },
+
+            { "Left/right\n(without clicking any button)",
+                                                "Yaw.\n\n"
+
+                                                "Rotate camera left/right.  "
+                                                "Camera position will not change, only viewing direction will change. \n\n"
+                                                
+                                                "If there is a locked target (as is the case when the application starts), this will "
+                                                " cause horizontal rotation around the target. "
+                                                "Both the camera position and direction will change. "
+
+                                                "If 'shift mode' is on, and no target is locked, camera will be *shifted* left/right. "
+                                                "In this case, camera "
+                                                "position will change, but viewing direction will remain the same.\n\n"
+
+            },
+            {nullptr, nullptr },
+
+            { "Foward/backward\n(without clicking any button)",  
+                                                
+                                                "Pitch.\n\n"
+
+                                                "Similar to mouse left/right action, except that the rotation or shifting will "
+                                                " be in up/down/vertical direction"
+            },
+            {nullptr, nullptr },
+
+            { "Left click + forward/backward",  "Throttle.\n\n"
+                                                "Zoom camera in and out"
+            },
+            {nullptr, nullptr },
+
+            { "Right click + left/right",       "Roll.\n\n"
+                                                "This motion is equivalant to tilting your head left/right\n\n"
+                                                "If a target is locked, this action will be ignored."
+            },
+            {nullptr, nullptr },
+            {nullptr, nullptr },
+
+            { "Ctrl key + any above action",
+                                                "This is like using the 'fine' adjustment knob for the same action.\n"
+                                                "Performs that action with less sensitivity to input.  For the same amount of input, "
+                                                "there will be less motion.  Use for more control of small movements."
+            },
+            {nullptr, nullptr },
+
+            { "Shift key + any above action",
+                                                "This is like using the 'coarse' adjustment knob for the same action.\n"
+                                                "Performs that action with high sensitivity to input. "
+                                                "E.g. to move far away from the sun, press shift and then do left click + backward ."
+            },
+
+
+            };
+
+            ImGui::PushFont(appFontMedium);
+            ImGui::Columns(2, "mycolumn");
+            ImGui::Text("Action"); ImGui::NextColumn();  ImGui::SetColumnOffset(-1, 300);
+            ImGui::Text("Description"); ImGui::NextColumn();
+            ImGui::Separator();
+
+            populateMouseNavigationTwoColumnTable(shortcutHelp, sizeof(shortcutHelp) / sizeof(shortcutHelp[0]));
+            ImGui::PopFont();
+        }
+        ImGui::End();
+    }
 
     if (bMouseGrabbed)
     {
-        ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x / 2.0f, 10.0f), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+        ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x / 2.0f, 20.0f), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
         ImGui::SetNextWindowBgAlpha(0.35f);
+        ImGui::PushFont(appFontMedium);
         if (ImGui::Begin("Escape message", &bShowFlagsOverlay, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
         {
             ImGui::Text("Escape key / double-click to get mouse back");
         }
         ImGui::End();
+        ImGui::PopFont();
     }
     else
     {
+        ImGui::PushFont(appFontSmallMedium);
         // Show menu bar
         if (ImGui::BeginMainMenuBar())
         {
@@ -450,12 +599,14 @@ void Universe::generateImGuiWidgets()
             if (ImGui::BeginMenu("Help"))
             {
                 ImGui::MenuItem("Introduction", nullptr, &bShowIntroduction);
+                ImGui::MenuItem("Show Mouse navigation help", nullptr, &bShowMouseNavigationHelp);
                 ImGui::MenuItem("Show Keyboard Shortcuts", nullptr, &bShowKeyboardShortcuts);
                 ImGui::EndMenu();
             }
 
             ImGui::EndMainMenuBar();
         }
+        ImGui::PopFont();
     }
 
     // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
@@ -497,6 +648,10 @@ void Universe::generateImGuiWidgets()
 
                 if (ImGui::Button("Tilted orbital planes## demo"))
                     ShowDemo(UDemo_TiltedOrbitalPlanes);
+                ImGui::SameLine();
+                HelpMarker(
+                    "Moon's orbital plane tilt is highly exagerated since other distances and sizes are not to scale."                    
+                );
 
                 if (ImGui::Button("6 month long day & 6 month long\nnight on north pole"))
                     ShowDemo(UDemo_SixMonthLongDayAndNightOnNorthPole);
@@ -506,9 +661,18 @@ void Universe::generateImGuiWidgets()
 
                 if (ImGui::Button("Precession motion## demo"))
                     ShowDemo(UDemo_PrecessionMotion);
+                ImGui::SameLine();
+                HelpMarker(
+                    "Notice how earth's north pole changes its orientation in space while maintaining the tilt angle."
+                );
 
                 if (ImGui::Button("Star Parallex## demo"))
                     ShowDemo(UDemo_StarParallex);
+                ImGui::SameLine();
+                HelpMarker(
+                    "Observe the movement of the stars in the background as the earth moves in its orbit.  The stars appear to shift horizontaly."
+                    "Some stars shift more than others.  Stars closer to earth shift more than those farther away."
+                );
 
                 ImGui::PopFont();
             }
@@ -607,7 +771,7 @@ void Universe::generateImGuiWidgets()
             //ImGui::SameLine(); HelpMarker("When checked, Shift left/right/up/down on mouse movements.\nWhen unchecked, rotate instead.");
             //ImGui::Checkbox("Lock on earth (z)", &bLockOntoEarth);
             //if (ImGui::IsItemEdited())
-            //    SetFollowTargetAndMode(bLockOntoEarth ? UCmdParam_On : UCmdParam_Off);
+            //    SetLockTargetAndMode(bLockOntoEarth ? UCmdParam_On : UCmdParam_Off);
             //ImGui::SameLine(); HelpMarker("Also pauses earth's revolution. Activate this mode and\nthen use mouse to view earth from different angles.");
 
             //ImGui::Checkbox("Directional lock on earth (b)", &bEarthFollowMode);
@@ -616,31 +780,29 @@ void Universe::generateImGuiWidgets()
             //ImGui::SameLine();
             //HelpMarker("Earth follow mode");
 
-            ImGui::Text("Follow target:");
-            int lock = (followTarget == &earth) ? 0 : (followTarget == &sun) ? 1 : (followTarget == &moon) ? 2 : 3;
+            //----------------------------------------------------------
+            ImGui::Text("Lock target:");  ImGui::SameLine(); HelpMarker("Camera will always look at the selected target.");
+            int lock = (lockTarget == &earth) ? 0 : (lockTarget == &sun) ? 1 : (lockTarget == &moon) ? 2 : 3;
             int previousLock = lock;
             ImGui::RadioButton("earth", &lock, 0); ImGui::SameLine();
             ImGui::RadioButton("sun", &lock, 1); ImGui::SameLine();
             ImGui::RadioButton("moon", &lock, 2); ImGui::SameLine();
             ImGui::RadioButton("none", &lock, 3);
             if (lock != previousLock)
-                SetFollowTargetAndMode(
+                SetLockTargetAndMode(
                 (lock == 0) ? &earth : (lock == 1) ? &sun : (lock == 2) ? &moon : nullptr,
-                    FollowMode_FixedPosition);
+                    TargetLockMode_ViewTarget);
 
-            const char* items[] = { "Fixed Position", "Fixed Direction" };
-            int currentItem = (followMode == FollowMode_FixedPosition) ? 0 : 1;
-            int previousCurrentItem = currentItem;
-            ImGui::SetNextItemWidth(120);
-            ImGui::Combo("Follow mode", &currentItem, items, IM_ARRAYSIZE(items));
-            if (currentItem != previousCurrentItem)
-                SetFollowMode((currentItem == 0) ? FollowMode_FixedPosition : FollowMode_FixedDirection);
+            //----------------------------------------------------------
+            ImGui::Text("Lock mode: "); ImGui::SameLine(); HelpMarker("If 'Follow lock' selected, camera will move with the object looking at it from the same direction.");
+            TargetLockMode mode = lockMode;
+            TargetLockMode previousMode = mode;
+            ImGui::RadioButton("View lock", (int*)& mode, int(TargetLockMode_ViewTarget)); ImGui::SameLine();
+            ImGui::RadioButton("Follow lock", (int*)&mode, int(TargetLockMode_FollowTarget));
+            if (mode != previousMode)
+                SetLockMode(mode);
 
-
-            //ImGui::Checkbox("Lock on sun (c)", &bLockOntoSun);
-            //if (ImGui::IsItemEdited())
-            //    NavigationLockOntoSun(bLockOntoSun ? UCmdParam_On : UCmdParam_Off);
-
+            //----------------------------------------------------------
             if (ImGui::Button("Show default view (d)"))
                 SetDefaultView();
             ImGui::Unindent();

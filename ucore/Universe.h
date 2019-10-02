@@ -168,17 +168,9 @@ typedef enum
 
 typedef enum
 {
-    NavigationLockTarget_None,
-    NavigationLockTarget_Earth,
-    NavigationLockTarget_Sun,
-    NavigationLockTarget_Moon,
-} NavigationLockTarget;
-
-typedef enum
-{
-    FollowMode_FixedPosition,       // camera position remains fixed
-    FollowMode_FixedDirection       // camera moves with the object maintaining distance and direction
-} FollowMode;
+    TargetLockMode_ViewTarget,        // camera position remains fixed, but always looks at the target
+    TargetLockMode_FollowTarget       // camera moves with the object maintaining distance and direction
+} TargetLockMode;
 
 class Universe
 {
@@ -212,11 +204,11 @@ public:
     void SetDefaultView();
     void SetApplicationStartView();
     
-    void SetFollowTargetAndMode(Sphere* target, FollowMode mode);
-    void SetFollowMode(FollowMode mode);
+    void SetLockTargetAndMode(Sphere* target, TargetLockMode mode);
+    void SetLockMode(TargetLockMode mode);
     void ToggleConstantDirectionFollowMode();
     void ResetFollowTargetAndMode();
-    void ToggleFollowTarget(Sphere* target, FollowMode mode);
+    void ToggleFollowTarget(Sphere* target, TargetLockMode mode);
 
     void LookAtTarget();
 
@@ -311,10 +303,11 @@ private:
     bool bShowAxis = true;
     bool bShowOrbitsGlobalEnable = true;           // Individual orbit enables are in respective renderer classes.
 
-    FollowMode followMode = FollowMode_FixedPosition;
+    TargetLockMode lockMode = TargetLockMode_ViewTarget;
     VECTOR followVector = VECTOR(1.0, 1.0, 1.0);
     float followDistance = 0.0f;
-    Sphere* followTarget = nullptr;
+    Sphere* lockTarget = nullptr;           // If not null, the camera will change direction such that target
+                                            // will always appear at the center of the screen.
 
 
     bool bSimulationPause = false;
@@ -380,6 +373,7 @@ private:
     bool bAlwaysShowControlPanel = true;
     bool bIsWindowFullScreen = false;
     bool bShowFlagsOverlay = true;
+    bool bShowMouseNavigationHelp = false;
     bool bShowKeyboardShortcuts = false;
     bool bShowIntroduction = false;
 
