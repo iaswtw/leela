@@ -155,6 +155,7 @@ typedef enum
 typedef enum
 {
     UDemo_TotalSolarEclipse,
+    UDemo_TotalSolarEclipseViewFromSun,
     UDemo_TotalSolarEclipseOnNorthPole,
     UDemo_AnnularSolarEclipseFromSpace,
     UDemo_PartialLunarEclipse,
