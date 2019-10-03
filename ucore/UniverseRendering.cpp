@@ -6,6 +6,8 @@
 #include "imgui_impl_opengl3.h"
 
 
+//#define RELEASE_BUILD
+
 /*************************************************************************************************
 
 
@@ -14,24 +16,44 @@ void Universe::initializeGL()
 {
     printf("Inside initializeGL\n");
 
+#ifdef RELEASE_BUILD
+    std::string vertFilename("shaders/planet.vert.glsl");
+    std::string fragFilename("shaders/planet.frag.glsl");
+#else
     std::string vertFilename("../ucore/shaders/planet.vert.glsl");
     std::string fragFilename("../ucore/shaders/planet.frag.glsl");
+#endif
     planetGlslProgram.compileShadersFromFile(vertFilename, fragFilename);
     planetGlslProgram.link();
 
 
+#ifdef RELEASE_BUILD
+    vertFilename = "shaders/sun.vert.glsl";
+    fragFilename = "shaders/sun.frag.glsl";
+#else
     vertFilename = "../ucore/shaders/sun.vert.glsl";
     fragFilename = "../ucore/shaders/sun.frag.glsl";
+#endif
     sunGlslProgram.compileShadersFromFile(vertFilename, fragFilename);
     sunGlslProgram.link();
 
+#ifdef RELEASE_BUILD
+    vertFilename = "shaders/star.vert.glsl";
+    fragFilename = "shaders/star.frag.glsl";
+#else
     vertFilename = "../ucore/shaders/star.vert.glsl";
     fragFilename = "../ucore/shaders/star.frag.glsl";
+#endif
     starGlslProgram.compileShadersFromFile(vertFilename, fragFilename);
     starGlslProgram.link();
 
+#ifdef RELEASE_BUILD
+    vertFilename = "shaders/simple.vert.glsl";
+    fragFilename = "shaders/simple.frag.glsl";
+#else
     vertFilename = "../ucore/shaders/simple.vert.glsl";
     fragFilename = "../ucore/shaders/simple.frag.glsl";
+#endif
     simpleGlslProgram.compileShadersFromFile(vertFilename, fragFilename);
     simpleGlslProgram.link();
 
@@ -224,7 +246,7 @@ void Universe::renderTransparentUsingSimpleGlslProgram()
 void Universe::generateImGuiWidgets()
 {
     // Our state
-    bool show_demo_window = true;
+    bool show_demo_window = false;
     bool show_another_window = false;
 
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
