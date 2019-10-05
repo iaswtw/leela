@@ -61,7 +61,10 @@ static std::string FindFontFile(const char * fileName)
 
 Universe::Universe() :
     sunRenderer(sun),
-    earthRenderer(earth),
+    //earthRenderer(earth, "../ucore/textures/Map-World_23_10.png"),
+    earthRenderer(earth, "../ucore/textures/earthmap1k.png"),
+    
+    //earthRenderer(earth, "../ucore/textures/cat1.png"),
     moonRenderer(moon),
     axisRenderer(axis),
     starsRenderer(stars)
@@ -241,6 +244,7 @@ void Universe::SetApplicationStartView()
     // Adjust navigation view locks on earth and sun
     SetLockTargetAndMode(&earth, TargetLockMode_ViewTarget);
     earth.bRevolutionMotion = true;
+    earth.bRotationMotion = false;
 }
 
 
@@ -954,6 +958,7 @@ int Universe::run()
 	}
 	catch (exception& e)
 	{
+        printf("%s\n", e.what());
 		retval = 1;
 	}
 

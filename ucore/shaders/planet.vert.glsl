@@ -5,6 +5,7 @@ const float PI = 3.1415926535897932384626433832795;
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec4 in_color;
 layout (location = 2) in vec3 normal;
+layout (location = 3) in vec2 texCoord;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -28,6 +29,7 @@ struct SphereInfo {
 uniform SphereInfo sphereInfo;
 
 out vec4 Color;
+out vec2 TexCoord;
         
 //--------------------------------------------------------------------------------------------------------------------------
 // Terminology:
@@ -256,4 +258,5 @@ void main()
     
     // apply all 3 transformations to the original point
     gl_Position = proj * view * model * vec4(position, 1.0);
+    TexCoord = texCoord;
 }
