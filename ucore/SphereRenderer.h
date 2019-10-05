@@ -43,7 +43,7 @@ enum NightColorDarkness
 class SphereRenderer
 {
 public:
-    SphereRenderer(Sphere& sphere);
+    SphereRenderer(Sphere& sphere, std::string textureFilename = "");
     ~SphereRenderer();
 
     void setAsLightSource();
@@ -77,6 +77,7 @@ protected:
     GLuint _orbitalPlaneGridVao;            // grid lines in the orbital plane
     GLuint _orbitVao;
     GLuint _latAndLongVao;
+    GLuint _texture;
 
     int numMainSphereVertices = -1;
     int numMainSphereElements = -1;
@@ -90,13 +91,16 @@ protected:
     float _nightColorMultiplier;
 
     bool _bIsLightSource = false;
+    std::string _textureFilename;
+
+    unsigned char* data = nullptr;
 };
 
 
 class PlanetRenderer : public SphereRenderer
 {
 public:
-	PlanetRenderer(Sphere& sphere);
+	PlanetRenderer(Sphere& sphere, std::string textureFilename = "");
 	~PlanetRenderer();
 
 	void renderSphere(GlslProgram& glslProgram, Sphere* sun, Sphere* otherSphere = nullptr);

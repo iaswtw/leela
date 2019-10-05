@@ -20,6 +20,10 @@
 #include <map>
 #include <array>
 
+#include "lodepng.h"
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stbi_image.h"
 
 using TriangleList = std::vector<Triangle>;
 using VertexList = std::vector<glm::vec3>;
@@ -186,13 +190,30 @@ static inline void vector_push_back_10(std::vector<float>& v, float f1, float f2
     v.push_back(f10);
 }
 
+static inline void vector_push_back_12(std::vector<float>& v, float f1, float f2, float f3, float f4, float f5, float f6, float f7, float f8, float f9, float f10, float f11, float f12)
+{
+    v.push_back(f1);
+    v.push_back(f2);
+    v.push_back(f3);
+    v.push_back(f4);
+    v.push_back(f5);
+    v.push_back(f6);
+    v.push_back(f7);
+    v.push_back(f8);
+    v.push_back(f9);
+    v.push_back(f10);
+    v.push_back(f11);
+    v.push_back(f12);
+}
 
-SphereRenderer::SphereRenderer(Sphere& sphere) :
+
+SphereRenderer::SphereRenderer(Sphere& sphere, std::string textureFilename) :
     _sphere(sphere)
 {
     setNightColorDarkness(NightColorDarkness_High);
+    _textureFilename = textureFilename;
+    printf("Setting _textureFilename to %s\n", _textureFilename.c_str());
 }
-
 
 SphereRenderer::~SphereRenderer()
 {
@@ -247,28 +268,38 @@ std::vector<float>* SphereRenderer::_constructMainSphereVertices()
             float y1 = s._radius * sin(theta) * sin(alpha);
             float z1 = s._radius * cos(theta);
             glm::vec3 N1 = glm::normalize(glm::vec3(x1, y1, z1) - glm::vec3(0.0f, 0.0f, 0.0f));
+            float texX1 = alpha / 2*M_PI;
+            float texY1 = theta / M_PI;
 
             float x2 = s._radius * sin(theta + theat_inc) * cos(alpha);
             float y2 = s._radius * sin(theta + theat_inc) * sin(alpha);
             float z2 = s._radius * cos(theta + theat_inc);
             glm::vec3 N2 = glm::normalize(glm::vec3(x2, y2, z2) - glm::vec3(0.0f, 0.0f, 0.0f));
+            float texX2 = alpha / 2 * M_PI;
+            float texY2 = (theta + theat_inc) / M_PI;
 
             float x3 = s._radius * sin(theta) * cos(alpha + alpha_inc);
             float y3 = s._radius * sin(theta) * sin(alpha + alpha_inc);
             float z3 = s._radius * cos(theta);
             glm::vec3 N3 = glm::normalize(glm::vec3(x3, y3, z3) - glm::vec3(0.0f, 0.0f, 0.0f));
+            float texX3 = (alpha + alpha_inc) / 2 * M_PI;
+            float texY3 = theta / M_PI;
 
             float x4 = s._radius * sin(theta + theat_inc) * cos(alpha + alpha_inc);
             float y4 = s._radius * sin(theta + theat_inc) * sin(alpha + alpha_inc);
             float z4 = s._radius * cos(theta + theat_inc);
             glm::vec3 N4 = glm::normalize(glm::vec3(x4, y4, z4) - glm::vec3(0.0f, 0.0f, 0.0f));
+            float texX4 = (alpha + alpha_inc) / 2 * M_PI;
+            float texY4 = (theta + theat_inc) / M_PI;
 
-            vector_push_back_10(*v, x1, y1, z1, s._r, s._g, s._b, 1.0f, N1.x, N1.y, N1.z);
-            vector_push_back_10(*v, x2, y2, z2, s._r, s._g, s._b, 1.0f, N2.x, N2.y, N2.z);
-            vector_push_back_10(*v, x3, y3, z3, s._r, s._g, s._b, 1.0f, N3.x, N3.y, N3.z);
-            vector_push_back_10(*v, x3, y3, z3, s._r, s._g, s._b, 1.0f, N3.x, N3.y, N3.z);
-            vector_push_back_10(*v, x2, y2, z2, s._r, s._g, s._b, 1.0f, N2.x, N2.y, N2.z);
-            vector_push_back_10(*v, x4, y4, z4, s._r, s._g, s._b, 1.0f, N4.x, N4.y, N4.z);
+            // todo - calculate texture coords for each of the 4 vertices and add to vector.
+
+            vector_push_back_12(*v, x1, y1, z1, s._r, s._g, s._b, 1.0f, N1.x, N1.y, N1.z, texX1, texY1);
+            vector_push_back_12(*v, x2, y2, z2, s._r, s._g, s._b, 1.0f, N2.x, N2.y, N2.z, texX2, texY2);
+            vector_push_back_12(*v, x3, y3, z3, s._r, s._g, s._b, 1.0f, N3.x, N3.y, N3.z, texX3, texY3);
+            vector_push_back_12(*v, x3, y3, z3, s._r, s._g, s._b, 1.0f, N3.x, N3.y, N3.z, texX3, texY3);
+            vector_push_back_12(*v, x2, y2, z2, s._r, s._g, s._b, 1.0f, N2.x, N2.y, N2.z, texX2, texY2);
+            vector_push_back_12(*v, x4, y4, z4, s._r, s._g, s._b, 1.0f, N4.x, N4.y, N4.z, texX4, texY4);
 
             //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
         }
@@ -292,10 +323,69 @@ std::pair<std::vector<float>*, std::vector<Triangle>*>  SphereRenderer::_constru
         // Generate normal for this vertex
         glm::vec3 N = glm::normalize(glm::vec3(vertex.x, vertex.y, vertex.z) - glm::vec3(0.0f, 0.0f, 0.0f));
 
+
+        float texCoordX;
+        float texCoordY;
+
+        // calculate alpha and beta angle. Convert it to a range between 0 & 1 to be used as texture coordinates.
+        // At this point, radius is 1.0f.
+        float alpha = asin(float(vertex.y) / 1.0f);
+        if (vertex.y >= 0.0f)
+        {
+            if (vertex.x >= 0.0f)
+            {
+                // 1st quadrant. no special handling
+            }
+            else
+            {
+                // 2nd quadrant
+                alpha = M_PI - alpha;
+            }
+        }
+        else
+        {
+            if (alpha >= 0.0f)
+                throw std::exception("ERROR: alpha should be negative");
+
+            // y is -ve. alpha will also be -ve
+            if (vertex.x < 0.0f)
+            {
+                // 3rd quadrant
+                alpha = M_PI - alpha;
+            }
+            else
+            {
+                // 4th quadrant
+                alpha += 2 * M_PI;
+            }
+        }
+        
+        if (alpha < 0)
+        {
+            std::string msg = "alpha unexpectedly less than 0. Alpha = " + std::to_string(alpha) + 
+                              ", x = " + std::to_string(vertex.x) +
+                              ", y = " + std::to_string(vertex.y)
+                ;
+            throw std::exception(msg.c_str());
+        }
+        texCoordX = alpha / (2 * M_PI);
+
+        // beta is from +ve Z axis.
+        float d = sqrt((vertex.x * vertex.x) + (vertex.y * vertex.y));
+        float beta = asin(d / 1.0f);
+        if (vertex.z < 0)
+            beta = M_PI - beta;
+        texCoordY = beta / M_PI;
+        //texCoordY = (M_PI - beta) / M_PI;
+
+        //printf("%%%% texture coord: x = %f, y = %f\n", texCoordX, texCoordY);
+        
+        
         // scale vertices with unit radius to the actual radius of sphere.
         vertex *= s._radius;
 
-        vector_push_back_10(*v, vertex.x, vertex.y, vertex.z, s._r, s._g, s._b, 1.0f, N.x, N.y, N.z);
+
+        vector_push_back_12(*v, vertex.x, vertex.y, vertex.z, s._r, s._g, s._b, 1.0f, N.x, N.y, N.z, texCoordX, texCoordY);
     }
 
     printf("=== Sphere: Num vertices = %d\n", v->size()/10);
@@ -341,8 +431,8 @@ std::vector<float>* SphereRenderer::_constructLatitudesAndLongitudeVertices()
             else
                 cMult = 0.9f;
 
-            vector_push_back_10(*v, x1, y1, z1, s._r*cMult, s._g*cMult, s._b*cMult, 1.0, N1.x, N1.y, N1.z);
-            vector_push_back_10(*v, x2, y2, z2, s._r*cMult, s._g*cMult, s._b*cMult, 1.0, N2.x, N2.y, N2.z);
+            vector_push_back_12(*v, x1, y1, z1, s._r*cMult, s._g*cMult, s._b*cMult, 1.0, N1.x, N1.y, N1.z, 0.0f, 0.0f);
+            vector_push_back_12(*v, x2, y2, z2, s._r*cMult, s._g*cMult, s._b*cMult, 1.0, N2.x, N2.y, N2.z, 0.0f, 0.0f);
 
             //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
         }
@@ -369,8 +459,8 @@ std::vector<float>* SphereRenderer::_constructLatitudesAndLongitudeVertices()
             float z2 = 1.001f * s._radius * cos(theta);
             glm::vec3 N2 = glm::normalize(glm::vec3(x2, y2, z2) - glm::vec3(0.0f, 0.0f, 0.0f));
 
-            vector_push_back_10(*v, x1, y1, z1, s._r*0.9f, s._g*0.5f, s._b*0.5f, 1.0f, N1.x, N1.y, N1.z);
-            vector_push_back_10(*v, x2, y2, z2, s._r*0.9f, s._g*0.5f, s._b*0.5f, 1.0f, N2.x, N2.y, N2.z);
+            vector_push_back_12(*v, x1, y1, z1, s._r*0.9f, s._g*0.5f, s._b*0.5f, 1.0f, N1.x, N1.y, N1.z, 0.0f, 0.0f);
+            vector_push_back_12(*v, x2, y2, z2, s._r*0.9f, s._g*0.5f, s._b*0.5f, 1.0f, N2.x, N2.y, N2.z, 0.0f, 0.0f);
 
             //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
         }
@@ -396,8 +486,8 @@ std::vector<float>* SphereRenderer::_constructLatitudesAndLongitudeVertices()
             float z2 = 1.001f * s._radius * cos(theta);
             glm::vec3 N2 = glm::normalize(glm::vec3(x2, y2, z2) - glm::vec3(0.0f, 0.0f, 0.0f));
 
-            vector_push_back_10(*v, x1, y1, z1, s._r*cMult, s._g*cMult, s._b*cMult, 1.0f, N1.x, N1.y, N1.z);
-            vector_push_back_10(*v, x2, y2, z2, s._r*cMult, s._g*cMult, s._b*cMult, 1.0f, N2.x, N2.y, N2.z);
+            vector_push_back_12(*v, x1, y1, z1, s._r*cMult, s._g*cMult, s._b*cMult, 1.0f, N1.x, N1.y, N1.z, 0.0f, 0.0f);
+            vector_push_back_12(*v, x2, y2, z2, s._r*cMult, s._g*cMult, s._b*cMult, 1.0f, N2.x, N2.y, N2.z, 0.0f, 0.0f);
 
             //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
         }
@@ -536,6 +626,9 @@ void SphereRenderer::constructVerticesAndSendToGpu()
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(7 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
+    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(10 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
     numMainSphereVertices = v->size() / PLANET_STRIDE_IN_VBO;
     delete v;
 
@@ -575,12 +668,57 @@ void SphereRenderer::constructVerticesAndSendToGpu()
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(7 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
+    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(10 * sizeof(float)));
+    glEnableVertexAttribArray(3);
+
     numMainSphereVertices = v->size() / PLANET_STRIDE_IN_VBO;
     numMainSphereElements = e->size() * 3;
     
     delete v;
     delete e;
 #endif
+
+    printf("*************** texture setup *******************\n");
+    printf("_textureFilename = %s\n", _textureFilename.c_str());
+    if (!_textureFilename.empty())
+    {
+        glGenTextures(1, &_texture);
+        glBindTexture(GL_TEXTURE_2D, _texture);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+
+        std::vector<unsigned char> image1;
+        unsigned int width, height;
+        unsigned int error = lodepng::decode(image1, width, height, _textureFilename.c_str());
+        if (error)
+        {
+            printf("error %d: %s\n", error, lodepng_error_text(error));
+        }
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image1.data());
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+
+        //int width, height, nrChannels;
+        //
+        //data = stbi_load(_textureFilename.c_str(), &width, &height, &nrChannels, 0);
+        //if (data)
+        //{
+        //    printf("\n====== Image: width = %d, height = %d, nrChannels = %d\n", width, height, nrChannels);
+        //    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        //    glGenerateMipmap(GL_TEXTURE_2D);
+        //    glBindTexture(GL_TEXTURE_2D, 0);
+        //    stbi_image_free(data);
+        //}
+        //else
+        //{
+        //    printf("ERROR: Unable to load texture image\n");
+        //    throw std::exception("Unable to load texture image");
+        //}
+    }
 
     //---------------------------------------------------------------------------------------------------
     // latitude and longitude
@@ -604,6 +742,9 @@ void SphereRenderer::constructVerticesAndSendToGpu()
 
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(7 * sizeof(float)));
     glEnableVertexAttribArray(2);
+
+    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(10 * sizeof(float)));
+    glEnableVertexAttribArray(3);
 
     numLatAndLongVertices = v->size() / PLANET_STRIDE_IN_VBO;
     delete v;
@@ -707,8 +848,8 @@ int SphereRenderer::_getIcoSphereSubdivisionLevel()
 
 //############################################################################################################
 
-PlanetRenderer::PlanetRenderer(Sphere& sphere)
-	: SphereRenderer(sphere)
+PlanetRenderer::PlanetRenderer(Sphere& sphere, std::string textureFilename)
+	: SphereRenderer(sphere, textureFilename)
 {
 }
 
@@ -743,6 +884,17 @@ void PlanetRenderer::renderSphere(GlslProgram& glslProgram, Sphere* sun, Sphere*
 		glslProgram.setVec3("otherSphereCenterTransformed", glm::value_ptr(otherSphere->getModelTransformedCenter()));
 	}
 
+    if (!_textureFilename.empty())
+    {
+        //printf("texture filename not empty. Texture = %d\n", _texture);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, _texture);
+        glslProgram.setBool("useTexture", true);
+    }
+    else
+    {
+        glslProgram.setBool("useTexture", false);
+    }
 	glBindVertexArray(_mainVao);
 
 	// Draw vertices
@@ -763,6 +915,8 @@ void PlanetRenderer::renderLatitudeAndLongitudes(GlslProgram& glslProgram)
 	{
         glslProgram.setMat4("model", glm::value_ptr(_sphere.getModelMatrix()));
         glBindVertexArray(_latAndLongVao);
+
+        glslProgram.setBool("useTexture", false);
 
 		// Draw vertices
 		glDrawArrays(GL_LINES, 0, numLatAndLongVertices);
