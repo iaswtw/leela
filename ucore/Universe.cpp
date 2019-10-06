@@ -140,7 +140,7 @@ void Universe::initSceneObjects()
         glm::radians(0.0f),                 // axis rotation angle
         glm::radians(10.0f)                 // axis tilt angle
     );
-    moon.setOrbitalParameters(360,          // radius of orbit
+    moon.setOrbitalParameters(400,          // radius of orbit
         0.0f,                               // initial orbital angle
         0.008888888f,                       // revolution velocity
         0,                                  // orbital rotation angle

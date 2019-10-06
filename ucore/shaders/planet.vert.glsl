@@ -30,7 +30,9 @@ uniform SphereInfo sphereInfo;
 
 out vec4 Color;
 out vec2 TexCoord;
-out float darknessFactor;       // multiplier to be applied to the color of this vertex
+out float darknessFactor;       // multiplier to be applied to the color of vertex based on various factors
+                                // such as whether in day/night, where in day, where in shadow, etc.
+                                // The actual application of this value is done in fragment shader.
         
 //--------------------------------------------------------------------------------------------------------------------------
 // Terminology:
@@ -71,8 +73,6 @@ vec3 nearestPtL(vec3 modelTransformedPosition)
 
 void main()
 {
-    // default out color to in color.
-    Color = in_color;
     darknessFactor = 1.0;
     float daylightShadingMultiplier = 1.0;
 
@@ -83,12 +83,9 @@ void main()
     //float selfUmbraConeHalfAngle    = asin(sphereInfo.radius / selfUmbraLength);
 
     vec3 x_normal   = normalize(vec3(model * vec4(normal, 0.0)));
-    //vec3 x_normal   = normal;
     //vec3 x_position = vec3(model * vec4(position, 1.0));
     float dotProduct = dot(normalize(sunCenterTransformed - sphereInfo.centerTransformed), x_normal);
     //float compareValue = sin(selfUmbraConeHalfAngle);
-    
-
     
     do {
         // Find if point is in night
@@ -98,8 +95,6 @@ void main()
             if (dotProduct < -sphereInfo.sineOfSelfUmbraConeHalfAngle)
             {
                 // vertex is in night
-                //Color = vec4(in_color.rgb * nightColorMultiplier, in_color.a);
-                Color = vec4(in_color.rgb * nightColorMultiplier, in_color.a);
                 darknessFactor = nightColorMultiplier;
                 break;
             }
@@ -114,7 +109,6 @@ void main()
             {
                 // point is on the night side of this sphere.
                 // todo - this is only true if radius of sun is same as radius of this planet
-                Color = vec4(in_color.xyz * nightColorMultiplier, in_color.a);
                 darknessFactor = nightColorMultiplier;
                 break;
             }
@@ -230,34 +224,34 @@ void main()
         
                 //----------------------------------------------------------------
                 // Apply coloring based on the type of shadow the point is in.
+                float umbraDarknessFactor = 0.1;
                 if (bInUmbra) {
-                    //Color = vec4(in_color.rgb * 0.2, in_color.a);
-                    float umbraDarknessFactor = 0.2;
                     darknessFactor *= umbraDarknessFactor;
                 }
                 else if (bInAntumbra) {
-                    //Color = vec4(in_color.rgb * 0.4, in_color.a);
                     float antumbraDarknessFactor = 0.4;
-                    darknessFactor *= antumbraDarknessFactor;
+                    if (realisticShading) {
+                        // todo - perform shading based on distance from internal penumbra edge.
+                        darknessFactor *= antumbraDarknessFactor;
+                    }
+                    else {
+                        darknessFactor *= antumbraDarknessFactor;
+                    }
                 }
                 else if (bInPenumbra) {
-                    //Color = vec4(in_color.rgb * 0.6, in_color.a);
                     // simulate reduction in darkness using a shifted (by +1) cosine curve between 0 & 180 degrees
                     float penumbraDarknessFactor = 0;                    
                     if (realisticShading) {
-                        edgeCloseness = sqrt(edgeCloseness);
-                        penumbraDarknessFactor = 0.8 - 0.8 * ((1.0 + cos(edgeCloseness * PI) / 2.0));
-                        penumbraDarknessFactor += 0.6;      // todo - 0.2 should have worked.  But it does not result in full color at the outer edge of penumbra.
+                        //edgeCloseness = sqrt(edgeCloseness);
+                        penumbraDarknessFactor = umbraDarknessFactor + ((1.0 - umbraDarknessFactor) * (1.0 - max(0, cos(edgeCloseness * PI))));
                     }
                     else {
-                        penumbraDarknessFactor = 0.6;
+                        penumbraDarknessFactor = umbraDarknessFactor + 0.5;
                     }
                     
                     darknessFactor *= penumbraDarknessFactor;
                 }
                 else {
-                    //Color = vec(1.0, 0.0, 0.0, 1.0);
-                    //Color = in_color;
                 }
             }
         }
@@ -265,5 +259,6 @@ void main()
     
     // apply all 3 transformations to the original point
     gl_Position = proj * view * model * vec4(position, 1.0);
+    Color = in_color;
     TexCoord = texCoord;
 }

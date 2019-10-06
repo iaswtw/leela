@@ -5,15 +5,14 @@ in vec2 TexCoord;
 in float darknessFactor;
 
 uniform bool useTexture = false;
-uniform sampler2D outTexture;
+uniform sampler2D ourTexture;
 
 out vec4 FragColor;
 
 void main()
 {
     if (useTexture) {
-        FragColor = texture(outTexture, TexCoord) * darknessFactor;
-//        FragColor = texture(outTexture, TexCoord);
+        FragColor = texture(ourTexture, TexCoord) * darknessFactor;
     }
     else {
         FragColor = vec4(Color.rgb * darknessFactor, Color.a);
