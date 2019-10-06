@@ -11,8 +11,11 @@ out vec4 FragColor;
 
 void main()
 {
-    if (useTexture)
+    if (useTexture) {
         FragColor = texture(outTexture, TexCoord) * darknessFactor;
-    else
-        FragColor = Color;
+//        FragColor = texture(outTexture, TexCoord);
+    }
+    else {
+        FragColor = vec4(Color.rgb * darknessFactor, Color.a);
+    }
 }

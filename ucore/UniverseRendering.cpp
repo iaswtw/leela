@@ -74,7 +74,7 @@ void Universe::initializeGL()
     earthRenderer.setPolygonCountLevel(PolygonCountLevel_High);
     earthRenderer.constructVerticesAndSendToGpu();
     earthRenderer.bShowLatitudesAndLongitudes = true;
-    earthRenderer.setNightColorDarkness(NightColorDarkness_Medium);
+    earthRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
 
 
     moonRenderer.setPolygonCountLevel(PolygonCountLevel_Medium);

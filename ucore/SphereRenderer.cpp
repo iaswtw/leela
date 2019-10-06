@@ -327,9 +327,12 @@ std::pair<std::vector<float>*, std::vector<Triangle>*>  SphereRenderer::_constru
         float texCoordX;
         float texCoordY;
 
+        float d;
+
         // calculate alpha and beta angle. Convert it to a range between 0 & 1 to be used as texture coordinates.
         // At this point, radius is 1.0f.
-        float alpha = asin(float(vertex.y) / 1.0f);
+        d = sqrt((vertex.x * vertex.x) + (vertex.y * vertex.y));
+        float alpha = asin(float(vertex.y) / d);
         if (vertex.y >= 0.0f)
         {
             if (vertex.x >= 0.0f)
@@ -374,7 +377,7 @@ std::pair<std::vector<float>*, std::vector<Triangle>*>  SphereRenderer::_constru
         texCoordX = alpha / (2 * M_PI);
 
         // beta is from +ve Z axis.
-        float d = sqrt((vertex.x * vertex.x) + (vertex.y * vertex.y));
+        d = sqrt((vertex.x * vertex.x) + (vertex.y * vertex.y));
         float beta = asin(d / 1.0f);
         if (vertex.z < 0)
             beta = M_PI - beta;
@@ -970,8 +973,8 @@ void PlanetRenderer::renderOrbit(GlslProgram& glslProgram)
 
 
 
-SunRenderer::SunRenderer(Sphere& sphere)
-	: SphereRenderer(sphere)
+SunRenderer::SunRenderer(Sphere& sphere, std::string textureFilename)
+	: SphereRenderer(sphere, textureFilename)
 {
 }
 
@@ -984,7 +987,18 @@ void SunRenderer::renderSphere(GlslProgram& glslProgram)
 {
     glslProgram.setMat4("model", glm::value_ptr(_sphere.getModelMatrix()));
 
-	glBindVertexArray(_mainVao);
+    if (!_textureFilename.empty())
+    {
+        //printf("texture filename not empty. Texture = %d\n", _texture);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, _texture);
+        glslProgram.setBool("useTexture", true);
+    }
+    else
+    {
+        glslProgram.setBool("useTexture", false);
+    }
+    glBindVertexArray(_mainVao);
 
 	// Draw vertices
 #ifndef USE_ICOSPHERE

@@ -30,7 +30,7 @@ uniform SphereInfo sphereInfo;
 
 out vec4 Color;
 out vec2 TexCoord;
-out float darknessFactor;
+out float darknessFactor;       // multiplier to be applied to the color of this vertex
         
 //--------------------------------------------------------------------------------------------------------------------------
 // Terminology:
@@ -99,7 +99,7 @@ void main()
             {
                 // vertex is in night
                 //Color = vec4(in_color.rgb * nightColorMultiplier, in_color.a);
-                Color = vec4(in_color.rgb * 0.0, in_color.a);
+                Color = vec4(in_color.rgb * nightColorMultiplier, in_color.a);
                 darknessFactor = nightColorMultiplier;
                 break;
             }
@@ -123,11 +123,10 @@ void main()
         // Point is in day.  Find if it is in shadow
         {
             //float daylightShadingMultiplier = sqrt(min(1.0, dotProduct+compareValue));
-            vec4 tempColor = in_color;
             if (realisticShading)
             {
                 daylightShadingMultiplier = sqrt(min(1.0, dotProduct + sphereInfo.sineOfSelfUmbraConeHalfAngle));
-                tempColor = vec4(in_color.rgb * daylightShadingMultiplier, 1.0);
+                daylightShadingMultiplier = max(daylightShadingMultiplier, nightColorMultiplier);       // don't let color become any darker than night time color.
                 darknessFactor = daylightShadingMultiplier;
             }
       
@@ -233,32 +232,32 @@ void main()
                 // Apply coloring based on the type of shadow the point is in.
                 if (bInUmbra) {
                     //Color = vec4(in_color.rgb * 0.2, in_color.a);
-                    darknessFactor = 0.19;
-                    Color = vec4(tempColor.rgb * darknessFactor, tempColor.a);
+                    float umbraDarknessFactor = 0.2;
+                    darknessFactor *= umbraDarknessFactor;
                 }
                 else if (bInAntumbra) {
                     //Color = vec4(in_color.rgb * 0.4, in_color.a);
-                    darknessFactor = 0.4;
-                    Color = vec4(tempColor.rgb * darknessFactor, tempColor.a);                    
+                    float antumbraDarknessFactor = 0.4;
+                    darknessFactor *= antumbraDarknessFactor;
                 }
                 else if (bInPenumbra) {
                     //Color = vec4(in_color.rgb * 0.6, in_color.a);
                     // simulate reduction in darkness using a shifted (by +1) cosine curve between 0 & 180 degrees
-                    darknessFactor = 0;                    
+                    float penumbraDarknessFactor = 0;                    
                     if (realisticShading) {
                         edgeCloseness = sqrt(edgeCloseness);
-                        darknessFactor = 0.8 - 0.8 * ((1.0 + cos(edgeCloseness * PI) / 2.0));
-                        darknessFactor += 0.6;      // todo - 0.2 should have worked.  But it does not result in full color at the outer edge of penumbra.
+                        penumbraDarknessFactor = 0.8 - 0.8 * ((1.0 + cos(edgeCloseness * PI) / 2.0));
+                        penumbraDarknessFactor += 0.6;      // todo - 0.2 should have worked.  But it does not result in full color at the outer edge of penumbra.
                     }
                     else {
-                        darknessFactor = 0.6;
+                        penumbraDarknessFactor = 0.6;
                     }
-                    Color = vec4(tempColor.rgb * darknessFactor, tempColor.a);
+                    
+                    darknessFactor *= penumbraDarknessFactor;
                 }
                 else {
                     //Color = vec(1.0, 0.0, 0.0, 1.0);
                     //Color = in_color;
-                    Color = tempColor;
                 }
             }
         }

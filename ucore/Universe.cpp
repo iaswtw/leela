@@ -60,12 +60,14 @@ static std::string FindFontFile(const char * fileName)
 }
 
 Universe::Universe() :
-    sunRenderer(sun),
+    sunRenderer(sun, "../ucore/textures/sunmap.png"),
     //earthRenderer(earth, "../ucore/textures/Map-World_23_10.png"),
-    earthRenderer(earth, "../ucore/textures/earthmap1k.png"),
+    //earthRenderer(earth, "../ucore/textures/earthmap1k.png"),
+    earthRenderer(earth, "../ucore/textures/earth-erde-mit-wolken-2k.png"),
     
     //earthRenderer(earth, "../ucore/textures/cat1.png"),
-    moonRenderer(moon),
+    //moonRenderer(moon),
+    moonRenderer(moon, "../ucore/textures/moonmap1k.png"),
     axisRenderer(axis),
     starsRenderer(stars)
 {
@@ -100,7 +102,7 @@ void Universe::initSceneObjects()
     sun.setColor(1.0f, 1.0f, 0.6f);
     sun.setRotationParameters(160,          // radius
         0,                                  // initial rotation angle
-        0.02f,                              // rotation velocity
+        0.002f,                              // rotation velocity
         glm::radians(0.0f),                 // axis rotation angle
         glm::radians(0.0f)                  // axis tilt angle
     );
@@ -140,7 +142,7 @@ void Universe::initSceneObjects()
     );
     moon.setOrbitalParameters(360,          // radius of orbit
         0.0f,                               // initial orbital angle
-        0.01f,                              // revolution velocity
+        0.008888888f,                       // revolution velocity
         0,                                  // orbital rotation angle
         glm::radians(30.0f)                 // orbital tilt
     );
@@ -244,7 +246,6 @@ void Universe::SetApplicationStartView()
     // Adjust navigation view locks on earth and sun
     SetLockTargetAndMode(&earth, TargetLockMode_ViewTarget);
     earth.bRevolutionMotion = true;
-    earth.bRotationMotion = false;
 }
 
 
