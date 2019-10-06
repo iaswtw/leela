@@ -30,6 +30,7 @@ uniform SphereInfo sphereInfo;
 
 out vec4 Color;
 out vec2 TexCoord;
+out float darknessFactor;
         
 //--------------------------------------------------------------------------------------------------------------------------
 // Terminology:
@@ -72,6 +73,8 @@ void main()
 {
     // default out color to in color.
     Color = in_color;
+    darknessFactor = 1.0;
+    float daylightShadingMultiplier = 1.0;
 
     vec3 modelTransformedPosition   = vec3((model * vec4(position, 1.0)));
     float dist_sun_thisSphere       = distance(sunCenterTransformed, sphereInfo.centerTransformed);
@@ -97,6 +100,7 @@ void main()
                 // vertex is in night
                 //Color = vec4(in_color.rgb * nightColorMultiplier, in_color.a);
                 Color = vec4(in_color.rgb * 0.0, in_color.a);
+                darknessFactor = nightColorMultiplier;
                 break;
             }
         }
@@ -111,18 +115,20 @@ void main()
                 // point is on the night side of this sphere.
                 // todo - this is only true if radius of sun is same as radius of this planet
                 Color = vec4(in_color.xyz * nightColorMultiplier, in_color.a);
+                darknessFactor = nightColorMultiplier;
                 break;
             }
         }
         
         // Point is in day.  Find if it is in shadow
         {
-            //float multiplier = sqrt(min(1.0, dotProduct+compareValue));
+            //float daylightShadingMultiplier = sqrt(min(1.0, dotProduct+compareValue));
             vec4 tempColor = in_color;
             if (realisticShading)
             {
-                float multiplier = sqrt(min(1.0, dotProduct + sphereInfo.sineOfSelfUmbraConeHalfAngle));
-                tempColor = vec4(in_color.rgb * multiplier, 1.0);
+                daylightShadingMultiplier = sqrt(min(1.0, dotProduct + sphereInfo.sineOfSelfUmbraConeHalfAngle));
+                tempColor = vec4(in_color.rgb * daylightShadingMultiplier, 1.0);
+                darknessFactor = daylightShadingMultiplier;
             }
       
             float dist_sun_otherSphere      = distance(sunCenterTransformed, vec3(otherSphereCenterTransformed));
@@ -227,25 +233,27 @@ void main()
                 // Apply coloring based on the type of shadow the point is in.
                 if (bInUmbra) {
                     //Color = vec4(in_color.rgb * 0.2, in_color.a);
-                    Color = vec4(tempColor.rgb * 0.19, tempColor.a);
+                    darknessFactor = 0.19;
+                    Color = vec4(tempColor.rgb * darknessFactor, tempColor.a);
                 }
                 else if (bInAntumbra) {
                     //Color = vec4(in_color.rgb * 0.4, in_color.a);
-                    Color = vec4(tempColor.rgb * 0.4, tempColor.a);
+                    darknessFactor = 0.4;
+                    Color = vec4(tempColor.rgb * darknessFactor, tempColor.a);                    
                 }
                 else if (bInPenumbra) {
                     //Color = vec4(in_color.rgb * 0.6, in_color.a);
                     // simulate reduction in darkness using a shifted (by +1) cosine curve between 0 & 180 degrees
-                    float factor = 0;                    
+                    darknessFactor = 0;                    
                     if (realisticShading) {
                         edgeCloseness = sqrt(edgeCloseness);
-                        factor = 0.8 - 0.8 * ((1.0 + cos(edgeCloseness * PI) / 2.0));
-                        factor += 0.6;      // todo - 0.2 should have worked.  But it does not result in full color at the outer edge of penumbra.
+                        darknessFactor = 0.8 - 0.8 * ((1.0 + cos(edgeCloseness * PI) / 2.0));
+                        darknessFactor += 0.6;      // todo - 0.2 should have worked.  But it does not result in full color at the outer edge of penumbra.
                     }
                     else {
-                        factor = 0.6;
+                        darknessFactor = 0.6;
                     }
-                    Color = vec4(tempColor.rgb * factor, tempColor.a);
+                    Color = vec4(tempColor.rgb * darknessFactor, tempColor.a);
                 }
                 else {
                     //Color = vec(1.0, 0.0, 0.0, 1.0);

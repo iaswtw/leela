@@ -268,28 +268,28 @@ std::vector<float>* SphereRenderer::_constructMainSphereVertices()
             float y1 = s._radius * sin(theta) * sin(alpha);
             float z1 = s._radius * cos(theta);
             glm::vec3 N1 = glm::normalize(glm::vec3(x1, y1, z1) - glm::vec3(0.0f, 0.0f, 0.0f));
-            float texX1 = alpha / 2*M_PI;
+            float texX1 = alpha / (2 * M_PI);
             float texY1 = theta / M_PI;
 
             float x2 = s._radius * sin(theta + theat_inc) * cos(alpha);
             float y2 = s._radius * sin(theta + theat_inc) * sin(alpha);
             float z2 = s._radius * cos(theta + theat_inc);
             glm::vec3 N2 = glm::normalize(glm::vec3(x2, y2, z2) - glm::vec3(0.0f, 0.0f, 0.0f));
-            float texX2 = alpha / 2 * M_PI;
+            float texX2 = alpha / (2 * M_PI);
             float texY2 = (theta + theat_inc) / M_PI;
 
             float x3 = s._radius * sin(theta) * cos(alpha + alpha_inc);
             float y3 = s._radius * sin(theta) * sin(alpha + alpha_inc);
             float z3 = s._radius * cos(theta);
             glm::vec3 N3 = glm::normalize(glm::vec3(x3, y3, z3) - glm::vec3(0.0f, 0.0f, 0.0f));
-            float texX3 = (alpha + alpha_inc) / 2 * M_PI;
+            float texX3 = (alpha + alpha_inc) / (2 * M_PI);
             float texY3 = theta / M_PI;
 
             float x4 = s._radius * sin(theta + theat_inc) * cos(alpha + alpha_inc);
             float y4 = s._radius * sin(theta + theat_inc) * sin(alpha + alpha_inc);
             float z4 = s._radius * cos(theta + theat_inc);
             glm::vec3 N4 = glm::normalize(glm::vec3(x4, y4, z4) - glm::vec3(0.0f, 0.0f, 0.0f));
-            float texX4 = (alpha + alpha_inc) / 2 * M_PI;
+            float texX4 = (alpha + alpha_inc) / (2 * M_PI);
             float texY4 = (theta + theat_inc) / M_PI;
 
             // todo - calculate texture coords for each of the 4 vertices and add to vector.
@@ -335,11 +335,13 @@ std::pair<std::vector<float>*, std::vector<Triangle>*>  SphereRenderer::_constru
             if (vertex.x >= 0.0f)
             {
                 // 1st quadrant. no special handling
+                //alpha = 0;
             }
             else
             {
                 // 2nd quadrant
                 alpha = M_PI - alpha;
+                //alpha = 0;
             }
         }
         else
@@ -352,6 +354,7 @@ std::pair<std::vector<float>*, std::vector<Triangle>*>  SphereRenderer::_constru
             {
                 // 3rd quadrant
                 alpha = M_PI - alpha;
+                //alpha = 0;
             }
             else
             {
@@ -562,7 +565,7 @@ std::vector<float>* SphereRenderer::_constructOrbitalPlaneGridVertices()
     float maxGridLines      = 20;
     float inc               = (s._orbitalRadius * 2 * 1.2f) / maxGridLines;
     //inc = std::max(inc, 50.0f);
-    printf("inc = %f\n", inc);
+    //printf("inc = %f\n", inc);
 
     float x, y;
     float m                 = 0.4f;      // color multiplier
