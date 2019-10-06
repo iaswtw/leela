@@ -113,7 +113,7 @@ public:
 class SunRenderer : public SphereRenderer
 {
 public:
-	SunRenderer(Sphere& sphere);
+	SunRenderer(Sphere& sphere, std::string textureFilename = "");
 	~SunRenderer();
 
 	void renderSphere(GlslProgram& glslProgram);
