@@ -112,8 +112,8 @@ void Universe::ShowDemo(int nParam)
 
         /* Set proper moon's position so that the moon's shadow will
            fall on the earth shortly */
-        Moon_SetOrbitalPositionAngle(-3.7f * M_PI / 5);
-        Earth_SetOrbitalPositionAngle(0.75f * M_PI / 2);
+        Moon_SetOrbitalPositionAngle(-3.3f * M_PI / 5);
+        Earth_SetOrbitalPositionAngle(0.79f * M_PI / 2);
 
         // Adjust earth's motions
         Earth_RotationMotion(UCmdParam_On);
@@ -144,7 +144,7 @@ void Universe::ShowDemo(int nParam)
         // Set S
         // the hardcoded values here were found by printing the value of S & D on screen using ImGui
         // while manually going to that position.
-        newS = PNT(-112.110907, 3115.794740, 64.879020);
+        newS = PNT(-102.765937, 3070.539521, 59.694453);
         space.setFrame(AT_POINT,
             newS,
             VECTOR(newS, PNT(1220.0681, -2517.4311, -572.8346)),
@@ -192,7 +192,7 @@ void Universe::ShowDemo(int nParam)
         /* Set proper moon's position so that the moon's shadow will
            fall on the earth shortly */
         Moon_SetOrbitalPositionAngle(0.96 * M_PI / 2);
-        Earth_SetOrbitalPositionAngle(1.25f * M_PI / 2);
+        Earth_SetOrbitalPositionAngle(1.24f * M_PI / 2);
 
         // Adjust earth's motions
         Earth_RotationMotion(UCmdParam_On);
