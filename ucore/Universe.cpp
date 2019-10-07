@@ -136,7 +136,7 @@ void Universe::initSceneObjects()
     moon.setColor(0.8f, 0.8f, 0.8f);
     moon.setRotationParameters(22,          // radius
         0,                                  // initial rotation angle
-        0.005f,                             // rotation velocity
+        0.008888888f,                       // rotation velocity
         glm::radians(0.0f),                 // axis rotation angle
         glm::radians(10.0f)                 // axis tilt angle
     );

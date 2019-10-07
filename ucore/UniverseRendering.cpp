@@ -135,6 +135,10 @@ void Universe::renderAllNontransparentObjects()
     planetGlslProgram.setMat4("view", glm::value_ptr(viewMatrix));
     planetGlslProgram.setMat4("proj", glm::value_ptr(projectionMatrix));
 
+    // turn usage of texture on/off based on global setting. Individual spheres might change this
+    // depending on whether they have texture set up.
+    planetGlslProgram.setBool("useTexture", bRealisticSurfaces);
+
     renderUsingPlanetGlslProgram();
 
     planetGlslProgram.unuse();
@@ -199,9 +203,11 @@ void Universe::renderUsingPlanetGlslProgram()
     planetGlslProgram.setFloat("sunRadius", sun.getRadius());
     planetGlslProgram.setBool("realisticShading", bRealisticShading);
 
+    planetGlslProgram.setBool("useTexture", bRealisticSurfaces);
     earthRenderer.renderSphere(planetGlslProgram, &sun, &moon);
     earthRenderer.renderLatitudeAndLongitudes(planetGlslProgram);
 
+    planetGlslProgram.setBool("useTexture", bRealisticSurfaces);
     moonRenderer.renderSphere(planetGlslProgram, &sun, &earth);
     moonRenderer.renderLatitudeAndLongitudes(planetGlslProgram);
 
@@ -221,6 +227,7 @@ void Universe::renderUsingStarGlslProgram()
 
 void Universe::renderUsingSunGlslProgram()
 {
+    sunGlslProgram.setBool("useTexture", bRealisticSurfaces);
     sunRenderer.renderSphere(sunGlslProgram);
 }
 
@@ -667,7 +674,7 @@ void Universe::generateImGuiWidgets()
                 if (ImGui::Button("Annular Solar Eclipse from space## demo"))
                     ShowDemo(UDemo_AnnularSolarEclipseFromSpace);
                 ImGui::SameLine();
-                HelpMarker("This also shows umbra starting to travel over the earth. This happens close to the 4th contact for a duration of about 2 seconds. So watch out!");
+                HelpMarker("This also shows umbra starting to travel over the earth. This happens between 3rd and 4th contact for a few seconds. So watch out!");
 
                 if (ImGui::Button("Partial Lunar Eclipse## demo"))
                     ShowDemo(UDemo_PartialLunarEclipse);
@@ -708,6 +715,7 @@ void Universe::generateImGuiWidgets()
             //-----------------------------------------------------
 
             ImGui::Checkbox("Realistic shading", &bRealisticShading);
+            ImGui::Checkbox("Realistic surfaces", &bRealisticSurfaces);
             ImGui::Separator();
 
             //-----------------------------------------------------
@@ -761,6 +769,7 @@ void Universe::generateImGuiWidgets()
             ImGui::Checkbox("Orbit## earth", &earthRenderer.bShowOrbit);
             ImGui::Checkbox("Orbital plane (e)## earth", &earthRenderer.bShowOrbitalPlane);
             ImGui::Checkbox("Precession motion (F6)## earth", &earth.bPrecessionMotion);
+            ImGui::Checkbox("Show latitudes/longituedes## earth", &earthRenderer.bShowLatitudesAndLongitudes);
             ImGui::SameLine();
             if (ImGui::Button("Reset## earth precession motion"))
                 Earth_PrecessionMotion(UCmdParam_Reset);

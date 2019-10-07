@@ -242,8 +242,9 @@ void main()
                     // simulate reduction in darkness using a shifted (by +1) cosine curve between 0 & 180 degrees
                     float penumbraDarknessFactor = 0;                    
                     if (realisticShading) {
-                        //edgeCloseness = sqrt(edgeCloseness);
-                        penumbraDarknessFactor = umbraDarknessFactor + ((1.0 - umbraDarknessFactor) * (1.0 - max(0, cos(edgeCloseness * PI))));
+                        edgeCloseness = sqrt(edgeCloseness);
+                        penumbraDarknessFactor = umbraDarknessFactor + 
+                                                 ((1.0 - umbraDarknessFactor) * ((- cos(edgeCloseness * PI) / 2.0) + 0.5));
                     }
                     else {
                         penumbraDarknessFactor = umbraDarknessFactor + 0.5;

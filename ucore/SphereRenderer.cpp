@@ -329,22 +329,22 @@ std::pair<std::vector<float>*, std::vector<Triangle>*>  SphereRenderer::_constru
 
         float d;
 
+
+        //------------------------------------------------------------------
         // calculate alpha and beta angle. Convert it to a range between 0 & 1 to be used as texture coordinates.
         // At this point, radius is 1.0f.
         d = sqrt((vertex.x * vertex.x) + (vertex.y * vertex.y));
         float alpha = asin(float(vertex.y) / d);
+        if (alpha == -0.0f)
+            alpha = 0.0f;
         if (vertex.y >= 0.0f)
         {
             if (vertex.x >= 0.0f)
-            {
-                // 1st quadrant. no special handling
-                //alpha = 0;
+            { // 1st quadrant. no special handling
             }
             else
-            {
-                // 2nd quadrant
+            {   // 2nd quadrant
                 alpha = M_PI - alpha;
-                //alpha = 0;
             }
         }
         else
@@ -354,14 +354,11 @@ std::pair<std::vector<float>*, std::vector<Triangle>*>  SphereRenderer::_constru
 
             // y is -ve. alpha will also be -ve
             if (vertex.x < 0.0f)
-            {
-                // 3rd quadrant
+            {   // 3rd quadrant
                 alpha = M_PI - alpha;
-                //alpha = 0;
             }
             else
-            {
-                // 4th quadrant
+            {   // 4th quadrant
                 alpha += 2 * M_PI;
             }
         }
@@ -376,13 +373,12 @@ std::pair<std::vector<float>*, std::vector<Triangle>*>  SphereRenderer::_constru
         }
         texCoordX = alpha / (2 * M_PI);
 
-        // beta is from +ve Z axis.
-        d = sqrt((vertex.x * vertex.x) + (vertex.y * vertex.y));
-        float beta = asin(d / 1.0f);
-        if (vertex.z < 0)
-            beta = M_PI - beta;
-        texCoordY = beta / M_PI;
-        //texCoordY = (M_PI - beta) / M_PI;
+        //------------------------------------------------------------------
+        // beta is measured from from +ve Z axis.
+        float beta = asin(vertex.z);                // this is when measured from +ve X axis. goes from +PI/2 to -PI/2
+        beta = -beta + (M_PI / 2.0f);               // invert (-PI/2 to +PI/2) then shift (0 to PI)
+        texCoordY = beta / M_PI;                    // 0 to PI => 0 to 1
+
 
         //printf("%%%% texture coord: x = %f, y = %f\n", texCoordX, texCoordY);
         
@@ -419,12 +415,24 @@ std::vector<float>* SphereRenderer::_constructLatitudesAndLongitudeVertices()
     {
         float alpha = glm::radians(alphas);
 
+        //auto genSphPointAndNormal = [](float radius, float theta, float alpha) {
+        //    float x = radius * sin(theta) * cos(alpha);
+        //    float y = radius * sin(theta) * sin(alpha);
+        //    float z = radius * cos(theta);
+        //    glm::vec3 N = glm::normalize(glm::vec3(x, y, z) - glm::vec3(0.0f, 0.0f, 0.0f));
+
+        //    auto ret = { x, y, z, N };
+        //    return ret;
+        //};
+
         for (float theta = 0; theta < float(2 * M_PI); theta += inc)
         {
             float x1 = 1.001f * s._radius * sin(theta) * cos(alpha);
             float y1 = 1.001f * s._radius * sin(theta) * sin(alpha);
             float z1 = 1.001f * s._radius * cos(theta);
             glm::vec3 N1 = glm::normalize(glm::vec3(x1, y1, z1) - glm::vec3(0.0f, 0.0f, 0.0f));
+
+            //auto [x1, y1, z1, N1] = genSphPointAndNormal(1.001f * s._radius, theta, alpha);
 
             float x2 = 1.001f * s._radius * sin(theta + inc) * cos(alpha);
             float y2 = 1.001f * s._radius * sin(theta + inc) * sin(alpha);
@@ -895,10 +903,10 @@ void PlanetRenderer::renderSphere(GlslProgram& glslProgram, Sphere* sun, Sphere*
         //printf("texture filename not empty. Texture = %d\n", _texture);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _texture);
-        glslProgram.setBool("useTexture", true);
     }
     else
     {
+        // usage of texture was enabled globally earlier. Disable it.
         glslProgram.setBool("useTexture", false);
     }
 	glBindVertexArray(_mainVao);
@@ -992,10 +1000,10 @@ void SunRenderer::renderSphere(GlslProgram& glslProgram)
         //printf("texture filename not empty. Texture = %d\n", _texture);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _texture);
-        glslProgram.setBool("useTexture", true);
     }
     else
     {
+        // usage of texture was enabled globally earlier. Disable it.
         glslProgram.setBool("useTexture", false);
     }
     glBindVertexArray(_mainVao);
