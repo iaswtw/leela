@@ -365,6 +365,7 @@ private:
     //   When false, day & night hemispheres will he equal.
     //   When true, night hemisphere will be smaller than depending on the size of the sun.
     bool bRealisticShading = true;
+    bool bRealisticSurfaces = true;
 
     //=================================================================
     // IMGUI, SDL related
