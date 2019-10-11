@@ -59,6 +59,8 @@ public:
 
 
 private:
+    std::tuple<float, float, float, glm::vec3, float, float> calcPointOnSphere(float radius, float alpha, float theta);
+
     std::vector<float>* _constructMainSphereVertices();
     std::pair<std::vector<float>*, std::vector<Triangle>*> _constructMainIcoSphereVertices();
     std::vector<float>* _constructLatitudesAndLongitudeVertices();

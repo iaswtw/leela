@@ -29,7 +29,7 @@ using TriangleList = std::vector<Triangle>;
 using VertexList = std::vector<glm::vec3>;
 
 
-#define USE_ICOSPHERE
+//#define USE_ICOSPHERE
 
 namespace icosahedron
 {
@@ -165,6 +165,26 @@ IndexedMesh make_icosphere(int subdivisions)
 }
 
 
+/////////////////////////////////////////////////////////////////////////////////
+//// find middle point of 2 vertices
+//// NOTE: new vertex must be resized, so the length is equal to the radius
+/////////////////////////////////////////////////////////////////////////////////
+//void computeHalfVertex(const float v1[3], const float v2[3], float newV[3])
+//{
+//    newV[0] = v1[0] + v2[0];    // x
+//    newV[1] = v1[1] + v2[1];    // y
+//    newV[2] = v1[2] + v2[2];    // z
+//    float scale = radius / sqrtf(newV[0] * newV[0] + newV[1] * newV[1] + newV[2] * newV[2]);
+//    newV[0] *= scale;
+//    newV[1] *= scale;
+//    newV[2] *= scale;
+//}
+
+
+
+
+
+
 static inline void vector_push_back_7(std::vector<float>& v, float f1, float f2, float f3, float f4, float f5, float f6, float f7)
 {
     v.push_back(f1);
@@ -244,6 +264,29 @@ void SphereRenderer::setPolygonCountLevel(PolygonCountLevel polygonCountLevel)
 	_polygonCountLevel = polygonCountLevel;
 }
 
+/*
+ 
+ */
+std::tuple<float, float, float, glm::vec3, float, float> SphereRenderer::calcPointOnSphere(float radius, float alpha, float theta)
+{
+    if (alpha < 0)          alpha = 0.0f;
+    if (theta < 0)          theta = 0.0f;
+    
+    if (alpha > 2 * M_PI)   alpha = 2 * M_PI;
+    if (theta > M_PI)       theta = M_PI;
+
+    float x = radius * sin(theta) * cos(alpha);
+    float y = radius * sin(theta) * sin(alpha);
+    float z = radius * cos(theta);
+    glm::vec3 N = glm::normalize(glm::vec3(x, y, z) - glm::vec3(0.0f, 0.0f, 0.0f));
+    float texX = alpha / (2 * M_PI);
+    float texY = theta / M_PI;
+
+    if (texX > 1.0f)    texX = 1.0f;
+    if (texY > 1.0f)    texY = 1.0f;
+
+    return { x, y, z, N, texX, texY };
+}
 
 std::vector<float>* SphereRenderer::_constructMainSphereVertices()
 {
@@ -253,46 +296,25 @@ std::vector<float>* SphereRenderer::_constructMainSphereVertices()
 	float polygonIncrement = _getPolygonIncrement();
 
 	float alpha_inc = float(2 * M_PI) / polygonIncrement;
-    float theat_inc = float(M_PI) / (polygonIncrement / 2);
+    float theta_inc = float(M_PI) / (polygonIncrement / 2);
 
-    int numFloats = int((2 * M_PI / alpha_inc) * (M_PI / theat_inc)) * 10;
+    int numFloats = int((2 * M_PI / alpha_inc) * (M_PI / theta_inc)) * 10;
     printf("numFloats = %d\n", numFloats);
 
     v->reserve(numFloats);
-
-    for (float alpha = 0; alpha < float(2 * M_PI); alpha += alpha_inc)
+    float alpha;
+    float theta;
+    for (alpha = 0; alpha < float(2 * M_PI); alpha += alpha_inc)
     {
-        for (float theta = 0; theta < float(M_PI); theta += theat_inc)
+        for (theta = 0; theta < float(M_PI); theta += theta_inc)
         {
-            float x1 = s._radius * sin(theta) * cos(alpha);
-            float y1 = s._radius * sin(theta) * sin(alpha);
-            float z1 = s._radius * cos(theta);
-            glm::vec3 N1 = glm::normalize(glm::vec3(x1, y1, z1) - glm::vec3(0.0f, 0.0f, 0.0f));
-            float texX1 = alpha / (2 * M_PI);
-            float texY1 = theta / M_PI;
+            float theta_2 = theta + theta_inc;
+            float alpha_2 = alpha + alpha_inc;
 
-            float x2 = s._radius * sin(theta + theat_inc) * cos(alpha);
-            float y2 = s._radius * sin(theta + theat_inc) * sin(alpha);
-            float z2 = s._radius * cos(theta + theat_inc);
-            glm::vec3 N2 = glm::normalize(glm::vec3(x2, y2, z2) - glm::vec3(0.0f, 0.0f, 0.0f));
-            float texX2 = alpha / (2 * M_PI);
-            float texY2 = (theta + theat_inc) / M_PI;
-
-            float x3 = s._radius * sin(theta) * cos(alpha + alpha_inc);
-            float y3 = s._radius * sin(theta) * sin(alpha + alpha_inc);
-            float z3 = s._radius * cos(theta);
-            glm::vec3 N3 = glm::normalize(glm::vec3(x3, y3, z3) - glm::vec3(0.0f, 0.0f, 0.0f));
-            float texX3 = (alpha + alpha_inc) / (2 * M_PI);
-            float texY3 = theta / M_PI;
-
-            float x4 = s._radius * sin(theta + theat_inc) * cos(alpha + alpha_inc);
-            float y4 = s._radius * sin(theta + theat_inc) * sin(alpha + alpha_inc);
-            float z4 = s._radius * cos(theta + theat_inc);
-            glm::vec3 N4 = glm::normalize(glm::vec3(x4, y4, z4) - glm::vec3(0.0f, 0.0f, 0.0f));
-            float texX4 = (alpha + alpha_inc) / (2 * M_PI);
-            float texY4 = (theta + theat_inc) / M_PI;
-
-            // todo - calculate texture coords for each of the 4 vertices and add to vector.
+            auto [x1, y1, z1, N1, texX1, texY1] = calcPointOnSphere(s._radius, alpha, theta);
+            auto [x2, y2, z2, N2, texX2, texY2] = calcPointOnSphere(s._radius, alpha, theta_2);
+            auto [x3, y3, z3, N3, texX3, texY3] = calcPointOnSphere(s._radius, alpha_2, theta);
+            auto [x4, y4, z4, N4, texX4, texY4] = calcPointOnSphere(s._radius, alpha_2, theta_2);
 
             vector_push_back_12(*v, x1, y1, z1, s._r, s._g, s._b, 1.0f, N1.x, N1.y, N1.z, texX1, texY1);
             vector_push_back_12(*v, x2, y2, z2, s._r, s._g, s._b, 1.0f, N2.x, N2.y, N2.z, texX2, texY2);
@@ -300,8 +322,6 @@ std::vector<float>* SphereRenderer::_constructMainSphereVertices()
             vector_push_back_12(*v, x3, y3, z3, s._r, s._g, s._b, 1.0f, N3.x, N3.y, N3.z, texX3, texY3);
             vector_push_back_12(*v, x2, y2, z2, s._r, s._g, s._b, 1.0f, N2.x, N2.y, N2.z, texX2, texY2);
             vector_push_back_12(*v, x4, y4, z4, s._r, s._g, s._b, 1.0f, N4.x, N4.y, N4.z, texX4, texY4);
-
-            //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
         }
     }
 
@@ -314,6 +334,7 @@ std::pair<std::vector<float>*, std::vector<Triangle>*>  SphereRenderer::_constru
     Sphere& s = _sphere;
 
     IndexedMesh indexMesh = make_icosphere(_getIcoSphereSubdivisionLevel());
+    //IndexedMesh indexMesh = make_icosphere(1);
     
     // .first is VertexList; which is vector of glm::vec3
     for (int i = 0; i < indexMesh.first->size(); i++)
@@ -411,33 +432,14 @@ std::vector<float>* SphereRenderer::_constructLatitudesAndLongitudeVertices()
     //std::list<float> alphas = { 0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165 };
 
     //for (float alpha : alphas)
-    for (float alphas = 0.0f; alphas < 180.0f; alphas += 10.0f)
+    for (float alpha_deg = 0.0f; alpha_deg < 360.0f; alpha_deg += 10.0f)
     {
-        float alpha = glm::radians(alphas);
-
-        //auto genSphPointAndNormal = [](float radius, float theta, float alpha) {
-        //    float x = radius * sin(theta) * cos(alpha);
-        //    float y = radius * sin(theta) * sin(alpha);
-        //    float z = radius * cos(theta);
-        //    glm::vec3 N = glm::normalize(glm::vec3(x, y, z) - glm::vec3(0.0f, 0.0f, 0.0f));
-
-        //    auto ret = { x, y, z, N };
-        //    return ret;
-        //};
+        float alpha = glm::radians(alpha_deg);
 
         for (float theta = 0; theta < float(2 * M_PI); theta += inc)
         {
-            float x1 = 1.001f * s._radius * sin(theta) * cos(alpha);
-            float y1 = 1.001f * s._radius * sin(theta) * sin(alpha);
-            float z1 = 1.001f * s._radius * cos(theta);
-            glm::vec3 N1 = glm::normalize(glm::vec3(x1, y1, z1) - glm::vec3(0.0f, 0.0f, 0.0f));
-
-            //auto [x1, y1, z1, N1] = genSphPointAndNormal(1.001f * s._radius, theta, alpha);
-
-            float x2 = 1.001f * s._radius * sin(theta + inc) * cos(alpha);
-            float y2 = 1.001f * s._radius * sin(theta + inc) * sin(alpha);
-            float z2 = 1.001f * s._radius * cos(theta + inc);
-            glm::vec3 N2 = glm::normalize(glm::vec3(x2, y2, z2) - glm::vec3(0.0f, 0.0f, 0.0f));
+            auto [x1, y1, z1, N1, texX1, texY1] = calcPointOnSphere(1.001f * s._radius, alpha, theta);
+            auto [x2, y2, z2, N2, texX2, texY2] = calcPointOnSphere(1.001f * s._radius, alpha, theta + inc);
 
             float cMult;
             if (alpha == 0.0f)
@@ -463,15 +465,8 @@ std::vector<float>* SphereRenderer::_constructLatitudesAndLongitudeVertices()
 
         for (float alpha = 0; alpha < float(2 * M_PI); alpha += inc)
         {
-            float x1 = 1.001f * s._radius * sin(theta) * cos(alpha);
-            float y1 = 1.001f * s._radius * sin(theta) * sin(alpha);
-            float z1 = 1.001f * s._radius * cos(theta);
-            glm::vec3 N1 = glm::normalize(glm::vec3(x1, y1, z1) - glm::vec3(0.0f, 0.0f, 0.0f));
-
-            float x2 = 1.001f * s._radius * sin(theta) * cos(alpha + inc);
-            float y2 = 1.001f * s._radius * sin(theta) * sin(alpha + inc);
-            float z2 = 1.001f * s._radius * cos(theta);
-            glm::vec3 N2 = glm::normalize(glm::vec3(x2, y2, z2) - glm::vec3(0.0f, 0.0f, 0.0f));
+            auto [x1, y1, z1, N1, texX1, texY1] = calcPointOnSphere(1.001f * s._radius, alpha, theta);
+            auto [x2, y2, z2, N2, texX2, texY2] = calcPointOnSphere(1.001f * s._radius, alpha + inc, theta);
 
             vector_push_back_12(*v, x1, y1, z1, s._r*0.9f, s._g*0.5f, s._b*0.5f, 1.0f, N1.x, N1.y, N1.z, 0.0f, 0.0f);
             vector_push_back_12(*v, x2, y2, z2, s._r*0.9f, s._g*0.5f, s._b*0.5f, 1.0f, N2.x, N2.y, N2.z, 0.0f, 0.0f);
@@ -488,17 +483,10 @@ std::vector<float>* SphereRenderer::_constructLatitudesAndLongitudeVertices()
         float theta = glm::radians(thetas);
         float cMult = 0.9f;
 
-        for (float alpha = 0; alpha < float(2 * M_PI) - inc; alpha += inc)
+        for (float alpha = 0; alpha < float(2 * M_PI); alpha += inc)
         {
-            float x1 = 1.001f * s._radius * sin(theta) * cos(alpha);
-            float y1 = 1.001f * s._radius * sin(theta) * sin(alpha);
-            float z1 = 1.001f * s._radius * cos(theta);
-            glm::vec3 N1 = glm::normalize(glm::vec3(x1, y1, z1) - glm::vec3(0.0f, 0.0f, 0.0f));
-
-            float x2 = 1.001f * s._radius * sin(theta) * cos(alpha + inc);
-            float y2 = 1.001f * s._radius * sin(theta) * sin(alpha + inc);
-            float z2 = 1.001f * s._radius * cos(theta);
-            glm::vec3 N2 = glm::normalize(glm::vec3(x2, y2, z2) - glm::vec3(0.0f, 0.0f, 0.0f));
+            auto [x1, y1, z1, N1, texX1, texY1] = calcPointOnSphere(1.001f * s._radius, alpha, theta);
+            auto [x2, y2, z2, N2, texX2, texY2] = calcPointOnSphere(1.001f * s._radius, alpha + inc, theta);
 
             vector_push_back_12(*v, x1, y1, z1, s._r*cMult, s._g*cMult, s._b*cMult, 1.0f, N1.x, N1.y, N1.z, 0.0f, 0.0f);
             vector_push_back_12(*v, x2, y2, z2, s._r*cMult, s._g*cMult, s._b*cMult, 1.0f, N2.x, N2.y, N2.z, 0.0f, 0.0f);
@@ -641,7 +629,7 @@ void SphereRenderer::constructVerticesAndSendToGpu()
     glEnableVertexAttribArray(2);
 
     glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(10 * sizeof(float)));
-    glEnableVertexAttribArray(2);
+    glEnableVertexAttribArray(3);
 
     numMainSphereVertices = v->size() / PLANET_STRIDE_IN_VBO;
     delete v;
@@ -698,11 +686,15 @@ void SphereRenderer::constructVerticesAndSendToGpu()
     {
         glGenTextures(1, &_texture);
         glBindTexture(GL_TEXTURE_2D, _texture);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+        // The following border color isn't used because 'clamp_to_edge' used above. 
+        // Set border color to debug problems at the edge in the future.
+        float color[] = { 1.0f, 0.0f, 0.0f, 1.0f };
+        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
 
         std::vector<unsigned char> image1;
         unsigned int width, height;
@@ -843,7 +835,7 @@ float SphereRenderer::_getPolygonIncrement()
 	case PolygonCountLevel_Medium:
 		return 500.0;
 	case PolygonCountLevel_High:
-		return 1800.0;
+		return 1000.0;
 	}
 }
 
