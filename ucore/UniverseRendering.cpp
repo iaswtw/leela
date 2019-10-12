@@ -765,14 +765,14 @@ void Universe::generateImGuiWidgets()
             ImGui::PopFont();
 
             ImGui::Indent();
-            ImGui::Checkbox("Revolution motion (0)## earth", &earth.bRevolutionMotion);
-            ImGui::Checkbox("Orbit## earth", &earthRenderer.bShowOrbit);
+            ImGui::Checkbox("Revolution  (0)## earth", &earth.bRevolutionMotion);
+            ImGui::Checkbox("Orbit## earth", &earthRenderer.bShowOrbit);  ImGui::SameLine();
             ImGui::Checkbox("Orbital plane (e)## earth", &earthRenderer.bShowOrbitalPlane);
-            ImGui::Checkbox("Precession motion (F6)## earth", &earth.bPrecessionMotion);
-            ImGui::Checkbox("Show latitudes/longituedes## earth", &earthRenderer.bShowLatitudesAndLongitudes);
+            ImGui::Checkbox("Precession (F6)## earth", &earth.bPrecessionMotion);
             ImGui::SameLine();
             if (ImGui::Button("Reset## earth precession motion"))
                 Earth_PrecessionMotion(UCmdParam_Reset);
+            ImGui::Checkbox("Show latitudes/longituedes## earth", &earthRenderer.bShowLatitudesAndLongitudes);
             ImGui::Unindent();
 
             ImGui::Separator();
@@ -784,8 +784,8 @@ void Universe::generateImGuiWidgets()
             ImGui::PopFont();
 
             ImGui::Indent();
-            ImGui::Checkbox("Revolution motion", &moon.bRevolutionMotion);
-            ImGui::Checkbox("Orbit## moon", &moonRenderer.bShowOrbit);
+            ImGui::Checkbox("Revolution", &moon.bRevolutionMotion);
+            ImGui::Checkbox("Orbit## moon", &moonRenderer.bShowOrbit); ImGui::SameLine();
             ImGui::Checkbox("Orbital plane (m)##moon", &moonRenderer.bShowOrbitalPlane);
             ImGui::Checkbox("Orbital plane rotation (F5)", &moon.bOrbitalPlaneRotation);
             ImGui::SameLine();
