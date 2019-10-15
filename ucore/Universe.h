@@ -25,7 +25,7 @@
 
 constexpr auto MAXGALAXYSTARS = 10000;
 
-
+#define RELEASE_BUILD
 
 /*!
  **************************************************************************
@@ -257,8 +257,6 @@ private:
     bool bFastForward = false;
     bool bFastReverse = false;
 
-    int dx = 0;
-    int dy = 0;
     int previousX = 0;
     int previousY = 0;
     float _stepMultiplier = 1.0f;
@@ -276,6 +274,8 @@ private:
     bool bRotateRightSd = false;
     bool bRotateLeftSd = false;
 
+    const float REFERENCE_FRAME_RATE = 60.0f;
+
 
     const float noYaw               = 0.0f;
     const float noPitch             = 0.0f;
@@ -288,10 +288,28 @@ private:
     const float nominalThrottle     = 30.0f;
 
 
-    float yaw       = 0.0f;
-    float pitch     = 0.0f;
-    float roll      = 0.0f;
-    float throttle  = 0.0f;
+    //----------------------------------------------
+    // Keyboard
+    //----------------------------------------------
+    float keyboard_yaw       = 0.0f;
+    float keyboard_pitch     = 0.0f;
+    float keyboard_roll      = 0.0f;
+    float keyboard_throttle  = 0.0f;
+
+    //----------------------------------------------
+    // Mouse inputs.  Just arrived mouse inputs are processed in the next iteration and then cleared.
+    //----------------------------------------------
+    float mouse_dx = 0.0f;
+    float mouse_dy = 0.0f;
+    float new_mouse_wheel_throttle = 0.0f;
+
+    // low pass filtered inputs in various directions.
+    float throttle = 0.0f;
+    float yaw = 0.0f;
+    float pitch = 0.0f;
+    float roll = 0.0f;
+
+
 
 
     bool bCtrlModifier = false;
@@ -309,7 +327,9 @@ private:
     float followDistance = 0.0f;
     Sphere* lockTarget = nullptr;           // If not null, the camera will change direction such that target
                                             // will always appear at the center of the screen.
-
+    bool bEarthSurfaceLockMode = false;
+    float surfaceLockTheta = 1.0f;      // change which latitude camera is at.
+    float surfaceLockAlpha = 0.0f;      // don't intend to use this. Don't see enough value.
 
     bool bSimulationPause = false;
 
