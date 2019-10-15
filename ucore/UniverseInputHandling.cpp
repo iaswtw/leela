@@ -22,6 +22,9 @@ void Universe::onKeyDown(SDL_Event* event)
     case SDLK_f:
         FastForward(UCmdParam_Start);
         break;
+    case SDLK_n:
+        bEarthSurfaceLockMode = !bEarthSurfaceLockMode;
+        break;
     case SDLK_m:
         Moon_OrbitalPlane(UCmdParam_Toggle);
         break;
@@ -105,28 +108,28 @@ void Universe::onKeyDown(SDL_Event* event)
 
 
     case SDLK_HOME:
-        throttle = nominalThrottle;
+        keyboard_throttle = nominalThrottle;
         break;
     case SDLK_END:
-        throttle = -nominalThrottle;
+        keyboard_throttle = -nominalThrottle;
         break;
     case SDLK_PAGEDOWN:
-        yaw = nominalYaw;
+        keyboard_yaw = nominalYaw;
         break;
     case SDLK_DELETE:
-        yaw = -nominalYaw;
+        keyboard_yaw = -nominalYaw;
         break;
     case SDLK_PAGEUP:
         if (!bAltModifier)
-            pitch = nominalPitch;
+            keyboard_pitch = nominalPitch;
         else
-            roll = -nominalRoll;
+            keyboard_roll = -nominalRoll;
         break;
     case SDLK_INSERT:
         if (!bAltModifier)
-            pitch = -nominalPitch;
+            keyboard_pitch = -nominalPitch;
         else
-            roll = nominalRoll;
+            keyboard_roll = nominalRoll;
         break;
 
         // Modifiers
@@ -159,16 +162,16 @@ void Universe::onKeyUp(SDL_Event* event)
 
     case SDLK_HOME:
     case SDLK_END:
-        throttle = noThrottle;
+        keyboard_throttle = noThrottle;
         break;
     case SDLK_PAGEDOWN:
     case SDLK_DELETE:
-        yaw = noYaw;
+        keyboard_yaw = noYaw;
         break;
     case SDLK_PAGEUP:
     case SDLK_INSERT:
-        roll = noRoll;
-        pitch = noPitch;
+        keyboard_roll = noRoll;
+        keyboard_pitch = noPitch;
         break;
 
 
@@ -192,24 +195,7 @@ void Universe::onKeyUp(SDL_Event* event)
 
 void Universe::onMouseMotion(int xrel, int yrel)
 {
-    float dx = float(xrel);
-    float dy = float(yrel);
-
-    float l_throttle  = 0.0f;
-    float l_yaw       = 0.0f;
-    float l_pitch     = 0.0f;
-    float l_roll      = 0.0f;
-
-    if (bLeftMouseButtonDown)
-        l_throttle = -dy * 5.0f;
-    else
-        l_pitch = -dy / 20.0f;
-
-    if (bRightMouseButtonDown)
-        l_roll = -dx / 20.0f;
-    else
-        l_yaw = dx / 20.0f;
-
-    navigate(l_throttle, l_yaw, l_pitch, l_roll);
+    mouse_dx = float(xrel);
+    mouse_dy = float(yrel);
 }
 

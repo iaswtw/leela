@@ -6,7 +6,7 @@
 #include "imgui_impl_opengl3.h"
 
 
-//#define RELEASE_BUILD
+
 
 /*************************************************************************************************
 
@@ -853,7 +853,7 @@ void Universe::generateImGuiWidgets()
             //-----------------------------------------------------
 
             ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-            _stepMultiplierFrameRateAdjustment = 60.0f / ImGui::GetIO().Framerate;
+            _stepMultiplierFrameRateAdjustment = REFERENCE_FRAME_RATE / ImGui::GetIO().Framerate;
 
             ImGui::Separator();
             ImGui::Text("S: %.4f, %.4f, %.4f", space.S.x, space.S.y, space.S.z);

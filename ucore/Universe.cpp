@@ -60,6 +60,12 @@ static std::string FindFontFile(const char * fileName)
 }
 
 Universe::Universe() :
+
+#ifdef RELEASE_BUILD
+    sunRenderer(sun, "textures/sunmap.png"),
+    earthRenderer(earth, "textures/earth-erde-mit-wolken-2k.png"),
+    moonRenderer(moon, "textures/moonmap1k.png"),
+#else
     sunRenderer(sun, "../ucore/textures/sunmap.png"),
     //earthRenderer(earth, "../ucore/textures/Map-World_23_10.png"),
     //earthRenderer(earth, "../ucore/textures/earthmap1k.png"),
@@ -68,6 +74,8 @@ Universe::Universe() :
     //earthRenderer(earth, "../ucore/textures/cat1.png"),
     //moonRenderer(moon),
     moonRenderer(moon, "../ucore/textures/moonmap1k.png"),
+#endif
+
     axisRenderer(axis),
     starsRenderer(stars)
 {
@@ -648,7 +656,90 @@ void Universe::resetWidgetControlMode()
 **************************************************************************************************/
 void Universe::processFlags()
 {
+    //----------------------------------------------
+    // First half of this method applies single pole IIR filtering to various motion inputs.
+    //----------------------------------------------
+
+    static const float EPSILON = 0.00001f;
+    static const float alpha = 0.05f;
+
+    // adjust gain w.r.t. current frame rate. Slower framerate result in higher gain to keep real-time behaviour same.
+    float gain = 1.0f;
+    float frameRate = ImGui::GetIO().Framerate;
+    if (frameRate > 5)
+        gain = REFERENCE_FRAME_RATE / frameRate;
+    else
+        gain = REFERENCE_FRAME_RATE / 5.0f;
+
+    //-------------------------------------
+    // initialize motions due to mouse to zero.
+    //-------------------------------------
+    float mouse_throttle    = 0.0f;
+    float mouse_yaw         = 0.0f;
+    float mouse_pitch       = 0.0f;
+    float mouse_roll        = 0.0f;
+
+    //-------------------------------------
+    // calculate motions due to mouse horizontal and vertical motion.
+    //-------------------------------------
+    if (bLeftMouseButtonDown)
+        mouse_throttle = -mouse_dy * 5.0f;
+    else
+        mouse_pitch = -mouse_dy / 20.0f;
+
+    if (bRightMouseButtonDown)
+        mouse_roll = -mouse_dx / 20.0f;
+    else
+        mouse_yaw = mouse_dx / 20.0f;
+
+
+    //-------------------------------------
+    // Combine mouse and keyboard inputs.
+    //-------------------------------------
+    float new_throttle  = mouse_throttle + keyboard_throttle + new_mouse_wheel_throttle;
+    float new_yaw       = mouse_yaw      + keyboard_yaw;
+    float new_pitch     = mouse_pitch    + keyboard_pitch;
+    float new_roll      = mouse_roll     + keyboard_roll;
+
+    //-------------------------------------
+    // Compensate for low/high framerate.
+    // TODO - Not sure if this is the right way to do it.
+    //-------------------------------------
+    new_throttle    *= gain;
+    new_yaw         *= gain;
+    new_pitch       *= gain;
+    new_roll        *= gain;
+
+    //-------------------------------------
+    // Apply 1st order IIR filter to all motions
+    //-------------------------------------
+    throttle  = alpha * new_throttle    + (1 - alpha) * throttle;
+    yaw       = alpha * new_yaw         + (1 - alpha) * yaw;
+    pitch     = alpha * new_pitch       + (1 - alpha) * pitch;
+    roll      = alpha * new_roll        + (1 - alpha) * roll;
+
+    //-------------------------------------
+    // Squelch motions below threshold.
+    //-------------------------------------
+    if (fabs(throttle) < EPSILON)     throttle = 0.0f;
+    if (fabs(yaw)      < EPSILON)          yaw = 0.0f;
+    if (fabs(pitch)    < EPSILON)        pitch = 0.0f;
+    if (fabs(roll)     < EPSILON)         roll = 0.0f;
+
+
+    //-------------------------------------
+    // Finally, apply the motions
+    //-------------------------------------
     navigate(throttle, yaw, pitch, roll);
+
+
+    //-------------------------------------
+    // we have used up the mouse input, if there was any.
+    //-------------------------------------
+    mouse_dx = 0.0f;
+    mouse_dy = 0.0f;
+    new_mouse_wheel_throttle = 0.0f;
+
 
     if (!bSimulationPause)
     {
@@ -660,7 +751,33 @@ void Universe::processFlags()
             advance(_stepMultiplier * _stepMultiplierFrameRateAdjustment);
     }
 
-    if (lockTarget != nullptr)
+    if (bEarthSurfaceLockMode)
+    {
+        glm::mat4 emm = earth.getModelMatrix();
+        glm::vec3 xCenter = earth.getModelTransformedCenter();
+
+        glm::vec4 S = glm::vec4(
+            1.01f * earth._radius * sinf(space.rad(surfaceLockTheta)),
+            0.0f,
+            1.01f * earth._radius * cosf(space.rad(surfaceLockTheta)),
+            1.0f);
+
+        glm::vec3 xS = emm * S;
+        glm::vec3 xD = emm * glm::vec4(S.x, S.y + 100.0f, S.z, 1.0f);
+        //VECTOR downwardDirVector = VECTOR(xS, xCenter);
+        //    space.crossProduct(VECTOR(xS, xCenter), VECTOR(xS, xD));
+
+        //PNT xD PNT(xS.x, xS.y + 100, xS.z);
+
+        //PNT newS = PNT(earth.getCenter()).translated(-followDistance, followVector);
+        space.setFrame(
+            AT_POINT,
+            xS,
+            VECTOR(xS, xD),
+            PNT(xCenter));
+
+    }
+    else if (lockTarget != nullptr)
         LookAtTarget();
 
 }
@@ -696,6 +813,7 @@ void Universe::navigate(float __throttle, float __yaw, float __pitch, float __ro
     if (lockTarget == nullptr)
     {
         // Finally, Apply the motion value.
+        // TODO - don't allow navigating into in a object.
         if (__throttle != 0.0f)
             space.moveFrame(Movement_Forward, __throttle);
 
@@ -722,6 +840,7 @@ void Universe::navigate(float __throttle, float __yaw, float __pitch, float __ro
     {
         if (lockMode != TargetLockMode_FollowTarget)
         {
+            // TODO - don't allow navigating into in a object.
             if (__throttle != 0.0f)
                 space.moveFrame(Movement_Forward, __throttle);
 
@@ -840,11 +959,7 @@ int Universe::runMainLoop()
                     break;
                 case SDL_MOUSEWHEEL:
                     if (bMouseGrabbed) {
-                        // Hack
-                        bool oldValue = bLeftMouseButtonDown;
-                        bLeftMouseButtonDown = true;
-                        onMouseMotion(-event.wheel.x * 10, -event.wheel.y * 10);
-                        bLeftMouseButtonDown = oldValue;
+                        new_mouse_wheel_throttle = event.wheel.y * 100;
                     }
                     break;
                 }
