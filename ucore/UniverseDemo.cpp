@@ -76,7 +76,7 @@ void Universe::ShowDemo(int nParam)
 
         /* Set proper moon's position so that the moon's shadow will
            fall on the earth shortly */
-        Moon_SetOrbitalPositionAngle(0.8f * M_PI / 2);
+        Moon_SetOrbitalPositionAngle(0.9f * M_PI / 2);
 
         // Adjust earth's motions
         Earth_RotationMotion(UCmdParam_On);
