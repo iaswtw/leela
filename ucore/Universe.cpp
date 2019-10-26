@@ -982,7 +982,6 @@ int Universe::runMainLoop()
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         SDL_GL_SwapWindow(window);
-        SDL_Delay(10);
     }
 
 	return 0;
@@ -1013,7 +1012,6 @@ int Universe::run()
 
     printf("Created SDL GL window\n");
     context = SDL_GL_CreateContext(window);
-    SDL_GL_SetSwapInterval(1);
 
     glewInit();
 
@@ -1054,6 +1052,7 @@ int Universe::run()
     
     printf("initializing scene objects... ");
 
+	SDL_GL_SetSwapInterval(1);
 	int retval = 0;
 	try
 	{
