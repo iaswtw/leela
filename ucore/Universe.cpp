@@ -674,10 +674,10 @@ void Universe::processFlags()
     //-------------------------------------
     // initialize motions due to mouse to zero.
     //-------------------------------------
-    float mouse_throttle    = 0.0f;
-    float mouse_yaw         = 0.0f;
-    float mouse_pitch       = 0.0f;
-    float mouse_roll        = 0.0f;
+    mouse_throttle    = 0.0f;
+    mouse_yaw         = 0.0f;
+    mouse_pitch       = 0.0f;
+    mouse_roll        = 0.0f;
 
     //-------------------------------------
     // calculate motions due to mouse horizontal and vertical motion.
@@ -696,35 +696,67 @@ void Universe::processFlags()
     //-------------------------------------
     // Combine mouse and keyboard inputs.
     //-------------------------------------
-    float new_throttle  = mouse_throttle + keyboard_throttle + new_mouse_wheel_throttle;
-    float new_yaw       = mouse_yaw      + keyboard_yaw;
-    float new_pitch     = mouse_pitch    + keyboard_pitch;
-    float new_roll      = mouse_roll     + keyboard_roll;
+    new_throttle[0]  = mouse_throttle + keyboard_throttle + new_mouse_wheel_throttle;
+    new_yaw[0]       = mouse_yaw      + keyboard_yaw;
+    new_pitch[0]     = mouse_pitch    + keyboard_pitch;
+    new_roll[0]      = mouse_roll     + keyboard_roll;
 
     //-------------------------------------
     // Compensate for low/high framerate.
     // TODO - Not sure if this is the right way to do it.
     //-------------------------------------
-    new_throttle    *= gain;
-    new_yaw         *= gain;
-    new_pitch       *= gain;
-    new_roll        *= gain;
+    gain /= 40;
 
-    //-------------------------------------
-    // Apply 1st order IIR filter to all motions
-    //-------------------------------------
-    throttle  = alpha * new_throttle    + (1 - alpha) * throttle;
-    yaw       = alpha * new_yaw         + (1 - alpha) * yaw;
-    pitch     = alpha * new_pitch       + (1 - alpha) * pitch;
-    roll      = alpha * new_roll        + (1 - alpha) * roll;
+    new_throttle[0]    *= gain;
+    new_yaw[0]         *= gain;
+    new_pitch[0]       *= gain;
+    new_roll[0]        *= gain;
+
+
+    // Amplify or attenuate the value based on keyboard modifiers.
+    if (bCtrlModifier)
+        new_throttle[0] /= 10;
+    else if (bShiftModifier)
+        new_throttle[0] *= 100;
+
+    if (bCtrlModifier)
+        new_yaw[0] /= 10;
+    else if (bShiftModifier)
+        new_yaw[0] *= 10;
+
+    if (bCtrlModifier)
+        new_pitch[0] /= 100;
+    else if (bShiftModifier)
+        new_pitch[0] *= 10;
+
+    if (bCtrlModifier)
+        new_roll[0] /= 10;
+    else if (bShiftModifier)
+        new_roll[0] *= 100;
+
+
+    ////-------------------------------------
+    //// Apply 1st order IIR filter to all motions
+    ////-------------------------------------
+    //throttle[0]  = alpha * new_throttle    + (1 - alpha) * throttle[0];
+    //yaw[0]       = alpha * new_yaw         + (1 - alpha) * yaw[0];
+    //pitch[0]     = alpha * new_pitch       + (1 - alpha) * pitch[0];
+    //roll[0]      = alpha * new_roll        + (1 - alpha) * roll[0];
+
+    throttle    = applyFir(fir_coeff, new_throttle, FIR_WIDTH);
+    yaw         = applyFir(fir_coeff, new_yaw,      FIR_WIDTH);
+    pitch       = applyFir(fir_coeff, new_pitch,    FIR_WIDTH);
+    roll        = applyFir(fir_coeff, new_roll,     FIR_WIDTH);
+
+
 
     //-------------------------------------
     // Squelch motions below threshold.
     //-------------------------------------
-    if (fabs(throttle) < EPSILON)     throttle = 0.0f;
-    if (fabs(yaw)      < EPSILON)          yaw = 0.0f;
-    if (fabs(pitch)    < EPSILON)        pitch = 0.0f;
-    if (fabs(roll)     < EPSILON)         roll = 0.0f;
+    //if (fabs(throttle) < EPSILON)     throttle = 0.0f;
+    //if (fabs(yaw)      < EPSILON)          yaw = 0.0f;
+    //if (fabs(pitch)    < EPSILON)        pitch = 0.0f;
+    //if (fabs(roll)     < EPSILON)         roll = 0.0f;
 
 
     //-------------------------------------
@@ -780,6 +812,38 @@ void Universe::processFlags()
     else if (lockTarget != nullptr)
         LookAtTarget();
 
+    shiftValues(new_throttle, FIR_WIDTH);
+    shiftValues(new_yaw,      FIR_WIDTH);
+    shiftValues(new_pitch,    FIR_WIDTH);
+    shiftValues(new_roll,     FIR_WIDTH);
+}
+
+/*
+ This performs multiply and accumulate. It does not reverse the input; it is assumed
+ to be reversed, i.e. index 0 is the most recent sample.
+ */
+float Universe::applyFir(float * firFilterCoefficients, float* inputVector, unsigned filterWidth)
+{
+    float result = 0;
+
+    for (int i = 0; i < filterWidth; i++)
+    {
+        result += inputVector[i] * firFilterCoefficients[i];
+    }
+
+    return result;
+}
+
+/*
+ Shift values in the given vector to right by 1 position.
+ After the shift, index 0 is considered 'free'.
+ */
+void Universe::shiftValues(float* values, unsigned int numValues)
+{
+    for (unsigned int i = numValues - 1; i > 0; i--)
+    {
+        values[i] = values[i - 1];
+    }
 }
 
 /*
@@ -789,27 +853,6 @@ void Universe::processFlags()
  */
 void Universe::navigate(float __throttle, float __yaw, float __pitch, float __roll)
 {
-    // Amplify or attenuate the value based on keyboard modifiers.
-    if (bCtrlModifier)
-        __throttle /= 10;
-    else if (bShiftModifier)
-        __throttle *= 100;
-
-    if (bCtrlModifier)
-        __yaw /= 10;
-    else if (bShiftModifier)
-        __yaw *= 10;
-
-    if (bCtrlModifier)
-        __pitch /= 100;
-    else if (bShiftModifier)
-        __pitch *= 10;
-
-    if (bCtrlModifier)
-        __roll /= 10;
-    else if (bShiftModifier)
-        __roll *= 100;
-
     if (lockTarget == nullptr)
     {
         // Finally, Apply the motion value.
