@@ -58,10 +58,6 @@ void Universe::initializeGL()
     simpleGlslProgram.link();
 
 
-    //---------------------------------------------------------------------------------------------------
-    // Axis
-    axisRenderer.constructVerticesAndSendToGpu();
-    starsRenderer.constructVerticesAndSendToGpu();
 
     //---------------------------------------------------------------------------------------------------
 
@@ -80,6 +76,11 @@ void Universe::initializeGL()
     moonRenderer.setPolygonCountLevel(PolygonCountLevel_Medium);
     moonRenderer.constructVerticesAndSendToGpu();
     moonRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
+
+    //---------------------------------------------------------------------------------------------------
+    // Axis
+    axisRenderer.constructVerticesAndSendToGpu();
+    starsRenderer.constructVerticesAndSendToGpu();
 
     glBindVertexArray(0);       // Disable VBO
 }
