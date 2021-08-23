@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	
+	<?include Config.wxi?>
+	<?define Version=1.0.0.0 ?>
+	
+	<Product Id="*"
+			 UpgradeCode="$(var.UpgradeCode)"
+			 Name="$(var.ProductName) $(var.Version)"
+			 Manufacturer="$(var.Manufacturer)"
+			 Version="$(var.Version)" Language="1033">
+		<Package InstallerVersion="200" Compressed="yes" Description="$(var.ProductName)" InstallScope="perMachine" />
+
+		<MajorUpgrade AllowDowngrades="yes" Schedule="afterInstallValidate"/>
+		<MediaTemplate EmbedCab="yes" />
+
+		<!--<Icon Id="universe3d.ico" SourceFile="$(var.SolutionDir)universe3d.ico" />-->
+		
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id='ProgramMenuFolder' Name='ProgramMenuFolder'>
+				<Directory Id='ProgramGroup' Name='Universe3D'/>
+			</Directory>
+			<!--<Directory Id="DesktopFolder" />-->
+			
+			<Directory Id="ProgramFilesFolder">
+				<Directory Id="INSTALLFOLDER" Name="$(var.InstallName)">
+					<Component Id="AppFolder" Guid="{fe15b9bd-b9be-47b0-ac66-2b71a40693ff}">
+						<CreateFolder/>
+						<RemoveFile Id="PurgeAppFolder" Name="*.*" On="uninstall" />
+					</Component>
+					
+					<Component Id="Universe3D" Guid="{baf8541c-0dee-4957-ada6-0c95d54b5ccf}">
+						<File Source="$(var.Universe3D.TargetPath)"></File>
+						<File Source="$(var.SolutionDir)external\glew-2.1.0\bin\Release\Win32\glew32.dll"></File>
+						<File Source="$(var.SolutionDir)external\SDL2-2.0.10\libs\SDL2.dll"></File>
+						<File Source="$(var.SolutionDir)universe3d.ico"></File>
+					</Component>
+					<Directory Id="shaders" Name="shaders">
+						<Component Id="shaders" Guid="{a2585e88-9a05-4e25-9a35-fa6bf929d76f}">
+							<File Source="$(var.Universe3D.ProjectDir)shaders\planet.frag.glsl"></File>
+							<File Source="$(var.Universe3D.ProjectDir)shaders\planet.vert.glsl"></File>
+							<File Source="$(var.Universe3D.ProjectDir)shaders\star.frag.glsl"></File>
+							<File Source="$(var.Universe3D.ProjectDir)shaders\star.vert.glsl"></File>
+							<File Source="$(var.Universe3D.ProjectDir)shaders\sun.frag.glsl"></File>
+							<File Source="$(var.Universe3D.ProjectDir)shaders\sun.vert.glsl"></File>
+							<File Source="$(var.Universe3D.ProjectDir)shaders\simple.frag.glsl"></File>
+							<File Source="$(var.Universe3D.ProjectDir)shaders\simple.vert.glsl"></File>
+						</Component>
+					</Directory>
+					<Directory Id="textures" Name="textures">
+						<Component Id="textures" Guid="{7a5be203-5093-4c1a-aca9-847c9754d2df}">
+							<File Source="$(var.Universe3D.ProjectDir)textures\cat1.png"></File>
+							<File Source="$(var.Universe3D.ProjectDir)textures\earth-erde-mit-wolken-2k.png"></File>
+							<File Source="$(var.Universe3D.ProjectDir)textures\earthmap1k.png"></File>
+							<File Source="$(var.Universe3D.ProjectDir)textures\Map-World_23_10.jpg"></File>
+							<File Source="$(var.Universe3D.ProjectDir)textures\Map-World_23_10.png"></File>
+							<File Source="$(var.Universe3D.ProjectDir)textures\Map-World_23_100.jpg"></File>
+							<File Source="$(var.Universe3D.ProjectDir)textures\moonmap1k.png"></File>
+							<File Source="$(var.Universe3D.ProjectDir)textures\sunmap.png"></File>
+						</Component>
+					</Directory>
+					<Directory Id="fonts" Name="fonts">
+						<Component Id="fonts" Guid="{d3a4d245-8e61-40cc-9b9e-d9af87b2a4ba}">
+							<File Source="$(var.SolutionDir)external\fonts\Cousine-Regular.ttf"></File>
+							<File Source="$(var.SolutionDir)external\fonts\DroidSans.ttf"></File>
+							<File Source="$(var.SolutionDir)external\fonts\Karla-Regular.ttf"></File>
+							<File Source="$(var.SolutionDir)external\fonts\ProggyClean.ttf"></File>
+							<File Source="$(var.SolutionDir)external\fonts\ProggyTiny.ttf"></File>
+							<File Source="$(var.SolutionDir)external\fonts\Roboto-Medium.ttf"></File>
+						</Component>
+					</Directory>
+
+				</Directory>
+			</Directory>
+		</Directory>
+
+		<!-- Add the shortcut to your installer package -->
+		<DirectoryRef Id="ProgramGroup">
+			<Component Id='ApplicationShortcut' Guid='{6b793f5d-e619-40ce-b648-7a1d198fec37}'>
+				<Shortcut Id='LaunchShortcut' Name='Universe3d' Description='Universe3d Simulation' Target='[INSTALLFOLDER]$(var.Universe3D.TargetFileName)' WorkingDirectory='INSTALLFOLDER' />
+				<Shortcut Id="UninstallProduct" Name="Uninstall Universe3d" Target="[SystemFolder]msiexec.exe" Arguments="/x [ProductCode]" Description="Uninstalls Universe3d" />
+				<RemoveFolder Id='ProgramGroup' On='uninstall'/>
+				<RegistryValue Root='HKCU' Key='SOFTWARE\Universe3d' Name='installed' Type='integer' Value='1' KeyPath='yes' />
+			</Component>
+		</DirectoryRef>
+
+
+		<Feature Id="ProductFeature" Level="1" Title="Universe3D">
+			<!--<ComponentRef Id="gitextensions.ico"/>-->
+			<ComponentRef Id="AppFolder"/>
+			<ComponentRef Id="Universe3D"/>
+			<ComponentRef Id="shaders"/>
+			<ComponentRef Id="textures"/>
+			<ComponentRef Id="fonts"/>
+			<ComponentRef Id="ApplicationShortcut"/>
+		</Feature>
+
+	</Product>
+</Wix>

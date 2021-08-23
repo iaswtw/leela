@@ -1041,6 +1041,9 @@ int Universe::run()
     setvbuf(stdout, 0, _IONBF, 0);
     const char* glsl_version = "#version 330";
 
+
+
+
     SDL_Init(SDL_INIT_EVERYTHING);
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
