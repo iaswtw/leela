@@ -14,11 +14,11 @@
 		<MajorUpgrade AllowDowngrades="yes" Schedule="afterInstallValidate"/>
 		<MediaTemplate EmbedCab="yes" />
 
-		<!--<Icon Id="universe3d.ico" SourceFile="$(var.SolutionDir)universe3d.ico" />-->
+		<!--<Icon Id="leela.ico" SourceFile="$(var.SolutionDir)leela.ico" />-->
 		
 		<Directory Id="TARGETDIR" Name="SourceDir">
 			<Directory Id='ProgramMenuFolder' Name='ProgramMenuFolder'>
-				<Directory Id='ProgramGroup' Name='Universe3D'/>
+				<Directory Id='ProgramGroup' Name='leela'/>
 			</Directory>
 			<!--<Directory Id="DesktopFolder" />-->
 			
@@ -29,34 +29,34 @@
 						<RemoveFile Id="PurgeAppFolder" Name="*.*" On="uninstall" />
 					</Component>
 					
-					<Component Id="Universe3D" Guid="{baf8541c-0dee-4957-ada6-0c95d54b5ccf}">
-						<File Source="$(var.Universe3D.TargetPath)"></File>
+					<Component Id="leela" Guid="{baf8541c-0dee-4957-ada6-0c95d54b5ccf}">
+						<File Source="$(var.leela.TargetPath)"></File>
 						<File Source="$(var.SolutionDir)external\glew-2.1.0\bin\Release\Win32\glew32.dll"></File>
 						<File Source="$(var.SolutionDir)external\SDL2-2.0.10\libs\SDL2.dll"></File>
-						<File Source="$(var.SolutionDir)universe3d.ico"></File>
+						<File Source="$(var.SolutionDir)leela.ico"></File>
 					</Component>
 					<Directory Id="shaders" Name="shaders">
 						<Component Id="shaders" Guid="{a2585e88-9a05-4e25-9a35-fa6bf929d76f}">
-							<File Source="$(var.Universe3D.ProjectDir)shaders\planet.frag.glsl"></File>
-							<File Source="$(var.Universe3D.ProjectDir)shaders\planet.vert.glsl"></File>
-							<File Source="$(var.Universe3D.ProjectDir)shaders\star.frag.glsl"></File>
-							<File Source="$(var.Universe3D.ProjectDir)shaders\star.vert.glsl"></File>
-							<File Source="$(var.Universe3D.ProjectDir)shaders\sun.frag.glsl"></File>
-							<File Source="$(var.Universe3D.ProjectDir)shaders\sun.vert.glsl"></File>
-							<File Source="$(var.Universe3D.ProjectDir)shaders\simple.frag.glsl"></File>
-							<File Source="$(var.Universe3D.ProjectDir)shaders\simple.vert.glsl"></File>
+							<File Source="$(var.leela.ProjectDir)shaders\planet.frag.glsl"></File>
+							<File Source="$(var.leela.ProjectDir)shaders\planet.vert.glsl"></File>
+							<File Source="$(var.leela.ProjectDir)shaders\star.frag.glsl"></File>
+							<File Source="$(var.leela.ProjectDir)shaders\star.vert.glsl"></File>
+							<File Source="$(var.leela.ProjectDir)shaders\sun.frag.glsl"></File>
+							<File Source="$(var.leela.ProjectDir)shaders\sun.vert.glsl"></File>
+							<File Source="$(var.leela.ProjectDir)shaders\simple.frag.glsl"></File>
+							<File Source="$(var.leela.ProjectDir)shaders\simple.vert.glsl"></File>
 						</Component>
 					</Directory>
 					<Directory Id="textures" Name="textures">
 						<Component Id="textures" Guid="{7a5be203-5093-4c1a-aca9-847c9754d2df}">
-							<File Source="$(var.Universe3D.ProjectDir)textures\cat1.png"></File>
-							<File Source="$(var.Universe3D.ProjectDir)textures\earth-erde-mit-wolken-2k.png"></File>
-							<File Source="$(var.Universe3D.ProjectDir)textures\earthmap1k.png"></File>
-							<File Source="$(var.Universe3D.ProjectDir)textures\Map-World_23_10.jpg"></File>
-							<File Source="$(var.Universe3D.ProjectDir)textures\Map-World_23_10.png"></File>
-							<File Source="$(var.Universe3D.ProjectDir)textures\Map-World_23_100.jpg"></File>
-							<File Source="$(var.Universe3D.ProjectDir)textures\moonmap1k.png"></File>
-							<File Source="$(var.Universe3D.ProjectDir)textures\sunmap.png"></File>
+							<File Source="$(var.leela.ProjectDir)textures\cat1.png"></File>
+							<File Source="$(var.leela.ProjectDir)textures\earth-erde-mit-wolken-2k.png"></File>
+							<File Source="$(var.leela.ProjectDir)textures\earthmap1k.png"></File>
+							<File Source="$(var.leela.ProjectDir)textures\Map-World_23_10.jpg"></File>
+							<File Source="$(var.leela.ProjectDir)textures\Map-World_23_10.png"></File>
+							<File Source="$(var.leela.ProjectDir)textures\Map-World_23_100.jpg"></File>
+							<File Source="$(var.leela.ProjectDir)textures\moonmap1k.png"></File>
+							<File Source="$(var.leela.ProjectDir)textures\sunmap.png"></File>
 						</Component>
 					</Directory>
 					<Directory Id="fonts" Name="fonts">
@@ -77,18 +77,18 @@
 		<!-- Add the shortcut to your installer package -->
 		<DirectoryRef Id="ProgramGroup">
 			<Component Id='ApplicationShortcut' Guid='{6b793f5d-e619-40ce-b648-7a1d198fec37}'>
-				<Shortcut Id='LaunchShortcut' Name='Universe3d' Description='Universe3d Simulation' Target='[INSTALLFOLDER]$(var.Universe3D.TargetFileName)' WorkingDirectory='INSTALLFOLDER' />
-				<Shortcut Id="UninstallProduct" Name="Uninstall Universe3d" Target="[SystemFolder]msiexec.exe" Arguments="/x [ProductCode]" Description="Uninstalls Universe3d" />
+				<Shortcut Id='LaunchShortcut' Name='leela' Description='leela Simulation' Target='[INSTALLFOLDER]$(var.leela.TargetFileName)' WorkingDirectory='INSTALLFOLDER' />
+				<Shortcut Id="UninstallProduct" Name="Uninstall leela" Target="[SystemFolder]msiexec.exe" Arguments="/x [ProductCode]" Description="Uninstalls leela" />
 				<RemoveFolder Id='ProgramGroup' On='uninstall'/>
-				<RegistryValue Root='HKCU' Key='SOFTWARE\Universe3d' Name='installed' Type='integer' Value='1' KeyPath='yes' />
+				<RegistryValue Root='HKCU' Key='SOFTWARE\leela' Name='installed' Type='integer' Value='1' KeyPath='yes' />
 			</Component>
 		</DirectoryRef>
 
 
-		<Feature Id="ProductFeature" Level="1" Title="Universe3D">
+		<Feature Id="ProductFeature" Level="1" Title="leela">
 			<!--<ComponentRef Id="gitextensions.ico"/>-->
 			<ComponentRef Id="AppFolder"/>
-			<ComponentRef Id="Universe3D"/>
+			<ComponentRef Id="leela"/>
 			<ComponentRef Id="shaders"/>
 			<ComponentRef Id="textures"/>
 			<ComponentRef Id="fonts"/>

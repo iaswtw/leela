@@ -28,7 +28,7 @@ constexpr auto NUM_NAVIGATION_INPUT_SAMPLES = 10;
 constexpr auto FIR_WIDTH = 100;
 
 
-#define RELEASE_BUILD
+//#define RELEASE_BUILD
 
 /*!
  **************************************************************************

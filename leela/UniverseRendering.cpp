@@ -20,8 +20,8 @@ void Universe::initializeGL()
     std::string vertFilename("shaders/planet.vert.glsl");
     std::string fragFilename("shaders/planet.frag.glsl");
 #else
-    std::string vertFilename("../ucore/shaders/planet.vert.glsl");
-    std::string fragFilename("../ucore/shaders/planet.frag.glsl");
+    std::string vertFilename("../leela/shaders/planet.vert.glsl");
+    std::string fragFilename("../leela/shaders/planet.frag.glsl");
 #endif
     planetGlslProgram.compileShadersFromFile(vertFilename, fragFilename);
     planetGlslProgram.link();
@@ -31,8 +31,8 @@ void Universe::initializeGL()
     vertFilename = "shaders/sun.vert.glsl";
     fragFilename = "shaders/sun.frag.glsl";
 #else
-    vertFilename = "../ucore/shaders/sun.vert.glsl";
-    fragFilename = "../ucore/shaders/sun.frag.glsl";
+    vertFilename = "../leela/shaders/sun.vert.glsl";
+    fragFilename = "../leela/shaders/sun.frag.glsl";
 #endif
     sunGlslProgram.compileShadersFromFile(vertFilename, fragFilename);
     sunGlslProgram.link();
@@ -41,8 +41,8 @@ void Universe::initializeGL()
     vertFilename = "shaders/star.vert.glsl";
     fragFilename = "shaders/star.frag.glsl";
 #else
-    vertFilename = "../ucore/shaders/star.vert.glsl";
-    fragFilename = "../ucore/shaders/star.frag.glsl";
+    vertFilename = "../leela/shaders/star.vert.glsl";
+    fragFilename = "../leela/shaders/star.frag.glsl";
 #endif
     starGlslProgram.compileShadersFromFile(vertFilename, fragFilename);
     starGlslProgram.link();
@@ -51,8 +51,8 @@ void Universe::initializeGL()
     vertFilename = "shaders/simple.vert.glsl";
     fragFilename = "shaders/simple.frag.glsl";
 #else
-    vertFilename = "../ucore/shaders/simple.vert.glsl";
-    fragFilename = "../ucore/shaders/simple.frag.glsl";
+    vertFilename = "../leela/shaders/simple.vert.glsl";
+    fragFilename = "../leela/shaders/simple.frag.glsl";
 #endif
     simpleGlslProgram.compileShadersFromFile(vertFilename, fragFilename);
     simpleGlslProgram.link();
@@ -328,7 +328,7 @@ void Universe::generateImGuiWidgets()
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.8f, 0.8f, 1));
 
             ImGui::PushFont(appFontGiant);
-            ImGui::TextWrapped("Universe3d\n\n");
+            ImGui::TextWrapped("Leela\n\n");
             ImGui::PopFont();
 
             ImGui::PushFont(appFontMedium);
@@ -611,7 +611,7 @@ void Universe::generateImGuiWidgets()
         // Show menu bar
         if (ImGui::BeginMainMenuBar())
         {
-            if (ImGui::BeginMenu("Universe3d"))
+            if (ImGui::BeginMenu("Leela"))
             {
                 if (ImGui::MenuItem("Exit Application"))
                     bQuit = true;
