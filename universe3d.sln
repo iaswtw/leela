@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.31613.86
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Universe3D", "ucore\ucore.vcxproj", "{31AC98B1-E7E6-4ECF-BDEE-92055C8699D2}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "Universe3DSetup", "Universe3DSetupWix\Universe3DSetup.wixproj", "{684B784B-68B3-48F8-815F-482B29A3833D}"
+Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "Universe3DSetup", "Universe3DSetup\Universe3DSetup.wixproj", "{684B784B-68B3-48F8-815F-482B29A3833D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
