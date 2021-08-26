@@ -3,35 +3,29 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31613.86
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Universe3D", "ucore\ucore.vcxproj", "{31AC98B1-E7E6-4ECF-BDEE-92055C8699D2}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "leela", "leela\leela.vcxproj", "{31AC98B1-E7E6-4ECF-BDEE-92055C8699D2}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "Universe3DSetup", "Universe3DSetup\Universe3DSetup.wixproj", "{684B784B-68B3-48F8-815F-482B29A3833D}"
+Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "setup", "setup\setup.wixproj", "{684B784B-68B3-48F8-815F-482B29A3833D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
 		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
-		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{31AC98B1-E7E6-4ECF-BDEE-92055C8699D2}.Debug|Any CPU.ActiveCfg = Debug|Win32
 		{31AC98B1-E7E6-4ECF-BDEE-92055C8699D2}.Debug|x64.ActiveCfg = Debug|x64
 		{31AC98B1-E7E6-4ECF-BDEE-92055C8699D2}.Debug|x64.Build.0 = Debug|x64
 		{31AC98B1-E7E6-4ECF-BDEE-92055C8699D2}.Debug|x86.ActiveCfg = Debug|Win32
 		{31AC98B1-E7E6-4ECF-BDEE-92055C8699D2}.Debug|x86.Build.0 = Debug|Win32
-		{31AC98B1-E7E6-4ECF-BDEE-92055C8699D2}.Release|Any CPU.ActiveCfg = Release|Win32
 		{31AC98B1-E7E6-4ECF-BDEE-92055C8699D2}.Release|x64.ActiveCfg = Release|x64
 		{31AC98B1-E7E6-4ECF-BDEE-92055C8699D2}.Release|x64.Build.0 = Release|x64
 		{31AC98B1-E7E6-4ECF-BDEE-92055C8699D2}.Release|x86.ActiveCfg = Release|Win32
 		{31AC98B1-E7E6-4ECF-BDEE-92055C8699D2}.Release|x86.Build.0 = Release|Win32
-		{684B784B-68B3-48F8-815F-482B29A3833D}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{684B784B-68B3-48F8-815F-482B29A3833D}.Debug|x64.ActiveCfg = Debug|x86
 		{684B784B-68B3-48F8-815F-482B29A3833D}.Debug|x86.ActiveCfg = Debug|x86
 		{684B784B-68B3-48F8-815F-482B29A3833D}.Debug|x86.Build.0 = Debug|x86
-		{684B784B-68B3-48F8-815F-482B29A3833D}.Release|Any CPU.ActiveCfg = Release|x86
 		{684B784B-68B3-48F8-815F-482B29A3833D}.Release|x64.ActiveCfg = Release|x86
 		{684B784B-68B3-48F8-815F-482B29A3833D}.Release|x86.ActiveCfg = Release|x86
 		{684B784B-68B3-48F8-815F-482B29A3833D}.Release|x86.Build.0 = Release|x86
@@ -40,6 +34,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {BE1AAB66-2E93-4A6D-8C40-CDF5158C7A7E}
+		SolutionGuid = {3B497FEE-F7CB-4108-9989-26000E451238}
 	EndGlobalSection
 EndGlobal

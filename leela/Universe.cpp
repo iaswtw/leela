@@ -66,14 +66,14 @@ Universe::Universe() :
     earthRenderer(earth, "textures/earth-erde-mit-wolken-2k.png"),
     moonRenderer(moon, "textures/moonmap1k.png"),
 #else
-    sunRenderer(sun, "../ucore/textures/sunmap.png"),
-    //earthRenderer(earth, "../ucore/textures/Map-World_23_10.png"),
-    //earthRenderer(earth, "../ucore/textures/earthmap1k.png"),
-    earthRenderer(earth, "../ucore/textures/earth-erde-mit-wolken-2k.png"),
+    sunRenderer(sun, "../leela/textures/sunmap.png"),
+    //earthRenderer(earth, "../leela/textures/Map-World_23_10.png"),
+    //earthRenderer(earth, "../leela/textures/earthmap1k.png"),
+    earthRenderer(earth, "../leela/textures/earth-erde-mit-wolken-2k.png"),
     
-    //earthRenderer(earth, "../ucore/textures/cat1.png"),
+    //earthRenderer(earth, "../leela/textures/cat1.png"),
     //moonRenderer(moon),
-    moonRenderer(moon, "../ucore/textures/moonmap1k.png"),
+    moonRenderer(moon, "../leela/textures/moonmap1k.png"),
 #endif
 
     axisRenderer(axis),
@@ -962,7 +962,7 @@ int Universe::runMainLoop()
             }
 
             //----------------------------------------------------
-            // Pass mouse events to universe3d application only if ImGui isn't using them.
+            // Pass mouse events to leela application only if ImGui isn't using them.
             if (!io.WantCaptureMouse)
             {
                 switch (event.type)
@@ -1054,7 +1054,7 @@ int Universe::run()
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     //SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 
-    window = SDL_CreateWindow("Universe3d", 100, 100, 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED);
+    window = SDL_CreateWindow("Leela", 100, 100, 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED);
 
     printf("Created SDL GL window\n");
     context = SDL_GL_CreateContext(window);

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Include>
+
+  <?define Manufacturer = "Leela Development Team" ?>
+  <?define ProductName = "Leela" ?>
+  <?define InstallName = Leela ?>
+
+  <?define AppRegKey = "Software\Leela" ?>
+  <?define InstalledRegKey = "Software\Leela\Installed" ?>
+
+  <!-- upgrade code never changes -->
+  <?define UpgradeCode = "e79b5ef1-88ac-4808-9eb9-9d34d0590c7b" ?>
+
+</Include>

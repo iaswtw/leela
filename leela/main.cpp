@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 
     if (retval != 0)
     {
-        Sleep(10000);
+        Sleep(1000);
     }
     return retval;
 }
