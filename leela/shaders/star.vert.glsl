@@ -1,7 +1,7 @@
 #version 330 core
 
-in vec3 position;
-in vec4 in_color;
+layout (location = 0) in vec3 position;
+layout (location = 1) in vec4 in_color;
 
 uniform mat4 model;
 uniform mat4 view;
