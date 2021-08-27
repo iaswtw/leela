@@ -1,4 +1,4 @@
-# universe3d
+# Leela
 
 This simulation of the sun, moon and earth system is intended to be a teaching aid for anyone who is curious to understand the orbital mechanics of these three celestial bodies.
 
