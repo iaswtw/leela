@@ -6,7 +6,7 @@
     <ProductVersion>3.10</ProductVersion>
     <ProjectGuid>684b784b-68b3-48f8-815f-482b29a3833d</ProjectGuid>
     <SchemaVersion>2.0</SchemaVersion>
-    <OutputName>Universe3DSetup</OutputName>
+    <OutputName>Leela</OutputName>
     <OutputType>Package</OutputType>
     <Name>Universe3DSetup</Name>
   </PropertyGroup>

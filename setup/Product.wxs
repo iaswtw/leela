@@ -47,18 +47,7 @@
 							<File Source="$(var.leela.ProjectDir)shaders\simple.vert.glsl"></File>
 						</Component>
 					</Directory>
-					<Directory Id="textures" Name="textures">
-						<Component Id="textures" Guid="{7a5be203-5093-4c1a-aca9-847c9754d2df}">
-							<File Source="$(var.leela.ProjectDir)textures\cat1.png"></File>
-							<File Source="$(var.leela.ProjectDir)textures\earth-erde-mit-wolken-2k.png"></File>
-							<File Source="$(var.leela.ProjectDir)textures\earthmap1k.png"></File>
-							<File Source="$(var.leela.ProjectDir)textures\Map-World_23_10.jpg"></File>
-							<File Source="$(var.leela.ProjectDir)textures\Map-World_23_10.png"></File>
-							<File Source="$(var.leela.ProjectDir)textures\Map-World_23_100.jpg"></File>
-							<File Source="$(var.leela.ProjectDir)textures\moonmap1k.png"></File>
-							<File Source="$(var.leela.ProjectDir)textures\sunmap.png"></File>
-						</Component>
-					</Directory>
+					<Directory Id="textures" Name="textures" />
 					<Directory Id="fonts" Name="fonts">
 						<Component Id="fonts" Guid="{d3a4d245-8e61-40cc-9b9e-d9af87b2a4ba}">
 							<File Source="$(var.SolutionDir)external\fonts\Cousine-Regular.ttf"></File>
@@ -84,15 +73,48 @@
 			</Component>
 		</DirectoryRef>
 
+		<DirectoryRef Id="textures">
+			<Component Id="textures_cat1.png" Guid="*">
+				<File Id="textures_cat1.png" Source="$(var.leela.ProjectDir)textures\cat1.png" KeyPath="yes"></File>
+			</Component>
+			<Component Id="textures_earth_erde_mit_wolken_2k.png" Guid="*">
+				<File Id="textures_earth_erde_mit_wolken_2k.png" Source="$(var.leela.ProjectDir)textures\earth-erde-mit-wolken-2k.png" KeyPath="yes"></File>
+			</Component>
+			<Component Id="textures_earthmap1k.png" Guid="*">
+				<File Id="textures_earthmap1k.png" Source="$(var.leela.ProjectDir)textures\earthmap1k.png" KeyPath="yes"></File>
+			</Component>
+			<Component Id="textures_Map_World_23_10.jpg" Guid="*">
+				<File Id="textures_Map_World_23_10.jpg" Source="$(var.leela.ProjectDir)textures\Map-World_23_10.jpg" KeyPath="yes"></File>
+			</Component>
+			<Component Id="textures_Map_World_23_10.png" Guid="*">
+				<File Id="textures_Map_World_23_10.png" Source="$(var.leela.ProjectDir)textures\Map-World_23_10.png" KeyPath="yes"></File>
+			</Component>
+			<Component Id="textures_Map_World_23_100.jpg" Guid="*">
+				<File Id="textures_Map_World_23_100.jpg" Source="$(var.leela.ProjectDir)textures\Map-World_23_100.jpg" KeyPath="yes"></File>
+			</Component>
+			<Component Id="textures_moonmap1k.png" Guid="*">
+				<File Id="textures_moonmap1k.png" Source="$(var.leela.ProjectDir)textures\moonmap1k.png" KeyPath="yes"></File>
+			</Component>
+			<Component Id="textures_sunmap.png" Guid="*">
+				<File Id="textures_sunmap.png" Source="$(var.leela.ProjectDir)textures\sunmap.png" KeyPath="yes"></File>
+			</Component>
+		</DirectoryRef>
 
 		<Feature Id="ProductFeature" Level="1" Title="leela">
 			<!--<ComponentRef Id="gitextensions.ico"/>-->
 			<ComponentRef Id="AppFolder"/>
 			<ComponentRef Id="leela"/>
 			<ComponentRef Id="shaders"/>
-			<ComponentRef Id="textures"/>
 			<ComponentRef Id="fonts"/>
 			<ComponentRef Id="ApplicationShortcut"/>
+			<ComponentRef Id="textures_cat1.png"/>
+			<ComponentRef Id="textures_earth_erde_mit_wolken_2k.png"/>
+			<ComponentRef Id="textures_earthmap1k.png"/>
+			<ComponentRef Id="textures_Map_World_23_10.jpg"/>
+			<ComponentRef Id="textures_Map_World_23_10.png"/>
+			<ComponentRef Id="textures_Map_World_23_100.jpg"/>
+			<ComponentRef Id="textures_moonmap1k.png"/>
+			<ComponentRef Id="textures_sunmap.png"/>
 		</Feature>
 
 	</Product>
