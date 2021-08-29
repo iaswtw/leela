@@ -259,7 +259,7 @@ public:
         //if (angle < -2 * M_PI)
         //    angle += 2 * M_PI;
 
-        angle = fmod(angle, 2 * M_PI);
+        angle = (float) fmod(angle, 2 * M_PI);
         return angle;
     }
 
