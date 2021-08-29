@@ -48,16 +48,7 @@
 						</Component>
 					</Directory>
 					<Directory Id="textures" Name="textures" />
-					<Directory Id="fonts" Name="fonts">
-						<Component Id="fonts" Guid="{d3a4d245-8e61-40cc-9b9e-d9af87b2a4ba}">
-							<File Source="$(var.SolutionDir)external\fonts\Cousine-Regular.ttf"></File>
-							<File Source="$(var.SolutionDir)external\fonts\DroidSans.ttf"></File>
-							<File Source="$(var.SolutionDir)external\fonts\Karla-Regular.ttf"></File>
-							<File Source="$(var.SolutionDir)external\fonts\ProggyClean.ttf"></File>
-							<File Source="$(var.SolutionDir)external\fonts\ProggyTiny.ttf"></File>
-							<File Source="$(var.SolutionDir)external\fonts\Roboto-Medium.ttf"></File>
-						</Component>
-					</Directory>
+					<Directory Id="fonts" Name="fonts" />
 
 				</Directory>
 			</Directory>
@@ -100,6 +91,30 @@
 			</Component>
 		</DirectoryRef>
 
+
+		<DirectoryRef Id="fonts">
+			<Component Id="fonts_Cousine_Regular.ttf" Guid="*">
+				<File Id="fonts_Cousine_Regular.ttf" Source="$(var.SolutionDir)external\fonts\Cousine-Regular.ttf" KeyPath="yes"></File>
+			</Component>
+			<Component Id="fonts_DroidSans.ttf">
+				<File Id="fonts_DroidSans.ttf" Source="$(var.SolutionDir)external\fonts\DroidSans.ttf" KeyPath="yes"></File>
+			</Component>
+			<Component Id="fonts_Karla_Regular.ttf">
+				<File Id="fonts_Karla_Regular.ttf" Source="$(var.SolutionDir)external\fonts\Karla-Regular.ttf" KeyPath="yes"></File>
+			</Component>
+			<Component Id="fonts_ProggyClean.ttf">
+				<File Id="fonts_ProggyClean.ttf" Source="$(var.SolutionDir)external\fonts\ProggyClean.ttf" KeyPath="yes"></File>
+			</Component>
+			<Component Id="fonts_ProggyTiny.ttf">
+				<File Id="fonts_ProggyTiny.ttf" Source="$(var.SolutionDir)external\fonts\ProggyTiny.ttf" KeyPath="yes"></File>
+			</Component>
+			<Component Id="font_Roboto_Medium.ttf">
+				<File Id="font_Roboto_Medium.ttf" Source="$(var.SolutionDir)external\fonts\Roboto-Medium.ttf" KeyPath="yes"></File>
+			</Component>
+		</DirectoryRef>
+
+
+
 		<Feature Id="ProductFeature" Level="1" Title="leela">
 			<!--<ComponentRef Id="gitextensions.ico"/>-->
 			<ComponentRef Id="AppFolder"/>
@@ -107,6 +122,7 @@
 			<ComponentRef Id="shaders"/>
 			<ComponentRef Id="fonts"/>
 			<ComponentRef Id="ApplicationShortcut"/>
+			
 			<ComponentRef Id="textures_cat1.png"/>
 			<ComponentRef Id="textures_earth_erde_mit_wolken_2k.png"/>
 			<ComponentRef Id="textures_earthmap1k.png"/>
@@ -115,6 +131,13 @@
 			<ComponentRef Id="textures_Map_World_23_100.jpg"/>
 			<ComponentRef Id="textures_moonmap1k.png"/>
 			<ComponentRef Id="textures_sunmap.png"/>
+			
+			<ComponentRef Id="fonts_Cousine_Regular.ttf"/>
+			<ComponentRef Id="fonts_DroidSans.ttf"/>
+			<ComponentRef Id="fonts_Karla_Regular.ttf"/>
+			<ComponentRef Id="fonts_ProggyClean.ttf"/>
+			<ComponentRef Id="fonts_ProggyTiny.ttf"/>
+			<ComponentRef Id="font_Roboto_Medium.ttf"/>
 		</Feature>
 
 	</Product>

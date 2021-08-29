@@ -272,15 +272,15 @@ std::tuple<float, float, float, glm::vec3, float, float> SphereRenderer::calcPoi
     if (alpha < 0)          alpha = 0.0f;
     if (theta < 0)          theta = 0.0f;
     
-    if (alpha > 2 * M_PI)   alpha = 2 * M_PI;
-    if (theta > M_PI)       theta = M_PI;
+    if (alpha > 2 * M_PI)   alpha = float(2 * M_PI);
+    if (theta > M_PI)       theta = float(M_PI);
 
     float x = radius * sin(theta) * cos(alpha);
     float y = radius * sin(theta) * sin(alpha);
     float z = radius * cos(theta);
     glm::vec3 N = glm::normalize(glm::vec3(x, y, z) - glm::vec3(0.0f, 0.0f, 0.0f));
-    float texX = alpha / (2 * M_PI);
-    float texY = theta / M_PI;
+    float texX = float(alpha / (2 * M_PI));
+    float texY = float(theta / M_PI);
 
     if (texX > 1.0f)    texX = 1.0f;
     if (texY > 1.0f)    texY = 1.0f;
@@ -392,7 +392,7 @@ std::pair<std::vector<float>*, std::vector<Triangle>*>  SphereRenderer::_constru
                 ;
             throw std::exception(msg.c_str());
         }
-        texCoordX = alpha / (2 * M_PI);
+        texCoordX = float(alpha / (2 * M_PI));
 
         //------------------------------------------------------------------
         // beta is measured from from +ve Z axis.

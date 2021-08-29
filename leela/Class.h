@@ -23,8 +23,12 @@ public:
     } color;
 
     int c;
-    PT() { c = -1; }
+    PT()
+        : c(-1), x(0.0), y(0.0), color{ 0, 0, 0 }
+    {
+    }
     PT(double xx, double yy, int cc = -1)
+        : color{ 0, 0, 0 }
     {
         x = xx; y = yy; c = cc;
     }
@@ -50,7 +54,10 @@ class PNT : public PT
 {
 public:
     double z;
-    PNT() { c = -1; }
+    PNT()
+        : z(0.0)
+    { 
+    }
     PNT(double xx, double yy, double zz, int cc = -1)
     {
         x = xx; y = yy; z = zz; c = cc;
@@ -140,7 +147,11 @@ class VECTOR
 {
 public:
     double x, y, z, l, m, n, d;
-    VECTOR() { }
+    VECTOR()
+        : x(0.0), y(0.0), z(0.0), l(0.0), m(0.0), n(0.0), d(0.0)
+    {
+    }
+
     VECTOR(double xx, double yy, double zz)
     {
         x = xx; y = yy; z = zz; calc();
@@ -209,7 +220,11 @@ class PLANE
 {
 public:
     double l, m, n, rho;
-    PLANE() { }
+    PLANE()
+        : l(0.0), m(0.0), n(0.0), rho(0.0)
+    {
+    }
+
     PLANE(PNT D, PNT S, int pointOnPlane = 1)
     {
         double distsquare = (S.x - D.x)*(S.x - D.x) + (S.y - D.y)*(S.y - D.y) + (S.z - D.z)*(S.z - D.z);

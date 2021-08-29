@@ -358,15 +358,15 @@ void Universe::SetSimulationSpeed(int nParam)
     eSimulationSpeed = USimulationSpeedType(nParam);
     switch (eSimulationSpeed)
     {
-    case USimulationSpeed_1p5625_Percent:      _stepMultiplier = 1.0 / pow(2, 6);        break;
-    case USimulationSpeed_3p125_Percent:       _stepMultiplier = 1.0 / pow(2, 5);        break;
-    case USimulationSpeed_6p25_Percent:        _stepMultiplier = 1.0 / pow(2, 4);        break;
-    case USimulationSpeed_12p5_Percent:        _stepMultiplier = 1.0 / pow(2, 3);        break;
-    case USimulationSpeed_25_Percent:          _stepMultiplier = 1.0 / pow(2, 2);        break;
-    case USimulationSpeed_50_Percent:          _stepMultiplier = 1.0 / pow(2, 1);        break;
-    case USimulationSpeed_100_Percent:         _stepMultiplier = 1.0 / pow(2, 0);        break;
-    case USimulationSpeed_400_Percent:         _stepMultiplier = 1.0 / pow(2, -2);        break;
-    case USimulationSpeed_1600_Percent:        _stepMultiplier = 1.0 / pow(2, -4);        break;
+    case USimulationSpeed_1p5625_Percent:      _stepMultiplier = float(1.0 / pow(2, 6));        break;
+    case USimulationSpeed_3p125_Percent:       _stepMultiplier = float(1.0 / pow(2, 5));        break;
+    case USimulationSpeed_6p25_Percent:        _stepMultiplier = float(1.0 / pow(2, 4));        break;
+    case USimulationSpeed_12p5_Percent:        _stepMultiplier = float(1.0 / pow(2, 3));        break;
+    case USimulationSpeed_25_Percent:          _stepMultiplier = float(1.0 / pow(2, 2));        break;
+    case USimulationSpeed_50_Percent:          _stepMultiplier = float(1.0 / pow(2, 1));        break;
+    case USimulationSpeed_100_Percent:         _stepMultiplier = float(1.0 / pow(2, 0));        break;
+    case USimulationSpeed_400_Percent:         _stepMultiplier = float(1.0 / pow(2, -2));        break;
+    case USimulationSpeed_1600_Percent:        _stepMultiplier = float(1.0 / pow(2, -4));        break;
     }
 }
 
@@ -789,9 +789,9 @@ void Universe::processFlags()
         glm::vec3 xCenter = earth.getModelTransformedCenter();
 
         glm::vec4 S = glm::vec4(
-            1.01f * earth._radius * sinf(space.rad(surfaceLockTheta)),
+            1.01f * earth._radius * sinf((float)space.rad(surfaceLockTheta)),
             0.0f,
-            1.01f * earth._radius * cosf(space.rad(surfaceLockTheta)),
+            1.01f * earth._radius * cosf((float)space.rad(surfaceLockTheta)),
             1.0f);
 
         glm::vec3 xS = emm * S;
@@ -826,7 +826,7 @@ float Universe::applyFir(float * firFilterCoefficients, float* inputVector, unsi
 {
     float result = 0;
 
-    for (int i = 0; i < filterWidth; i++)
+    for (unsigned int i = 0; i < filterWidth; i++)
     {
         result += inputVector[i] * firFilterCoefficients[i];
     }
