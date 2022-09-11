@@ -36,8 +36,9 @@ void GlslProgram::printShaderCompileStatus(GLuint shader)
 		char buffer[512];
 		glGetShaderInfoLog(shader, 512, NULL, buffer);
 		printf("Log:\n%s\n", buffer);
-
+#ifdef WIN32
 		throw std::exception("shader failed to compile.");
+#endif
 	}
 }
 
@@ -50,7 +51,9 @@ void GlslProgram::_readFile(std::string& filePath, std::string& fileContents)
     {
         perror(filePath.c_str());
         printf("Failed to open %s\n", filePath.c_str());
+#ifdef WIN32
 		throw std::exception("Could not open shader file");
+#endif
     }
     while (std::getline(shaderFile, line))
     {
@@ -116,8 +119,9 @@ void GlslProgram::link()
 		// Don't leak shaders either.
 		glDeleteShader(vertShaderId);
 		glDeleteShader(fragShaderId);
-
+#ifdef WIN32
 		throw std::exception("shader program failed to link");
+#endif
 	}
 	else
 	{

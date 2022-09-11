@@ -1,4 +1,8 @@
+#ifdef WIN32
 #include "pch.h"
+#else
+#include <stdio.h>
+#endif
 #include "SphereRenderer.h"
 #include "Utils.h"
 
@@ -10,7 +14,7 @@
 #include <SDL.h>
 #include <SDL_opengl.h>
 
-#include "sphere.h"
+#include "Sphere.h"
 #include "Space.h"
 
 #include <fstream>
@@ -370,9 +374,10 @@ std::pair<std::vector<float>*, std::vector<Triangle>*>  SphereRenderer::_constru
         }
         else
         {
+#ifdef WIN32
             if (alpha >= 0.0f)
                 throw std::exception("ERROR: alpha should be negative");
-
+#endif
             // y is -ve. alpha will also be -ve
             if (vertex.x < 0.0f)
             {   // 3rd quadrant
@@ -390,7 +395,9 @@ std::pair<std::vector<float>*, std::vector<Triangle>*>  SphereRenderer::_constru
                               ", x = " + std::to_string(vertex.x) +
                               ", y = " + std::to_string(vertex.y)
                 ;
+#ifdef WIN32
             throw std::exception(msg.c_str());
+#endif
         }
         texCoordX = float(alpha / (2 * M_PI));
 

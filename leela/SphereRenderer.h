@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sphere.h"
+#include "Sphere.h"
 
 // GLM includes
 #define GLM_ENABLE_EXPERIMENTAL

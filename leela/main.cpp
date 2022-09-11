@@ -1,11 +1,17 @@
-#include "pch.h"
-#include "Windows.h"
+#ifdef WIN32
+    #include "pch.h"
+    #include "Windows.h"
+#else
+    #include <unistd.h>
+#endif
+
 #include "Universe.h"
 
 
 int main(int argc, char *argv[])
 {
 
+#ifdef WIN32
     wchar_t fullPath[MAX_PATH];
     wchar_t drive[MAX_PATH];
     wchar_t dir[MAX_PATH];
@@ -30,13 +36,17 @@ int main(int argc, char *argv[])
         printf("ERROR: Couldn't change current working directory");
         return 1;
     }
-
+#endif
     Universe app;
     auto retval = app.run();
 
     if (retval != 0)
     {
+#ifdef WIN32
         Sleep(1000);
+#else
+        usleep(1000*1000);
+#endif
     }
     return retval;
 }

@@ -3,7 +3,7 @@ ELF         := universe3d
 SRCS        := $(wildcard *.cpp)
 OBJS        := $(SRCS:.cpp=.o)
 DEPS        := $(SRCS:.cpp=.d)
-CFLAGS      := $(shell pkg-config --cflags sdl2 glew glm)  
+CFLAGS      := $(shell pkg-config --cflags sdl2 glew glm) -O2  
 LIBS        := -lm $(shell pkg-config --libs sdl2 glew) -std=gnu++11  -fno-threadsafe-statics
 
 
@@ -23,7 +23,7 @@ $(OBJS): %.o: %.cpp
 
 .PHONY: clean
 clean:
-	rm -rf $(OBJS)
+	rm -rf $(OBJS) $(ELF)
 	
 	
 -include $(DEPS)

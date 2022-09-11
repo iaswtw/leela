@@ -9,7 +9,7 @@
 #include <SDL.h>
 #include <SDL_opengl.h>
 
-#include "sphere.h"
+#include "Sphere.h"
 #include "SphereRenderer.h"
 #include "AxisRenderer.h"
 #include "Stars.h"
