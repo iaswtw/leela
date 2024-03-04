@@ -48,6 +48,7 @@ out float darknessFactor;       // multiplier to be applied to the color of vert
 // Calculate perpendicular from the given point in argument (modelTransformedPosition, i.e. thisPoint
 // transformed using its model matrix) point on the line joining the sun's center and the
 // otherSphere's center.
+// See formula derivation at the bottom of this file.
 //-------------------------------------------------------------------------------------------------
 vec3 nearestPtL(vec3 modelTransformedPosition)
 {
@@ -263,3 +264,57 @@ void main()
     Color = in_color;
     TexCoord = texCoord;
 }
+
+
+/*
+
+Take derivative of the length of segment joining the given point P, and any point on AB.
+Equate the derivative to 0 to get the minima.
+k is the parameter in the parametric equation of line joining A & B points.
+
+d sqrt(f(k))           1
+------------ =   ----------- x f'(k)  =  0
+     dk          2 sqrt(f(k))
+
+Therefore,  f'(k) = 0
+
+f(k) = (a_x + k_x - p_x)^2  +  (a_y + k_y - p_y)^2  +  (a_z + k_z - p_z)^2 
+
+                             d(k_x)                          d(k_y)                            d(k_z)
+f'(k) = 2 (a_x + k_x - p_x) -------   +  2 (a_y + k_y - p_y) -------  +   2 (a_z + k_z - p_z) -------       = 0
+                              dk                              dk                                dk
+
+where:  k_x = k(b_x - a_x)
+        k_y = k(b_y - a_y)
+        k_z = k(b_z - a_z)
+
+
+Dividing both sizes by 2.  Substituting k_x, k_y and k_z, and taking their derivative:
+
+    (a_x + k_x - p_x) (b_x - a_x)   +   (a_y + k_y - p_y) (b_y - a_y)  +  (a_z + k_z - p_z) (b_z - a_x)     = 0 
+
+    Expanding k_x, k_y and k_z, and multiplying the brackets:
+
+    k(b_x - a_x)^2 + (a_x - p_x)(b_x - a_x)   +   k(b_y - a_y)^2 + (a_y - p_y)(b_y - a_y)   +   k(b_z - a_z)^2 + (a_z - p_z)(b_z - a_z)   = 0
+
+    Collecting K terms to gether.
+
+    k[(b_x - a_x)^2 + (b_y - a_y)^2 + (b_z - a_z)^2]   +   (a_x - p_x)(b_x - a_x) + (a_y - p_y)(b_y - a_y) + (a_z - p_z)(b_z - a_z)   = 0
+
+    Move constants to the right side. They become negative.  Change a_x - p_x to p_x - a_x to eliminate the negative sign.
+
+    k[(b_x - a_x)^2 + (b_y - a_y)^2 + (b_z - a_z)^2]   =  (p_x - a_x)(b_x - a_x) + (p_y - a_y)(b_y - a_y) + (p_z - a_z)(b_z - a_z) 
+
+               (p_x - a_x)(b_x - a_x) + (p_y - a_y)(b_y - a_y) + (p_z - a_z)(b_z - a_z)
+    k =       ----------------------------------------------------------------------------
+                         (b_x - a_x)^2 + (b_y - a_y)^2 + (b_z - a_z)^2
+
+
+  Denominator is the square of the distance between A & B.
+
+
+                 (p_x - a_x)(b_x - a_x) + (p_y - a_y)(b_y - a_y) + (p_z - a_z)(b_z - a_z)
+    k =       ----------------------------------------------------------------------------
+                                          dist(AB) ^ 2
+
+*/
