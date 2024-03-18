@@ -70,12 +70,19 @@ void Universe::initializeGL()
     earthRenderer.setPolygonCountLevel(PolygonCountLevel_High);
     earthRenderer.constructVerticesAndSendToGpu();
     earthRenderer.bShowLatitudesAndLongitudes = true;
-    earthRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
+    earthRenderer.setNightColorDarkness(NightColorDarkness_Medium);
 
 
     moonRenderer.setPolygonCountLevel(PolygonCountLevel_Medium);
     moonRenderer.constructVerticesAndSendToGpu();
     moonRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
+
+
+    marsRenderer.setPolygonCountLevel(PolygonCountLevel_Medium);
+    marsRenderer.constructVerticesAndSendToGpu();
+    marsRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
+    marsRenderer.bShowOrbitalPlane = True;
+    marsRenderer.bShowOrbit = True;
 
     //---------------------------------------------------------------------------------------------------
     // Axis
@@ -116,7 +123,7 @@ void Universe::render()
 
 
     //=====================================================================================
-    // Render all objects in t he scene
+    // Render all objects in the scene
     //=====================================================================================
     renderAllNontransparentObjects();
 
@@ -212,6 +219,10 @@ void Universe::renderUsingPlanetGlslProgram()
     moonRenderer.renderSphere(planetGlslProgram, &sun, &earth);
     moonRenderer.renderLatitudeAndLongitudes(planetGlslProgram);
 
+    planetGlslProgram.setBool("useTexture", bRealisticSurfaces);
+    marsRenderer.renderSphere(planetGlslProgram, &sun, &mars);
+    marsRenderer.renderLatitudeAndLongitudes(planetGlslProgram);
+
 }
 
 void Universe::renderUsingStarGlslProgram()
@@ -243,12 +254,15 @@ void Universe::renderUsingSimpleGlslProgram()
         earthRenderer.renderOrbit(simpleGlslProgram);
     if (bShowOrbitsGlobalEnable)
         moonRenderer.renderOrbit(simpleGlslProgram);
+    if (bShowOrbitsGlobalEnable)
+        marsRenderer.renderOrbit(simpleGlslProgram);
 }
 
 void Universe::renderTransparentUsingSimpleGlslProgram()
 {
     earthRenderer.renderOrbitalPlane(simpleGlslProgram);
     moonRenderer.renderOrbitalPlane(simpleGlslProgram);
+    marsRenderer.renderOrbitalPlane(simpleGlslProgram);
 }
 
 void Universe::generateImGuiWidgets()

@@ -35,18 +35,7 @@
 						<File Source="$(var.SolutionDir)external\SDL2-2.0.10\libs\SDL2.dll"></File>
 						<File Source="$(var.SolutionDir)leela.ico"></File>
 					</Component>
-					<Directory Id="shaders" Name="shaders">
-						<Component Id="shaders" Guid="{a2585e88-9a05-4e25-9a35-fa6bf929d76f}">
-							<File Source="$(var.leela.ProjectDir)shaders\planet.frag.glsl"></File>
-							<File Source="$(var.leela.ProjectDir)shaders\planet.vert.glsl"></File>
-							<File Source="$(var.leela.ProjectDir)shaders\star.frag.glsl"></File>
-							<File Source="$(var.leela.ProjectDir)shaders\star.vert.glsl"></File>
-							<File Source="$(var.leela.ProjectDir)shaders\sun.frag.glsl"></File>
-							<File Source="$(var.leela.ProjectDir)shaders\sun.vert.glsl"></File>
-							<File Source="$(var.leela.ProjectDir)shaders\simple.frag.glsl"></File>
-							<File Source="$(var.leela.ProjectDir)shaders\simple.vert.glsl"></File>
-						</Component>
-					</Directory>
+					<Directory Id="shaders" Name="shaders" />
 					<Directory Id="textures" Name="textures" />
 					<Directory Id="fonts" Name="fonts" />
 
@@ -63,6 +52,39 @@
 				<RegistryValue Root='HKCU' Key='SOFTWARE\leela' Name='installed' Type='integer' Value='1' KeyPath='yes' />
 			</Component>
 		</DirectoryRef>
+
+		
+
+
+		<DirectoryRef Id="shaders">
+			<Component Id="shaders_planet.frag.glsl" Guid="*">
+				<File Id="shaders_planet.frag.glsl" Source="$(var.leela.ProjectDir)shaders\planet.frag.glsl" KeyPath="yes"></File>
+			</Component>
+			<Component Id="shaders_planet.vert.glsl" Guid="*">
+				<File Id="shaders_planet.vert.glsl" Source="$(var.leela.ProjectDir)shaders\planet.vert.glsl" KeyPath="yes"></File>
+			</Component>
+			<Component Id="shaders_star.frag.glsl" Guid="*">
+				<File Id="shaders_star.frag.glsl" Source="$(var.leela.ProjectDir)shaders\star.frag.glsl" KeyPath="yes"></File>
+			</Component>
+			<Component Id="shaders_star.vert.glsl" Guid="*">
+				<File Id="shaders_star.vert.glsl" Source="$(var.leela.ProjectDir)shaders\star.vert.glsl" KeyPath="yes"></File>
+			</Component>
+			<Component Id="shaders_sun.frag.glsl" Guid="*">
+				<File Id="shaders_sun.frag.glsl" Source="$(var.leela.ProjectDir)shaders\sun.frag.glsl" KeyPath="yes"></File>
+			</Component>
+			<Component Id="shaders_sun.vert.glsl" Guid="*">
+				<File Id="shaders_sun.vert.glsl" Source="$(var.leela.ProjectDir)shaders\sun.vert.glsl" KeyPath="yes"></File>
+			</Component>
+			<Component Id="shaders_simple.frag.glsl" Guid="*">
+				<File Id="shaders_simple.frag.glsl" Source="$(var.leela.ProjectDir)shaders\simple.frag.glsl" KeyPath="yes"></File>
+			</Component>
+			<Component Id="shaders_simple.vert.glsl" Guid="*">
+				<File Id="shaders_simple.vert.glsl" Source="$(var.leela.ProjectDir)shaders\simple.vert.glsl" KeyPath="yes"></File>
+			</Component>
+		</DirectoryRef>
+
+
+
 
 		<DirectoryRef Id="textures">
 			<Component Id="textures_cat1.png" Guid="*">
@@ -119,10 +141,20 @@
 			<!--<ComponentRef Id="gitextensions.ico"/>-->
 			<ComponentRef Id="AppFolder"/>
 			<ComponentRef Id="leela"/>
-			<ComponentRef Id="shaders"/>
-			<ComponentRef Id="fonts"/>
 			<ComponentRef Id="ApplicationShortcut"/>
-			
+
+			<!-- Shaders -->
+			<ComponentRef Id="shaders_planet.frag.glsl"/>
+			<ComponentRef Id="shaders_planet.vert.glsl"/>
+			<ComponentRef Id="shaders_star.frag.glsl"/>
+			<ComponentRef Id="shaders_star.vert.glsl"/>
+			<ComponentRef Id="shaders_sun.frag.glsl"/>
+			<ComponentRef Id="shaders_sun.vert.glsl"/>
+			<ComponentRef Id="shaders_simple.frag.glsl"/>
+			<ComponentRef Id="shaders_simple.vert.glsl"/>
+
+
+			<!-- Textures -->
 			<ComponentRef Id="textures_cat1.png"/>
 			<ComponentRef Id="textures_earth_erde_mit_wolken_2k.png"/>
 			<ComponentRef Id="textures_earthmap1k.png"/>
@@ -131,7 +163,8 @@
 			<ComponentRef Id="textures_Map_World_23_100.jpg"/>
 			<ComponentRef Id="textures_moonmap1k.png"/>
 			<ComponentRef Id="textures_sunmap.png"/>
-			
+
+			<!-- Fonts -->
 			<ComponentRef Id="fonts_Cousine_Regular.ttf"/>
 			<ComponentRef Id="fonts_DroidSans.ttf"/>
 			<ComponentRef Id="fonts_Karla_Regular.ttf"/>

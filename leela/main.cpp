@@ -3,9 +3,11 @@
 #include "Universe.h"
 
 
-int main(int argc, char *argv[])
+/*
+ * Change to the parent directory of the executable we are running from.
+ */
+bool changeDirToParentOfExecutable()
 {
-
     wchar_t fullPath[MAX_PATH];
     wchar_t drive[MAX_PATH];
     wchar_t dir[MAX_PATH];
@@ -28,6 +30,19 @@ int main(int argc, char *argv[])
     if (!SetCurrentDirectory((LPCTSTR)fullPath))
     {
         printf("ERROR: Couldn't change current working directory");
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+int main(int argc, char *argv[])
+{
+    
+    if (!changeDirToParentOfExecutable())
+    {
         return 1;
     }
 
