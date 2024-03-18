@@ -161,6 +161,7 @@ public:
         glm::mat4 modelTrans(1.0f);
 
         // translate to the parent's center.
+        //printf("getOrbitalPlaneModelMatrix: sphere name = %s, _parent = %p\n", _name.c_str(), _parent);
         if (_parent != nullptr)
         {
             modelTrans = glm::translate(modelTrans, _parent->getCenter());

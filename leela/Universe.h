@@ -28,7 +28,7 @@ constexpr auto NUM_NAVIGATION_INPUT_SAMPLES = 10;
 constexpr auto FIR_WIDTH = 100;
 
 
-//#define RELEASE_BUILD
+#define RELEASE_BUILD
 
 /*!
  **************************************************************************
@@ -383,12 +383,14 @@ private:
     Axis axis;
     Sphere earth;
     Sphere sun;
+    Sphere mars;
     Sphere moon;
     Stars stars;
 
     AxisRenderer axisRenderer;
     PlanetRenderer earthRenderer;
     PlanetRenderer moonRenderer;
+    PlanetRenderer marsRenderer;
     SunRenderer sunRenderer;
     StarsRenderer starsRenderer;
     

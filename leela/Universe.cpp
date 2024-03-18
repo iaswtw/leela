@@ -65,6 +65,7 @@ Universe::Universe() :
     sunRenderer(sun, "textures/sunmap.png"),
     earthRenderer(earth, "textures/earth-erde-mit-wolken-2k.png"),
     moonRenderer(moon, "textures/moonmap1k.png"),
+    marsRenderer(mars, "textures/mars2k.png"),
 #else
     sunRenderer(sun, "../leela/textures/sunmap.png"),
     //earthRenderer(earth, "../leela/textures/Map-World_23_10.png"),
@@ -74,6 +75,7 @@ Universe::Universe() :
     //earthRenderer(earth, "../leela/textures/cat1.png"),
     //moonRenderer(moon),
     moonRenderer(moon, "../leela/textures/moonmap1k.png"),
+    marsRenderer(mars, "../leela/textures/mars2k.png"),
 #endif
 
     axisRenderer(axis),
@@ -124,6 +126,7 @@ void Universe::initSceneObjects()
 
     // Earth
     //---------------------------------------
+    earth.setName("Earth");
     earth.setColor(0.55f, 0.82f, 1.0f);
     earth.setRotationParameters(80,         // radius
         0,                                  // initial rotation angle
@@ -132,15 +135,16 @@ void Universe::initSceneObjects()
         glm::radians(23.5f)                 // axis tilt angle
     );
     earth.setOrbitalParameters(3000,        // radius of orbit
-        glm::radians(0.0f),                 // initial orbital angle
+        glm::radians(30.0f),                 // initial orbital angle
         0.001f,                             // revolution velocity
         0.0f,                               // orbital rotation angle
-        0                                   // orbital tilt
+        0                                   // orbital  tilt
     );
     earth.setOrbitalPlaneColor(glm::vec3(0.55, 0.82, 1.0));
 
     // Moon
     //---------------------------------------
+    moon.setName("Moon");
     moon.setColor(0.8f, 0.8f, 0.8f);
     moon.setRotationParameters(22,          // radius
         0,                                  // initial rotation angle
@@ -155,9 +159,28 @@ void Universe::initSceneObjects()
         glm::radians(30.0f)                 // orbital tilt
     );
     moon.setOrbitalPlaneColor(glm::vec3(0.8f, 0.8f, 0.8f));
-
     moon.setParentSphere(&earth);
     earth.setParentSphere(&sun);
+
+
+    // Mars
+    //---------------------------------------
+    mars.setName("Mars");
+    mars.setColor(0.85f, 0.5f, 0.5f);
+    mars.setRotationParameters(60,          // radius
+        0,                                  // initial rotation angle
+        0.02f,                              // rotation velocity
+        glm::radians(270.0f),               // axis rotation angle
+        glm::radians(25.0f)                 // axis tilt angle
+    );
+    mars.setOrbitalParameters(5000,         // radius of orbit
+        0,                                  // initial orbital angle
+        0.0006f,                            // revolution velocity
+        0.0f,                               // orbital rotation angle
+        glm::radians(1.85f)                 // orbital tilt
+    );
+    mars.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
+    mars.setParentSphere(&sun);
 
     SetApplicationStartView();
 
@@ -201,6 +224,7 @@ void Universe::advance(float stepMultiplier)
     sun.advance(stepMultiplier);
     earth.advance(stepMultiplier);
     moon.advance(stepMultiplier);
+    mars.advance(stepMultiplier);
 }
 
 

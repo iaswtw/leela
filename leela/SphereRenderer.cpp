@@ -230,7 +230,8 @@ static inline void vector_push_back_12(std::vector<float>& v, float f1, float f2
 SphereRenderer::SphereRenderer(Sphere& sphere, std::string textureFilename) :
     _sphere(sphere)
 {
-    setNightColorDarkness(NightColorDarkness_High);
+    setNightColorDarkness(NightColorDarkness_Black);
+    //setNightColorDarkness(NightColorDarkness_VeryLow);
     _textureFilename = textureFilename;
     printf("Setting _textureFilename to %s\n", _textureFilename.c_str());
 }
@@ -878,7 +879,8 @@ void PlanetRenderer::renderSphere(GlslProgram& glslProgram, Sphere* sun, Sphere*
 	glslProgram.setMat4("model", glm::value_ptr(_sphere.getModelMatrix()));
 	glslProgram.setVec3("sphereInfo.centerTransformed", glm::value_ptr(_sphere.getCenter()));
 	glslProgram.setFloat("sphereInfo.radius", _sphere.getRadius());
-	glslProgram.setFloat("nightColorMultiplier", _nightColorMultiplier);
+	//glslProgram.setFloat("nightColorMultiplier", 0.1);
+    glslProgram.setFloat("nightColorMultiplier", _nightColorMultiplier);
     glslProgram.setFloat("sphereInfo.sineOfSelfUmbraConeHalfAngle", sineOfSelfUmbraConeHalfAngle);
 
 	//glEnable(GL_MULTISAMPLE);
