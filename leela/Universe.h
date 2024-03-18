@@ -391,6 +391,7 @@ private:
     PlanetRenderer earthRenderer;
     PlanetRenderer moonRenderer;
     PlanetRenderer marsRenderer;
+    PlanetRenderer * planetRenderers[4] = { &earthRenderer, &moonRenderer, &marsRenderer, NULL};
     SunRenderer sunRenderer;
     StarsRenderer starsRenderer;
     

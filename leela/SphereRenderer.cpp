@@ -864,7 +864,9 @@ PlanetRenderer::~PlanetRenderer()
 {
 
 }
-
+/*
+ * otherSphere      the sphere that could eclipse the sun for this planet/moon. 
+ */
 void PlanetRenderer::renderSphere(GlslProgram& glslProgram, Sphere* sun, Sphere* otherSphere)
 {
 	//----------------------------------------------------------------------------------------------------

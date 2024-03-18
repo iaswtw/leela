@@ -70,7 +70,7 @@ void Universe::initializeGL()
     earthRenderer.setPolygonCountLevel(PolygonCountLevel_High);
     earthRenderer.constructVerticesAndSendToGpu();
     earthRenderer.bShowLatitudesAndLongitudes = true;
-    earthRenderer.setNightColorDarkness(NightColorDarkness_Medium);
+    earthRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
 
 
     moonRenderer.setPolygonCountLevel(PolygonCountLevel_Medium);
@@ -78,11 +78,11 @@ void Universe::initializeGL()
     moonRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
 
 
-    marsRenderer.setPolygonCountLevel(PolygonCountLevel_Medium);
+    marsRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
     marsRenderer.constructVerticesAndSendToGpu();
-    marsRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
-    marsRenderer.bShowOrbitalPlane = True;
-    marsRenderer.bShowOrbit = True;
+    marsRenderer.setNightColorDarkness(NightColorDarkness_High);
+    //marsRenderer.bShowOrbitalPlane = False;
+    marsRenderer.bShowOrbit = False;
 
     //---------------------------------------------------------------------------------------------------
     // Axis
@@ -251,18 +251,20 @@ void Universe::renderUsingSimpleGlslProgram()
     }
 
     if (bShowOrbitsGlobalEnable)
-        earthRenderer.renderOrbit(simpleGlslProgram);
-    if (bShowOrbitsGlobalEnable)
-        moonRenderer.renderOrbit(simpleGlslProgram);
-    if (bShowOrbitsGlobalEnable)
-        marsRenderer.renderOrbit(simpleGlslProgram);
+    {
+        for (int i = 0; planetRenderers[i] != NULL; i++)
+        {
+            planetRenderers[i]->renderOrbit(simpleGlslProgram);
+        }
+    }
 }
 
 void Universe::renderTransparentUsingSimpleGlslProgram()
 {
-    earthRenderer.renderOrbitalPlane(simpleGlslProgram);
-    moonRenderer.renderOrbitalPlane(simpleGlslProgram);
-    marsRenderer.renderOrbitalPlane(simpleGlslProgram);
+    for (int i = 0; planetRenderers[i] != NULL; i++)
+    {
+        planetRenderers[i]->renderOrbitalPlane(simpleGlslProgram);
+    }
 }
 
 void Universe::generateImGuiWidgets()
@@ -809,6 +811,21 @@ void Universe::generateImGuiWidgets()
             ImGui::Unindent();
 
             ImGui::Separator();
+
+            //-----------------------------------------------------
+
+            ImGui::PushFont(appFontSmall);
+            ImGui::Text("Mars:");               // Display some text (you can use a format strings too)
+            ImGui::PopFont();
+
+            ImGui::Indent();
+            ImGui::Checkbox("Revolution", &mars.bRevolutionMotion);
+            ImGui::Checkbox("Orbit## mars", &marsRenderer.bShowOrbit); ImGui::SameLine();
+            ImGui::Checkbox("Orbital plane (,)##mars", &marsRenderer.bShowOrbitalPlane);
+            ImGui::Unindent();
+
+            ImGui::Separator();
+
 
             //-----------------------------------------------------
 
