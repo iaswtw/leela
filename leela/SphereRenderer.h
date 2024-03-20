@@ -49,6 +49,7 @@ public:
     void setAsLightSource();
     void setNightColorDarkness(NightColorDarkness darkness);
 	void setPolygonCountLevel(PolygonCountLevel polygonCountLevel);
+    std::vector<float>* _constructRotationAxis();
     void constructVerticesAndSendToGpu();
 
 
@@ -79,6 +80,7 @@ protected:
     GLuint _orbitalPlaneGridVao;            // grid lines in the orbital plane
     GLuint _orbitVao;
     GLuint _latAndLongVao;
+    GLuint _rotationAxisVao;
     GLuint _texture;
 
     int numMainSphereVertices = -1;
@@ -87,6 +89,7 @@ protected:
     int numOrbitalPlaneVertices = -1;
     int numOrbitalPlaneGridVertices = -1;
     int numOrbitVertices = -1;
+    int numRotationAxisVertices = -1;
 
 	PolygonCountLevel _polygonCountLevel;
     NightColorDarkness _nightColorDarkness;
@@ -109,6 +112,7 @@ public:
 	void renderLatitudeAndLongitudes(GlslProgram& glslProgram);
 	void renderOrbitalPlane(GlslProgram& glslProgram);
 	void renderOrbit(GlslProgram& glslProgram);
+    void renderRotationAxis(GlslProgram& glslProgram);
 
 };
 
