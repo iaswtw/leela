@@ -80,7 +80,7 @@ void Universe::initializeGL()
 
     marsRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
     marsRenderer.constructVerticesAndSendToGpu();
-    marsRenderer.setNightColorDarkness(NightColorDarkness_High);
+    marsRenderer.setNightColorDarkness(NightColorDarkness_Medium);
     //marsRenderer.bShowOrbitalPlane = False;
     marsRenderer.bShowOrbit = False;
 
@@ -245,6 +245,14 @@ void Universe::renderUsingSunGlslProgram()
 
 void Universe::renderUsingSimpleGlslProgram()
 {
+    if (bShowPlanetAxis)
+    {
+        for (int i = 0; planetRenderers[i] != NULL; i++)
+        {
+            planetRenderers[i]->renderRotationAxis(simpleGlslProgram);
+        }
+    }
+
     if (bShowAxis)
     {
         axisRenderer.render(simpleGlslProgram);
@@ -879,7 +887,8 @@ void Universe::generateImGuiWidgets()
             //-----------------------------------------------------
 
             ImGui::Checkbox("Show orbits (o)", &bShowOrbitsGlobalEnable);
-            ImGui::Checkbox("Show axis (a)", &bShowAxis);
+            ImGui::Checkbox("Show coordinate axis (a)", &bShowAxis);
+            ImGui::Checkbox("Show planet axis (a)", &bShowPlanetAxis);
             ImGui::Separator();
 
             //-----------------------------------------------------

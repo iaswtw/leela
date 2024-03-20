@@ -345,6 +345,7 @@ private:
 
     bool bGalaxyStars = false;
     bool bShowAxis = true;
+    bool bShowPlanetAxis = false;
     bool bShowOrbitsGlobalEnable = true;           // Individual orbit enables are in respective renderer classes.
 
     TargetLockMode lockMode = TargetLockMode_ViewTarget;

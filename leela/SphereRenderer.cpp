@@ -266,7 +266,11 @@ void SphereRenderer::setPolygonCountLevel(PolygonCountLevel polygonCountLevel)
 }
 
 /*
- 
+* 
+ * Return a tuple containing information about a point on sphere corresponding to the given radius, alpha, theta arguments.
+ *  - x, y, & z of the point on sphere
+ *  - Normal unit vector at that point on the sphere
+ *  - texture coordinates to use for this point from the 2-D rectangular texture.
  */
 std::tuple<float, float, float, glm::vec3, float, float> SphereRenderer::calcPointOnSphere(float radius, float alpha, float theta)
 {
@@ -597,6 +601,89 @@ std::vector<float>* SphereRenderer::_constructOrbitalPlaneGridVertices()
 }
 
 
+std::vector<float>* SphereRenderer::_constructRotationAxis()
+{
+    std::vector<float>* v = new std::vector<float>();
+    Sphere& s = _sphere;
+
+    float m = 0.4f;      // color multiplier
+    float radius = s._radius;
+    glm::vec3& color = s._orbitalPlaneColor;
+
+    float polygonIncrement = _getPolygonIncrement();
+    float alpha_inc = float(2 * M_PI) / polygonIncrement;
+    
+    alpha_inc = alpha_inc * 10;
+
+    float alpha;
+    for (alpha = 0; alpha < float(2 * M_PI); alpha += alpha_inc)
+    {
+
+        //---------------------------------------------------
+        // Cylindrical rotation axis 
+        //---------------------------------------------------
+        float x1 = 0.005f * radius * cos(alpha);
+        float y1 = 0.005f * radius * sin(alpha);
+        float z1 = 0.99  * radius;
+
+        float x2 = 0.005f * radius * cos(alpha + alpha_inc);
+        float y2 = 0.005f * radius * sin(alpha + alpha_inc);
+        float z2 = 0.99  * radius;
+
+        float z = radius * 1.3;
+
+        glm::vec3 N1 = glm::normalize(glm::vec3(x1, y1, 0.0f) - glm::vec3(0.0f, 0.0f, 0.0f));
+        glm::vec3 N2 = glm::normalize(glm::vec3(x2, y2, 0.0f) - glm::vec3(0.0f, 0.0f, 0.0f));
+
+        // two triangles that form a rectangle on north side
+        vector_push_back_12(*v, x1, y1, z1, s._r, s._g, s._b, 1.0f, N1.x, N1.y, N1.z, 0.0f, 0.0f);
+        vector_push_back_12(*v, x2, y2, z2, s._r, s._g, s._b, 1.0f, N2.x, N2.y, N2.z, 0.0f, 0.0f);
+        vector_push_back_12(*v, x1, y1, z,  s._r, s._g, s._b, 1.0f, N1.x, N1.y, N1.z, 0.0f, 0.0f);
+
+        vector_push_back_12(*v, x1, y1, z, s._r, s._g, s._b, 1.0f, N1.x, N1.y, N1.z, 0.0f, 0.0f);
+        vector_push_back_12(*v, x2, y2, z2, s._r, s._g, s._b, 1.0f, N2.x, N2.y, N2.z, 0.0f, 0.0f);
+        vector_push_back_12(*v, x2, y2, z,  s._r, s._g, s._b, 1.0f, N2.x, N2.y, N2.z, 0.0f, 0.0f);
+
+        // two triangles that form a rectangle on south side
+        vector_push_back_12(*v, x1, y1, -z1, s._r, s._g, s._b, 1.0f, N1.x, N1.y, N1.z, 0.0f, 0.0f);
+        vector_push_back_12(*v, x2, y2, -z2, s._r, s._g, s._b, 1.0f, N2.x, N2.y, N2.z, 0.0f, 0.0f);
+        vector_push_back_12(*v, x1, y1, -z, s._r, s._g, s._b, 1.0f, N1.x, N1.y, N1.z, 0.0f, 0.0f);
+
+        vector_push_back_12(*v, x1, y1, -z, s._r, s._g, s._b, 1.0f, N1.x, N1.y, N1.z, 0.0f, 0.0f);
+        vector_push_back_12(*v, x2, y2, -z2, s._r, s._g, s._b, 1.0f, N2.x, N2.y, N2.z, 0.0f, 0.0f);
+        vector_push_back_12(*v, x2, y2, -z, s._r, s._g, s._b, 1.0f, N2.x, N2.y, N2.z, 0.0f, 0.0f);
+
+
+        //---------------------------------------------------
+        // Conical rotation axis 
+        //---------------------------------------------------
+
+        //float x1 = 0.01f * radius * cos(alpha);
+        //float y1 = 0.01f * radius * sin(alpha);
+        //float z1 = 0.99 * radius;
+
+        //float x2 = 0.01f * radius * cos(alpha + alpha_inc);
+        //float y2 = 0.01f * radius * sin(alpha + alpha_inc);
+        //float z2 = 0.99 * radius;
+
+        //float z  = radius * 1.3;
+
+        //glm::vec3 N1 = glm::normalize(glm::vec3(x1, y1, 0.0f) - glm::vec3(0.0f, 0.0f, 0.0f));
+        //glm::vec3 N2 = glm::normalize(glm::vec3(x2, y2, 0.0f) - glm::vec3(0.0f, 0.0f, 0.0f));
+
+        //vector_push_back_12(*v, x1,   y1,   z1,  s._r, s._g, s._b, 1.0f, N1.x, N1.y, N1.z, 0.0f, 0.0f);
+        //vector_push_back_12(*v, x2,   y2,   z2,  s._r, s._g, s._b, 1.0f, N2.x, N2.y, N2.z, 0.0f, 0.0f);
+        //vector_push_back_12(*v, 0.0f, 0.0f, z,   s._r, s._g, s._b, 1.0f, N1.x, N1.y, N1.z, 0.0f, 0.0f);
+
+        //vector_push_back_12(*v, x1,   y1,   -z1, s._r, s._g, s._b, 1.0f, N1.x, N1.y, N1.z, 0.0f, 0.0f);
+        //vector_push_back_12(*v, x2,   y2,   -z2, s._r, s._g, s._b, 1.0f, N2.x, N2.y, N2.z, 0.0f, 0.0f);
+        //vector_push_back_12(*v, 0.0f, 0.0f, -z,  s._r, s._g, s._b, 1.0f, N1.x, N1.y, N1.z, 0.0f, 0.0f);
+    }
+
+    return v;
+}
+
+
 void SphereRenderer::constructVerticesAndSendToGpu()
 {
     GLuint vbo;     // vertex buffer object
@@ -620,15 +707,19 @@ void SphereRenderer::constructVerticesAndSendToGpu()
         v->data(),
         GL_STATIC_DRAW);
 
+    // x, y & z coordinates of the point
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), nullptr);
     glEnableVertexAttribArray(0);
 
+    // r, g, b, a color values of the point
     glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
+    // x, y & z of unit normal vector to the sphere at the point
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(7 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
+    // texture coordinates of the point
     glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(10 * sizeof(float)));
     glEnableVertexAttribArray(3);
 
@@ -816,14 +907,47 @@ void SphereRenderer::constructVerticesAndSendToGpu()
         v->data(),
         GL_STATIC_DRAW);
 
+    // xyz of point
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), nullptr);
     glEnableVertexAttribArray(0);
 
+    // rgba of point
     glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
     numOrbitVertices = v->size() / VERTEX_STRIDE_IN_VBO;
     delete v;
+
+    //---------------------------------------------------------------------------------------------------
+    // Rotation axis
+    v = _constructRotationAxis();
+
+    glGenVertexArrays(1, &_rotationAxisVao);
+    glBindVertexArray(_rotationAxisVao);
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        sizeof(float)* v->size(),
+        v->data(),
+        GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), nullptr);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(7 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(10 * sizeof(float)));
+    glEnableVertexAttribArray(3);
+
+    numRotationAxisVertices = v->size() / PLANET_STRIDE_IN_VBO;
+    delete v;
+
+
 }
 
 
@@ -971,6 +1095,18 @@ void PlanetRenderer::renderOrbit(GlslProgram& glslProgram)
 	}
 }
 
+/*
+ * 
+ */
+void PlanetRenderer::renderRotationAxis(GlslProgram& glslProgram)
+{
+    glslProgram.setMat4("model", glm::value_ptr(_sphere.getModelMatrix()));
+
+    glslProgram.setBool("useTexture", false);
+
+    glBindVertexArray(_rotationAxisVao);
+    glDrawArrays(GL_TRIANGLES, 0, numRotationAxisVertices);
+}
 
 
 //############################################################################################################
