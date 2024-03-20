@@ -256,6 +256,8 @@ public:
     void cleanupAndExitApplication();
     void generateImGuiWidgets();
 
+    bool bShowLowDarknessAtNight = false;
+
 private:
     bool bQuit = false;
     bool bMouseGrabbed = false;

@@ -2,6 +2,8 @@
 
 #include "sphere.h"
 
+class Universe;
+
 // GLM includes
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
@@ -43,7 +45,7 @@ enum NightColorDarkness
 class SphereRenderer
 {
 public:
-    SphereRenderer(Sphere& sphere, std::string textureFilename = "");
+    SphereRenderer(Universe& parent, Sphere& sphere, std::string textureFilename = "");
     ~SphereRenderer();
 
     void setAsLightSource();
@@ -73,6 +75,7 @@ private:
     int _getIcoSphereSubdivisionLevel();
 
 protected:
+    Universe& parent;
     Sphere& _sphere;
 
     GLuint _mainVao;
@@ -105,7 +108,7 @@ protected:
 class PlanetRenderer : public SphereRenderer
 {
 public:
-	PlanetRenderer(Sphere& sphere, std::string textureFilename = "");
+	PlanetRenderer(Universe& parent, Sphere& sphere, std::string textureFilename = "");
 	~PlanetRenderer();
 
 	void renderSphere(GlslProgram& glslProgram, Sphere* sun, Sphere* otherSphere = nullptr);
@@ -119,7 +122,7 @@ public:
 class SunRenderer : public SphereRenderer
 {
 public:
-	SunRenderer(Sphere& sphere, std::string textureFilename = "");
+	SunRenderer(Universe& parent, Sphere& sphere, std::string textureFilename = "");
 	~SunRenderer();
 
 	void renderSphere(GlslProgram& glslProgram);

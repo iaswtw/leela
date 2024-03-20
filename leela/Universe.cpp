@@ -62,10 +62,10 @@ static std::string FindFontFile(const char * fileName)
 Universe::Universe() :
 
 #ifdef RELEASE_BUILD
-    sunRenderer(sun, "textures/sunmap.png"),
-    earthRenderer(earth, "textures/earth-erde-mit-wolken-2k.png"),
-    moonRenderer(moon, "textures/moonmap1k.png"),
-    marsRenderer(mars, "textures/mars2k.png"),
+    sunRenderer(*this, sun, "textures/sunmap.png"),
+    earthRenderer(*this, earth, "textures/earth-erde-mit-wolken-2k.png"),
+    moonRenderer(*this, moon, "textures/moonmap1k.png"),
+    marsRenderer(*this, mars, "textures/mars2k.png"),
 #else
     sunRenderer(sun, "../leela/textures/sunmap.png"),
     //earthRenderer(earth, "../leela/textures/Map-World_23_10.png"),

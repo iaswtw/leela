@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "SphereRenderer.h"
 #include "Utils.h"
-
+#include "Universe.h"
 
 #include "glm/ext.hpp"
 #include "glm/gtx/string_cast.hpp"
@@ -227,7 +227,8 @@ static inline void vector_push_back_12(std::vector<float>& v, float f1, float f2
 }
 
 
-SphereRenderer::SphereRenderer(Sphere& sphere, std::string textureFilename) :
+SphereRenderer::SphereRenderer(Universe& parent, Sphere& sphere, std::string textureFilename) :
+    parent(parent),
     _sphere(sphere)
 {
     setNightColorDarkness(NightColorDarkness_Black);
@@ -251,7 +252,7 @@ void SphereRenderer::setNightColorDarkness(NightColorDarkness darkness)
     switch (_nightColorDarkness)
     {
     case NightColorDarkness_Black:      _nightColorMultiplier = 0.0f;   break;
-    case NightColorDarkness_VeryHigh:   _nightColorMultiplier = 0.05f;  break;
+    case NightColorDarkness_VeryHigh:   _nightColorMultiplier = 0.07f;  break;
     case NightColorDarkness_High:       _nightColorMultiplier = 0.15f;  break;
     case NightColorDarkness_Medium:     _nightColorMultiplier = 0.2f;   break;
     case NightColorDarkness_Low:        _nightColorMultiplier = 0.5f;   break;
@@ -979,8 +980,8 @@ int SphereRenderer::_getIcoSphereSubdivisionLevel()
 
 //############################################################################################################
 
-PlanetRenderer::PlanetRenderer(Sphere& sphere, std::string textureFilename)
-	: SphereRenderer(sphere, textureFilename)
+PlanetRenderer::PlanetRenderer(Universe& parent, Sphere& sphere, std::string textureFilename)
+	: SphereRenderer(parent, sphere, textureFilename)
 {
 }
 
@@ -1005,8 +1006,12 @@ void PlanetRenderer::renderSphere(GlslProgram& glslProgram, Sphere* sun, Sphere*
 	glslProgram.setMat4("model", glm::value_ptr(_sphere.getModelMatrix()));
 	glslProgram.setVec3("sphereInfo.centerTransformed", glm::value_ptr(_sphere.getCenter()));
 	glslProgram.setFloat("sphereInfo.radius", _sphere.getRadius());
-	//glslProgram.setFloat("nightColorMultiplier", 0.1);
-    glslProgram.setFloat("nightColorMultiplier", _nightColorMultiplier);
+    float multiplierAdjust = 1.0f;
+    if (parent.bShowLowDarknessAtNight)
+    {
+        multiplierAdjust = 2.0f;
+    }
+    glslProgram.setFloat("nightColorMultiplier", _nightColorMultiplier * multiplierAdjust);
     glslProgram.setFloat("sphereInfo.sineOfSelfUmbraConeHalfAngle", sineOfSelfUmbraConeHalfAngle);
 
 	//glEnable(GL_MULTISAMPLE);
@@ -1138,8 +1143,8 @@ void PlanetRenderer::renderRotationAxis(GlslProgram& glslProgram, Sphere* sun, S
 
 
 
-SunRenderer::SunRenderer(Sphere& sphere, std::string textureFilename)
-	: SphereRenderer(sphere, textureFilename)
+SunRenderer::SunRenderer(Universe& parent, Sphere& sphere, std::string textureFilename)
+	: SphereRenderer(parent, sphere, textureFilename)
 {
 }
 

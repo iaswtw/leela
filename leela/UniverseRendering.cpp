@@ -80,7 +80,7 @@ void Universe::initializeGL()
 
     marsRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
     marsRenderer.constructVerticesAndSendToGpu();
-    marsRenderer.setNightColorDarkness(NightColorDarkness_Medium);
+    marsRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
     //marsRenderer.bShowOrbitalPlane = False;
     marsRenderer.bShowOrbit = False;
 
@@ -887,7 +887,9 @@ void Universe::generateImGuiWidgets()
 
             ImGui::Checkbox("Show orbits (o)", &bShowOrbitsGlobalEnable);
             ImGui::Checkbox("Show coordinate axis (a)", &bShowAxis);
-            ImGui::Checkbox("Show planet axis (a)", &bShowPlanetAxis);
+            ImGui::Checkbox("Show planet axis", &bShowPlanetAxis);
+            ImGui::Checkbox("Low darkness at night", &bShowLowDarknessAtNight);
+
             ImGui::Separator();
 
             //-----------------------------------------------------
