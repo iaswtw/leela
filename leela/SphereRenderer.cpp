@@ -1098,9 +1098,34 @@ void PlanetRenderer::renderOrbit(GlslProgram& glslProgram)
 /*
  * 
  */
-void PlanetRenderer::renderRotationAxis(GlslProgram& glslProgram)
+void PlanetRenderer::renderRotationAxis(GlslProgram& glslProgram, Sphere* sun, Sphere* otherSphere)
 {
+    //glslProgram.setMat4("model", glm::value_ptr(_sphere.getModelMatrix()));
+
+
+    PNT sphereCenter = PNT(_sphere.getCenter());
+    float distSunToThisSphere = PNT(sun->getCenter()).distanceTo(sphereCenter);
+    float selfUmbraLength = (_sphere.getRadius() * distSunToThisSphere) / (sun->getRadius() - _sphere.getRadius());
+    float sineOfSelfUmbraConeHalfAngle = asin(_sphere.getRadius() / selfUmbraLength);
+
+
     glslProgram.setMat4("model", glm::value_ptr(_sphere.getModelMatrix()));
+    glslProgram.setVec3("sphereInfo.centerTransformed", glm::value_ptr(_sphere.getCenter()));
+    glslProgram.setFloat("sphereInfo.radius", _sphere.getRadius());
+    //glslProgram.setFloat("nightColorMultiplier", 0.1);
+    glslProgram.setFloat("nightColorMultiplier", _nightColorMultiplier);
+    glslProgram.setFloat("sphereInfo.sineOfSelfUmbraConeHalfAngle", sineOfSelfUmbraConeHalfAngle);
+
+    //glEnable(GL_MULTISAMPLE);
+
+    if (otherSphere != nullptr)
+    {
+        // When drawing earth, other sphere is moon.
+        glslProgram.setFloat("otherSphereRadius", otherSphere->getRadius());
+        glslProgram.setVec3("otherSphereCenterTransformed", glm::value_ptr(otherSphere->getModelTransformedCenter()));
+    }
+
+
 
     glslProgram.setBool("useTexture", false);
 

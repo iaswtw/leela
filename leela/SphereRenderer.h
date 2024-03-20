@@ -112,7 +112,7 @@ public:
 	void renderLatitudeAndLongitudes(GlslProgram& glslProgram);
 	void renderOrbitalPlane(GlslProgram& glslProgram);
 	void renderOrbit(GlslProgram& glslProgram);
-    void renderRotationAxis(GlslProgram& glslProgram);
+    void renderRotationAxis(GlslProgram& glslProgram, Sphere* sun, Sphere* otherSphere);
 
 };
 
