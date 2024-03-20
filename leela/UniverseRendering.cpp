@@ -223,6 +223,13 @@ void Universe::renderUsingPlanetGlslProgram()
     marsRenderer.renderSphere(planetGlslProgram, &sun, &mars);
     marsRenderer.renderLatitudeAndLongitudes(planetGlslProgram);
 
+
+    if (bShowPlanetAxis)
+    {
+        earthRenderer.renderRotationAxis(planetGlslProgram, &sun, &moon);
+        moonRenderer.renderRotationAxis(planetGlslProgram, &sun, &earth);
+        marsRenderer.renderRotationAxis(planetGlslProgram, &sun, &mars);
+    }
 }
 
 void Universe::renderUsingStarGlslProgram()
@@ -245,14 +252,6 @@ void Universe::renderUsingSunGlslProgram()
 
 void Universe::renderUsingSimpleGlslProgram()
 {
-    if (bShowPlanetAxis)
-    {
-        for (int i = 0; planetRenderers[i] != NULL; i++)
-        {
-            planetRenderers[i]->renderRotationAxis(simpleGlslProgram);
-        }
-    }
-
     if (bShowAxis)
     {
         axisRenderer.render(simpleGlslProgram);
