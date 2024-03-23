@@ -301,18 +301,18 @@ std::vector<float>* SphereRenderer::_constructMainSphereVertices()
 
 	float polygonIncrement = _getPolygonIncrement();
 
-	float alpha_inc = float(2 * M_PI) / polygonIncrement;
+	float alpha_inc = float(2 * float(M_PI)) / polygonIncrement;
     float theta_inc = float(M_PI) / (polygonIncrement / 2);
 
-    int numFloats = int((2 * M_PI / alpha_inc) * (M_PI / theta_inc)) * 10;
+    int numFloats = int((2 * float(M_PI) / alpha_inc) * (float(M_PI) / theta_inc)) * 10;
     printf("numFloats = %d\n", numFloats);
 
     v->reserve(numFloats);
     float alpha;
     float theta;
-    for (alpha = 0; alpha < float(2 * M_PI); alpha += alpha_inc)
+    for (alpha = 0; alpha < float(2 * float(M_PI)); alpha += alpha_inc)
     {
-        for (theta = 0; theta < float(M_PI); theta += theta_inc)
+        for (theta = 0; theta < float(float(M_PI)); theta += theta_inc)
         {
             float theta_2 = theta + theta_inc;
             float alpha_2 = alpha + alpha_inc;
@@ -343,7 +343,7 @@ std::pair<std::vector<float>*, std::vector<Triangle>*>  SphereRenderer::_constru
     //IndexedMesh indexMesh = make_icosphere(1);
     
     // .first is VertexList; which is vector of glm::vec3
-    for (int i = 0; i < indexMesh.first->size(); i++)
+    for (unsigned int i = 0; i < indexMesh.first->size(); i++)
     {
         glm::vec3& vertex = (*indexMesh.first)[i];
 
@@ -371,7 +371,7 @@ std::pair<std::vector<float>*, std::vector<Triangle>*>  SphereRenderer::_constru
             }
             else
             {   // 2nd quadrant
-                alpha = M_PI - alpha;
+                alpha = (float)M_PI - alpha;
             }
         }
         else
@@ -382,11 +382,11 @@ std::pair<std::vector<float>*, std::vector<Triangle>*>  SphereRenderer::_constru
             // y is -ve. alpha will also be -ve
             if (vertex.x < 0.0f)
             {   // 3rd quadrant
-                alpha = M_PI - alpha;
+                alpha = float(M_PI) - alpha;
             }
             else
             {   // 4th quadrant
-                alpha += 2 * M_PI;
+                alpha += 2 * float(M_PI);
             }
         }
         
@@ -398,13 +398,13 @@ std::pair<std::vector<float>*, std::vector<Triangle>*>  SphereRenderer::_constru
                 ;
             throw std::exception(msg.c_str());
         }
-        texCoordX = float(alpha / (2 * M_PI));
+        texCoordX = float(alpha / (2 * float(M_PI)));
 
         //------------------------------------------------------------------
         // beta is measured from from +ve Z axis.
         float beta = asin(vertex.z);                // this is when measured from +ve X axis. goes from +PI/2 to -PI/2
-        beta = -beta + (M_PI / 2.0f);               // invert (-PI/2 to +PI/2) then shift (0 to PI)
-        texCoordY = beta / M_PI;                    // 0 to PI => 0 to 1
+        beta = -beta + (float(M_PI) / 2.0f);        // invert (-PI/2 to +PI/2) then shift (0 to PI)
+        texCoordY = beta / float(M_PI);             // 0 to PI => 0 to 1
 
 
         //printf("%%%% texture coord: x = %f, y = %f\n", texCoordX, texCoordY);
@@ -430,7 +430,7 @@ std::vector<float>* SphereRenderer::_constructLatitudesAndLongitudeVertices()
     Sphere& s = _sphere;
 
 	float polygonIncrement = _getPolygonIncrement();
-    float inc = float(2 * M_PI) / polygonIncrement;
+    float inc = float(2 * float(M_PI)) / polygonIncrement;
 
     //---------------------------------------------------------------------------------
     // Longitudes
@@ -442,7 +442,7 @@ std::vector<float>* SphereRenderer::_constructLatitudesAndLongitudeVertices()
     {
         float alpha = glm::radians(alpha_deg);
 
-        for (float theta = 0; theta < float(2 * M_PI); theta += inc)
+        for (float theta = 0; theta < float(2 * float(M_PI)); theta += inc)
         {
             auto [x1, y1, z1, N1, texX1, texY1] = calcPointOnSphere(1.001f * s._radius, alpha, theta);
             auto [x2, y2, z2, N2, texX2, texY2] = calcPointOnSphere(1.001f * s._radius, alpha, theta + inc);
@@ -469,7 +469,7 @@ std::vector<float>* SphereRenderer::_constructLatitudesAndLongitudeVertices()
     {
         theta = glm::radians(theta);
 
-        for (float alpha = 0; alpha < float(2 * M_PI); alpha += inc)
+        for (float alpha = 0; alpha < float(2 * float(M_PI)); alpha += inc)
         {
             auto [x1, y1, z1, N1, texX1, texY1] = calcPointOnSphere(1.001f * s._radius, alpha, theta);
             auto [x2, y2, z2, N2, texX2, texY2] = calcPointOnSphere(1.001f * s._radius, alpha + inc, theta);
@@ -625,13 +625,13 @@ std::vector<float>* SphereRenderer::_constructRotationAxis()
         //---------------------------------------------------
         float x1 = 0.005f * radius * cos(alpha);
         float y1 = 0.005f * radius * sin(alpha);
-        float z1 = 0.99  * radius;
+        float z1 = 0.99f  * radius;
 
         float x2 = 0.005f * radius * cos(alpha + alpha_inc);
         float y2 = 0.005f * radius * sin(alpha + alpha_inc);
-        float z2 = 0.99  * radius;
+        float z2 = 0.99f  * radius;
 
-        float z = radius * 1.3;
+        float z = radius * 1.3f;
 
         glm::vec3 N1 = glm::normalize(glm::vec3(x1, y1, 0.0f) - glm::vec3(0.0f, 0.0f, 0.0f));
         glm::vec3 N2 = glm::normalize(glm::vec3(x2, y2, 0.0f) - glm::vec3(0.0f, 0.0f, 0.0f));
@@ -696,7 +696,7 @@ void SphereRenderer::constructVerticesAndSendToGpu()
     //---------------------------------------------------------------------------------------------------
     // The sphere itself
     v = _constructMainSphereVertices();
-
+    
     glGenVertexArrays(1, &_mainVao);
     glBindVertexArray(_mainVao);
 
@@ -962,6 +962,8 @@ float SphereRenderer::_getPolygonIncrement()
 		return 500.0;
 	case PolygonCountLevel_High:
 		return 1000.0;
+    default:
+        return 500;
 	}
 }
 
@@ -999,7 +1001,7 @@ void PlanetRenderer::renderSphere(GlslProgram& glslProgram, Sphere* sun, Sphere*
     if (!_sphere.bIsCenterOfMass)
     {
         PNT sphereCenter = PNT(_sphere.getCenter());
-        float distSunToThisSphere = PNT(sun->getCenter()).distanceTo(sphereCenter);
+        float distSunToThisSphere = (float)PNT(sun->getCenter()).distanceTo(sphereCenter);
         float selfUmbraLength = (_sphere.getRadius() * distSunToThisSphere) / (sun->getRadius() - _sphere.getRadius());
         float sineOfSelfUmbraConeHalfAngle = asin(_sphere.getRadius() / selfUmbraLength);
 
@@ -1112,7 +1114,7 @@ void PlanetRenderer::renderRotationAxis(GlslProgram& glslProgram, Sphere* sun, S
         //glslProgram.setMat4("model", glm::value_ptr(_sphere.getModelMatrix()));
 
         PNT sphereCenter = PNT(_sphere.getCenter());
-        float distSunToThisSphere = PNT(sun->getCenter()).distanceTo(sphereCenter);
+        float distSunToThisSphere = (float)PNT(sun->getCenter()).distanceTo(sphereCenter);
         float selfUmbraLength = (_sphere.getRadius() * distSunToThisSphere) / (sun->getRadius() - _sphere.getRadius());
         float sineOfSelfUmbraConeHalfAngle = asin(_sphere.getRadius() / selfUmbraLength);
 

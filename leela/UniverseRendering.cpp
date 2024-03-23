@@ -789,6 +789,7 @@ void Universe::generateImGuiWidgets()
             ImGui::PopFont();
 
             ImGui::Indent();
+            ImGui::Checkbox("Rotation## earth", &earth.bRotationMotion); ImGui::SameLine();
             ImGui::Checkbox("Revolution  (0)## earth", &earth.bRevolutionMotion);
             ImGui::Checkbox("Orbit## earth", &earthRenderer.bShowOrbit);  ImGui::SameLine();
             ImGui::Checkbox("Orbital plane (e)## earth", &earthRenderer.bShowOrbitalPlane);

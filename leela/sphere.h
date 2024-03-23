@@ -77,12 +77,12 @@ public:
         _orbitalRadius = orbitalRadius;
     }
 
-    void setRotationParameters(float radius, float rotationAngle, float rotationAngularVelocity, float axisRotationAngle, float axisTiltAngle)
+    void setRotationParameters(float radius, float rotationAngle, float rotationAngularVelocity, float axisTiltOrientationAngle, float axisTiltAngle)
     {
         _radius = radius;
         _rotationAngle = rotationAngle;
         _rotationAngularVelocity = rotationAngularVelocity;
-        _axisRotationAngle = axisRotationAngle;
+        _axisTiltOrientationAngle = axisTiltOrientationAngle;
         _axisTiltAngle = axisTiltAngle;
     }
 
@@ -104,10 +104,6 @@ public:
     {
         _orbitalAngle = orbitalAngle;
     }
-    void setAxisRotationAngle(float axisRotationAngle)
-    {
-        _axisRotationAngle = axisRotationAngle;
-    }
 
     inline glm::vec3& getCenter()
     {
@@ -124,16 +120,15 @@ public:
         return _rotationAngle;
     }
 
-    inline float getAxisRotationAngle()
-    {
-        return _axisRotationAngle;
-    }
-
     inline float getAxisTiltAngle()
     {
         return _axisTiltAngle;
     }
 
+    inline float getAxisTiltOrientationAngle()
+    {
+        return _axisTiltOrientationAngle;
+    }
 
     inline float getOrbitalRotationAngle()
     {
@@ -189,8 +184,11 @@ public:
 
         // tilt and rotate axis. 
         // todo - do this using a single rotate invocation
-        modelTrans = glm::rotate(modelTrans,   getAxisRotationAngle(),   glm::vec3(0.0f, 0.0f, 1.0f));
-        modelTrans = glm::rotate(modelTrans,   getAxisTiltAngle(),       glm::vec3(0.0f, 1.0f, 0.0f));
+        //modelTrans = glm::rotate(modelTrans,   getAxisRotationAngle(),   glm::vec3(0.0f, 0.0f, 1.0f));
+
+        glm::vec3 axisTiltOrientationAxis = glm::vec3(cos(getAxisTiltOrientationAngle()), sin(getAxisTiltOrientationAngle()), 0.0f);
+
+        modelTrans = glm::rotate(modelTrans,   getAxisTiltAngle(),       axisTiltOrientationAxis);
         modelTrans = glm::rotate(modelTrans,   getRotationAngle(),       glm::vec3(0.0f, 0.0f, 1.0f));
         
         return modelTrans;
@@ -212,8 +210,11 @@ public:
 
         if (bPrecessionMotion)
         {
-            _axisRotationAngle += 0.005f;      // todo - use step multiplier and a new internal velocity variable.
+            _axisRotationAngle -= 0.005f;      // todo - use step multiplier and a new internal velocity variable.
             _axisRotationAngle = _normalizeAngle(_axisRotationAngle);
+
+            _axisTiltOrientationAngle -= 0.01f;
+            _axisTiltOrientationAngle = _normalizeAngle(_axisTiltOrientationAngle);
         }
         if (bOrbitalPlaneRotation)
         {
@@ -286,6 +287,7 @@ public:
     float _rotationAngularVelocity = 0;     // angular velocity or rotation around sphere's axis. Previously called 'w'.
     float _axisRotationAngle = 0;           // previously called 'alpha'
     float _axisTiltAngle = 0;               // previously called 'beta'
+    float _axisTiltOrientationAngle = glm::radians(0.0f);
 
     // Revolution variables
     float _orbitalRadius = 0;

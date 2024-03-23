@@ -113,7 +113,7 @@ void Universe::initSceneObjects()
     sun.setRotationParameters(160,          // radius
         0,                                  // initial rotation angle
         0.002f,                              // rotation velocity
-        glm::radians(0.0f),                 // axis rotation angle
+        glm::radians(0.0f),                 // axis tilt orientation angle
         glm::radians(0.0f)                  // axis tilt angle
     );
     sun.setOrbitalParameters(0,             // radius of orbit
@@ -131,7 +131,7 @@ void Universe::initSceneObjects()
     earth.setRotationParameters(80,         // radius
         0,                                  // initial rotation angle
         0.02f,                              // rotation velocity
-        glm::radians(270.0f),               // axis rotation angle
+        glm::radians(0.0f),                 // axis tilt orientation angle
         glm::radians(23.5f)                 // axis tilt angle
     );
     earth.setOrbitalParameters(3000,        // radius of orbit
@@ -149,7 +149,7 @@ void Universe::initSceneObjects()
     moon.setRotationParameters(22,          // radius
         0,                                  // initial rotation angle
         0.008888888f,                       // rotation velocity
-        glm::radians(0.0f),                 // axis rotation angle
+        glm::radians(0.0f),                 // axis tilt orientation angle
         glm::radians(10.0f)                 // axis tilt angle
     );
     moon.setOrbitalParameters(400,          // radius of orbit
@@ -170,7 +170,7 @@ void Universe::initSceneObjects()
     mars.setRotationParameters(60,          // radius
         0,                                  // initial rotation angle
         0.02f,                              // rotation velocity
-        glm::radians(270.0f),               // axis rotation angle
+        glm::radians(270.0f),               // axis tilt orientation angle
         glm::radians(25.0f)                 // axis tilt angle
     );
     mars.setOrbitalParameters(5000,         // radius of orbit
@@ -510,7 +510,7 @@ void Universe::Earth_PrecessionMotion(int nParam)
     if (nParam == UCmdParam_Reset)
     {
         earth.bPrecessionMotion = false;
-        earth.setAxisRotationAngle(glm::radians(270.0f));
+        earth._axisTiltOrientationAngle = glm::radians(-90.0f);
     }
     else
     {
@@ -1151,5 +1151,6 @@ int Universe::run()
 	cout << "Cleaning up..." << endl;
 	cleanupAndExitApplication();
 
+    cout << "Exiting leela with value " << retval;
     return retval;
 }
