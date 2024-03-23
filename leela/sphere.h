@@ -269,6 +269,7 @@ public:
     bool bRotationMotion = true;
     bool bPrecessionMotion = false;
     bool bOrbitalPlaneRotation = false;
+    bool bIsCenterOfMass = false;               // if true, this is a virtual sphere. It represents the center of mass of two or more bodies.
 
     // angles and angle velocities are in radians
 
@@ -277,6 +278,7 @@ public:
     float _g = 1;
     float _b = 1;
     glm::vec3 _orbitalPlaneColor = glm::vec3(1.0, 1.0, 1.0);
+
 
     // Rotation variables
     float _radius = 0;
