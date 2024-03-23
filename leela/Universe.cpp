@@ -66,6 +66,10 @@ Universe::Universe() :
     earthRenderer(*this, earth, "textures/earth-erde-mit-wolken-2k.png"),
     moonRenderer(*this, moon, "textures/moonmap1k.png"),
     marsRenderer(*this, mars, "textures/mars2k.png"),
+    jupiterRenderer(*this, jupiter, "textures/jupiter2k.png"),
+    saturnRenderer(*this, saturn, "textures/saturn2k.png"),
+    uranusRenderer(*this, uranus, "textures/uranus2k.png"),
+    neptuneRenderer(*this, neptune, "textures/neptune2k.png"),
 #else
     sunRenderer(sun, "../leela/textures/sunmap.png"),
     //earthRenderer(earth, "../leela/textures/Map-World_23_10.png"),
@@ -182,6 +186,87 @@ void Universe::initSceneObjects()
     mars.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
     mars.setParentSphere(&sun);
 
+    // Jupiter
+    //---------------------------------------
+    jupiter.setName("Jupiter");
+    jupiter.setColor(0.85f, 0.7f, 0.6f);
+    jupiter.setRotationParameters(160,      // radius
+        0,                                  // initial rotation angle
+        0.02f,                              // rotation velocity
+        glm::radians(270.0f),               // axis tilt orientation angle
+        glm::radians(3.1f)                  // axis tilt angle
+    );
+    jupiter.setOrbitalParameters(7000,      // radius of orbit
+        glm::radians(80.0f),                // initial orbital angle
+        0.0004f,                            // revolution velocity
+        0.0f,                               // orbital rotation angle
+        glm::radians(1.31f)                 // orbital tilt
+    );
+    jupiter.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
+    jupiter.setParentSphere(&sun);
+
+
+    // Saturn
+    //---------------------------------------
+    saturn.setName("Saturn");
+    saturn.setColor(0.7f, 0.7f, 0.4f);
+    saturn.setRotationParameters(120,       // radius
+        0,                                  // initial rotation angle
+        0.02f,                              // rotation velocity
+        glm::radians(270.0f),               // axis tilt orientation angle
+        glm::radians(26.7f)                 // axis tilt angle
+    );
+    saturn.setOrbitalParameters(9000,       // radius of orbit
+        glm::radians(220.0f),               // initial orbital angle
+        0.0002f,                            // revolution velocity
+        0.0f,                               // orbital rotation angle
+        glm::radians(2.49f)                 // orbital tilt
+    );
+    saturn.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
+    saturn.setParentSphere(&sun);
+
+
+    // Uranus
+    //---------------------------------------
+    uranus.setName("Uranus");
+    uranus.setColor(0.7f, 0.7f, 0.85f);
+    uranus.setRotationParameters(100,       // radius
+        0,                                  // initial rotation angle
+        0.02f,                              // rotation velocity
+        glm::radians(270.0f),               // axis tilt orientation angle
+        glm::radians(97.7f)                 // axis tilt angle
+    );
+    uranus.setOrbitalParameters(11000,      // radius of orbit
+        glm::radians(18.0f),                // initial orbital angle
+        0.0001f,                            // revolution velocity
+        0.0f,                               // orbital rotation angle
+        glm::radians(.77f)                  // orbital tilt
+    );
+    uranus.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
+    uranus.setParentSphere(&sun);
+
+
+    // Neptune
+    //---------------------------------------
+    neptune.setName("Neptune");
+    neptune.setColor(0.4f, 0.4f, 0.9f);
+    neptune.setRotationParameters(100,       // radius
+        0,                                   // initial rotation angle
+        0.02f,                               // rotation velocity
+        glm::radians(270.0f),                // axis tilt orientation angle
+        glm::radians(28.0f)                  // axis tilt angle
+    );
+    neptune.setOrbitalParameters(13000,      // radius of orbit
+        glm::radians(150.0f),                // initial orbital angle
+        0.00008f,                            // revolution velocity
+        0.0f,                                // orbital rotation angle
+        glm::radians(1.77f)                  // orbital tilt
+    );
+    neptune.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
+    neptune.setParentSphere(&sun);
+
+
+    //---------------------------------------------------------------
     SetApplicationStartView();
 
 }
@@ -225,6 +310,17 @@ void Universe::advance(float stepMultiplier)
     earth.advance(stepMultiplier);
     moon.advance(stepMultiplier);
     mars.advance(stepMultiplier);
+    jupiter.advance(stepMultiplier);
+    saturn.advance(stepMultiplier);
+    uranus.advance(stepMultiplier);
+    neptune.advance(stepMultiplier);
+
+
+    // TODO: how to ensure parents are advanced before children when using a loop?
+    //for (int i = 0; allSpheres[i] != NULL; i++)
+    //{
+    //    allSpheres[i]->advance(stepMultiplier);
+    //}
 }
 
 
@@ -482,7 +578,7 @@ void Universe::SimulationPause(int nParam)
 ****************************************************************************/
 void Universe::Earth_RotationMotion(int nParam)
 {
-    ChangeBoolean(&earth.bRevolutionMotion, nParam);
+    ChangeBoolean(&earth.bRotationMotion, nParam);
 }
 
 /*!

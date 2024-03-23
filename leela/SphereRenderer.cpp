@@ -616,6 +616,9 @@ std::vector<float>* SphereRenderer::_constructRotationAxis()
     
     alpha_inc = alpha_inc * 10;
 
+    float axisLengthMultipler = 1.3f;           // multiply to sphere's radius
+    //float axisLengthMultipler = 1000.0f;        // multiply to sphere's radius
+
     float alpha;
     for (alpha = 0; alpha < float(2 * M_PI); alpha += alpha_inc)
     {
@@ -631,7 +634,7 @@ std::vector<float>* SphereRenderer::_constructRotationAxis()
         float y2 = 0.005f * radius * sin(alpha + alpha_inc);
         float z2 = 0.99f  * radius;
 
-        float z = radius * 1.3f;
+        float z = radius * axisLengthMultipler;
 
         glm::vec3 N1 = glm::normalize(glm::vec3(x1, y1, 0.0f) - glm::vec3(0.0f, 0.0f, 0.0f));
         glm::vec3 N2 = glm::normalize(glm::vec3(x2, y2, 0.0f) - glm::vec3(0.0f, 0.0f, 0.0f));

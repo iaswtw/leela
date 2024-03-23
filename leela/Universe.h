@@ -388,13 +388,24 @@ private:
     Sphere sun;
     Sphere mars;
     Sphere moon;
+    Sphere jupiter;
+    Sphere saturn;
+    Sphere uranus;
+    Sphere neptune;
     Stars stars;
+
+    Sphere* allSpheres[9] = { &sun, &earth, &moon, &mars, &jupiter, &saturn, &uranus, &neptune, NULL };
+    Sphere* allPlanets[8] = {       &earth, &moon, &mars, &jupiter, &saturn, &uranus, &neptune, NULL };
 
     AxisRenderer axisRenderer;
     PlanetRenderer earthRenderer;
     PlanetRenderer moonRenderer;
     PlanetRenderer marsRenderer;
-    PlanetRenderer * planetRenderers[4] = { &earthRenderer, &moonRenderer, &marsRenderer, NULL};
+    PlanetRenderer jupiterRenderer;
+    PlanetRenderer saturnRenderer;
+    PlanetRenderer uranusRenderer;
+    PlanetRenderer neptuneRenderer;
+    PlanetRenderer * planetRenderers[8] = { &earthRenderer, &moonRenderer, &marsRenderer, &jupiterRenderer, &saturnRenderer , &uranusRenderer, &neptuneRenderer, NULL};
     SunRenderer sunRenderer;
     StarsRenderer starsRenderer;
     

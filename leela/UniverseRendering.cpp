@@ -84,6 +84,31 @@ void Universe::initializeGL()
     //marsRenderer.bShowOrbitalPlane = False;
     marsRenderer.bShowOrbit = False;
 
+    jupiterRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
+    jupiterRenderer.constructVerticesAndSendToGpu();
+    jupiterRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
+    //jupiterRenderer.bShowOrbitalPlane = False;
+    jupiterRenderer.bShowOrbit = False;
+
+    saturnRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
+    saturnRenderer.constructVerticesAndSendToGpu();
+    saturnRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
+    //saturnRenderer.bShowOrbitalPlane = False;
+    saturnRenderer.bShowOrbit = False;
+
+    uranusRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
+    uranusRenderer.constructVerticesAndSendToGpu();
+    uranusRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
+    //uranusRenderer.bShowOrbitalPlane = False;
+    uranusRenderer.bShowOrbit = False;
+
+    neptuneRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
+    neptuneRenderer.constructVerticesAndSendToGpu();
+    neptuneRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
+    //neptuneRenderer.bShowOrbitalPlane = False;
+    neptuneRenderer.bShowOrbit = False;
+
+
     //---------------------------------------------------------------------------------------------------
     // Axis
     axisRenderer.constructVerticesAndSendToGpu();
@@ -223,12 +248,32 @@ void Universe::renderUsingPlanetGlslProgram()
     marsRenderer.renderSphere(planetGlslProgram, &sun, &mars);
     marsRenderer.renderLatitudeAndLongitudes(planetGlslProgram);
 
+    planetGlslProgram.setBool("useTexture", bRealisticSurfaces);
+    jupiterRenderer.renderSphere(planetGlslProgram, &sun, &jupiter);
+    jupiterRenderer.renderLatitudeAndLongitudes(planetGlslProgram);
+
+    planetGlslProgram.setBool("useTexture", bRealisticSurfaces);
+    saturnRenderer.renderSphere(planetGlslProgram, &sun, &saturn);
+    saturnRenderer.renderLatitudeAndLongitudes(planetGlslProgram);
+
+    planetGlslProgram.setBool("useTexture", bRealisticSurfaces);
+    uranusRenderer.renderSphere(planetGlslProgram, &sun, &uranus);
+    uranusRenderer.renderLatitudeAndLongitudes(planetGlslProgram);
+
+    planetGlslProgram.setBool("useTexture", bRealisticSurfaces);
+    neptuneRenderer.renderSphere(planetGlslProgram, &sun, &neptune);
+    neptuneRenderer.renderLatitudeAndLongitudes(planetGlslProgram);
+
 
     if (bShowPlanetAxis)
     {
         earthRenderer.renderRotationAxis(planetGlslProgram, &sun, &moon);
         moonRenderer.renderRotationAxis(planetGlslProgram, &sun, &earth);
         marsRenderer.renderRotationAxis(planetGlslProgram, &sun, &mars);
+        jupiterRenderer.renderRotationAxis(planetGlslProgram, &sun, &jupiter);
+        saturnRenderer.renderRotationAxis(planetGlslProgram, &sun, &saturn);
+        uranusRenderer.renderRotationAxis(planetGlslProgram, &sun, &uranus);
+        neptuneRenderer.renderRotationAxis(planetGlslProgram, &sun, &neptune);
     }
 }
 
