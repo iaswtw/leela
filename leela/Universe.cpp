@@ -177,7 +177,7 @@ void Universe::initSceneObjects()
         glm::radians(270.0f),               // axis tilt orientation angle
         glm::radians(25.0f)                 // axis tilt angle
     );
-    mars.setOrbitalParameters(5000,         // radius of orbit
+    mars.setOrbitalParameters(7000,         // radius of orbit
         0,                                  // initial orbital angle
         0.0006f,                            // revolution velocity
         0.0f,                               // orbital rotation angle
@@ -190,14 +190,14 @@ void Universe::initSceneObjects()
     //---------------------------------------
     jupiter.setName("Jupiter");
     jupiter.setColor(0.85f, 0.7f, 0.6f);
-    jupiter.setRotationParameters(160,      // radius
+    jupiter.setRotationParameters(140,      // radius
         0,                                  // initial rotation angle
         0.02f,                              // rotation velocity
         glm::radians(270.0f),               // axis tilt orientation angle
         glm::radians(3.1f)                  // axis tilt angle
     );
-    jupiter.setOrbitalParameters(7000,      // radius of orbit
-        glm::radians(80.0f),                // initial orbital angle
+    jupiter.setOrbitalParameters(11000,      // radius of orbit
+        glm::radians(280.0f),               // initial orbital angle
         0.0004f,                            // revolution velocity
         0.0f,                               // orbital rotation angle
         glm::radians(1.31f)                 // orbital tilt
@@ -210,13 +210,13 @@ void Universe::initSceneObjects()
     //---------------------------------------
     saturn.setName("Saturn");
     saturn.setColor(0.7f, 0.7f, 0.4f);
-    saturn.setRotationParameters(120,       // radius
+    saturn.setRotationParameters(110,       // radius
         0,                                  // initial rotation angle
         0.02f,                              // rotation velocity
         glm::radians(270.0f),               // axis tilt orientation angle
         glm::radians(26.7f)                 // axis tilt angle
     );
-    saturn.setOrbitalParameters(9000,       // radius of orbit
+    saturn.setOrbitalParameters(15000,       // radius of orbit
         glm::radians(220.0f),               // initial orbital angle
         0.0002f,                            // revolution velocity
         0.0f,                               // orbital rotation angle
@@ -230,13 +230,13 @@ void Universe::initSceneObjects()
     //---------------------------------------
     uranus.setName("Uranus");
     uranus.setColor(0.7f, 0.7f, 0.85f);
-    uranus.setRotationParameters(100,       // radius
+    uranus.setRotationParameters(90,       // radius
         0,                                  // initial rotation angle
         0.02f,                              // rotation velocity
         glm::radians(270.0f),               // axis tilt orientation angle
         glm::radians(97.7f)                 // axis tilt angle
     );
-    uranus.setOrbitalParameters(11000,      // radius of orbit
+    uranus.setOrbitalParameters(20000,      // radius of orbit
         glm::radians(18.0f),                // initial orbital angle
         0.0001f,                            // revolution velocity
         0.0f,                               // orbital rotation angle
@@ -250,13 +250,13 @@ void Universe::initSceneObjects()
     //---------------------------------------
     neptune.setName("Neptune");
     neptune.setColor(0.4f, 0.4f, 0.9f);
-    neptune.setRotationParameters(100,       // radius
+    neptune.setRotationParameters(80,        // radius
         0,                                   // initial rotation angle
         0.02f,                               // rotation velocity
         glm::radians(270.0f),                // axis tilt orientation angle
         glm::radians(28.0f)                  // axis tilt angle
     );
-    neptune.setOrbitalParameters(13000,      // radius of orbit
+    neptune.setOrbitalParameters(25000,      // radius of orbit
         glm::radians(150.0f),                // initial orbital angle
         0.00008f,                            // revolution velocity
         0.0f,                                // orbital rotation angle
