@@ -66,8 +66,11 @@ void Universe::initializeGL()
     sunRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
     sunRenderer.constructVerticesAndSendToGpu();
 
-
-    earthRenderer.setPolygonCountLevel(PolygonCountLevel_High);
+#ifdef DRAW_LINES_INSTEAD_OF_TRIANGLES
+    earthRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
+#else
+    earthRenderer.setPolygonCountLevel(PolygonCountLevel_Medium);
+#endif
     earthRenderer.constructVerticesAndSendToGpu();
     earthRenderer.bShowLatitudesAndLongitudes = true;
     earthRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
@@ -785,6 +788,7 @@ void Universe::generateImGuiWidgets()
 
             ImGui::Checkbox("Realistic shading", &bRealisticShading);
             ImGui::Checkbox("Realistic surfaces", &bRealisticSurfaces);
+            ImGui::Checkbox("Wireframe surfaces", &bShowWireframeSurfaces);
             ImGui::Separator();
 
             //-----------------------------------------------------

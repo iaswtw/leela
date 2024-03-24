@@ -29,7 +29,6 @@ using TriangleList = std::vector<Triangle>;
 using VertexList = std::vector<glm::vec3>;
 
 
-//#define USE_ICOSPHERE
 
 namespace icosahedron
 {
@@ -398,14 +397,47 @@ std::pair<std::vector<float>*, std::vector<Triangle>*>  SphereRenderer::_constru
                 ;
             throw std::exception(msg.c_str());
         }
-        texCoordX = float(alpha / (2 * float(M_PI)));
+        texCoordX = float(alpha / (2 * M_PI));
+        //printf("tex X: %f", texCoordX);
+        //if (texCoordX > 1.0f)
+        //{
+        //    printf("texture X coord is greater than 1.0f");
+        //}
+        //if (texCoordX < 0.0f)
+        //{
+        //    printf("texture X coord is less than 0.0f");
+        //}
+        //if (texCoordX > 1.0f)
+        //{
+        //    texCoordX -= 1.0f;
+        //}
+        //if (texCoordX < 0.0f)
+        //{
+        //    texCoordX += 1.0f;
+        //}
 
         //------------------------------------------------------------------
         // beta is measured from from +ve Z axis.
         float beta = asin(vertex.z);                // this is when measured from +ve X axis. goes from +PI/2 to -PI/2
-        beta = -beta + (float(M_PI) / 2.0f);        // invert (-PI/2 to +PI/2) then shift (0 to PI)
+        beta = -beta + float(M_PI / 2.0f);        // invert (-PI/2 to +PI/2) then shift (0 to PI)
         texCoordY = beta / float(M_PI);             // 0 to PI => 0 to 1
-
+        //printf("tex Y: %f", texCoordY);
+        //if (texCoordY > 1.0f)
+        //{
+        //    printf("texture Y coord is greater than 1.0f");
+        //}
+        //if (texCoordY < 0.0f)
+        //{
+        //    printf("texture Y coord is less than 0.0f");
+        //}
+        //if (texCoordY > 1.0f)
+        //{
+        //    texCoordY -= 1.0f;
+        //}
+        //if (texCoordY < 0.0f)
+        //{
+        //    texCoordY += 1.0f;
+        //}
 
         //printf("%%%% texture coord: x = %f, y = %f\n", texCoordX, texCoordY);
         
@@ -782,11 +814,15 @@ void SphereRenderer::constructVerticesAndSendToGpu()
     {
         glGenTextures(1, &_texture);
         glBindTexture(GL_TEXTURE_2D, _texture);
+#ifdef USE_ICOSPHERE
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+#else
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+#endif
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
         // The following border color isn't used because 'clamp_to_edge' used above. 
         // Set border color to debug problems at the edge in the future.
         float color[] = { 1.0f, 0.0f, 0.0f, 1.0f };
@@ -1042,7 +1078,17 @@ void PlanetRenderer::renderSphere(GlslProgram& glslProgram, Sphere* sun, Sphere*
         }
         glBindVertexArray(_mainVao);
 
-        // Draw vertices
+
+        if (parent.bShowWireframeSurfaces)
+        {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        }
+        else
+        {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
+
+    // Draw vertices
 #ifndef USE_ICOSPHERE
         glDrawArrays(GL_TRIANGLES, 0, numMainSphereVertices);
 #else

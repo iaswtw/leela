@@ -29,6 +29,8 @@ constexpr auto FIR_WIDTH = 100;
 
 
 #define RELEASE_BUILD
+//#define USE_ICOSPHERE
+//#define DRAW_LINES_INSTEAD_OF_TRIANGLES
 
 /*!
  **************************************************************************
@@ -257,6 +259,8 @@ public:
     void generateImGuiWidgets();
 
     bool bShowLowDarknessAtNight = false;
+    bool bShowWireframeSurfaces = false;
+
 
 private:
     bool bQuit = false;
