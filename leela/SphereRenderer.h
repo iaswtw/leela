@@ -111,11 +111,11 @@ public:
 	PlanetRenderer(Universe& parent, Sphere& sphere, std::string textureFilename = "");
 	~PlanetRenderer();
 
-	void renderSphere(GlslProgram& glslProgram, Sphere* sun, Sphere* otherSphere = nullptr);
+	void renderSphere(GlslProgram& glslProgram);
 	void renderLatitudeAndLongitudes(GlslProgram& glslProgram);
 	void renderOrbitalPlane(GlslProgram& glslProgram);
 	void renderOrbit(GlslProgram& glslProgram);
-    void renderRotationAxis(GlslProgram& glslProgram, Sphere* sun, Sphere* otherSphere);
+    void renderRotationAxis(GlslProgram& glslProgram);
 
 };
 

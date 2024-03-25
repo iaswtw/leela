@@ -265,6 +265,18 @@ public:
         return angle;
     }
 
+    // related sphere is a sphere that is close enough to this sphere so as to possibly cast a shadow
+    // on this sphere.
+    void setRelatedSphere(Sphere * relatedSphere)
+    {
+        _relatedSphere = relatedSphere;
+    }
+
+    void setSunSphere(Sphere* sunSphere)
+    {
+        _sunSphere = sunSphere;
+    }
+
 public:
     bool bRevolutionMotion = true;
     bool bRotationMotion = true;
@@ -296,7 +308,11 @@ public:
     float _orbitalPlaneRotationAngle = 0;   // previously called 'alphao'
     float _orbitalPlaneTiltAngle = 0;       // previously called 'betao'
 
-    Sphere *_parent = nullptr;
+    Sphere* _relatedSphere = nullptr;
+    Sphere* _sunSphere = nullptr;
+
+    Sphere *_parent = nullptr;              // e.g. if this is moon, _parent is earth.
+                                            // TODO: this will change when we bring in center of mass virtual Sphere object.
     std::string _name = "NoName";
 };
 

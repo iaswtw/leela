@@ -6,12 +6,6 @@
 #include "imgui_impl_opengl3.h"
 
 
-
-
-/*************************************************************************************************
-
-
-**************************************************************************************************/
 void Universe::initializeGL()
 {
     printf("Inside initializeGL\n");
@@ -121,10 +115,9 @@ void Universe::initializeGL()
 }
 
 
-/*************************************************************************************************
-
-
-**************************************************************************************************/
+/*
+ * Top level render method called from the main loop
+ */
 void Universe::render()
 {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -239,44 +232,18 @@ void Universe::renderUsingPlanetGlslProgram()
     planetGlslProgram.setFloat("sunRadius", sun.getRadius());
     planetGlslProgram.setBool("realisticShading", bRealisticShading);
 
-    planetGlslProgram.setBool("useTexture", bRealisticSurfaces);
-    earthRenderer.renderSphere(planetGlslProgram, &sun, &moon);
-    earthRenderer.renderLatitudeAndLongitudes(planetGlslProgram);
-
-    planetGlslProgram.setBool("useTexture", bRealisticSurfaces);
-    moonRenderer.renderSphere(planetGlslProgram, &sun, &earth);
-    moonRenderer.renderLatitudeAndLongitudes(planetGlslProgram);
-
-    planetGlslProgram.setBool("useTexture", bRealisticSurfaces);
-    marsRenderer.renderSphere(planetGlslProgram, &sun, &mars);
-    marsRenderer.renderLatitudeAndLongitudes(planetGlslProgram);
-
-    planetGlslProgram.setBool("useTexture", bRealisticSurfaces);
-    jupiterRenderer.renderSphere(planetGlslProgram, &sun, &jupiter);
-    jupiterRenderer.renderLatitudeAndLongitudes(planetGlslProgram);
-
-    planetGlslProgram.setBool("useTexture", bRealisticSurfaces);
-    saturnRenderer.renderSphere(planetGlslProgram, &sun, &saturn);
-    saturnRenderer.renderLatitudeAndLongitudes(planetGlslProgram);
-
-    planetGlslProgram.setBool("useTexture", bRealisticSurfaces);
-    uranusRenderer.renderSphere(planetGlslProgram, &sun, &uranus);
-    uranusRenderer.renderLatitudeAndLongitudes(planetGlslProgram);
-
-    planetGlslProgram.setBool("useTexture", bRealisticSurfaces);
-    neptuneRenderer.renderSphere(planetGlslProgram, &sun, &neptune);
-    neptuneRenderer.renderLatitudeAndLongitudes(planetGlslProgram);
-
+    for (int i = 0; systemRenderers[i] != NULL; i++)
+    {
+        systemRenderers[i]->renderSphere(planetGlslProgram);
+        systemRenderers[i]->renderLatitudeAndLongitudes(planetGlslProgram);
+    }
 
     if (bShowPlanetAxis)
     {
-        earthRenderer.renderRotationAxis(planetGlslProgram, &sun, &moon);
-        moonRenderer.renderRotationAxis(planetGlslProgram, &sun, &earth);
-        marsRenderer.renderRotationAxis(planetGlslProgram, &sun, &mars);
-        jupiterRenderer.renderRotationAxis(planetGlslProgram, &sun, &jupiter);
-        saturnRenderer.renderRotationAxis(planetGlslProgram, &sun, &saturn);
-        uranusRenderer.renderRotationAxis(planetGlslProgram, &sun, &uranus);
-        neptuneRenderer.renderRotationAxis(planetGlslProgram, &sun, &neptune);
+        for (int i = 0; systemRenderers[i] != NULL; i++)
+        {
+            systemRenderers[i]->renderRotationAxis(planetGlslProgram);
+        }
     }
 }
 
@@ -307,20 +274,32 @@ void Universe::renderUsingSimpleGlslProgram()
 
     if (bShowOrbitsGlobalEnable)
     {
-        for (int i = 0; planetRenderers[i] != NULL; i++)
+        for (int i = 0; systemRenderers[i] != NULL; i++)
         {
-            planetRenderers[i]->renderOrbit(simpleGlslProgram);
+            systemRenderers[i]->renderOrbit(simpleGlslProgram);
         }
     }
 }
 
 void Universe::renderTransparentUsingSimpleGlslProgram()
 {
-    for (int i = 0; planetRenderers[i] != NULL; i++)
+    for (int i = 0; systemRenderers[i] != NULL; i++)
     {
-        planetRenderers[i]->renderOrbitalPlane(simpleGlslProgram);
+        systemRenderers[i]->renderOrbitalPlane(simpleGlslProgram);
     }
 }
+
+
+//// Like small buttons, small checkboxes fit within text without additional vertical spacing.
+//bool Universe::SmallCheckbox(const char* label, bool* v)
+//{
+//    ImGuiContext& g = *ImGui::GImGui;
+//    float backup_padding_y = g.Style.FramePadding.y;
+//    g.Style.FramePadding.y = 0.0f;
+//    bool pressed = ImGui::Checkbox(label, v);
+//    g.Style.FramePadding.y = backup_padding_y;
+//    return pressed;
+//}
 
 void Universe::generateImGuiWidgets()
 {
@@ -789,6 +768,11 @@ void Universe::generateImGuiWidgets()
             ImGui::Checkbox("Realistic shading", &bRealisticShading);
             ImGui::Checkbox("Realistic surfaces", &bRealisticSurfaces);
             ImGui::Checkbox("Wireframe surfaces", &bShowWireframeSurfaces);
+            ImGui::Checkbox("Show orbits (o)", &bShowOrbitsGlobalEnable);
+            ImGui::Checkbox("Show coordinate axis (a)", &bShowAxis);
+            ImGui::Checkbox("Show planet axis", &bShowPlanetAxis);
+            ImGui::Checkbox("Low darkness at night", &bShowLowDarknessAtNight);
+
             ImGui::Separator();
 
             //-----------------------------------------------------
@@ -930,15 +914,6 @@ void Universe::generateImGuiWidgets()
             if (ImGui::Button("Show default view (d)"))
                 SetDefaultView();
             ImGui::Unindent();
-
-            ImGui::Separator();
-
-            //-----------------------------------------------------
-
-            ImGui::Checkbox("Show orbits (o)", &bShowOrbitsGlobalEnable);
-            ImGui::Checkbox("Show coordinate axis (a)", &bShowAxis);
-            ImGui::Checkbox("Show planet axis", &bShowPlanetAxis);
-            ImGui::Checkbox("Low darkness at night", &bShowLowDarknessAtNight);
 
             ImGui::Separator();
 

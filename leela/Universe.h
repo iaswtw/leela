@@ -114,10 +114,6 @@ typedef enum
     UCmdParam_Off,
 } UCmdParamType;
 
-/*!
- **************************************************************************
-
- **************************************************************************/
 typedef enum
 {
     USimulationSpeed_1p5625_Percent = 0,
@@ -131,32 +127,18 @@ typedef enum
     USimulationSpeed_1600_Percent
 } USimulationSpeedType;
 
-
-/*!
- **************************************************************************
-
- **************************************************************************/
 typedef enum
 {
     UTimeDirection_Forward,
     UTimeDirection_Reverse
 } UTimeDirectionType;
 
-
-/*!
- **************************************************************************
-
- **************************************************************************/
 typedef enum
 {
     UDotDensity_Normal,
     UDotDensity_High
 } UDotDensityType;
 
-/*!
- **************************************************************************
-
- **************************************************************************/
 typedef enum
 {
     UDemo_TotalSolarEclipse,
@@ -262,7 +244,7 @@ public:
     bool bShowWireframeSurfaces = false;
 
 
-private:
+public:
     bool bQuit = false;
     bool bMouseGrabbed = false;
     bool bFastForward = false;
@@ -409,7 +391,8 @@ private:
     PlanetRenderer saturnRenderer;
     PlanetRenderer uranusRenderer;
     PlanetRenderer neptuneRenderer;
-    PlanetRenderer * planetRenderers[8] = { &earthRenderer, &moonRenderer, &marsRenderer, &jupiterRenderer, &saturnRenderer , &uranusRenderer, &neptuneRenderer, NULL};
+    // list of all planet & satellite (System) renderers. Does not contain sun.
+    PlanetRenderer * systemRenderers[8] = { &earthRenderer, &moonRenderer, &marsRenderer, &jupiterRenderer, &saturnRenderer , &uranusRenderer, &neptuneRenderer, NULL};
     SunRenderer sunRenderer;
     StarsRenderer starsRenderer;
     

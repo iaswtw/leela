@@ -145,6 +145,7 @@ void Universe::initSceneObjects()
         0                                   // orbital  tilt
     );
     earth.setOrbitalPlaneColor(glm::vec3(0.55, 0.82, 1.0));
+    earth.setSunSphere(&sun);
 
     // Moon
     //---------------------------------------
@@ -165,6 +166,9 @@ void Universe::initSceneObjects()
     moon.setOrbitalPlaneColor(glm::vec3(0.8f, 0.8f, 0.8f));
     moon.setParentSphere(&earth);
     earth.setParentSphere(&sun);
+    moon.setSunSphere(&sun);
+    moon.setRelatedSphere(&earth);
+    earth.setRelatedSphere(&moon);
 
 
     // Mars
@@ -185,6 +189,7 @@ void Universe::initSceneObjects()
     );
     mars.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
     mars.setParentSphere(&sun);
+    mars.setSunSphere(&sun);
 
     // Jupiter
     //---------------------------------------
@@ -204,6 +209,7 @@ void Universe::initSceneObjects()
     );
     jupiter.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
     jupiter.setParentSphere(&sun);
+    jupiter.setSunSphere(&sun);
 
 
     // Saturn
@@ -224,6 +230,7 @@ void Universe::initSceneObjects()
     );
     saturn.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
     saturn.setParentSphere(&sun);
+    saturn.setSunSphere(&sun);
 
 
     // Uranus
@@ -244,6 +251,7 @@ void Universe::initSceneObjects()
     );
     uranus.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
     uranus.setParentSphere(&sun);
+    uranus.setSunSphere(&sun);
 
 
     // Neptune
@@ -264,6 +272,7 @@ void Universe::initSceneObjects()
     );
     neptune.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
     neptune.setParentSphere(&sun);
+    neptune.setSunSphere(&sun);
 
 
     //---------------------------------------------------------------
