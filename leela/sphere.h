@@ -150,6 +150,10 @@ public:
         return _orbitalPlaneRotationAngle;
     }
      
+    void setAxisTiltOrientationAngle(float axisTiltOrientationAngle)
+    {
+        _axisTiltOrientationAngle = axisTiltOrientationAngle;
+    }
 
     glm::mat4 getOrbitalPlaneModelMatrix()
     {

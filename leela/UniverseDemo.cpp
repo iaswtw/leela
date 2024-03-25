@@ -248,7 +248,7 @@ void Universe::ShowDemo(int nParam)
 
         Moon_SetOrbitalPositionAngle(0);
         // Set earth at (0,R,0)
-        Earth_SetOrbitalPositionAngle(M_PI / 2);
+        Earth_SetOrbitalPositionAngle(0.0f);
 
         // Set S
         newS = PNT(earth.getCenter().x + 250, earth.getCenter().y - 350, earth.getCenter().z + 300);
@@ -273,6 +273,8 @@ void Universe::ShowDemo(int nParam)
         Earth_OrbitalPlane(UCmdParam_On);
         Moon_OrbitalPlane(UCmdParam_Off);
 
+        bShowPlanetAxis = True;
+
         SetDotDensity(UDotDensity_Normal);
         SetSimulationSpeed(USimulationSpeed_400_Percent);
         SimulationPause(UCmdParam_Off);
@@ -283,7 +285,7 @@ void Universe::ShowDemo(int nParam)
 
         Moon_SetOrbitalPositionAngle(0);
         // Set earth at (0,R,0)
-        Earth_SetOrbitalPositionAngle(M_PI + M_PI / 4);
+        Earth_SetOrbitalPositionAngle(0.0f);
 
         // Set S
         newS = PNT(earth.getCenter().x, earth.getCenter().y - 350, earth.getCenter().z + 100);
@@ -307,6 +309,8 @@ void Universe::ShowDemo(int nParam)
         //// Adjust orbital planes
         Earth_OrbitalPlane(UCmdParam_On);
         Moon_OrbitalPlane(UCmdParam_Off);
+
+        bShowPlanetAxis = True;
 
         SetDotDensity(UDotDensity_Normal);
         SetSimulationSpeed(USimulationSpeed_400_Percent);

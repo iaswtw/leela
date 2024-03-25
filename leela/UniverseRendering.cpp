@@ -289,17 +289,19 @@ void Universe::renderTransparentUsingSimpleGlslProgram()
     }
 }
 
+#include "imgui_internal.h"
+extern ImGuiContext * GImGui;
 
-//// Like small buttons, small checkboxes fit within text without additional vertical spacing.
-//bool Universe::SmallCheckbox(const char* label, bool* v)
-//{
-//    ImGuiContext& g = *ImGui::GImGui;
-//    float backup_padding_y = g.Style.FramePadding.y;
-//    g.Style.FramePadding.y = 0.0f;
-//    bool pressed = ImGui::Checkbox(label, v);
-//    g.Style.FramePadding.y = backup_padding_y;
-//    return pressed;
-//}
+// Like small buttons, small checkboxes fit within text without additional vertical spacing.
+bool Universe::SmallCheckbox(const char* label, bool* v)
+{
+    ImGuiContext& g = *GImGui;
+    float backup_padding_y = g.Style.FramePadding.y;
+    g.Style.FramePadding.y = 0.0f;
+    bool pressed = ImGui::Checkbox(label, v);
+    g.Style.FramePadding.y = backup_padding_y;
+    return pressed;
+}
 
 void Universe::generateImGuiWidgets()
 {
@@ -765,13 +767,13 @@ void Universe::generateImGuiWidgets()
 
             //-----------------------------------------------------
 
-            ImGui::Checkbox("Realistic shading", &bRealisticShading);
-            ImGui::Checkbox("Textured surfaces", &bRealisticSurfaces);
-            ImGui::Checkbox("Wireframe surfaces", &bShowWireframeSurfaces);
-            ImGui::Checkbox("Show orbits (o)", &bShowOrbitsGlobalEnable);
-            ImGui::Checkbox("Show coordinate axis (a)", &bShowAxis);
-            ImGui::Checkbox("Show planet axis", &bShowPlanetAxis);
-            ImGui::Checkbox("Low darkness at night", &bShowLowDarknessAtNight);
+            SmallCheckbox("Realistic shading", &bRealisticShading);
+            SmallCheckbox("Textured surfaces", &bRealisticSurfaces);
+            SmallCheckbox("Wireframe surfaces", &bShowWireframeSurfaces);
+            SmallCheckbox("Show orbits (o)", &bShowOrbitsGlobalEnable);
+            SmallCheckbox("Show coordinate axis (a)", &bShowAxis);
+            SmallCheckbox("Show planet axis", &bShowPlanetAxis);
+            SmallCheckbox("Low darkness at night", &bShowLowDarknessAtNight);
 
             ImGui::Separator();
 
@@ -782,7 +784,7 @@ void Universe::generateImGuiWidgets()
             ImGui::PopFont();
             ImGui::Indent();
 
-            ImGui::Checkbox("Time pause (space bar)", &bSimulationPause);
+            SmallCheckbox("Time pause (space bar)", &bSimulationPause);
 
             ImGui::Button("Fast Rewind (r)");
             if (ImGui::IsItemActivated())       Rewind(UCmdParam_On);
@@ -822,15 +824,15 @@ void Universe::generateImGuiWidgets()
             ImGui::PopFont();
 
             ImGui::Indent();
-            ImGui::Checkbox("Rotation## earth", &earth.bRotationMotion); ImGui::SameLine();
-            ImGui::Checkbox("Revolution  (0)## earth", &earth.bRevolutionMotion);
-            ImGui::Checkbox("Orbit## earth", &earthRenderer.bShowOrbit);  ImGui::SameLine();
-            ImGui::Checkbox("Orbital plane (e)## earth", &earthRenderer.bShowOrbitalPlane);
-            ImGui::Checkbox("Precession (F6)## earth", &earth.bPrecessionMotion);
+            SmallCheckbox("Rotation## earth", &earth.bRotationMotion); ImGui::SameLine();
+            SmallCheckbox("Revolution  (0)## earth", &earth.bRevolutionMotion);
+            SmallCheckbox("Orbit## earth", &earthRenderer.bShowOrbit);  ImGui::SameLine();
+            SmallCheckbox("Orbital plane (e)## earth", &earthRenderer.bShowOrbitalPlane);
+            SmallCheckbox("Precession (F6)## earth", &earth.bPrecessionMotion);
             ImGui::SameLine();
             if (ImGui::Button("Reset## earth precession motion"))
                 Earth_PrecessionMotion(UCmdParam_Reset);
-            ImGui::Checkbox("Show latitudes/longituedes## earth", &earthRenderer.bShowLatitudesAndLongitudes);
+            SmallCheckbox("Show latitudes/longituedes## earth", &earthRenderer.bShowLatitudesAndLongitudes);
             ImGui::Unindent();
 
             ImGui::Separator();
@@ -842,10 +844,10 @@ void Universe::generateImGuiWidgets()
             ImGui::PopFont();
 
             ImGui::Indent();
-            ImGui::Checkbox("Revolution", &moon.bRevolutionMotion);
-            ImGui::Checkbox("Orbit## moon", &moonRenderer.bShowOrbit); ImGui::SameLine();
-            ImGui::Checkbox("Orbital plane (m)##moon", &moonRenderer.bShowOrbitalPlane);
-            ImGui::Checkbox("Orbital plane rotation (F5)", &moon.bOrbitalPlaneRotation);
+            SmallCheckbox("Revolution", &moon.bRevolutionMotion);
+            SmallCheckbox("Orbit## moon", &moonRenderer.bShowOrbit); ImGui::SameLine();
+            SmallCheckbox("Orbital plane (m)##moon", &moonRenderer.bShowOrbitalPlane);
+            SmallCheckbox("Orbital plane rotation (F5)", &moon.bOrbitalPlaneRotation);
             ImGui::SameLine();
             if (ImGui::Button("Reset## moon orbital plane rotation"))
                 Moon_OrbitalPlaneRotation(UCmdParam_Reset);
@@ -860,9 +862,9 @@ void Universe::generateImGuiWidgets()
             ImGui::PopFont();
 
             ImGui::Indent();
-            ImGui::Checkbox("Revolution", &mars.bRevolutionMotion);
-            ImGui::Checkbox("Orbit## mars", &marsRenderer.bShowOrbit); ImGui::SameLine();
-            ImGui::Checkbox("Orbital plane (,)##mars", &marsRenderer.bShowOrbitalPlane);
+            SmallCheckbox("Revolution", &mars.bRevolutionMotion);
+            SmallCheckbox("Orbit## mars", &marsRenderer.bShowOrbit); ImGui::SameLine();
+            SmallCheckbox("Orbital plane (,)##mars", &marsRenderer.bShowOrbitalPlane);
             ImGui::Unindent();
 
             ImGui::Separator();
@@ -875,14 +877,14 @@ void Universe::generateImGuiWidgets()
             ImGui::PopFont();
 
             ImGui::Indent();
-            //ImGui::Checkbox("Shift mode (v)", &bSidewaysMotionMode);
+            //SmallCheckbox("Shift mode (v)", &bSidewaysMotionMode);
             //ImGui::SameLine(); HelpMarker("When checked, Shift left/right/up/down on mouse movements.\nWhen unchecked, rotate instead.");
-            //ImGui::Checkbox("Lock on earth (z)", &bLockOntoEarth);
+            //SmallCheckbox("Lock on earth (z)", &bLockOntoEarth);
             //if (ImGui::IsItemEdited())
             //    SetLockTargetAndMode(bLockOntoEarth ? UCmdParam_On : UCmdParam_Off);
             //ImGui::SameLine(); HelpMarker("Also pauses earth's revolution. Activate this mode and\nthen use mouse to view earth from different angles.");
 
-            //ImGui::Checkbox("Directional lock on earth (b)", &bEarthFollowMode);
+            //SmallCheckbox("Directional lock on earth (b)", &bEarthFollowMode);
             //if (ImGui::IsItemEdited())
             //    NavigationLockOntoEarthWithConstantDirection(bEarthFollowMode ? UCmdParam_On : UCmdParam_Off);
             //ImGui::SameLine();

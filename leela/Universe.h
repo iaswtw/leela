@@ -238,6 +238,7 @@ public:
     void setWidgetControlMode();
     void resetWidgetControlMode();
     void cleanupAndExitApplication();
+    bool SmallCheckbox(const char* label, bool* v);
     void generateImGuiWidgets();
 
     bool bShowLowDarknessAtNight = false;

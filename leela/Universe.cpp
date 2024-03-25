@@ -280,11 +280,6 @@ void Universe::initSceneObjects()
 
 }
 
-
-/*************************************************************************************************
-
-
-**************************************************************************************************/
 void Universe::printGlError()
 {
     GLenum err = glGetError();
@@ -308,10 +303,6 @@ void Universe::printGlError()
 }
 
 
-
-
-
-
 void Universe::advance(float stepMultiplier)
 {
     // Advance parents before children
@@ -333,23 +324,11 @@ void Universe::advance(float stepMultiplier)
 }
 
 
-/*!
-****************************************************************************
-
-
-
-****************************************************************************/
 void Universe::ChangeSidewaysMotionMode()
 {
     bSidewaysMotionMode = !bSidewaysMotionMode;
 }
 
-/*!
-****************************************************************************
-
-
-
-****************************************************************************/
 void Universe::SetDefaultView()
 {
     space.pushFrame();
@@ -361,12 +340,6 @@ void Universe::SetDefaultView()
     ResetFollowTargetAndMode();
 }
 
-/*!
-****************************************************************************
-
-
-
-****************************************************************************/
 void Universe::SetApplicationStartView()
 {
     space.pushFrame();
@@ -386,10 +359,6 @@ void Universe::SetApplicationStartView()
 }
 
 
-/*!
-****************************************************************************
-
-****************************************************************************/
 void Universe::SetLockTargetAndMode(Sphere* target, TargetLockMode mode)
 {
     lockTarget = target;
@@ -499,35 +468,22 @@ void Universe::SetSimulationSpeed(int nParam)
     }
 }
 
-/*!
-****************************************************************************
-
- Set time flow direction to either Forward or Reverse depending on the
- argument.
-
-****************************************************************************/
+/*
+ * Set time flow direction to either Forward or Reverse depending on the
+ * argument.
+*/
 void Universe::SetTimeDirection(int nParam)
 {
     eTimeDirection = (UTimeDirectionType)nParam;
 }
 
-/*!
-****************************************************************************
-
- Turn On/Off Fast forward motion.
-
-****************************************************************************/
+// Turn On/Off Fast forward motion.
 void Universe::FastForward(int nParam)
 {
     ChangeBoolean(&bFastForward, nParam);
 }
 
-/*!
-****************************************************************************
-
- Turn On/Off fast Reverse motion.
-
-****************************************************************************/
+// Turn On/Off fast Reverse motion.
 void Universe::Rewind(int nParam)
 {
     ChangeBoolean(&bFastReverse, nParam);
@@ -566,36 +522,16 @@ void Universe::ChangeBoolean(bool *pBool, int nParam)
     }
 }
 
-
-/*!
-****************************************************************************
-
-
-
-****************************************************************************/
 void Universe::SimulationPause(int nParam)
 {
     ChangeBoolean(&bSimulationPause, nParam);
 }
 
-
-/*!
-****************************************************************************
-
-
-
-****************************************************************************/
 void Universe::Earth_RotationMotion(int nParam)
 {
     ChangeBoolean(&earth.bRotationMotion, nParam);
 }
 
-/*!
-****************************************************************************
-
-
-
-****************************************************************************/
 void Universe::Earth_RevolutionMotion(int nParam)
 {
     ChangeBoolean(&earth.bRevolutionMotion, nParam);
@@ -604,18 +540,12 @@ void Universe::Earth_RevolutionMotion(int nParam)
 }
 
 
-/*!
-****************************************************************************
-
-
-
-****************************************************************************/
 void Universe::Earth_PrecessionMotion(int nParam)
 {
     if (nParam == UCmdParam_Reset)
     {
         earth.bPrecessionMotion = false;
-        earth._axisTiltOrientationAngle = glm::radians(-90.0f);
+        earth._axisTiltOrientationAngle = glm::radians(0.0f);
     }
     else
     {
@@ -623,13 +553,6 @@ void Universe::Earth_PrecessionMotion(int nParam)
     }
 }
 
-
-/*!
-****************************************************************************
-
-
-
-****************************************************************************/
 void Universe::Earth_OrbitalPlane(int nParam)
 {
     ChangeBoolean(&earthRenderer.bShowOrbitalPlane, nParam);
@@ -639,12 +562,7 @@ void Universe::Earth_Orbit(int nParam)
 {
     ChangeBoolean(&earthRenderer.bShowOrbit, nParam);
 }
-/*!
-****************************************************************************
 
-
-
-****************************************************************************/
 void Universe::Moon_OrbitalPlane(int nParam)
 {
     ChangeBoolean(&moonRenderer.bShowOrbitalPlane, nParam);
@@ -656,12 +574,6 @@ void Universe::Moon_Orbit(int nParam)
     ChangeBoolean(&moonRenderer.bShowOrbit, nParam);
 }
 
-/*!
-****************************************************************************
-
-
-
-****************************************************************************/
 void Universe::Moon_OrbitalPlaneRotation(int nParam)
 {
 
@@ -676,24 +588,11 @@ void Universe::Moon_OrbitalPlaneRotation(int nParam)
     }
 }
 
-/*!
-****************************************************************************
-
-
-
-****************************************************************************/
 void Universe::Moon_RevolutionMotion(int nParam)
 {
     ChangeBoolean(&moon.bRevolutionMotion, nParam);
 }
 
-
-/*!
-****************************************************************************
-
-
-
-****************************************************************************/
 void Universe::SetDotDensity(int nParam)
 {
     eDotDensity = (UDotDensityType)nParam;
@@ -712,7 +611,6 @@ void Universe::SetDotDensity(int nParam)
 }
 
 
-
 void Universe::toggleFullScreen()
 {
     if (bIsWindowFullScreen) {
@@ -727,7 +625,6 @@ void Universe::toggleFullScreen()
     }
 }
 
-
 void Universe::cleanupAndExitApplication()
 {
     ImGui_ImplOpenGL3_Shutdown();
@@ -740,24 +637,12 @@ void Universe::cleanupAndExitApplication()
     SDL_Quit();
 }
 
-/*!
-****************************************************************************
-
-
-
-****************************************************************************/
 void Universe::Moon_SetOrbitalPositionAngle(double fAngle)
 {
     moon.setOrbitalAngle(float(fAngle));
     moon.calculateCenterPosition();
 }
 
-/*!
-****************************************************************************
-
-
-
-****************************************************************************/
 void Universe::Earth_SetOrbitalPositionAngle(double fAngle)
 {
     earth.setOrbitalAngle(float(fAngle));
@@ -778,11 +663,6 @@ void Universe::resetWidgetControlMode()
 }
 
 
-
-/*************************************************************************************************
-
-
-**************************************************************************************************/
 void Universe::processFlags()
 {
     //----------------------------------------------
@@ -1050,10 +930,6 @@ void Universe::navigate(float __throttle, float __yaw, float __pitch, float __ro
 }
 
 
-/*************************************************************************************************
-
-
-**************************************************************************************************/
 int Universe::runMainLoop()
 {
 	ImGuiIO& io = ImGui::GetIO();
@@ -1160,11 +1036,6 @@ int Universe::runMainLoop()
 
 }
 
-
-/*************************************************************************************************
-
-
-**************************************************************************************************/
 int Universe::run()
 {
     setvbuf(stdout, 0, _IONBF, 0);
