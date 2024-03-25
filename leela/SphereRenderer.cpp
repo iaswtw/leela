@@ -648,22 +648,22 @@ std::vector<float>* SphereRenderer::_constructRotationAxis()
     
     alpha_inc = alpha_inc * 10;
 
-    float axisLengthMultipler = 1.3f;           // multiply to sphere's radius
-    //float axisLengthMultipler = 1000.0f;        // multiply to sphere's radius
+    float axisLengthMultipler = 1.3f;               // multiply to sphere's radius
+    float axisCylinderDiameterMultiplier = 0.015f;
+    //float axisLengthMultipler = 1000.0f;          // multiply to sphere's radius
 
     float alpha;
     for (alpha = 0; alpha < float(2 * M_PI); alpha += alpha_inc)
     {
-
         //---------------------------------------------------
         // Cylindrical rotation axis 
         //---------------------------------------------------
-        float x1 = 0.005f * radius * cos(alpha);
-        float y1 = 0.005f * radius * sin(alpha);
-        float z1 = 0.99f  * radius;
+        float x1 = axisCylinderDiameterMultiplier * radius * cos(alpha);
+        float y1 = axisCylinderDiameterMultiplier * radius * sin(alpha);
+        float z1 = 0.99f  * radius;                 // start from inside the sphere surface; hence radius multiplier is less than 1.
 
-        float x2 = 0.005f * radius * cos(alpha + alpha_inc);
-        float y2 = 0.005f * radius * sin(alpha + alpha_inc);
+        float x2 = axisCylinderDiameterMultiplier * radius * cos(alpha + alpha_inc);
+        float y2 = axisCylinderDiameterMultiplier * radius * sin(alpha + alpha_inc);
         float z2 = 0.99f  * radius;
 
         float z = radius * axisLengthMultipler;
