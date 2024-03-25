@@ -2,7 +2,7 @@
 #include "Universe.h"
 
 #include "imgui.h"
-#include "imgui_impl_sdl.h"
+#include "imgui_impl_sdl2.h"
 #include "imgui_impl_opengl3.h"
 
 
@@ -311,7 +311,7 @@ void Universe::generateImGuiWidgets()
 
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplSDL2_NewFrame(window);
+    ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
 
     // Always showing overlay window showing status of various flags
@@ -766,7 +766,7 @@ void Universe::generateImGuiWidgets()
             //-----------------------------------------------------
 
             ImGui::Checkbox("Realistic shading", &bRealisticShading);
-            ImGui::Checkbox("Realistic surfaces", &bRealisticSurfaces);
+            ImGui::Checkbox("Textured surfaces", &bRealisticSurfaces);
             ImGui::Checkbox("Wireframe surfaces", &bShowWireframeSurfaces);
             ImGui::Checkbox("Show orbits (o)", &bShowOrbitsGlobalEnable);
             ImGui::Checkbox("Show coordinate axis (a)", &bShowAxis);
