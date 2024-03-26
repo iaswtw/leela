@@ -538,7 +538,7 @@ std::vector<float>* SphereRenderer::_constructLatitudesAndLongitudeVertices()
 
 
 // Construct the circular/elliptical orbit
-std::vector<float>* SphereRenderer::_constructOrbit()
+void SphereRenderer::_constructOrbit()
 {
     std::vector<float>* v   = new std::vector<float>();
     Sphere& s               = _sphere;
@@ -564,7 +564,35 @@ std::vector<float>* SphereRenderer::_constructOrbit()
         vector_push_back_7(*v, x2, y2, z2, color.r*m, color.g*m, color.b*m, 0.8f);
     }
 
-    return v;
+    if (_orbitVbo != 0)
+    {
+        glDeleteBuffers(1, &_orbitVbo);
+    }
+    if (_orbitVao != 0)
+    {
+        glDeleteVertexArrays(1, &_orbitVao);
+    }
+
+    glGenVertexArrays(1, &_orbitVao);
+    glBindVertexArray(_orbitVao);
+    glGenBuffers(1, &_orbitVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, _orbitVbo);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        sizeof(float) * v->size(),
+        v->data(),
+        GL_STATIC_DRAW);
+
+    // xyz of point
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), nullptr);
+    glEnableVertexAttribArray(0);
+
+    // rgba of point
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    numOrbitVertices = v->size() / VERTEX_STRIDE_IN_VBO;
+    delete v;
 }
 
 std::vector<float>* SphereRenderer::_constructOrbitalPlaneVertices()
@@ -935,28 +963,8 @@ void SphereRenderer::constructVerticesAndSendToGpu()
 
     //---------------------------------------------------------------------------------------------------
     // Orbital itself
-    v = _constructOrbit();
+    _constructOrbit();
 
-    glGenVertexArrays(1, &_orbitVao);
-    glBindVertexArray(_orbitVao);
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        sizeof(float) * v->size(),
-        v->data(),
-        GL_STATIC_DRAW);
-
-    // xyz of point
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), nullptr);
-    glEnableVertexAttribArray(0);
-
-    // rgba of point
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    numOrbitVertices = v->size() / VERTEX_STRIDE_IN_VBO;
-    delete v;
 
     //---------------------------------------------------------------------------------------------------
     // Rotation axis

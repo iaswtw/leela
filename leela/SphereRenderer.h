@@ -61,13 +61,13 @@ public:
     bool bShowLatitudesAndLongitudes = false;
 
 
-private:
+public:
     std::tuple<float, float, float, glm::vec3, float, float> calcPointOnSphere(float radius, float alpha, float theta);
 
     std::vector<float>* _constructMainSphereVertices();
     std::pair<std::vector<float>*, std::vector<Triangle>*> _constructMainIcoSphereVertices();
     std::vector<float>* _constructLatitudesAndLongitudeVertices();
-    std::vector<float>* _constructOrbit();
+    void _constructOrbit();
     std::vector<float>* _constructOrbitalPlaneVertices();
     std::vector<float>* _constructOrbitalPlaneGridVertices();
 
@@ -81,7 +81,8 @@ protected:
     GLuint _mainVao;
     GLuint _orbitalPlaneVao;
     GLuint _orbitalPlaneGridVao;            // grid lines in the orbital plane
-    GLuint _orbitVao;
+    GLuint _orbitVao = 0;
+    GLuint _orbitVbo = 0;
     GLuint _latAndLongVao;
     GLuint _rotationAxisVao;
     GLuint _texture;
