@@ -93,6 +93,7 @@ public:
         _orbitalAngularVelocity = orbitalAngularVelocity;
         _orbitalPlaneRotationAngle = orbitalPlaneRotationAngle;
         _orbitalPlaneTiltAngle = orbitalPlaneTiltAngle;
+        _orbitalPlaneTiltAngle_Deg = glm::degrees(_orbitalPlaneTiltAngle);
     }
 
     void setParentSphere(Sphere *parent)
@@ -311,6 +312,8 @@ public:
     float _orbitalAngularVelocity = 0;      // angular velocity of revolution around parent sphere. Previously called 'wo'.
     float _orbitalPlaneRotationAngle = 0;   // previously called 'alphao'
     float _orbitalPlaneTiltAngle = 0;       // previously called 'betao'
+    float _orbitalPlaneTiltAngle_Deg = 0;   // this is initialized when _orbitalPlaneTiltAngle is initially set.  After that, Imgui will show and change the _Deg value
+                                            // through the use of a slider. If modified, the radian value will be changed by the code that invokes Imgui slider.
 
     Sphere* _relatedSphere = nullptr;
     Sphere* _sunSphere = nullptr;

@@ -78,31 +78,26 @@ void Universe::initializeGL()
     marsRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
     marsRenderer.constructVerticesAndSendToGpu();
     marsRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
-    //marsRenderer.bShowOrbitalPlane = False;
     marsRenderer.bShowOrbit = False;
 
     jupiterRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
     jupiterRenderer.constructVerticesAndSendToGpu();
     jupiterRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
-    //jupiterRenderer.bShowOrbitalPlane = False;
     jupiterRenderer.bShowOrbit = False;
 
     saturnRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
     saturnRenderer.constructVerticesAndSendToGpu();
     saturnRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
-    //saturnRenderer.bShowOrbitalPlane = False;
     saturnRenderer.bShowOrbit = False;
 
     uranusRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
     uranusRenderer.constructVerticesAndSendToGpu();
     uranusRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
-    //uranusRenderer.bShowOrbitalPlane = False;
     uranusRenderer.bShowOrbit = False;
 
     neptuneRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
     neptuneRenderer.constructVerticesAndSendToGpu();
     neptuneRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
-    //neptuneRenderer.bShowOrbitalPlane = False;
     neptuneRenderer.bShowOrbit = False;
 
 
@@ -736,7 +731,7 @@ void Universe::generateImGuiWidgets()
                     ShowDemo(UDemo_TiltedOrbitalPlanes);
                 ImGui::SameLine();
                 HelpMarker(
-                    "Moon's orbital plane tilt is highly exagerated since other distances and sizes are not to scale."                    
+                    "Moon's orbital plane tilt is highly exagerated since other distances and sizes are not to scale."
                 );
 
                 if (ImGui::Button("6 month long day & 6 month long\nnight on north pole"))
@@ -833,6 +828,13 @@ void Universe::generateImGuiWidgets()
             if (ImGui::Button("Reset## earth precession motion"))
                 Earth_PrecessionMotion(UCmdParam_Reset);
             SmallCheckbox("Show latitudes/longituedes## earth", &earthRenderer.bShowLatitudesAndLongitudes);
+            ImGui::PushItemWidth(100);
+            if (ImGui::SliderFloat("Orbital Radius## earth", &earth._orbitalRadius, 500.0f, 4000.0f)) {
+                earthRenderer._constructOrbit();
+                earthRenderer._constructOrbitalPlaneVertices();
+                earthRenderer._constructOrbitalPlaneGridVertices();
+            }
+            ImGui::PopItemWidth();
             ImGui::Unindent();
 
             ImGui::Separator();
@@ -853,8 +855,17 @@ void Universe::generateImGuiWidgets()
                 Moon_OrbitalPlaneRotation(UCmdParam_Reset);
             ImGui::PushItemWidth(100);
             //ImGui::SetNextItemWidth(180);
-            if (ImGui::SliderFloat("Orbital Radius", &moon._orbitalRadius, 80.0f, 600.0f))
+            if (ImGui::SliderFloat("Orbital Radius## moon", &moon._orbitalRadius, 80.0f, 600.0f)) {
                 moonRenderer._constructOrbit();
+                moonRenderer._constructOrbitalPlaneVertices();
+                moonRenderer._constructOrbitalPlaneGridVertices();
+            }
+            if (ImGui::SliderFloat("Orbital Tilt", &moon._orbitalPlaneTiltAngle_Deg, 0.0f, 30.0f)) {
+                moon._orbitalPlaneTiltAngle = glm::radians(moon._orbitalPlaneTiltAngle_Deg);
+                moonRenderer._constructOrbit();
+                moonRenderer._constructOrbitalPlaneVertices();
+                moonRenderer._constructOrbitalPlaneGridVertices();
+            }
             ImGui::PopItemWidth();
             ImGui::Unindent();
 

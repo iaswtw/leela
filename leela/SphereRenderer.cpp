@@ -564,12 +564,11 @@ void SphereRenderer::_constructOrbit()
         vector_push_back_7(*v, x2, y2, z2, color.r*m, color.g*m, color.b*m, 0.8f);
     }
 
-    if (_orbitVbo != 0)
-    {
+    //-----------------------------------
+    if (_orbitVbo != 0) {
         glDeleteBuffers(1, &_orbitVbo);
     }
-    if (_orbitVao != 0)
-    {
+    if (_orbitVao != 0) {
         glDeleteVertexArrays(1, &_orbitVao);
     }
 
@@ -595,7 +594,7 @@ void SphereRenderer::_constructOrbit()
     delete v;
 }
 
-std::vector<float>* SphereRenderer::_constructOrbitalPlaneVertices()
+void SphereRenderer::_constructOrbitalPlaneVertices()
 {
     std::vector<float>* v   = new std::vector<float>();
     Sphere& s               = _sphere;
@@ -614,9 +613,37 @@ std::vector<float>* SphereRenderer::_constructOrbitalPlaneVertices()
     vector_push_back_7(*v, -radius * 1.2f, +radius * 1.2f, 0, color.r*m, color.g*m, color.b*m, alpha);
     vector_push_back_7(*v, -radius * 1.2f, -radius * 1.2f, 0, color.r*m, color.g*m, color.b*m, alpha);
 
-    return v;
+    //---------------------------------
+
+    if (_orbitalPlaneVbo != 0) {
+        glDeleteBuffers(1, &_orbitalPlaneVbo);
+    }
+    if (_orbitalPlaneVao != 0) {
+        glDeleteVertexArrays(1, &_orbitalPlaneVao);
+    }
+
+    glGenVertexArrays(1, &_orbitalPlaneVao);
+    glBindVertexArray(_orbitalPlaneVao);
+    glGenBuffers(1, &_orbitalPlaneVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, _orbitalPlaneVbo);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        sizeof(float) * v->size(),
+        v->data(),
+        GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), nullptr);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    numOrbitalPlaneVertices = v->size() / VERTEX_STRIDE_IN_VBO;
+    delete v;
 }
-std::vector<float>* SphereRenderer::_constructOrbitalPlaneGridVertices()
+
+
+void SphereRenderer::_constructOrbitalPlaneGridVertices()
 {
     std::vector<float>* v = new std::vector<float>();
     Sphere& s = _sphere;
@@ -658,7 +685,34 @@ std::vector<float>* SphereRenderer::_constructOrbitalPlaneGridVertices()
         y += inc;
     }
 
-    return v;
+    //--------------------------------------
+
+    if (_orbitalPlaneGridVbo != 0) {
+        glDeleteBuffers(1, &_orbitalPlaneGridVbo);
+    }
+    if (_orbitalPlaneGridVao != 0) {
+        glDeleteVertexArrays(1, &_orbitalPlaneGridVao);
+    }
+
+    glGenVertexArrays(1, &_orbitalPlaneGridVao);
+    glBindVertexArray(_orbitalPlaneGridVao);
+    glGenBuffers(1, &_orbitalPlaneGridVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, _orbitalPlaneGridVbo);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        sizeof(float) * v->size(),
+        v->data(),
+        GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), nullptr);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    numOrbitalPlaneGridVertices = v->size() / VERTEX_STRIDE_IN_VBO;
+    delete v;
+
 }
 
 
@@ -917,49 +971,11 @@ void SphereRenderer::constructVerticesAndSendToGpu()
 
     //---------------------------------------------------------------------------------------------------
     // Orbital plane
-    v = _constructOrbitalPlaneVertices();
-
-    glGenVertexArrays(1, &_orbitalPlaneVao);
-    glBindVertexArray(_orbitalPlaneVao);
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        sizeof(float) * v->size(),
-        v->data(),
-        GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), nullptr);
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    numOrbitalPlaneVertices = v->size() / VERTEX_STRIDE_IN_VBO;
-    delete v;
+    _constructOrbitalPlaneVertices();
 
     //---------------------------------------------------------------------------------------------------
     // orbital plane grid lines
-    v = _constructOrbitalPlaneGridVertices();
-
-    glGenVertexArrays(1, &_orbitalPlaneGridVao);
-    glBindVertexArray(_orbitalPlaneGridVao);
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        sizeof(float) * v->size(),
-        v->data(),
-        GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), nullptr);
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    numOrbitalPlaneGridVertices = v->size() / VERTEX_STRIDE_IN_VBO;
-    delete v;
+    _constructOrbitalPlaneGridVertices();
 
     //---------------------------------------------------------------------------------------------------
     // Orbital itself
@@ -1073,6 +1089,8 @@ void PlanetRenderer::renderSphere(GlslProgram& glslProgram)
             // When drawing earth, other sphere is moon.
             glslProgram.setFloat("otherSphereRadius", _sphere._relatedSphere->getRadius());
             glslProgram.setVec3("otherSphereCenterTransformed", glm::value_ptr(_sphere._relatedSphere->getModelTransformedCenter()));
+        } else {
+            glslProgram.setFloat("otherSphereRadius", 0.0f);
         }
 
         if (!_textureFilename.empty())

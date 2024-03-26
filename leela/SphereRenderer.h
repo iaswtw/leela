@@ -68,8 +68,8 @@ public:
     std::pair<std::vector<float>*, std::vector<Triangle>*> _constructMainIcoSphereVertices();
     std::vector<float>* _constructLatitudesAndLongitudeVertices();
     void _constructOrbit();
-    std::vector<float>* _constructOrbitalPlaneVertices();
-    std::vector<float>* _constructOrbitalPlaneGridVertices();
+    void _constructOrbitalPlaneVertices();
+    void _constructOrbitalPlaneGridVertices();
 
 	float _getPolygonIncrement();
     int _getIcoSphereSubdivisionLevel();
@@ -80,7 +80,9 @@ protected:
 
     GLuint _mainVao;
     GLuint _orbitalPlaneVao;
+    GLuint _orbitalPlaneVbo;
     GLuint _orbitalPlaneGridVao;            // grid lines in the orbital plane
+    GLuint _orbitalPlaneGridVbo;
     GLuint _orbitVao = 0;
     GLuint _orbitVbo = 0;
     GLuint _latAndLongVao;
