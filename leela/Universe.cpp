@@ -315,7 +315,6 @@ void Universe::advance(float stepMultiplier)
     uranus.advance(stepMultiplier);
     neptune.advance(stepMultiplier);
 
-
     // TODO: how to ensure parents are advanced before children when using a loop?
     //for (int i = 0; allSpheres[i] != NULL; i++)
     //{
@@ -792,6 +791,14 @@ void Universe::processFlags()
             advance(_stepMultiplier * _stepMultiplierFrameRateAdjustment);
     }
 
+    // always calculate sphere positions, even when simulation paused.
+    // This is because ImGui may change variables of scene objects, and it must be
+    // reflected by drawing updated objects.
+    for (int i = 0; allSpheres[i] != NULL; i++)
+    {
+        allSpheres[i]->calculateCenterPosition();
+    }
+
     if (bEarthSurfaceLockMode)
     {
         glm::mat4 emm = earth.getModelMatrix();
@@ -854,6 +861,18 @@ void Universe::shiftValues(float* values, unsigned int numValues)
         values[i] = values[i - 1];
     }
 }
+
+void Universe::clearAllFirFilters()
+{
+    for (int i = 0; i < FIR_WIDTH; i++)
+    {
+        new_throttle[i] = { 0.0f };
+        new_yaw[i]      = { 0.0f };
+        new_pitch[i]    = { 0.0f };
+        new_roll[i]     = { 0.0f };
+    }
+}
+
 
 /*
   Immediately apply the given throttle, yaw, pitch & roll values to the Space frame.
@@ -939,8 +958,8 @@ int Universe::runMainLoop()
     {
         while (SDL_PollEvent(&event))
         {
-            if (!bMouseGrabbed)
-                ImGui_ImplSDL2_ProcessEvent(&event);
+            // Always send mouse events to ImGui
+            ImGui_ImplSDL2_ProcessEvent(&event);
 
             switch (event.type)
             {

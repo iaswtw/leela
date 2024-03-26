@@ -244,6 +244,8 @@ public:
     bool bShowLowDarknessAtNight = false;
     bool bShowWireframeSurfaces = false;
 
+    void clearAllFirFilters();
+
 
 public:
     bool bQuit = false;

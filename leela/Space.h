@@ -41,7 +41,7 @@ class Space
 {
 public:
     Space() :
-        DS_dist(7200)
+        DS_dist(1200)
     {
         // Initialise the origin and standard axis point
         O.set(0, 0, 0);
@@ -56,21 +56,12 @@ public:
 
         // Initialise type of view
         eProjectionType = Projection_Perspective;
-
     }
 
     ~Space()
     {
-
     }
-
-
-    /*!
-    ****************************************************************************
-
-
-
-    ****************************************************************************/
+    
     void initFrame()
     {
         int l = int(sqrt((DS_dist*DS_dist) / 3.0));
@@ -87,12 +78,6 @@ public:
         L.x = D.x + 600 * DL.l; L.y = D.y + 600 * DL.m; L.z = D.z + 600 * DL.n;
     }
 
-    /*!
-    ****************************************************************************
-
-
-
-    ****************************************************************************/
     void defaultFrame()
     {
         initFrame();
@@ -113,34 +98,16 @@ public:
         return glm::vec3(D.x, D.y, D.z);
     }
 
-    /*!
-    ****************************************************************************
-
-
-
-    ****************************************************************************/
     double rad(double z)
     {
         return (z*M_PI / 180);
     }
 
-    /*!
-    ****************************************************************************
-
-
-
-    ****************************************************************************/
     double deg(double z)
     {
         return (z * 180 / M_PI);
     }
 
-    /*!
-    ****************************************************************************
-
-
-
-    ****************************************************************************/
     double distance(PNT p1, PNT p2)
     {
         double distsquare = (p1.x - p2.x)*(p1.x - p2.x) + (p1.y - p2.y)*(p1.y - p2.y) + (p1.z - p2.z)*(p1.z - p2.z);
@@ -152,14 +119,7 @@ public:
         return (dist);
     }
 
-
-
-    /*!
-    ***************************************************************************
-
-     Set the Frame in an absolute manner
-
-    ***************************************************************************/
+    // Set the Frame in an absolute manner
     void setFrame(int type, PNT s, VECTOR direction, PNT ref_pt)
     {
         PNT n;
@@ -206,13 +166,6 @@ public:
         }
     }
 
-
-    /*!
-    ****************************************************************************
-
-
-
-    ****************************************************************************/
     void rotateFrameAboutD(double horizontal, double vertical)
     {
         // rotate horizontally, i.e. about DR 
@@ -232,12 +185,6 @@ public:
         PP.SET(D, S);
     }
 
-    /*!
-    ****************************************************************************
-
-
-
-    ****************************************************************************/
     void rotateFrame(PNT along, double horizontal, double vertical)
     {
         // rotate horizontally
@@ -264,38 +211,16 @@ public:
         PP.SET(D, S);
     }
 
-
-    /*!
-    ****************************************************************************
-
-
-
-    ****************************************************************************/
     void setFrameMoveMode(int mode)
     {
         frameMoveMode = char(mode);
     }
 
-    /*!
-    ****************************************************************************
-
-
-
-    ****************************************************************************/
     int getFrameMoveMode()
     {
         return frameMoveMode;
     }
 
-
-
-
-    /*!
-    ****************************************************************************
-
-
-
-    ****************************************************************************/
     void setDefaultView()
     {
         initFrame();
@@ -370,12 +295,7 @@ public:
         return N;
     }
 
-    /*!
-    ****************************************************************************
-
-     returns V1xV2
-
-    ****************************************************************************/
+    // returns V1xV2
     VECTOR crossProduct(VECTOR V1, VECTOR V2)
     {
         VECTOR prod;
@@ -386,27 +306,15 @@ public:
         return (prod);
     }
 
-
-    /*!
-    ****************************************************************************
-
-     returns V1.V2
-
-    ****************************************************************************/
+    //returns V1.V2
     inline double dotProduct(VECTOR V1, VECTOR V2)
     {
         double prod = V1.x * V2.x + V1.y * V2.y + V1.z * V2.z;
         return (prod);
     }
 
-    /*!
-    ****************************************************************************
-
-     Central function of the Space class.  This function moves the frame
-     according to the specified direction type & by the specified amount.
-
-
-    ****************************************************************************/
+    // Central function of the Space class.  This function moves the frame
+    // according to the specified direction type & by the specified amount.
     void moveFrame(MovementType eDir, double increment, PNT p = PNT(0, 0, 0))
     {
         PNT Pnt;
@@ -439,8 +347,8 @@ public:
                 R = rotate(Pnt, S, R, increment);
                 break;
             case SPC_D_MODE:
-                S = rotate(R, D, S, increment);
-                L = rotate(R, D, L, increment);
+                S = rotate(R, D, S, -increment);
+                L = rotate(R, D, L, -increment);
                 break;
             }
             DS.SET(D, S);
@@ -459,8 +367,8 @@ public:
                 R = rotate(Pnt, S, R, -increment);
                 break;
             case SPC_D_MODE:
-                S = rotate(R, D, S, -increment);
-                L = rotate(R, D, L, -increment);
+                S = rotate(R, D, S, increment);
+                L = rotate(R, D, L, increment);
                 break;
             }
             DS.SET(D, S);
@@ -567,12 +475,6 @@ public:
         }
     }
 
-    /*!
-    ****************************************************************************
-
-
-
-    ****************************************************************************/
     void pushFrame()
     {
         OLD_S = S;
@@ -581,12 +483,6 @@ public:
         OLD_L = L;
     }
 
-    /*!
-    ****************************************************************************
-
-
-
-    ****************************************************************************/
     void popFrame()
     {
         S = OLD_S;
@@ -600,12 +496,6 @@ public:
         PP.SET(D, S);
     }
 
-    /*!
-    ****************************************************************************
-
-
-
-    ****************************************************************************/
     void swapFrame()
     {
         PNT TS, TD, TR, TL;
@@ -624,7 +514,6 @@ public:
         OLD_D = TD;
         OLD_R = TR;
         OLD_L = TL;
-
     }
 
 public:

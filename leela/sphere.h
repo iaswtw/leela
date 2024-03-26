@@ -226,7 +226,6 @@ public:
             _orbitalPlaneRotationAngle += 0.005f;     // todo - use step multiplier and velocity
             _orbitalPlaneRotationAngle = _normalizeAngle(_orbitalPlaneRotationAngle);
         }
-        calculateCenterPosition();
     }
 
     // Calculates center position based on the value of current parameters

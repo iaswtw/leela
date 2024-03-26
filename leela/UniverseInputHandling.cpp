@@ -140,10 +140,15 @@ void Universe::onKeyDown(SDL_Event* event)
     case SDLK_LSHIFT:
     case SDLK_RSHIFT:
         bShiftModifier = true;
+        bSidewaysMotionMode = true;
+        //clearAllFirFilters();
+
         break;
     case SDLK_LALT:
     case SDLK_RALT:
         bAltModifier = true;
+        space.setFrameMoveMode(1);
+        //clearAllFirFilters();
         break;
 
     }
@@ -183,10 +188,14 @@ void Universe::onKeyUp(SDL_Event* event)
     case SDLK_LSHIFT:
     case SDLK_RSHIFT:
         bShiftModifier = false;
+        bSidewaysMotionMode = false;
+        //clearAllFirFilters();
         break;
     case SDLK_LALT:
     case SDLK_RALT:
         bAltModifier = false;
+        space.setFrameMoveMode(0);
+        //clearAllFirFilters();
         break;
 
     }

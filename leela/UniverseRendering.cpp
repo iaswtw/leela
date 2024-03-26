@@ -855,7 +855,7 @@ void Universe::generateImGuiWidgets()
                 Moon_OrbitalPlaneRotation(UCmdParam_Reset);
             ImGui::PushItemWidth(100);
             //ImGui::SetNextItemWidth(180);
-            if (ImGui::SliderFloat("Orbital Radius## moon", &moon._orbitalRadius, 80.0f, 600.0f)) {
+            if (ImGui::SliderFloat("Orbital Radius## moon", &moon._orbitalRadius, 120.0f, 600.0f)) {
                 moonRenderer._constructOrbit();
                 moonRenderer._constructOrbitalPlaneVertices();
                 moonRenderer._constructOrbitalPlaneGridVertices();
