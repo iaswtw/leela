@@ -705,7 +705,7 @@ void Universe::generateImGuiWidgets()
             );
             static float f = 0.0f;
             ImGui::PushFont(appFontSmall);
-            if (ImGui::CollapsingHeader("Demos", ImGuiTreeNodeFlags_DefaultOpen)) {
+            if (ImGui::CollapsingHeader("Demos", ImGuiTreeNodeFlags_None)) {
                 ImGui::PushFont(appFontExtraSmall);
 
                 ImGui::SetNextItemWidth(190);
@@ -765,9 +765,9 @@ void Universe::generateImGuiWidgets()
             SmallCheckbox("Realistic shading", &bRealisticShading);
             SmallCheckbox("Textured surfaces", &bRealisticSurfaces);
             SmallCheckbox("Wireframe surfaces", &bShowWireframeSurfaces);
-            SmallCheckbox("Show orbits (o)", &bShowOrbitsGlobalEnable);
-            SmallCheckbox("Show coordinate axis (a)", &bShowAxis);
-            SmallCheckbox("Show planet axis", &bShowPlanetAxis);
+            SmallCheckbox("Orbits (o)", &bShowOrbitsGlobalEnable);
+            SmallCheckbox("Coordinate axis (a)", &bShowAxis);
+            SmallCheckbox("Planet axis", &bShowPlanetAxis);
             SmallCheckbox("Low darkness at night", &bShowLowDarknessAtNight);
 
             ImGui::Separator();
