@@ -22,6 +22,9 @@ void Universe::onKeyDown(SDL_Event* event)
     case SDLK_f:
         FastForward(UCmdParam_Start);
         break;
+    case SDLK_l:
+        ToggleFollowTarget(&earth, TargetLockMode_ViewTarget);
+        break;
     case SDLK_n:
         bEarthSurfaceLockMode = !bEarthSurfaceLockMode;
         break;
@@ -55,7 +58,6 @@ void Universe::onKeyDown(SDL_Event* event)
         ChangeSidewaysMotionMode();
         break;
     case SDLK_z:
-        ToggleFollowTarget(&earth, TargetLockMode_ViewTarget);
         break;
 
     // ============= Digits ===============

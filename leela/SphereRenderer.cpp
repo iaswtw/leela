@@ -71,6 +71,7 @@ namespace icosahedron
 
     void populateInitialTriangles(TriangleList* t)
     {
+        // Initial 20 faces
         t->push_back(Triangle(0, 4, 1));
         t->push_back(Triangle(0, 9, 4));
         t->push_back(Triangle(9, 5, 4));
@@ -456,7 +457,7 @@ std::pair<std::vector<float>*, std::vector<Triangle>*>  SphereRenderer::_constru
     return std::pair<std::vector<float>*, std::vector<Triangle>*>(v, indexMesh.second);
 }
 
-std::vector<float>* SphereRenderer::_constructLatitudesAndLongitudeVertices()
+void SphereRenderer::constructLatitudesAndLongitudeVertices()
 {
     std::vector<float>* v = new std::vector<float>();
     Sphere& s = _sphere;
@@ -533,12 +534,44 @@ std::vector<float>* SphereRenderer::_constructLatitudesAndLongitudeVertices()
         }
     }
 
-    return v;
+    //---------------------------------------------
+
+    if (_latAndLongVbo != 0) {
+        glDeleteBuffers(1, &_latAndLongVbo);
+    }
+    if (_latAndLongVao != 0) {
+        glDeleteVertexArrays(1, &_latAndLongVao);
+    }
+
+    glGenVertexArrays(1, &_latAndLongVao);
+    glBindVertexArray(_latAndLongVao);
+    glGenBuffers(1, &_latAndLongVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, _latAndLongVbo);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        sizeof(float) * v->size(),
+        v->data(),
+        GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), nullptr);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(7 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(10 * sizeof(float)));
+    glEnableVertexAttribArray(3);
+
+    numLatAndLongVertices = v->size() / PLANET_STRIDE_IN_VBO;
+    delete v;
 }
 
 
 // Construct the circular/elliptical orbit
-void SphereRenderer::_constructOrbit()
+void SphereRenderer::constructOrbit()
 {
     std::vector<float>* v   = new std::vector<float>();
     Sphere& s               = _sphere;
@@ -594,7 +627,7 @@ void SphereRenderer::_constructOrbit()
     delete v;
 }
 
-void SphereRenderer::_constructOrbitalPlaneVertices()
+void SphereRenderer::constructOrbitalPlaneVertices()
 {
     std::vector<float>* v   = new std::vector<float>();
     Sphere& s               = _sphere;
@@ -643,7 +676,7 @@ void SphereRenderer::_constructOrbitalPlaneVertices()
 }
 
 
-void SphereRenderer::_constructOrbitalPlaneGridVertices()
+void SphereRenderer::constructOrbitalPlaneGridVertices()
 {
     std::vector<float>* v = new std::vector<float>();
     Sphere& s = _sphere;
@@ -716,7 +749,7 @@ void SphereRenderer::_constructOrbitalPlaneGridVertices()
 }
 
 
-std::vector<float>* SphereRenderer::_constructRotationAxis()
+void SphereRenderer::constructRotationAxis()
 {
     std::vector<float>* v = new std::vector<float>();
     Sphere& s = _sphere;
@@ -798,10 +831,45 @@ std::vector<float>* SphereRenderer::_constructRotationAxis()
         //vector_push_back_12(*v, 0.0f, 0.0f, -z,  s._r, s._g, s._b, 1.0f, N1.x, N1.y, N1.z, 0.0f, 0.0f);
     }
 
-    return v;
+    //----------------------------------------
+
+    if (_rotationAxisVbo != 0) {
+        glDeleteBuffers(1, &_rotationAxisVbo);
+    }
+    if (_rotationAxisVao != 0) {
+        glDeleteVertexArrays(1, &_rotationAxisVao);
+    }
+
+    glGenVertexArrays(1, &_rotationAxisVao);
+    glBindVertexArray(_rotationAxisVao);
+    glGenBuffers(1, &_rotationAxisVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, _rotationAxisVbo);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        sizeof(float) * v->size(),
+        v->data(),
+        GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), nullptr);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(7 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(10 * sizeof(float)));
+    glEnableVertexAttribArray(3);
+
+    numRotationAxisVertices = v->size() / PLANET_STRIDE_IN_VBO;
+    delete v;
 }
 
-
+// Construct vertices for various aspects of the sphere such as the sphere surface itself, orbit, latitude/longitudes,
+// orbital plane, etc.
+//  - Vertices are sent to opengl immediately after creation.
+//  - If the sphere parameters change at runtime, some vertex generation methods have to be invoked again from those places.
 void SphereRenderer::constructVerticesAndSendToGpu()
 {
     GLuint vbo;     // vertex buffer object
@@ -940,78 +1008,20 @@ void SphereRenderer::constructVerticesAndSendToGpu()
         //}
     }
 
-    //---------------------------------------------------------------------------------------------------
     // latitude and longitude
-    v = _constructLatitudesAndLongitudeVertices();
+    constructLatitudesAndLongitudeVertices();
 
-    glGenVertexArrays(1, &_latAndLongVao);
-    glBindVertexArray(_latAndLongVao);
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        sizeof(float) * v->size(),
-        v->data(),
-        GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), nullptr);
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(7 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-
-    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(10 * sizeof(float)));
-    glEnableVertexAttribArray(3);
-
-    numLatAndLongVertices = v->size() / PLANET_STRIDE_IN_VBO;
-    delete v;
-
-    //---------------------------------------------------------------------------------------------------
     // Orbital plane
-    _constructOrbitalPlaneVertices();
+    constructOrbitalPlaneVertices();
 
-    //---------------------------------------------------------------------------------------------------
     // orbital plane grid lines
-    _constructOrbitalPlaneGridVertices();
+    constructOrbitalPlaneGridVertices();
 
-    //---------------------------------------------------------------------------------------------------
     // Orbital itself
-    _constructOrbit();
+    constructOrbit();
 
-
-    //---------------------------------------------------------------------------------------------------
     // Rotation axis
-    v = _constructRotationAxis();
-
-    glGenVertexArrays(1, &_rotationAxisVao);
-    glBindVertexArray(_rotationAxisVao);
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        sizeof(float)* v->size(),
-        v->data(),
-        GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), nullptr);
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(7 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-
-    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(10 * sizeof(float)));
-    glEnableVertexAttribArray(3);
-
-    numRotationAxisVertices = v->size() / PLANET_STRIDE_IN_VBO;
-    delete v;
-
-
+    constructRotationAxis();
 }
 
 

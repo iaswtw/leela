@@ -223,7 +223,7 @@ public:
         }
         if (bOrbitalPlaneRotation)
         {
-            _orbitalPlaneRotationAngle += 0.005f;     // todo - use step multiplier and velocity
+            _orbitalPlaneRotationAngle -= 0.005f * stepMultiplier;     // todo - use step multiplier and velocity
             _orbitalPlaneRotationAngle = _normalizeAngle(_orbitalPlaneRotationAngle);
         }
     }

@@ -51,7 +51,7 @@ public:
     void setAsLightSource();
     void setNightColorDarkness(NightColorDarkness darkness);
 	void setPolygonCountLevel(PolygonCountLevel polygonCountLevel);
-    std::vector<float>* _constructRotationAxis();
+    void constructRotationAxis();
     void constructVerticesAndSendToGpu();
 
 
@@ -66,10 +66,10 @@ public:
 
     std::vector<float>* _constructMainSphereVertices();
     std::pair<std::vector<float>*, std::vector<Triangle>*> _constructMainIcoSphereVertices();
-    std::vector<float>* _constructLatitudesAndLongitudeVertices();
-    void _constructOrbit();
-    void _constructOrbitalPlaneVertices();
-    void _constructOrbitalPlaneGridVertices();
+    void constructLatitudesAndLongitudeVertices();
+    void constructOrbit();
+    void constructOrbitalPlaneVertices();
+    void constructOrbitalPlaneGridVertices();
 
 	float _getPolygonIncrement();
     int _getIcoSphereSubdivisionLevel();
@@ -86,7 +86,9 @@ protected:
     GLuint _orbitVao = 0;
     GLuint _orbitVbo = 0;
     GLuint _latAndLongVao;
+    GLuint _latAndLongVbo;
     GLuint _rotationAxisVao;
+    GLuint _rotationAxisVbo;
     GLuint _texture;
 
     int numMainSphereVertices = -1;

@@ -830,9 +830,9 @@ void Universe::generateImGuiWidgets()
             SmallCheckbox("Show latitudes/longituedes## earth", &earthRenderer.bShowLatitudesAndLongitudes);
             ImGui::PushItemWidth(100);
             if (ImGui::SliderFloat("Orbital Radius## earth", &earth._orbitalRadius, 500.0f, 4000.0f)) {
-                earthRenderer._constructOrbit();
-                earthRenderer._constructOrbitalPlaneVertices();
-                earthRenderer._constructOrbitalPlaneGridVertices();
+                earthRenderer.constructOrbit();
+                earthRenderer.constructOrbitalPlaneVertices();
+                earthRenderer.constructOrbitalPlaneGridVertices();
             }
             ImGui::PopItemWidth();
             ImGui::Unindent();
@@ -856,15 +856,15 @@ void Universe::generateImGuiWidgets()
             ImGui::PushItemWidth(100);
             //ImGui::SetNextItemWidth(180);
             if (ImGui::SliderFloat("Orbital Radius## moon", &moon._orbitalRadius, 120.0f, 600.0f)) {
-                moonRenderer._constructOrbit();
-                moonRenderer._constructOrbitalPlaneVertices();
-                moonRenderer._constructOrbitalPlaneGridVertices();
+                moonRenderer.constructOrbit();
+                moonRenderer.constructOrbitalPlaneVertices();
+                moonRenderer.constructOrbitalPlaneGridVertices();
             }
             if (ImGui::SliderFloat("Orbital Tilt", &moon._orbitalPlaneTiltAngle_Deg, 0.0f, 30.0f)) {
                 moon._orbitalPlaneTiltAngle = glm::radians(moon._orbitalPlaneTiltAngle_Deg);
-                moonRenderer._constructOrbit();
-                moonRenderer._constructOrbitalPlaneVertices();
-                moonRenderer._constructOrbitalPlaneGridVertices();
+                moonRenderer.constructOrbit();
+                moonRenderer.constructOrbitalPlaneVertices();
+                moonRenderer.constructOrbitalPlaneGridVertices();
             }
             ImGui::PopItemWidth();
             ImGui::Unindent();

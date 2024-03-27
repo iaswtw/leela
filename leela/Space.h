@@ -148,7 +148,7 @@ public:
             DS.SET(D, S);
             PP.SET(D, S);
 
-            n = nearestptL(D, S, ref_pt);
+            n = nearestPointOnLine(D, S, ref_pt);
             n_ref_pt.SET(n, ref_pt);
             R = D.translated(100, n_ref_pt);
 
@@ -233,7 +233,7 @@ public:
     {
         z = rad(z);
 
-        PNT N = nearestptL(A, B, p);
+        PNT N = nearestPointOnLine(A, B, p);
         VECTOR AB(A, B);
         VECTOR NP(N, p);
         VECTOR NL = crossProduct(AB, NP);
@@ -272,7 +272,7 @@ public:
           nearest point.
 
     ****************************************************************************/
-    PNT nearestptL(PNT A, PNT B, PNT p)
+    PNT nearestPointOnLine(PNT A, PNT B, PNT p)
     {
         PNT N;
         double k;
@@ -530,7 +530,7 @@ public:
     // The Parallel Picture Plane
     PLANE PPP;
 
-    const int DS_dist;
+    int DS_dist;        // distance between D and S reference points
 
     // screen coordinates used in SDL_SetVideoMode
     int screen_width, screen_height;

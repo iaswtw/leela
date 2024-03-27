@@ -50,7 +50,7 @@ out float darknessFactor;       // multiplier to be applied to the color of vert
 // otherSphere's center.
 // See formula derivation at the bottom of this file.
 //-------------------------------------------------------------------------------------------------
-vec3 nearestPtL(vec3 modelTransformedPosition)
+vec3 nearestPointOnLine(vec3 modelTransformedPosition)
 {
     float dist = distance(sunCenterTransformed, otherSphereCenterTransformed);
     float den = dist * dist;
@@ -83,7 +83,7 @@ void main()
     //float selfUmbraLength           = (sphereInfo.radius * dist_sun_thisSphere) / (sunRadius - sphereInfo.radius);
     //float selfUmbraConeHalfAngle    = asin(sphereInfo.radius / selfUmbraLength);
 
-    vec3 x_normal   = normalize(vec3(model * vec4(normal, 0.0)));
+    vec3 x_normal   = normalize(vec3(model * vec4(normal, 0.0)));       // transformed normal of the current vertex
     //vec3 x_position = vec3(model * vec4(position, 1.0));
     float dotProduct = dot(normalize(sunCenterTransformed - sphereInfo.centerTransformed), x_normal);
     //float compareValue = sin(selfUmbraConeHalfAngle);
@@ -115,6 +115,7 @@ void main()
             }
         }
         
+        //----------------------------------------------------
         // Point is in day.  Find if it is in shadow
         {
             //float daylightShadingMultiplier = sqrt(min(1.0, dotProduct+compareValue));
@@ -125,9 +126,9 @@ void main()
                 darknessFactor = daylightShadingMultiplier;
             }
 
+            // If other sphere radius is 0, there is no other sphere; in which case, skip all shadow calculations.
             if (otherSphereRadius != 0.0)
             {
-      
                 float dist_sun_otherSphere      = distance(sunCenterTransformed, vec3(otherSphereCenterTransformed));
             
                 {
@@ -144,8 +145,11 @@ void main()
                         if (dist_sun_thisPoint < dist_sun_otherSphere)
                             break;                                              // point might be inside the 'other' sphere, but cannot be in shadow.
         
+                        if (dot((otherSphereCenterTransformed - modelTransformedPosition), x_normal) < 0.0f) // other sphere is below the horizon. Therefore, cannot be in its shadow.
+                            break;
+                        
                         // Calculate some important points and distances about umbra and penumbra.
-                        vec3  N                     = nearestPtL(modelTransformedPosition);
+                        vec3  N                     = nearestPointOnLine(modelTransformedPosition);
                         float dist_N_thisPoint      = distance(N, modelTransformedPosition);
                         float dist_N_sun            = distance(N, sunCenterTransformed);
                         float dist_N_otherSphere    = distance(N, otherSphereCenterTransformed);
