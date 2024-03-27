@@ -1061,6 +1061,10 @@ int Universe::run()
     const char* glsl_version = "#version 330";
 
 
+    if (FT_Init_FreeType(&ft))
+        cout << "ERROR:FREETYPE Could not init FreeType library" << endl;
+    if (FT_New_Face(ft, "fonts/arial.ttf", 0, &face))
+        cout << "ERROR:FREETYPE Failed to load font" << endl;
 
 
     SDL_Init(SDL_INIT_EVERYTHING);

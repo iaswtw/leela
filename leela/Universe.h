@@ -22,6 +22,8 @@
 #include "imgui.h"
 #include "OneShotBoolean.h"
 #include "GlslProgram.h"
+#include <ft2build.h>
+#include FT_FREETYPE_H
 
 constexpr auto MAXGALAXYSTARS = 10000;
 constexpr auto NUM_NAVIGATION_INPUT_SAMPLES = 10;
@@ -442,6 +444,9 @@ public:
     OneShotBoolean doubleClicked = OneShotBoolean();
 
     std::string logString = "";
+
+    FT_Library ft;
+    FT_Face face;
 
 };
 
