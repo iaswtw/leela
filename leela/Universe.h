@@ -265,6 +265,8 @@ public:
 
     void createFontCharacterTexture();
 
+    glm::vec2 getScreenCoordinates(glm::vec3 scenePoint);
+
 
 public:
     bool bQuit = false;

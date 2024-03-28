@@ -59,67 +59,6 @@ static std::string FindFontFile(const char * fileName)
     return std::string("");
 }
 
-void Universe::createFontCharacterTexture()
-{
-    spdlog::info("Generating font character textures");
-
-    if (FT_Init_FreeType(&ft))
-        spdlog::error("ERROR:FREETYPE Could not init FreeType library");
-
-    if (FT_New_Face(ft, "fonts/arial.ttf", 0, &face))
-        spdlog::error("ERROR:FREETYPE Failed to load font");
-
-    FT_Set_Pixel_Sizes(face, 0, 48);
-
-    //if (FT_Load_Glyph(face, "X", FT_LOAD_RENDER))
-    //    cout << "ERROR:FREETYPE Failed to load Glyph" << endl;
-
-    //----------------------
-
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);      // no byte alignment restriction
-    for (unsigned char c = 0; c < 128; c++)
-    {
-        if (FT_Load_Glyph(face, c, FT_LOAD_RENDER)) {
-            spdlog::error("ERROR:FREETYPE Failed to load Glyph");
-            continue;
-        }
-
-        unsigned int texture;
-        glGenTextures(1, &texture);
-        glBindTexture(GL_TEXTURE_2D, texture);
-        glTexImage2D(
-            GL_TEXTURE_2D,
-            0, GL_RED,
-            face->glyph->bitmap.width,
-            face->glyph->bitmap.rows,
-            0,
-            GL_RED,
-            GL_UNSIGNED_BYTE,
-            face->glyph->bitmap.buffer
-        );
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        Character character = {
-            texture,
-            glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
-            glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-            face->glyph->advance.x
-        };
-
-        characters.insert(std::pair<char, Character>(c, character));
-    }
-
-    //----------------------
-
-    FT_Done_Face(face);
-    FT_Done_FreeType(ft);
-
-}
-
 
 Universe::Universe() :
 
@@ -773,9 +712,15 @@ void Universe::processFlags()
 
     // Amplify or attenuate the value based on keyboard modifiers.
     if (bCtrlModifier)
-        new_throttle[0] /= 10;
+        if (bAltModifier)
+            new_throttle[0] /= 100;             // ctrl + alt = super slow zoom
+        else
+            new_throttle[0] /= 10;              // ctrl       = slow zoom
     else if (bShiftModifier)
-        new_throttle[0] *= 100;
+        if (bAltModifier)
+            new_throttle[0] *= 100;             // shift + alt = super fast zoom
+        else
+            new_throttle[0] *= 10;              // shift       = fast zoom
 
     if (bCtrlModifier)
         new_yaw[0] /= 10;
@@ -1031,6 +976,7 @@ int Universe::runMainLoop()
                     curWidth = event.window.data1;
                     curHeight = event.window.data2;
                     glViewport(0, 0, curWidth, curHeight);
+                    //glViewport(200, 200, 800, 600);
                 }
                 break;
             }
@@ -1120,9 +1066,10 @@ int Universe::run()
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     //SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 
-    window = SDL_CreateWindow("Leela", 100, 100, 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED);
+    //window = SDL_CreateWindow("Leela", 500, 500, 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED);
+    window = SDL_CreateWindow("Leela", 300, 300, 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
-    printf("Created SDL GL window\n");
+    spdlog::info("Created SDL GL window");
     context = SDL_GL_CreateContext(window);
 
     glewInit();
@@ -1160,10 +1107,10 @@ int Universe::run()
     createFontCharacterTexture();
 
     SDL_GetWindowSize(window, &curWidth, &curHeight);
-    printf("width = %d\n", curWidth);
-    printf("height = %d\n", curHeight);
+    spdlog::info("width = {}", curWidth);
+    spdlog::info("height = {}", curHeight);
     
-    printf("initializing scene objects... ");
+    spdlog::info("initializing scene objects... ");
 
 	SDL_GL_SetSwapInterval(1);
 	int retval = 0;

@@ -132,13 +132,15 @@ void Universe::render()
         1.0f,
         10000000.0f);
 
+    //spdlog::info("projectionMatrix = {}", glm::to_string(projectionMatrix));
+
 
     //=====================================================================================
     // Render all objects in the scene
     //=====================================================================================
     renderAllNontransparentObjects();
 
-    // Ibjects with alpha < 1.0 have to be rendered after all objects with alpha = 1.0
+    // Objects with alpha < 1.0 have to be rendered after all objects with alpha = 1.0
     // It still doesn't solve all problems.
     renderAllTransparentObjects();
 
@@ -214,7 +216,7 @@ void Universe::renderAllTransparentObjects()
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     fontGlslProgram.use();
-    glm::mat4 projection = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f);
+    glm::mat4 projection = glm::ortho(0.0f, float(curWidth), 0.0f, float(curHeight));
     fontGlslProgram.setMat4("projection", glm::value_ptr(projection));
 
     renderTransparentUsingFontGlslProgram();
@@ -292,7 +294,12 @@ void Universe::renderTransparentUsingSimpleGlslProgram()
 
 void Universe::renderTransparentUsingFontGlslProgram()
 {
-    RenderText("Hello World", 100, 100, 1.0f, glm::vec3(1.0f, 1.0f, 0.0f));
+
+    glm::vec2 projected = getScreenCoordinates(earth.getModelTransformedCenter());
+    //spdlog::info("projected = {}", glm::to_string(projected));
+
+    RenderText("Earth", projected.x, projected.y, 1.0f, glm::vec3(1.0f, 1.0f, 0.0f));
+    //RenderText("Hello World", 100.0f, 100.0f, 1.0f, glm::vec3(1.0f, 1.0f, 0.0f));
 }
 
 
@@ -308,6 +315,7 @@ void Universe::RenderText(std::string text, float x, float y, float scale, glm::
     std::string::const_iterator c;
     for (c = text.begin(); c != text.end(); c++)
     {
+        //spdlog::info("*c = {}", *c);
         Character ch = characters[*c];
 
         float xpos = x + ch.bearing.x * scale;
@@ -344,6 +352,88 @@ void Universe::RenderText(std::string text, float x, float y, float scale, glm::
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+
+
+void Universe::createFontCharacterTexture()
+{
+    spdlog::info("Generating font character textures");
+
+    if (FT_Init_FreeType(&ft))
+        spdlog::error("ERROR:FREETYPE Could not init FreeType library");
+
+    //if (FT_New_Face(ft, "fonts/arial.ttf", 0, &face))
+    if (FT_New_Face(ft, "fonts/Roboto-Medium.ttf", 0, &face))
+        spdlog::error("ERROR:FREETYPE Failed to load font");
+
+    FT_Set_Pixel_Sizes(face, 0, 12);
+
+    //if (FT_Load_Glyph(face, "X", FT_LOAD_RENDER))
+    //    cout << "ERROR:FREETYPE Failed to load Glyph" << endl;
+
+    //----------------------
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);      // no byte alignment restriction
+    for (unsigned char c = 0; c < 128; c++)
+    {
+        if (FT_Load_Glyph(face, FT_Get_Char_Index(face, c), FT_LOAD_RENDER)) {
+            spdlog::error("ERROR:FREETYPE Failed to load Glyph");
+            continue;
+        }
+
+        unsigned int texture;
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glTexImage2D(
+            GL_TEXTURE_2D,
+            0, GL_RED,
+            face->glyph->bitmap.width,
+            face->glyph->bitmap.rows,
+            0,
+            GL_RED,
+            GL_UNSIGNED_BYTE,
+            face->glyph->bitmap.buffer
+        );
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        Character character = {
+            texture,
+            glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
+            glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
+            face->glyph->advance.x
+        };
+
+        characters.insert(std::pair<char, Character>(c, character));
+    }
+
+    //----------------------
+
+    FT_Done_Face(face);
+    FT_Done_FreeType(ft);
+
+}
+
+// Given a 3d point in the scene, return the x and y coordinates of the point on the 2-d viewport.
+// E.g. if the view is locked on earth, the return value will be (w/2, h/2),
+//          where w and h are width and height of the viewport.
+//
+// `scenePoint` is a model-transformed point.
+glm::vec2 Universe::getScreenCoordinates(glm::vec3 scenePoint)
+{
+    glm::vec4 viewport(0.0f, 0.0f, float(curWidth), float(curHeight));
+
+    glm::vec3 projected = glm::project(
+        scenePoint,
+        viewMatrix,
+        projectionMatrix,
+        viewport
+    );
+
+    return glm::vec2(projected.x, projected.y);
+}
 
 
 #include "imgui_internal.h"

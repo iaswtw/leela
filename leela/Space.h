@@ -299,9 +299,9 @@ public:
     VECTOR crossProduct(VECTOR V1, VECTOR V2)
     {
         VECTOR prod;
-        prod.x = V1.y * V2.z - V1.z * V2.y;
+        prod.x =   V1.y * V2.z - V1.z * V2.y;
         prod.y = -(V1.x * V2.z - V1.z * V2.x);
-        prod.z = V1.x * V2.y - V1.y * V2.x;
+        prod.z =   V1.x * V2.y - V1.y * V2.x;
         prod.calc();
         return (prod);
     }
