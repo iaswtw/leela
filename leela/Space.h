@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Class.h"
 
@@ -62,6 +62,18 @@ public:
     {
     }
     
+    //
+    //             S              S = observer's eye
+    //              \             DS ⟂ DR ⟂ DL
+    //               \            
+    //       L--------\D          D is the direction in which the observer is looking
+    //               /            DL = DR x DS
+    //              /
+    //             /
+    //            R             R determines the downward direction
+    //
+    //
+    //
     void initFrame()
     {
         int l = int(sqrt((DS_dist*DS_dist) / 3.0));
@@ -82,6 +94,7 @@ public:
     {
         initFrame();
     }
+
 
     glm::vec3 getUpwardDirectionVector()
     {
@@ -224,6 +237,11 @@ public:
     void setDefaultView()
     {
         initFrame();
+    }
+
+    void setDSDistance()
+    {
+
     }
 
     /***************************************************************************

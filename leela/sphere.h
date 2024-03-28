@@ -180,6 +180,13 @@ public:
         return _center;
     }
 
+    // returns a vec3 in x-y plane (z=0)
+    glm::vec3 getAxisTiltOrientationAxis()
+    {
+        glm::vec3 axisTiltOrientationAxis = glm::vec3(cos(getAxisTiltOrientationAngle()), sin(getAxisTiltOrientationAngle()), 0.0f);
+        return axisTiltOrientationAxis;
+    }
+
     glm::mat4 getModelMatrix()
     {
         glm::mat4 modelTrans(1.0f);
@@ -191,7 +198,7 @@ public:
         // todo - do this using a single rotate invocation
         //modelTrans = glm::rotate(modelTrans,   getAxisRotationAngle(),   glm::vec3(0.0f, 0.0f, 1.0f));
 
-        glm::vec3 axisTiltOrientationAxis = glm::vec3(cos(getAxisTiltOrientationAngle()), sin(getAxisTiltOrientationAngle()), 0.0f);
+        glm::vec3 axisTiltOrientationAxis = getAxisTiltOrientationAxis();
 
         modelTrans = glm::rotate(modelTrans,   getAxisTiltAngle(),       axisTiltOrientationAxis);
         modelTrans = glm::rotate(modelTrans,   getRotationAngle(),       glm::vec3(0.0f, 0.0f, 1.0f));
@@ -215,15 +222,15 @@ public:
 
         if (bPrecessionMotion)
         {
-            _axisRotationAngle -= 0.005f;      // todo - use step multiplier and a new internal velocity variable.
+            _axisRotationAngle -= 0.005f * stepMultiplier;
             _axisRotationAngle = _normalizeAngle(_axisRotationAngle);
 
-            _axisTiltOrientationAngle -= 0.01f;
+            _axisTiltOrientationAngle -= 0.01f * stepMultiplier;
             _axisTiltOrientationAngle = _normalizeAngle(_axisTiltOrientationAngle);
         }
         if (bOrbitalPlaneRotation)
         {
-            _orbitalPlaneRotationAngle -= 0.005f * stepMultiplier;     // todo - use step multiplier and velocity
+            _orbitalPlaneRotationAngle -= 0.005f * stepMultiplier;
             _orbitalPlaneRotationAngle = _normalizeAngle(_orbitalPlaneRotationAngle);
         }
     }
@@ -253,6 +260,28 @@ public:
             _center.x += _parent->getCenter().x;
             _center.y += _parent->getCenter().y;
             _center.z += _parent->getCenter().z;
+        }
+    }
+
+    // Calculate 12 points outside the orbit suitable for drawing month labels
+    void calculateMonthPositions()
+    {
+        glm::vec3 axis = getAxisTiltOrientationAxis();
+        glm::vec3 perp = glm::vec3(axis.y, -axis.x, axis.z);
+
+        float scaler = 1.2f * _orbitalRadius;
+        perp = perp * scaler;
+
+        float theta = float(2 * M_PI / 12);
+        for (int i = 0; i < 12; i++)
+        {
+            monthPositions[i].x = perp.x * cos(theta) - perp.y * sin(theta);
+            monthPositions[i].y = perp.x * sin(theta) + perp.y * cos(theta);
+            monthPositions[i].z = 0;
+
+            //monthPositions[i] += _center;
+
+            theta += float(2 * M_PI / 12);
         }
     }
 
@@ -320,6 +349,21 @@ public:
     Sphere *_parent = nullptr;              // e.g. if this is moon, _parent is earth.
                                             // TODO: this will change when we bring in center of mass virtual Sphere object.
     std::string _name = "NoName";
+
+    std::vector<glm::vec3> monthPositions = {
+        {0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f},
+    };
 };
 
 

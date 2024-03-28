@@ -151,6 +151,19 @@ void Universe::render()
 void Universe::renderAllNontransparentObjects()
 {
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    // Labels that are allowed to hide under other objects should be written before the objects.
+    // This is because all labels, regardless of what object they are for, are written at a
+    // very shallow depth.
+
+    fontGlslProgram.use();
+    glm::mat4 projection = glm::ortho(0.0f, float(curWidth), 0.0f, float(curHeight));
+    fontGlslProgram.setMat4("projection", glm::value_ptr(projection));
+
+    renderUsingFontGlslProgram();
+
+    fontGlslProgram.unuse();
+
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     planetGlslProgram.use();
     planetGlslProgram.setMat4("view", glm::value_ptr(viewMatrix));
@@ -212,16 +225,6 @@ void Universe::renderAllTransparentObjects()
     renderTransparentUsingSimpleGlslProgram();
 
     simpleGlslProgram.unuse();
-
-    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-    fontGlslProgram.use();
-    glm::mat4 projection = glm::ortho(0.0f, float(curWidth), 0.0f, float(curHeight));
-    fontGlslProgram.setMat4("projection", glm::value_ptr(projection));
-
-    renderTransparentUsingFontGlslProgram();
-
-    fontGlslProgram.unuse();
 
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -292,13 +295,35 @@ void Universe::renderTransparentUsingSimpleGlslProgram()
     }
 }
 
-void Universe::renderTransparentUsingFontGlslProgram()
+void Universe::renderUsingFontGlslProgram()
 {
+    if (bShowMonthNames)
+    {
+        earth.calculateMonthPositions();
 
-    glm::vec2 projected = getScreenCoordinates(earth.getModelTransformedCenter());
-    //spdlog::info("projected = {}", glm::to_string(projected));
+        //glm::vec2 projected = getScreenCoordinates(earth.getModelTransformedCenter());
+        //spdlog::info("projected = {}", glm::to_string(projected));
 
-    RenderText("Earth", projected.x, projected.y, 1.0f, glm::vec3(1.0f, 1.0f, 0.0f));
+        std::vector<std::string> monthNames = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+
+        for (int i = 0; i < 12; i++)
+        {
+            glm::vec3 projected = getScreenCoordinates(earth.monthPositions[i]);
+            //glm::vec2 projected = getScreenCoordinates(glm::vec3(0.0f, 0.0f, 0.0f));
+
+            //spdlog::info("month Position {}: {}", i, glm::to_string(projected));
+
+            if (projected.z < 1.0f)
+            {
+                RenderText(
+                    monthNames[i].c_str(),
+                    projected.x,
+                    projected.y,
+                    1.0f,
+                    glm::vec3(1.0f, 1.0f, 0.0f));
+            }
+        }
+    }
     //RenderText("Hello World", 100.0f, 100.0f, 1.0f, glm::vec3(1.0f, 1.0f, 0.0f));
 }
 
@@ -308,6 +333,19 @@ void Universe::renderTransparentUsingFontGlslProgram()
 void Universe::RenderText(std::string text, float x, float y, float scale, glm::vec3 color)
 {
     fontGlslProgram.setVec3("textColor", glm::value_ptr(color));
+
+    GLboolean curDepthMaskEnable;
+    GLboolean prevBlendEnable;
+    
+    glGetBooleanv(GL_BLEND, &prevBlendEnable);          // backup blending enable/disable status before enabling it.
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glGetBooleanv(GL_DEPTH_WRITEMASK, &curDepthMaskEnable);       // backup current depth mask before disabling it
+    glDepthMask(GL_FALSE);            // disable writing to depth buffer.  This will allow other objects (spheres, etc) to
+                                      // overwrite the label when they are drawn later.
+    //---------------------------------
+
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(fontVao);
 
@@ -350,6 +388,11 @@ void Universe::RenderText(std::string text, float x, float y, float scale, glm::
     }
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
+
+    glDepthMask(curDepthMaskEnable);    // restore depth mask
+    if (!prevBlendEnable)               // disabled blending if it was previously disabled
+        glDisable(GL_BLEND);
+
 }
 
 
@@ -365,7 +408,7 @@ void Universe::createFontCharacterTexture()
     if (FT_New_Face(ft, "fonts/Roboto-Medium.ttf", 0, &face))
         spdlog::error("ERROR:FREETYPE Failed to load font");
 
-    FT_Set_Pixel_Sizes(face, 0, 12);
+    FT_Set_Pixel_Sizes(face, 0, 20);
 
     //if (FT_Load_Glyph(face, "X", FT_LOAD_RENDER))
     //    cout << "ERROR:FREETYPE Failed to load Glyph" << endl;
@@ -421,8 +464,10 @@ void Universe::createFontCharacterTexture()
 //          where w and h are width and height of the viewport.
 //
 // `scenePoint` is a model-transformed point.
-glm::vec2 Universe::getScreenCoordinates(glm::vec3 scenePoint)
+glm::vec3 Universe::getScreenCoordinates(glm::vec3& scenePoint)
 {
+    //spdlog::info("getScreenCoordinates: {}", glm::to_string(scenePoint));
+
     glm::vec4 viewport(0.0f, 0.0f, float(curWidth), float(curHeight));
 
     glm::vec3 projected = glm::project(
@@ -432,7 +477,9 @@ glm::vec2 Universe::getScreenCoordinates(glm::vec3 scenePoint)
         viewport
     );
 
-    return glm::vec2(projected.x, projected.y);
+    return projected;
+    //return glm::vec2(projected.x, projected.y);
+    //return glm::vec2(0.0f, 0.0f);
 }
 
 
@@ -921,6 +968,8 @@ void Universe::generateImGuiWidgets()
             SmallCheckbox("Coordinate axis (a)", &bShowAxis);
             SmallCheckbox("Planet axis", &bShowPlanetAxis);
             SmallCheckbox("Low darkness at night", &bShowLowDarknessAtNight);
+            SmallCheckbox("Month names", &bShowMonthNames);
+            
 
             ImGui::Separator();
 

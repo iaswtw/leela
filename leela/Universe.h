@@ -198,7 +198,7 @@ public:
 	void renderUsingSunGlslProgram();
     void renderUsingSimpleGlslProgram();
     void renderTransparentUsingSimpleGlslProgram();
-    void renderTransparentUsingFontGlslProgram();
+    void renderUsingFontGlslProgram();
     void RenderText(std::string text, float x, float y, float scale, glm::vec3 color);
 
     void constructFontInfrastructureAndSendToGpu();
@@ -265,8 +265,9 @@ public:
 
     void createFontCharacterTexture();
 
-    glm::vec2 getScreenCoordinates(glm::vec3 scenePoint);
+    glm::vec3 getScreenCoordinates(glm::vec3 &scenePoint);
 
+    bool isNoModifier();
 
 public:
     bool bQuit = false;
@@ -359,6 +360,7 @@ public:
     bool bShowAxis = true;
     bool bShowPlanetAxis = false;
     bool bShowOrbitsGlobalEnable = true;           // Individual orbit enables are in respective renderer classes.
+    bool bShowMonthNames = true;
 
     TargetLockMode lockMode = TargetLockMode_ViewTarget;
     VECTOR followVector = VECTOR(1.0, 1.0, 1.0);

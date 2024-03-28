@@ -4,7 +4,11 @@ void Universe::onKeyDown(SDL_Event* event)
 {
     switch (event->key.keysym.sym) {
     case SDLK_a:
-        ChangeBoolean(&bShowAxis, UCmdParam_Toggle);
+        if (isNoModifier())
+            ChangeBoolean(&bShowAxis, UCmdParam_Toggle);
+        else
+            if (bAltModifier)
+                ;   // todo set medium DS
         break;
     case SDLK_b:
         ToggleConstantDirectionFollowMode();
@@ -209,3 +213,10 @@ void Universe::onMouseMotion(int xrel, int yrel)
     mouse_dy = float(yrel);
 }
 
+bool Universe::isNoModifier()
+{
+    if (!bShiftModifier && !bCtrlModifier && !bAltModifier)
+        return true;
+    else
+        return false;
+}
