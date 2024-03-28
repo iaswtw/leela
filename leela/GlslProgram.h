@@ -2,6 +2,7 @@
 
 #include <GL/glew.h>
 #include <string>
+#include <vector>
 
 class GlslProgram
 {
@@ -9,7 +10,7 @@ public:
 	GlslProgram();
 	~GlslProgram();
 	void printShaderCompileStatus(GLuint shader);
-	void compileShadersFromFile(std::string& vertShaderFilename, std::string& fragShaderFilename);
+	void compileShadersFromFile(const char * vertShaderFilenames, const char * fragShaderFilename);
     void compileShaders(const char* vertShaderText, const char* fragShaderText);
     void link();
     void use();
@@ -24,7 +25,7 @@ public:
 
 
 private:
-    void _readFile(std::string& filePath, std::string& fileContents);
+    void _readFile(const char * fileName, std::string& fileContents);
     void _compileShader(const char* shaderText, GLuint& shaderId);
 
     const char* _vertShaderText = nullptr;

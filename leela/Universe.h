@@ -24,6 +24,11 @@
 #include "GlslProgram.h"
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#include "map"
+using namespace std;
+
+#include <spdlog/spdlog.h>
+
 
 constexpr auto MAXGALAXYSTARS = 10000;
 constexpr auto NUM_NAVIGATION_INPUT_SAMPLES = 10;
@@ -33,6 +38,14 @@ constexpr auto FIR_WIDTH = 100;
 #define RELEASE_BUILD
 //#define USE_ICOSPHERE
 //#define DRAW_LINES_INSTEAD_OF_TRIANGLES
+
+struct Character {
+    unsigned int textureID;     // ID handle of the glyph texture
+    glm::ivec2 size;            // size of glyph
+    glm::ivec2 bearing;         // offset from baseline to top/left of glyph
+    unsigned int advance;       // offset to advance to next glyph
+};
+
 
 /*!
  **************************************************************************
@@ -248,6 +261,8 @@ public:
 
     void clearAllFirFilters();
 
+    void createFontCharacterTexture();
+
 
 public:
     bool bQuit = false;
@@ -447,6 +462,8 @@ public:
 
     FT_Library ft;
     FT_Face face;
+
+    std::map<char, Character> characters;
 
 };
 

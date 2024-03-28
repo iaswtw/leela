@@ -1,7 +1,6 @@
-#include "pch.h"
 #include "Windows.h"
 #include "Universe.h"
-
+#include <spdlog/spdlog.h>
 
 /*
  * Change to the parent directory of the executable we are running from.
@@ -42,6 +41,7 @@ bool changeDirToParentOfExecutable()
 
 int main(int argc, char *argv[])
 {
+    spdlog::set_pattern("[%H:%M:%S.%e] [%^%l%$] %v");
     
     if (!changeDirToParentOfExecutable())
     {

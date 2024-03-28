@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "StarsRenderer.h"
 #include "Stars.h"
 #include <vector>

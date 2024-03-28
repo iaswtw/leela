@@ -1,10 +1,7 @@
-#include "pch.h"
-
 #include "GlslProgram.h"
-#include <string>
 #include <fstream>
 #include <exception>
-#include <vector>
+#include "spdlog/spdlog.h"
 
 GlslProgram::GlslProgram()
 {
@@ -24,38 +21,57 @@ void GlslProgram::printShaderCompileStatus(GLuint shader)
 {
 	GLint status;
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-	printf("Shader compile status = %d\n", status);
+	//spdlog::info("Shader compile status = {}", status);
 	if (status == GL_TRUE)
 	{
-		printf("Compile successful.\n\n");
+		spdlog::info("Shader compiled suuccessfully");
 	}
 	else
 	{
-		printf("!!! === Compile failed === !!!\n");
+		spdlog::error("!!! === Shader failed to compile === !!!\n");
 
 		char buffer[512];
 		glGetShaderInfoLog(shader, 512, NULL, buffer);
-		printf("Log:\n%s\n", buffer);
+		spdlog::error("Log:");
+		spdlog::error(buffer);
 
 		throw std::exception("shader failed to compile.");
 	}
 }
 
-void GlslProgram::_readFile(std::string& filePath, std::string& fileContents)
+// attempt to open files from the list of provided file paths.
+// If a file is successfully opened, read its contents, store them to `fileContents`, and return. 
+void GlslProgram::_readFile(const char * fileName, std::string& fileContents)
 {
     std::string line;
 
-    std::ifstream shaderFile(filePath);
-    if (shaderFile.fail())
-    {
-        perror(filePath.c_str());
-        printf("Failed to open %s\n", filePath.c_str());
-		throw std::exception("Could not open shader file");
-    }
-    while (std::getline(shaderFile, line))
-    {
-        fileContents += line + "\n";
-    }
+	std::vector<std::string> shaderDirs = {
+		"../../leela/shaders",
+		"shaders",
+	};
+
+	for (std::string shaderDir : shaderDirs) {
+		
+		std::string filePath = shaderDir + "/" + fileName;
+		std::ifstream shaderFile(filePath);
+		
+		if (shaderFile.fail()) {
+			perror(filePath.c_str());
+			printf("Failed to open %s\n", filePath.c_str());
+		}
+		else {
+			spdlog::info("Reading shader file {}", filePath.c_str());
+			while (std::getline(shaderFile, line)) {
+				fileContents += line + "\n";
+			}
+			return;
+		}
+
+	}
+	std::string msg("Could not find shader file: ");
+	msg += fileName;
+	throw std::exception(msg.c_str());
+
 }
 
 void GlslProgram::_compileShader(const char* shaderText, GLuint& shaderId)
@@ -76,7 +92,7 @@ void GlslProgram::compileShaders(const char* vertShaderText, const char* fragSha
 	_compileShader(fragShaderText, fragShaderId);
 }
 
-void GlslProgram::compileShadersFromFile(std::string& vertShaderFilename, std::string& fragShaderFilename)
+void GlslProgram::compileShadersFromFile(const char * vertShaderFilename, const char * fragShaderFilename)
 {
     std::string vertFileContents;
 	_readFile(vertShaderFilename, vertFileContents);
@@ -107,8 +123,8 @@ void GlslProgram::link()
 		std::vector<GLchar> infoLog(maxLength);
 		glGetProgramInfoLog(shaderProgramId, maxLength, &maxLength, &infoLog[0]);
 
-		printf("Linker error log:\n");
-		printf("%s\n", infoLog.data());
+		spdlog::error("Linker error log:");
+		spdlog::error(infoLog.data());
 
 		// We don't need the program anymore.
 		glDeleteProgram(shaderProgramId);
@@ -121,7 +137,7 @@ void GlslProgram::link()
 	}
 	else
 	{
-		printf("\nShader program link successful\n");
+		spdlog::info("Shader program link successful");
 		glDetachShader(shaderProgramId, vertShaderId);
 		glDetachShader(shaderProgramId, fragShaderId);
 

@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "SphereRenderer.h"
 #include "Utils.h"
 #include "Universe.h"
@@ -21,6 +20,7 @@
 #include <array>
 
 #include "lodepng.h"
+#include "spdlog/spdlog.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stbi_image.h"
@@ -234,7 +234,7 @@ SphereRenderer::SphereRenderer(Universe& parent, Sphere& sphere, std::string tex
     setNightColorDarkness(NightColorDarkness_Black);
     //setNightColorDarkness(NightColorDarkness_VeryLow);
     _textureFilename = textureFilename;
-    printf("Setting _textureFilename to %s\n", _textureFilename.c_str());
+    //printf("Setting _textureFilename to %s\n", _textureFilename.c_str());
 }
 
 SphereRenderer::~SphereRenderer()
@@ -305,7 +305,8 @@ std::vector<float>* SphereRenderer::_constructMainSphereVertices()
     float theta_inc = float(M_PI) / (polygonIncrement / 2);
 
     int numFloats = int((2 * float(M_PI) / alpha_inc) * (float(M_PI) / theta_inc)) * 10;
-    printf("numFloats = %d\n", numFloats);
+    spdlog::info("");
+    spdlog::info("{}: Main sphere vertex data occupies {} floats", _sphere._name, numFloats);
 
     v->reserve(numFloats);
     float alpha;
@@ -450,8 +451,9 @@ std::pair<std::vector<float>*, std::vector<Triangle>*>  SphereRenderer::_constru
         vector_push_back_12(*v, vertex.x, vertex.y, vertex.z, s._r, s._g, s._b, 1.0f, N.x, N.y, N.z, texCoordX, texCoordY);
     }
 
-    printf("=== Sphere: Num vertices = %d\n", v->size()/10);
-    printf("=== Sphere: Num elements = %d\n", indexMesh.second->size() / 6);
+    spdlog::info("");
+    spdlog::info("{}: Sphere: Num vertices = {}", _sphere._name, v->size()/10);
+    spdlog::info("{}: Sphere: Num elements = {}", _sphere._name, indexMesh.second->size() / 6);
 
     delete indexMesh.first;
     return std::pair<std::vector<float>*, std::vector<Triangle>*>(v, indexMesh.second);
@@ -958,8 +960,8 @@ void SphereRenderer::constructVerticesAndSendToGpu()
     delete e;
 #endif
 
-    printf("*************** texture setup *******************\n");
-    printf("_textureFilename = %s\n", _textureFilename.c_str());
+    //printf("*************** texture setup *******************\n");
+    //printf("_textureFilename = %s\n", _textureFilename.c_str());
     if (!_textureFilename.empty())
     {
         glGenTextures(1, &_texture);
@@ -978,9 +980,12 @@ void SphereRenderer::constructVerticesAndSendToGpu()
         float color[] = { 1.0f, 0.0f, 0.0f, 1.0f };
         glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
 
+
         std::vector<unsigned char> image1;
         unsigned int width, height;
-        unsigned int error = lodepng::decode(image1, width, height, _textureFilename.c_str());
+        std::string textureFilePath = _locateTextureFile(_textureFilename.c_str());
+        spdlog::info("Using texture file " + textureFilePath);
+        unsigned int error = lodepng::decode(image1, width, height, textureFilePath.c_str());
         if (error)
         {
             printf("error %d: %s\n", error, lodepng_error_text(error));
@@ -1024,6 +1029,27 @@ void SphereRenderer::constructVerticesAndSendToGpu()
     constructRotationAxis();
 }
 
+// locate and return the complete path of the given texture filename in know texture file locations.
+std::string SphereRenderer::_locateTextureFile(const char * fileName)
+{
+    std::vector<std::string> textureDirs = {
+        "../../leela/textures",
+        "textures",
+    };
+
+    for (std::string textureDir : textureDirs) {
+
+        std::string filePath = textureDir + "/" + fileName;
+        std::ifstream textureFile(filePath);
+        if (!textureFile.fail()) {
+            return filePath;
+        }
+    }
+
+    std::string msg = "Failed to locate ";
+    msg += fileName;
+    throw std::exception(msg.c_str());
+}
 
 float SphereRenderer::_getPolygonIncrement()
 {

@@ -1,57 +1,28 @@
-#include "pch.h"
 #include "Universe.h"
 
 #include "imgui.h"
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_opengl3.h"
 
+#include "spdlog/spdlog.h"
+
 
 void Universe::initializeGL()
 {
     printf("Inside initializeGL\n");
 
-#ifdef RELEASE_BUILD
-    std::string vertFilename("shaders/planet.vert.glsl");
-    std::string fragFilename("shaders/planet.frag.glsl");
-#else
-    std::string vertFilename("../leela/shaders/planet.vert.glsl");
-    std::string fragFilename("../leela/shaders/planet.frag.glsl");
-#endif
-    planetGlslProgram.compileShadersFromFile(vertFilename, fragFilename);
+    spdlog::info("Opening planet.frag.glsl");
+    planetGlslProgram.compileShadersFromFile("planet.vert.glsl", "planet.frag.glsl");
     planetGlslProgram.link();
 
-
-#ifdef RELEASE_BUILD
-    vertFilename = "shaders/sun.vert.glsl";
-    fragFilename = "shaders/sun.frag.glsl";
-#else
-    vertFilename = "../leela/shaders/sun.vert.glsl";
-    fragFilename = "../leela/shaders/sun.frag.glsl";
-#endif
-    sunGlslProgram.compileShadersFromFile(vertFilename, fragFilename);
+    sunGlslProgram.compileShadersFromFile("sun.vert.glsl", "sun.frag.glsl");
     sunGlslProgram.link();
 
-#ifdef RELEASE_BUILD
-    vertFilename = "shaders/star.vert.glsl";
-    fragFilename = "shaders/star.frag.glsl";
-#else
-    vertFilename = "../leela/shaders/star.vert.glsl";
-    fragFilename = "../leela/shaders/star.frag.glsl";
-#endif
-    starGlslProgram.compileShadersFromFile(vertFilename, fragFilename);
+    starGlslProgram.compileShadersFromFile("star.vert.glsl", "star.frag.glsl");
     starGlslProgram.link();
 
-#ifdef RELEASE_BUILD
-    vertFilename = "shaders/simple.vert.glsl";
-    fragFilename = "shaders/simple.frag.glsl";
-#else
-    vertFilename = "../leela/shaders/simple.vert.glsl";
-    fragFilename = "../leela/shaders/simple.frag.glsl";
-#endif
-    simpleGlslProgram.compileShadersFromFile(vertFilename, fragFilename);
+    simpleGlslProgram.compileShadersFromFile("simple.vert.glsl", "simple.frag.glsl");
     simpleGlslProgram.link();
-
-
 
     //---------------------------------------------------------------------------------------------------
 

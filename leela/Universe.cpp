@@ -1,5 +1,3 @@
-#include "pch.h"
-
 #ifndef _WIN32
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -15,6 +13,8 @@
 #include "Utils.h"
 #include <stdio.h>
 #include <string>
+
+#include <spdlog/spdlog.h>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -59,28 +59,78 @@ static std::string FindFontFile(const char * fileName)
     return std::string("");
 }
 
+void Universe::createFontCharacterTexture()
+{
+    spdlog::info("Generating font character textures");
+
+    if (FT_Init_FreeType(&ft))
+        spdlog::error("ERROR:FREETYPE Could not init FreeType library");
+
+    if (FT_New_Face(ft, "fonts/arial.ttf", 0, &face))
+        spdlog::error("ERROR:FREETYPE Failed to load font");
+
+    FT_Set_Pixel_Sizes(face, 0, 48);
+
+    //if (FT_Load_Glyph(face, "X", FT_LOAD_RENDER))
+    //    cout << "ERROR:FREETYPE Failed to load Glyph" << endl;
+
+    //----------------------
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);      // no byte alignment restriction
+    for (unsigned char c = 0; c < 128; c++)
+    {
+        if (FT_Load_Glyph(face, c, FT_LOAD_RENDER)) {
+            spdlog::error("ERROR:FREETYPE Failed to load Glyph");
+            continue;
+        }
+
+        unsigned int texture;
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glTexImage2D(
+            GL_TEXTURE_2D,
+            0, GL_RED,
+            face->glyph->bitmap.width,
+            face->glyph->bitmap.rows,
+            0,
+            GL_RED,
+            GL_UNSIGNED_BYTE,
+            face->glyph->bitmap.buffer
+        );
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        Character character = {
+            texture,
+            glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
+            glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
+            face->glyph->advance.x
+        };
+
+        characters.insert(std::pair<char, Character>(c, character));
+    }
+
+    //----------------------
+
+    FT_Done_Face(face);
+    FT_Done_FreeType(ft);
+
+}
+
+
 Universe::Universe() :
 
-#ifdef RELEASE_BUILD
-    sunRenderer(*this, sun, "textures/sunmap.png"),
-    earthRenderer(*this, earth, "textures/earth-erde-mit-wolken-2k.png"),
-    moonRenderer(*this, moon, "textures/moonmap1k.png"),
-    marsRenderer(*this, mars, "textures/mars2k.png"),
-    jupiterRenderer(*this, jupiter, "textures/jupiter2k.png"),
-    saturnRenderer(*this, saturn, "textures/saturn2k.png"),
-    uranusRenderer(*this, uranus, "textures/uranus2k.png"),
-    neptuneRenderer(*this, neptune, "textures/neptune2k.png"),
-#else
-    sunRenderer(sun, "../leela/textures/sunmap.png"),
-    //earthRenderer(earth, "../leela/textures/Map-World_23_10.png"),
-    //earthRenderer(earth, "../leela/textures/earthmap1k.png"),
-    earthRenderer(earth, "../leela/textures/earth-erde-mit-wolken-2k.png"),
-    
-    //earthRenderer(earth, "../leela/textures/cat1.png"),
-    //moonRenderer(moon),
-    moonRenderer(moon, "../leela/textures/moonmap1k.png"),
-    marsRenderer(mars, "../leela/textures/mars2k.png"),
-#endif
+    sunRenderer(*this, sun, "sunmap.png"),
+    earthRenderer(*this, earth, "earth-erde-mit-wolken-2k.png"),
+    moonRenderer(*this, moon, "moonmap1k.png"),
+    marsRenderer(*this, mars, "mars2k.png"),
+    jupiterRenderer(*this, jupiter, "jupiter2k.png"),
+    saturnRenderer(*this, saturn, "saturn2k.png"),
+    uranusRenderer(*this, uranus, "uranus2k.png"),
+    neptuneRenderer(*this, neptune, "neptune2k.png"),
 
     axisRenderer(axis),
     starsRenderer(stars)
@@ -1060,13 +1110,6 @@ int Universe::run()
     setvbuf(stdout, 0, _IONBF, 0);
     const char* glsl_version = "#version 330";
 
-
-    if (FT_Init_FreeType(&ft))
-        cout << "ERROR:FREETYPE Could not init FreeType library" << endl;
-    if (FT_New_Face(ft, "fonts/arial.ttf", 0, &face))
-        cout << "ERROR:FREETYPE Failed to load font" << endl;
-
-
     SDL_Init(SDL_INIT_EVERYTHING);
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
@@ -1114,6 +1157,7 @@ int Universe::run()
     ImGui_ImplSDL2_InitForOpenGL(window, context);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
+    createFontCharacterTexture();
 
     SDL_GetWindowSize(window, &curWidth, &curHeight);
     printf("width = %d\n", curWidth);

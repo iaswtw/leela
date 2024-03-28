@@ -54,6 +54,7 @@ public:
     void constructRotationAxis();
     void constructVerticesAndSendToGpu();
 
+    std::string _locateTextureFile(const char * filenName);
 
 public:
     bool bShowOrbitalPlane = false;

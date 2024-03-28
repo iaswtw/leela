@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "Universe.h"
 
 void Universe::ShowDemo(int nParam)
