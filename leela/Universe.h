@@ -198,8 +198,10 @@ public:
 	void renderUsingSunGlslProgram();
     void renderUsingSimpleGlslProgram();
     void renderTransparentUsingSimpleGlslProgram();
+    void renderTransparentUsingFontGlslProgram();
+    void RenderText(std::string text, float x, float y, float scale, glm::vec3 color);
 
-
+    void constructFontInfrastructureAndSendToGpu();
 
     void initializeGL();
     void initSceneObjects();
@@ -382,6 +384,9 @@ public:
     GLuint tex1;
     GLuint tex2;
 
+    GLuint fontVao;
+    GLuint fontVbo;
+
     GLint uniOverrideColor;
 
     glm::mat4 viewMatrix;
@@ -428,6 +433,7 @@ public:
 	GlslProgram sunGlslProgram;
 	GlslProgram starGlslProgram;
     GlslProgram simpleGlslProgram;
+    GlslProgram fontGlslProgram;
 
     // Realistic day/night shading, shadow shading.
     // Effect on day & nights:
