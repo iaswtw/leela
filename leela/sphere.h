@@ -77,6 +77,11 @@ public:
         _orbitalRadius = orbitalRadius;
     }
 
+    void restoreOrbitalRadius()
+    {
+        _orbitalRadius = _orbitalRadius_Backup;
+    }
+
     void setRotationParameters(float radius, float rotationAngle, float rotationAngularVelocity, float axisTiltOrientationAngle, float axisTiltAngle)
     {
         _radius = radius;
@@ -89,6 +94,8 @@ public:
     void setOrbitalParameters(float orbitalRadius, float orbitalAngle, float orbitalAngularVelocity, float orbitalPlaneRotationAngle, float orbitalPlaneTiltAngle)
     {
         setOrbitalRadius(orbitalRadius);
+        _orbitalRadius_Backup = _orbitalRadius;
+
         _orbitalAngle = orbitalAngle;
         _orbitalAngularVelocity = orbitalAngularVelocity;
         _orbitalPlaneRotationAngle = orbitalPlaneRotationAngle;
@@ -336,6 +343,7 @@ public:
 
     // Revolution variables
     float _orbitalRadius = 0;
+    float _orbitalRadius_Backup = 0;        // allows reverting back after modifying orbital radius
     float _orbitalAngle = 0;                // current revolution (orbital) angle (increments based on revolution angular velocity). Previously called 'tho'
     float _orbitalAngularVelocity = 0;      // angular velocity of revolution around parent sphere. Previously called 'wo'.
     float _orbitalPlaneRotationAngle = 0;   // previously called 'alphao'

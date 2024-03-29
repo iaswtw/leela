@@ -361,6 +361,7 @@ public:
     bool bShowPlanetAxis = false;
     bool bShowOrbitsGlobalEnable = true;           // Individual orbit enables are in respective renderer classes.
     bool bShowMonthNames = true;
+    bool bShowLabelsOnTop = false;
 
     TargetLockMode lockMode = TargetLockMode_ViewTarget;
     VECTOR followVector = VECTOR(1.0, 1.0, 1.0);

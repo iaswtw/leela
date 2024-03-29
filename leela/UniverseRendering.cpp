@@ -342,8 +342,10 @@ void Universe::RenderText(std::string text, float x, float y, float scale, glm::
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glGetBooleanv(GL_DEPTH_WRITEMASK, &curDepthMaskEnable);       // backup current depth mask before disabling it
-    glDepthMask(GL_FALSE);            // disable writing to depth buffer.  This will allow other objects (spheres, etc) to
-                                      // overwrite the label when they are drawn later.
+
+    if (!bShowLabelsOnTop)
+        glDepthMask(GL_FALSE);            // disable writing to depth buffer.  This will allow other objects (spheres, etc) to
+                                          // overwrite the label when they are drawn later.
     //---------------------------------
 
     glActiveTexture(GL_TEXTURE0);
@@ -969,6 +971,7 @@ void Universe::generateImGuiWidgets()
             SmallCheckbox("Planet axis", &bShowPlanetAxis);
             SmallCheckbox("Low darkness at night", &bShowLowDarknessAtNight);
             SmallCheckbox("Month names", &bShowMonthNames);
+            SmallCheckbox("Labels on top", &bShowLabelsOnTop);
             
 
             ImGui::Separator();
@@ -1034,8 +1037,14 @@ void Universe::generateImGuiWidgets()
                 earthRenderer.constructOrbit();
                 earthRenderer.constructOrbitalPlaneVertices();
                 earthRenderer.constructOrbitalPlaneGridVertices();
-            }
+            } ImGui::SameLine();
             ImGui::PopItemWidth();
+            if (ImGui::Button("Reset## earth orbital radius")) {
+                earth.restoreOrbitalRadius();
+                earthRenderer.constructOrbit();
+                earthRenderer.constructOrbitalPlaneVertices();
+                earthRenderer.constructOrbitalPlaneGridVertices();
+            }
             ImGui::Unindent();
 
             ImGui::Separator();
@@ -1057,6 +1066,12 @@ void Universe::generateImGuiWidgets()
             ImGui::PushItemWidth(100);
             //ImGui::SetNextItemWidth(180);
             if (ImGui::SliderFloat("Orbital Radius## moon", &moon._orbitalRadius, 120.0f, 600.0f)) {
+                moonRenderer.constructOrbit();
+                moonRenderer.constructOrbitalPlaneVertices();
+                moonRenderer.constructOrbitalPlaneGridVertices();
+            } ImGui::SameLine();
+            if (ImGui::Button("Reset## moon orbital radius")) {
+                moon.restoreOrbitalRadius();
                 moonRenderer.constructOrbit();
                 moonRenderer.constructOrbitalPlaneVertices();
                 moonRenderer.constructOrbitalPlaneGridVertices();
