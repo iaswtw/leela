@@ -1074,8 +1074,8 @@ int Universe::run()
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     //SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 
-    //window = SDL_CreateWindow("Leela", 500, 500, 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED);
-    window = SDL_CreateWindow("Leela", 300, 300, 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+    window = SDL_CreateWindow("Leela", 500, 500, 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED);
+    //window = SDL_CreateWindow("Leela", 300, 300, 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
     spdlog::info("Created SDL GL window");
     context = SDL_GL_CreateContext(window);
