@@ -213,6 +213,7 @@ public:
     
     void SetLockTargetAndMode(Sphere* target, TargetLockMode mode);
     void SetLockMode(TargetLockMode mode);
+    void toggleLockMode();
     void ToggleConstantDirectionFollowMode();
     void ResetFollowTargetAndMode();
     void ToggleFollowTarget(Sphere* target, TargetLockMode mode);
@@ -361,7 +362,9 @@ public:
     bool bShowPlanetAxis = false;
     bool bShowOrbitsGlobalEnable = true;           // Individual orbit enables are in respective renderer classes.
     bool bShowMonthNames = true;
+    bool bMonthLabelsCloserToSphere = false;
     bool bShowLabelsOnTop = false;
+    bool bShowLargeLabels = false;
 
     TargetLockMode lockMode = TargetLockMode_ViewTarget;
     VECTOR followVector = VECTOR(1.0, 1.0, 1.0);
@@ -389,8 +392,15 @@ public:
     GLuint tex1;
     GLuint tex2;
 
-    GLuint fontVao;
-    GLuint fontVbo;
+    GLuint fontVao, largeFontVao;
+    GLuint fontVbo, largeFontVbo;
+
+    FT_Library ft;
+    FT_Face face;
+
+    std::map<char, Character> characters;
+    std::map<char, Character> largeCharacters;
+
 
     GLint uniOverrideColor;
 
@@ -470,11 +480,6 @@ public:
     OneShotBoolean doubleClicked = OneShotBoolean();
 
     std::string logString = "";
-
-    FT_Library ft;
-    FT_Face face;
-
-    std::map<char, Character> characters;
 
 };
 

@@ -82,6 +82,12 @@ public:
         _orbitalRadius = _orbitalRadius_Backup;
     }
 
+    void restoreAxisTiltAngleFromBackup()
+    {
+        _axisTiltAngle = _axisTiltAngle_Backup;
+        _axisTiltAngle_Deg = glm::degrees(_axisTiltAngle);
+    }
+
     void setRotationParameters(float radius, float rotationAngle, float rotationAngularVelocity, float axisTiltOrientationAngle, float axisTiltAngle)
     {
         _radius = radius;
@@ -89,6 +95,8 @@ public:
         _rotationAngularVelocity = rotationAngularVelocity;
         _axisTiltOrientationAngle = axisTiltOrientationAngle;
         _axisTiltAngle = axisTiltAngle;
+        _axisTiltAngle_Backup = axisTiltAngle;
+        _axisTiltAngle_Deg = glm::degrees(_axisTiltAngle);
     }
 
     void setOrbitalParameters(float orbitalRadius, float orbitalAngle, float orbitalAngularVelocity, float orbitalPlaneRotationAngle, float orbitalPlaneTiltAngle)
@@ -271,12 +279,13 @@ public:
     }
 
     // Calculate 12 points outside the orbit suitable for drawing month labels
-    void calculateMonthPositions()
+    // labelPositionScale - if 1.0, labels are at sphere's orbital radius from the parent's (e.g. sun's) center.
+    void calculateMonthPositions(float labelPositionScale)
     {
         glm::vec3 axis = getAxisTiltOrientationAxis();
         glm::vec3 perp = glm::vec3(axis.y, -axis.x, axis.z);
 
-        float scaler = 1.2f * _orbitalRadius;
+        float scaler = labelPositionScale * _orbitalRadius;
         perp = perp * scaler;
 
         float theta = float(2 * M_PI / 12);
@@ -339,11 +348,13 @@ public:
     float _rotationAngularVelocity = 0;     // angular velocity or rotation around sphere's axis. Previously called 'w'.
     float _axisRotationAngle = 0;           // previously called 'alpha'
     float _axisTiltAngle = 0;               // previously called 'beta'
+    float _axisTiltAngle_Backup = 0;        // allows restoring after modifying axis tilt
+    float _axisTiltAngle_Deg = 0;           // to show in ImGui for controlling via slider.
     float _axisTiltOrientationAngle = glm::radians(0.0f);
 
     // Revolution variables
     float _orbitalRadius = 0;
-    float _orbitalRadius_Backup = 0;        // allows reverting back after modifying orbital radius
+    float _orbitalRadius_Backup = 0;        // allows restoring after modifying orbital radius
     float _orbitalAngle = 0;                // current revolution (orbital) angle (increments based on revolution angular velocity). Previously called 'tho'
     float _orbitalAngularVelocity = 0;      // angular velocity of revolution around parent sphere. Previously called 'wo'.
     float _orbitalPlaneRotationAngle = 0;   // previously called 'alphao'

@@ -371,6 +371,14 @@ void Universe::SetLockMode(TargetLockMode mode)
     }
 }
 
+void Universe::toggleLockMode()
+{
+    if (lockMode == TargetLockMode_ViewTarget)
+        SetLockMode(TargetLockMode_FollowTarget);
+    else
+        SetLockMode(TargetLockMode_ViewTarget);
+}
+
 void Universe::ToggleConstantDirectionFollowMode()
 {
     if (lockMode == TargetLockMode_FollowTarget)

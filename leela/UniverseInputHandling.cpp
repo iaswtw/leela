@@ -26,7 +26,7 @@ void Universe::onKeyDown(SDL_Event* event)
         FastForward(UCmdParam_Start);
         break;
     case SDLK_l:
-        ToggleFollowTarget(&earth, TargetLockMode_ViewTarget);
+        toggleLockMode();
         break;
     case SDLK_n:
         bEarthSurfaceLockMode = !bEarthSurfaceLockMode;
@@ -64,9 +64,15 @@ void Universe::onKeyDown(SDL_Event* event)
     case SDLK_v:
         ChangeSidewaysMotionMode();
         break;
+    case SDLK_x:
+        ToggleFollowTarget(&moon, TargetLockMode_ViewTarget);
+        break;
     case SDLK_z:
-        if (bAltModifier)
-            space.setFrameMoveMode(SHORT_D_MODE);
+        if (isNoModifier())
+            ToggleFollowTarget(&earth, TargetLockMode_ViewTarget);
+        else
+            if (bAltModifier)
+                space.setFrameMoveMode(SHORT_D_MODE);
         break;
 
     // ============= Digits ===============

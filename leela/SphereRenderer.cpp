@@ -509,8 +509,8 @@ void SphereRenderer::constructLatitudesAndLongitudeVertices()
             auto [x1, y1, z1, N1, texX1, texY1] = calcPointOnSphere(1.001f * s._radius, alpha, theta);
             auto [x2, y2, z2, N2, texX2, texY2] = calcPointOnSphere(1.001f * s._radius, alpha + inc, theta);
 
-            vector_push_back_12(*v, x1, y1, z1, s._r*0.9f, s._g*0.5f, s._b*0.5f, 1.0f, N1.x, N1.y, N1.z, 0.0f, 0.0f);
-            vector_push_back_12(*v, x2, y2, z2, s._r*0.9f, s._g*0.5f, s._b*0.5f, 1.0f, N2.x, N2.y, N2.z, 0.0f, 0.0f);
+            vector_push_back_12(*v, x1, y1, z1, s._r*0.9f, s._g*0.3f, s._b*0.3f, 1.0f, N1.x, N1.y, N1.z, 0.0f, 0.0f);
+            vector_push_back_12(*v, x2, y2, z2, s._r*0.9f, s._g*0.3f, s._b*0.3f, 1.0f, N2.x, N2.y, N2.z, 0.0f, 0.0f);
 
             //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
         }

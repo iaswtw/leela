@@ -102,6 +102,22 @@ void Universe::constructFontInfrastructureAndSendToGpu()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
+    //---------------------
+    // Large font
+
+    glGenVertexArrays(1, &largeFontVao);
+    glGenBuffers(1, &largeFontVbo);
+
+    glBindVertexArray(largeFontVao);
+    glBindBuffer(GL_ARRAY_BUFFER, largeFontVbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+
 }
 
 
@@ -299,7 +315,11 @@ void Universe::renderUsingFontGlslProgram()
 {
     if (bShowMonthNames)
     {
-        earth.calculateMonthPositions();
+        if (bMonthLabelsCloserToSphere)
+            earth.calculateMonthPositions((earth._orbitalRadius + 1.5f*earth._radius) / earth._orbitalRadius);
+        else
+            earth.calculateMonthPositions(1.2f);
+
 
         //glm::vec2 projected = getScreenCoordinates(earth.getModelTransformedCenter());
         //spdlog::info("projected = {}", glm::to_string(projected));
@@ -349,14 +369,22 @@ void Universe::RenderText(std::string text, float x, float y, float scale, glm::
     //---------------------------------
 
     glActiveTexture(GL_TEXTURE0);
-    glBindVertexArray(fontVao);
+    if (bShowLargeLabels)
+        glBindVertexArray(largeFontVao);
+    else
+        glBindVertexArray(fontVao);
 
     // iterate through all characters
     std::string::const_iterator c;
     for (c = text.begin(); c != text.end(); c++)
     {
+        Character ch;
+
         //spdlog::info("*c = {}", *c);
-        Character ch = characters[*c];
+        if (bShowLargeLabels)
+            ch = largeCharacters[*c];
+        else
+            ch = characters[*c];
 
         float xpos = x + ch.bearing.x * scale;
         float ypos = y - (ch.size.y - ch.bearing.y) * scale;
@@ -377,8 +405,12 @@ void Universe::RenderText(std::string text, float x, float y, float scale, glm::
 
         // render glyph texture over quad
         glBindTexture(GL_TEXTURE_2D, ch.textureID);
+
         // update content of VBO memory
-        glBindBuffer(GL_ARRAY_BUFFER, fontVbo);
+        if (bShowLargeLabels)
+            glBindBuffer(GL_ARRAY_BUFFER, largeFontVbo);
+        else
+            glBindBuffer(GL_ARRAY_BUFFER, fontVbo);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -403,63 +435,73 @@ void Universe::createFontCharacterTexture()
 {
     spdlog::info("Generating font character textures");
 
-    if (FT_Init_FreeType(&ft))
-        spdlog::error("ERROR:FREETYPE Could not init FreeType library");
-
-    //if (FT_New_Face(ft, "fonts/arial.ttf", 0, &face))
-    if (FT_New_Face(ft, "fonts/Roboto-Medium.ttf", 0, &face))
-        spdlog::error("ERROR:FREETYPE Failed to load font");
-
-    FT_Set_Pixel_Sizes(face, 0, 20);
-
     //if (FT_Load_Glyph(face, "X", FT_LOAD_RENDER))
     //    cout << "ERROR:FREETYPE Failed to load Glyph" << endl;
 
-    //----------------------
-
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);      // no byte alignment restriction
-    for (unsigned char c = 0; c < 128; c++)
+
+    for (int i = 0; i < 2; i++)
     {
-        if (FT_Load_Glyph(face, FT_Get_Char_Index(face, c), FT_LOAD_RENDER)) {
-            spdlog::error("ERROR:FREETYPE Failed to load Glyph");
-            continue;
+        if (FT_Init_FreeType(&ft))
+            spdlog::error("ERROR:FREETYPE Could not init FreeType library");
+
+        //if (FT_New_Face(ft, "fonts/arial.ttf", 0, &face))
+        if (FT_New_Face(ft, "fonts/Roboto-Medium.ttf", 0, &face))
+            spdlog::error("ERROR:FREETYPE Failed to load font");
+
+        if (i == 0)
+            FT_Set_Pixel_Sizes(face, 0, 20);
+        else
+            FT_Set_Pixel_Sizes(face, 0, 64);
+
+        //----------------------
+
+        for (unsigned char c = 0; c < 128; c++)
+        {
+            if (FT_Load_Glyph(face, FT_Get_Char_Index(face, c), FT_LOAD_RENDER)) {
+                spdlog::error("ERROR:FREETYPE Failed to load Glyph");
+                continue;
+            }
+
+            unsigned int texture;
+            glGenTextures(1, &texture);
+            glBindTexture(GL_TEXTURE_2D, texture);
+            glTexImage2D(
+                GL_TEXTURE_2D,
+                0, GL_RED,
+                face->glyph->bitmap.width,
+                face->glyph->bitmap.rows,
+                0,
+                GL_RED,
+                GL_UNSIGNED_BYTE,
+                face->glyph->bitmap.buffer
+            );
+
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+            Character character = {
+                texture,
+                glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
+                glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
+                face->glyph->advance.x
+            };
+
+            if (i == 0)
+                characters.insert(std::pair<char, Character>(c, character));
+            else
+                largeCharacters.insert(std::pair<char, Character>(c, character));
         }
 
-        unsigned int texture;
-        glGenTextures(1, &texture);
-        glBindTexture(GL_TEXTURE_2D, texture);
-        glTexImage2D(
-            GL_TEXTURE_2D,
-            0, GL_RED,
-            face->glyph->bitmap.width,
-            face->glyph->bitmap.rows,
-            0,
-            GL_RED,
-            GL_UNSIGNED_BYTE,
-            face->glyph->bitmap.buffer
-        );
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        Character character = {
-            texture,
-            glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
-            glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-            face->glyph->advance.x
-        };
-
-        characters.insert(std::pair<char, Character>(c, character));
+        FT_Done_Face(face);
+        FT_Done_FreeType(ft);
     }
-
     //----------------------
 
-    FT_Done_Face(face);
-    FT_Done_FreeType(ft);
-
 }
+
 
 // Given a 3d point in the scene, return the x and y coordinates of the point on the 2-d viewport.
 // E.g. if the view is locked on earth, the return value will be (w/2, h/2),
@@ -844,8 +886,8 @@ void Universe::generateImGuiWidgets()
     if (bMouseGrabbed)
     {
         ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x / 2.0f, 20.0f), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-        ImGui::SetNextWindowBgAlpha(0.35f);
-        ImGui::PushFont(appFontMedium);
+        ImGui::SetNextWindowBgAlpha(0.25f);
+        ImGui::PushFont(appFontSmallMedium);
         if (ImGui::Begin("Escape message", &bShowFlagsOverlay, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
         {
             ImGui::Text("Escape key / double-click to get mouse back");
@@ -971,8 +1013,9 @@ void Universe::generateImGuiWidgets()
             SmallCheckbox("Planet axis", &bShowPlanetAxis);
             SmallCheckbox("Low darkness at night", &bShowLowDarknessAtNight);
             SmallCheckbox("Month names", &bShowMonthNames);
+            SmallCheckbox("Month names closer to planet", &bMonthLabelsCloserToSphere);
             SmallCheckbox("Labels on top", &bShowLabelsOnTop);
-            
+            SmallCheckbox("Large Labels", &bShowLargeLabels);
 
             ImGui::Separator();
 
@@ -1038,12 +1081,18 @@ void Universe::generateImGuiWidgets()
                 earthRenderer.constructOrbitalPlaneVertices();
                 earthRenderer.constructOrbitalPlaneGridVertices();
             } ImGui::SameLine();
-            ImGui::PopItemWidth();
             if (ImGui::Button("Reset## earth orbital radius")) {
                 earth.restoreOrbitalRadius();
                 earthRenderer.constructOrbit();
                 earthRenderer.constructOrbitalPlaneVertices();
                 earthRenderer.constructOrbitalPlaneGridVertices();
+            }
+            if (ImGui::SliderFloat("Axis tilt## earth", &earth._axisTiltAngle_Deg, 0.0f, 90.0f)) {
+                earth._axisTiltAngle = glm::radians(earth._axisTiltAngle_Deg);
+            } ImGui::SameLine();
+            ImGui::PopItemWidth();
+            if (ImGui::Button("Reset## earth axis tilt")) {
+                earth.restoreAxisTiltAngleFromBackup();
             }
             ImGui::Unindent();
 
