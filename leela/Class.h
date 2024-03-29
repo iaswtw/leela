@@ -75,6 +75,9 @@ public:
     PNT translatedX(double amount);
     PNT translatedY(double amount);
     PNT translatedZ(double amount);
+    VECTOR extrude(VECTOR& direction);
+    VECTOR extrude(VECTOR& direction, float amount);
+
     double squaredDistanceTo(PNT& p);
     double distanceTo(PNT& p);
 
@@ -146,7 +149,9 @@ public:
 class VECTOR
 {
 public:
-    double x, y, z, l, m, n, d;
+    double x, y, z;         // x, y, z components of the vector
+    double l, m, n;         // directional cosines in x, y and z direction
+    double d;               // length of the vector
     VECTOR()
         : x(0.0), y(0.0), z(0.0), l(0.0), m(0.0), n(0.0), d(0.0)
     {
@@ -195,6 +200,10 @@ public:
     void disp()
     {
         printf("x=%.4f; y=%.4f; z=%.4f; d=%.4f; l=%.4f; m=%.4f; n=%.4f\n", x, y, z, d, l, m, n);
+    }
+    double length()
+    {
+        return d;
     }
 
     PNT PointAt(double k) {

@@ -8,7 +8,7 @@ void Universe::onKeyDown(SDL_Event* event)
             ChangeBoolean(&bShowAxis, UCmdParam_Toggle);
         else
             if (bAltModifier)
-                ;   // todo set medium DS
+                space.setFrameMoveMode(MEDIUM_D_MODE);
         break;
     case SDLK_b:
         ToggleConstantDirectionFollowMode();
@@ -42,6 +42,10 @@ void Universe::onKeyDown(SDL_Event* event)
     case SDLK_SPACE:
         SimulationPause(UCmdParam_Toggle);
         break;
+    case SDLK_q:
+        if (bAltModifier)
+            space.setFrameMoveMode(D_MODE);
+        break;
     case SDLK_r:
         Rewind(UCmdParam_Start);
         break;
@@ -61,6 +65,8 @@ void Universe::onKeyDown(SDL_Event* event)
         ChangeSidewaysMotionMode();
         break;
     case SDLK_z:
+        if (bAltModifier)
+            space.setFrameMoveMode(SHORT_D_MODE);
         break;
 
     // ============= Digits ===============
@@ -152,7 +158,7 @@ void Universe::onKeyDown(SDL_Event* event)
     case SDLK_LALT:
     case SDLK_RALT:
         bAltModifier = true;
-        space.setFrameMoveMode(1);
+        space.setFrameMoveMode(D_MODE);
         //clearAllFirFilters();
         break;
 
@@ -199,7 +205,7 @@ void Universe::onKeyUp(SDL_Event* event)
     case SDLK_LALT:
     case SDLK_RALT:
         bAltModifier = false;
-        space.setFrameMoveMode(0);
+        space.setFrameMoveMode(S_MODE);
         //clearAllFirFilters();
         break;
 

@@ -1,12 +1,21 @@
 ﻿#pragma once
 
 #include "Class.h"
+#include <spdlog/spdlog.h>
 
 #define TO_ORIGIN_FROM_Y        401
 #define AT_POINT                402
 
 #define SPC_S_MODE  0
 #define SPC_D_MODE  1
+
+typedef enum {
+    S_MODE,
+    D_MODE,
+    SHORT_D_MODE,
+    MEDIUM_D_MODE,
+} FrameMoveMode_t;
+
 
 typedef enum
 {
@@ -224,12 +233,12 @@ public:
         PP.SET(D, S);
     }
 
-    void setFrameMoveMode(int mode)
+    void setFrameMoveMode(FrameMoveMode_t mode)
     {
-        frameMoveMode = char(mode);
+        frameMoveMode = mode;
     }
 
-    int getFrameMoveMode()
+    FrameMoveMode_t getFrameMoveMode()
     {
         return frameMoveMode;
     }
@@ -239,7 +248,17 @@ public:
         initFrame();
     }
 
-    void setDSDistance()
+    void scaleDownFram()
+    {
+        scaleFrame(0.5f);
+    }
+
+    void scaleUpFrame()
+    {
+        scaleFrame(2.0f);
+    }
+
+    void scaleFrame(float amount)
     {
 
     }
@@ -336,6 +355,7 @@ public:
     void moveFrame(MovementType eDir, double increment, PNT p = PNT(0, 0, 0))
     {
         PNT Pnt;
+        PNT D1, R1, L1;
 
         switch (eDir)
         {
@@ -358,15 +378,31 @@ public:
         case Movement_RotateLeft:
             switch (frameMoveMode)
             {
-            case SPC_S_MODE:
+            case S_MODE:
                 Pnt.x = R.x + (S.x - D.x);  Pnt.y = R.y + (S.y - D.y);  Pnt.z = R.z + (S.z - D.z);
                 D = rotate(Pnt, S, D, increment);
                 L = rotate(Pnt, S, L, increment);
                 R = rotate(Pnt, S, R, increment);
                 break;
-            case SPC_D_MODE:
+            case D_MODE:
                 S = rotate(R, D, S, -increment);
                 L = rotate(R, D, L, -increment);
+                break;
+            case SHORT_D_MODE:
+                D1 = D.translated(DS.length() * 0.9, DS);
+                R1 = D1.translated(DR.length(), DR);
+                S = rotate(R1, D1, S, -increment);
+                D = rotate(R1, D1, D, -increment);
+                R = rotate(R1, D1, R, -increment);
+                L = rotate(R1, D1, L, -increment);
+                break;
+            case MEDIUM_D_MODE:
+                D1 = D.translated(DS.length() * 0.4, DS);
+                R1 = D1.translated(DR.length(), DR);
+                S = rotate(R1, D1, S, -increment);
+                D = rotate(R1, D1, D, -increment);
+                R = rotate(R1, D1, R, -increment);
+                L = rotate(R1, D1, L, -increment);
                 break;
             }
             DS.SET(D, S);
@@ -378,15 +414,31 @@ public:
         case Movement_RotateRight:
             switch (frameMoveMode)
             {
-            case SPC_S_MODE:
+            case S_MODE:
                 Pnt.x = R.x + (S.x - D.x);  Pnt.y = R.y + (S.y - D.y);  Pnt.z = R.z + (S.z - D.z);
                 D = rotate(Pnt, S, D, -increment);
                 L = rotate(Pnt, S, L, -increment);
                 R = rotate(Pnt, S, R, -increment);
                 break;
-            case SPC_D_MODE:
+            case D_MODE:
                 S = rotate(R, D, S, increment);
                 L = rotate(R, D, L, increment);
+                break;
+            case SHORT_D_MODE:
+                D1 = D.translated(DS.length() * 0.9, DS);
+                R1 = D1.translated(DR.length(), DR);
+                S = rotate(R1, D1, S, increment);
+                D = rotate(R1, D1, D, increment);
+                R = rotate(R1, D1, R, increment);
+                L = rotate(R1, D1, L, increment);
+                break;
+            case MEDIUM_D_MODE:
+                D1 = D.translated(DS.length() * 0.4, DS);
+                R1 = D1.translated(DR.length(), DR);
+                S = rotate(R1, D1, S, increment);
+                D = rotate(R1, D1, D, increment);
+                R = rotate(R1, D1, R, increment);
+                L = rotate(R1, D1, L, increment);
                 break;
             }
             DS.SET(D, S);
@@ -398,16 +450,32 @@ public:
         case Movement_RotateDown:
             switch (frameMoveMode)
             {
-            case SPC_S_MODE:
+            case S_MODE:
                 Pnt.x = L.x + (S.x - D.x);  Pnt.y = L.y + (S.y - D.y);  Pnt.z = L.z + (S.z - D.z);
                 D = rotate(S, Pnt, D, increment);
                 R = rotate(S, Pnt, R, increment);
                 L = rotate(S, Pnt, L, increment);
                 break;
-            case SPC_D_MODE:
+            case D_MODE:
                 Pnt.x = L.x + (S.x - D.x);  Pnt.y = L.y + (S.y - D.y);  Pnt.z = L.z + (S.z - D.z);
                 S = rotate(L, D, S, increment);
                 R = rotate(L, D, R, increment);
+                break;
+            case SHORT_D_MODE:
+                D1 = D.translated(DS.length() * 0.9, DS);
+                L1 = D1.translated(DL.length(), DL);
+                S = rotate(L1, D1, S, increment);
+                D = rotate(L1, D1, D, increment);
+                R = rotate(L1, D1, R, increment);
+                L = rotate(L1, D1, L, increment);
+                break;
+            case MEDIUM_D_MODE:
+                D1 = D.translated(DS.length() * 0.4, DS);
+                L1 = D1.translated(DL.length(), DL);
+                S = rotate(L1, D1, S, increment);
+                D = rotate(L1, D1, D, increment);
+                R = rotate(L1, D1, R, increment);
+                L = rotate(L1, D1, L, increment);
                 break;
             }
             DS.SET(D, S);
@@ -419,16 +487,32 @@ public:
         case Movement_RotateUp:
             switch (frameMoveMode)
             {
-            case SPC_S_MODE:
+            case S_MODE:
                 Pnt.x = L.x + (S.x - D.x);  Pnt.y = L.y + (S.y - D.y);  Pnt.z = L.z + (S.z - D.z);
                 D = rotate(S, Pnt, D, -increment);
                 R = rotate(S, Pnt, R, -increment);
                 L = rotate(S, Pnt, L, -increment);
                 break;
-            case SPC_D_MODE:
+            case D_MODE:
                 Pnt.x = L.x + (S.x - D.x);  Pnt.y = L.y + (S.y - D.y);  Pnt.z = L.z + (S.z - D.z);
                 S = rotate(L, D, S, -increment);
                 R = rotate(L, D, R, -increment);
+                break;
+            case SHORT_D_MODE:
+                D1 = D.translated(DS.length() * 0.9, DS);
+                L1 = D1.translated(DL.length(), DL);
+                S = rotate(L1, D1, S, -increment);
+                D = rotate(L1, D1, D, -increment);
+                R = rotate(L1, D1, R, -increment);
+                L = rotate(L1, D1, L, -increment);
+                break;
+            case MEDIUM_D_MODE:
+                D1 = D.translated(DS.length() * 0.4, DS);
+                L1 = D1.translated(DL.length(), DL);
+                S = rotate(L1, D1, S, -increment);
+                D = rotate(L1, D1, D, -increment);
+                R = rotate(L1, D1, R, -increment);
+                L = rotate(L1, D1, L, -increment);
                 break;
             }
             DS.SET(D, S);
@@ -561,7 +645,7 @@ public:
     // Type of view
     SpaceProjectionType eProjectionType;
     // frame Move Mode
-    char frameMoveMode;
+    FrameMoveMode_t frameMoveMode;
 
     // Page number of the screen in VGAMED mode
     unsigned PageNo;

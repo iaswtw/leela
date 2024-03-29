@@ -55,6 +55,28 @@ PNT PNT::translatedZ(double amount)
     return PNT(x, y, z + amount);
 }
 
+// create and return a new vector where:
+//  - the first point of the vector is `this` point.
+//  - the second point is formed by translating the `this` point in the direction of `direction_vector`.
+//  - length of new vector is same as the length of `direction_vector`.
+VECTOR PNT::extrude(VECTOR& direction_vector)
+{
+    return extrude(direction_vector, direction_vector.length());
+}
+
+// create and return a new vector where:
+//  - the first point of the vector is `this` point.
+//  - the second point is formed by translating the `this` point in the direction of `direction_vector`.
+//  - length of new vector is the given `amount`.
+VECTOR PNT::extrude(VECTOR& direction_vector, float amount)
+{
+    PNT p2 = translated(amount, direction_vector);
+    VECTOR v(*this, p2);
+    return v;
+}
+
+
+
 /*
  * Returns the square of the distance between given point and this point.
  */
