@@ -253,6 +253,7 @@ public:
     void onMouseMotion(int xrel, int yrel);
 
     void toggleFullScreen();
+    void toggleControlPanelVisibilityWhenMouseGrabbed();
     void setWidgetControlMode();
     void resetWidgetControlMode();
     void cleanupAndExitApplication();

@@ -621,6 +621,11 @@ void Universe::toggleFullScreen()
     }
 }
 
+void Universe::toggleControlPanelVisibilityWhenMouseGrabbed()
+{
+    bAlwaysShowControlPanel = !bAlwaysShowControlPanel;
+}
+
 void Universe::cleanupAndExitApplication()
 {
     ImGui_ImplOpenGL3_Shutdown();
@@ -961,7 +966,7 @@ int Universe::runMainLoop()
     {
         while (SDL_PollEvent(&event))
         {
-            // Always send mouse events to ImGui
+            // Always send mouse & keyboard events to ImGui
             ImGui_ImplSDL2_ProcessEvent(&event);
 
             switch (event.type)
@@ -983,7 +988,7 @@ int Universe::runMainLoop()
                     (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)) {
                     curWidth = event.window.data1;
                     curHeight = event.window.data2;
-                    glViewport(0, 0, curWidth, curHeight);
+                    glViewport(0, 0, curWidth, curHeight);      // change viewport dimensions when window is resized
                     //glViewport(200, 200, 800, 600);
                 }
                 break;
@@ -1085,8 +1090,10 @@ int Universe::run()
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
-    
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
     std::string fullFontFilePath = FindFontFile("Roboto-Medium.ttf");
     appFontExtraSmall   = io.Fonts->AddFontFromFileTTF(fullFontFilePath.c_str(), 14);
     appFontSmall        = io.Fonts->AddFontFromFileTTF(fullFontFilePath.c_str(), 16);
@@ -1101,8 +1108,6 @@ int Universe::run()
     if (!appFontSmall || !appFontSmallMedium || !appFontMedium || !appFontLarge || !fixedWidthSmall)
         printf("WARNING: Could not load fonts.  Will use default fixed width font.");
 
-    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();

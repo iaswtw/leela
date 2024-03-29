@@ -910,9 +910,16 @@ void Universe::generateImGuiWidgets()
             }
             if (ImGui::BeginMenu("View"))
             {
-                if (ImGui::MenuItem("Show Fullscreen", "F11"))
+                // menu shortcuts are display-only. (https://github.com/ocornut/imgui/issues/6381)
+                if (ImGui::MenuItem("Show Fullscreen", "F11")) {
                     toggleFullScreen();
-                ImGui::MenuItem("Show Control Panel in Navigation mode", nullptr, &bAlwaysShowControlPanel, true);
+                }
+                // Don't pass address of boolean below. if menu is activated using mouse, use the toggle function to achieve the boolean toggle.
+                // The same toggle function is used when the shorcut is handled in InputHandling file.
+                // We wouldn't have to do it this way if shortcuts were handled by Dear ImGui.
+                if (ImGui::MenuItem("Show Control Panel in Navigation mode", "F8", bAlwaysShowControlPanel, true)) {
+                    toggleControlPanelVisibilityWhenMouseGrabbed();
+                }
                 ImGui::EndMenu();
             }
 

@@ -111,6 +111,9 @@ void Universe::onKeyDown(SDL_Event* event)
         else
             Moon_OrbitalPlaneRotation(UCmdParam_Toggle);
         break;
+    case SDLK_F8:
+        toggleControlPanelVisibilityWhenMouseGrabbed();
+        break;
     case SDLK_F11:
         toggleFullScreen();
         break;
