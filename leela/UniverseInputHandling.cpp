@@ -127,10 +127,18 @@ void Universe::onKeyDown(SDL_Event* event)
         Earth_SetOrbitalPositionAngle(3 * M_PI / 2);
         Earth_RevolutionMotion(UCmdParam_Off);
         break;
-
+    case SDLK_9:
+        Moon_RevolutionMotion(UCmdParam_Toggle);
+        break;
 
 
     // ============ Function keys =============
+    case SDLK_F3:
+        bAdvanceEarthInOrbit = true;
+        break;
+    case SDLK_F4:
+        bRetardEarthInOrbit = true;
+        break;
     case SDLK_F6:
         if (bShiftModifier)
             Earth_PrecessionMotion(UCmdParam_Reset);
@@ -215,6 +223,16 @@ void Universe::onKeyUp(SDL_Event* event)
         break;
     case SDLK_r:
         Rewind(UCmdParam_Stop);
+        break;
+
+
+
+    // ============ Function keys =============
+    case SDLK_F3:
+        bAdvanceEarthInOrbit = false;
+        break;
+    case SDLK_F4:
+        bRetardEarthInOrbit = false;
         break;
 
     case SDLK_HOME:

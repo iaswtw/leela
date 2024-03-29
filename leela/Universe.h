@@ -279,6 +279,9 @@ public:
     bool bFastForward = false;
     bool bFastReverse = false;
 
+    bool bAdvanceEarthInOrbit = false;
+    bool bRetardEarthInOrbit = false;
+
     int previousX = 0;
     int previousY = 0;
     float _stepMultiplier = 1.0f;

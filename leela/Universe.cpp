@@ -797,6 +797,10 @@ void Universe::processFlags()
             advance(-5 * _stepMultiplier * _stepMultiplierFrameRateAdjustment);
         else
             advance(_stepMultiplier * _stepMultiplierFrameRateAdjustment);
+        if (bAdvanceEarthInOrbit)
+            earth._orbitalAngle += 0.005;
+        if (bRetardEarthInOrbit)
+            earth._orbitalAngle -= 0.005;
     }
 
     // always calculate sphere positions, even when simulation paused.
