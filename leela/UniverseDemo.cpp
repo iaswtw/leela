@@ -3,6 +3,7 @@
 void Universe::ShowDemo(int nParam)
 {
     PNT newS;
+    PNT newD;
 
     switch ((UDemoType)nParam)
     {
@@ -383,6 +384,36 @@ void Universe::ShowDemo(int nParam)
         SetDotDensity(UDotDensity_Normal);
         SetSimulationSpeed(USimulationSpeed_1600_Percent);
         SimulationPause(UCmdParam_Off);
+
+        break;
+
+    case UDemo_MoonsNodalPrecession:
+
+        // Set S
+        //newS = PNT(earth.getCenter().x + 500, earth.getCenter().y - 700, earth.getCenter().z + 150);
+        newS = PNT(-963.653801, 99.518279, 546.144668);
+        newD = PNT(213.123898, -15.924398, 341.529819);
+        space.setFrame(AT_POINT,
+            newS,
+            VECTOR(newS, newD),
+            PNT(newS.x, newS.y, newS.z - 100));
+
+        bShowAxis = false;          // turn off coordinate axis
+
+        Moon_OrbitalPlane(UCmdParam_On);
+        moon._orbitalPlaneRotationAngle = -1.025973;
+        moon.bOrbitalPlaneRotationSyncToParent = true;
+
+        Earth_RevolutionMotion(UCmdParam_Off);
+        Earth_SetOrbitalPositionAngle(0.437745);
+        Earth_OrbitalPlane(UCmdParam_On);
+
+
+        SetLockTargetAndMode(nullptr, TargetLockMode_ViewTarget);            // No lock on any object
+        bSidewaysMotionMode = true;                                          // enable sideways shift mode
+
+        bShowLabelsOnTop = true;
+
 
         break;
     }

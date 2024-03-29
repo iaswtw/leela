@@ -1,7 +1,12 @@
 #include "Universe.h"
+#include <spdlog/spdlog.h>
+
+constexpr int LOG_BUFFER_SIZE = 1000;
+static char logBuffer[LOG_BUFFER_SIZE];
 
 void Universe::onKeyDown(SDL_Event* event)
 {
+
     switch (event->key.keysym.sym) {
     case SDLK_a:
         if (isNoModifier())
@@ -17,10 +22,24 @@ void Universe::onKeyDown(SDL_Event* event)
         ToggleFollowTarget(&sun, TargetLockMode_ViewTarget);
         break;
     case SDLK_d:
-        SetDefaultView();
+        //if (isAllModifiers()) {
+        //    std::snprintf(logBuffer, LOG_BUFFER_SIZE, "%f, %f, %f", space.D.x, space.D.y, space.D.z);
+        //    ImGui::LogToClipboard();
+        //    ImGui::LogText(logBuffer);
+        //    ImGui::LogFinish();
+        //    spdlog::info("D = {}", logBuffer);
+        //}
+        //else
+            SetDefaultView();
         break;
     case SDLK_e:
-        Earth_OrbitalPlane(UCmdParam_Toggle);
+        //if (isAllModifiers()) {
+        //    std::snprintf(logBuffer, LOG_BUFFER_SIZE, "Earth _orbitalAngle = %f", earth._orbitalAngle);
+        //    logString = logBuffer;                  // ImGui will check the logString (of type std::string), and write its contents to Windows clipboard.
+        //    spdlog::info(logBuffer);
+        //}
+        //else
+            Earth_OrbitalPlane(UCmdParam_Toggle);
         break;
     case SDLK_f:
         FastForward(UCmdParam_Start);
@@ -50,16 +69,29 @@ void Universe::onKeyDown(SDL_Event* event)
         Rewind(UCmdParam_Start);
         break;
     case SDLK_s:
-        if (bShiftModifier && bCtrlModifier && bAltModifier)
+        if (isAllModifiers())
         {
-            char buffer[100];
-            std::snprintf(buffer, 100, "%f, %f, %f", space.S.x, space.S.y, space.S.z);
-            logString = buffer;
+            std::snprintf(
+                logBuffer,
+                LOG_BUFFER_SIZE,
+                "\nS = %f, %f, %f"
+                "\nD = %f, %f, %f"
+                "\nEarth._orbitalAngle = %f"
+                "\nmoon._orbitalPlaneRotationAngle = %f"
+                ,
+                space.S.x, space.S.y, space.S.z,
+                space.D.x, space.D.y, space.D.z,
+                earth._orbitalAngle,
+                moon._orbitalPlaneRotationAngle
+            );
+            logString = logBuffer;                  // ImGui will check the logString (of type std::string), and write its contents to Windows clipboard.
+            spdlog::info(logBuffer);
         }
-        else
-        {
-            ChangeBoolean(&bGalaxyStars, UCmdParam_Toggle);
-        }
+        // TODO GL_INVALID_OPERATION if stars are disabled
+        //else
+        //{
+        //    ChangeBoolean(&bGalaxyStars, UCmdParam_Toggle);
+        //}
         break;
     case SDLK_v:
         ChangeSidewaysMotionMode();
@@ -228,9 +260,19 @@ void Universe::onMouseMotion(int xrel, int yrel)
     mouse_dy = float(yrel);
 }
 
+// return true if no modifier is set.
 bool Universe::isNoModifier()
 {
     if (!bShiftModifier && !bCtrlModifier && !bAltModifier)
+        return true;
+    else
+        return false;
+}
+
+// return true if all modifiers are set.
+bool Universe::isAllModifiers()
+{
+    if (bShiftModifier && bCtrlModifier && bAltModifier)
         return true;
     else
         return false;

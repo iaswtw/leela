@@ -13,6 +13,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+#include <spdlog/spdlog.h>
 
 #define VERTEX_STRIDE_IN_VBO        7
 #define PLANET_STRIDE_IN_VBO        12
@@ -245,7 +246,15 @@ public:
         }
         if (bOrbitalPlaneRotation)
         {
-            _orbitalPlaneRotationAngle -= 0.005f * stepMultiplier;
+            float increment = 0.005f;
+            if (bOrbitalPlaneRotationSyncToParent) {
+                //spdlog::info("applying orbital plane rotation sync'd to parent's revolution");
+                //spdlog::info("_parent = {}", fmt::ptr(_parent));
+                if (_parent) {
+                    increment = _parent->_orbitalAngularVelocity / 18.6;        // hardcode this for moon
+                }
+            }
+            _orbitalPlaneRotationAngle -= increment * stepMultiplier;
             _orbitalPlaneRotationAngle = _normalizeAngle(_orbitalPlaneRotationAngle);
         }
     }
@@ -358,6 +367,7 @@ public:
     float _orbitalAngle = 0;                // current revolution (orbital) angle (increments based on revolution angular velocity). Previously called 'tho'
     float _orbitalAngularVelocity = 0;      // angular velocity of revolution around parent sphere. Previously called 'wo'.
     float _orbitalPlaneRotationAngle = 0;   // previously called 'alphao'
+    bool   bOrbitalPlaneRotationSyncToParent = false;
     float _orbitalPlaneTiltAngle = 0;       // previously called 'betao'
     float _orbitalPlaneTiltAngle_Deg = 0;   // this is initialized when _orbitalPlaneTiltAngle is initially set.  After that, Imgui will show and change the _Deg value
                                             // through the use of a slider. If modified, the radian value will be changed by the code that invokes Imgui slider.

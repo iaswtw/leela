@@ -1005,6 +1005,9 @@ void Universe::generateImGuiWidgets()
                     "Some stars shift more than others.  Stars closer to earth shift more than those farther away."
                 );
 
+                if (ImGui::Button("Moon's Nodal Precession## demo"))
+                    ShowDemo(UDemo_MoonsNodalPrecession);
+
                 ImGui::PopFont();
             }
             ImGui::PopFont();
@@ -1063,11 +1066,11 @@ void Universe::generateImGuiWidgets()
             ImGui::Unindent();
             ImGui::Separator();
 
-            //-----------------------------------------------------
             // Common font for the content of all the below sections
             ImGui::PushFont(appFontExtraSmall);
 
-
+            //-----------------------------------------------------
+            // Earth
             ImGui::PushFont(appFontSmall);
             ImGui::Text("Earth:");               // Display some text (you can use a format strings too)
             ImGui::PopFont();
@@ -1106,6 +1109,7 @@ void Universe::generateImGuiWidgets()
             ImGui::Separator();
 
             //-----------------------------------------------------
+            // Moon
 
             ImGui::PushFont(appFontSmall);
             ImGui::Text("Moon:");               // Display some text (you can use a format strings too)
@@ -1115,10 +1119,11 @@ void Universe::generateImGuiWidgets()
             SmallCheckbox("Revolution", &moon.bRevolutionMotion);
             SmallCheckbox("Orbit## moon", &moonRenderer.bShowOrbit); ImGui::SameLine();
             SmallCheckbox("Orbital plane (m)##moon", &moonRenderer.bShowOrbitalPlane);
-            SmallCheckbox("Orbital plane rotation (F5)", &moon.bOrbitalPlaneRotation);
+            SmallCheckbox("Nodal Precession (F5)", &moon.bOrbitalPlaneRotation);
             ImGui::SameLine();
             if (ImGui::Button("Reset## moon orbital plane rotation"))
                 Moon_OrbitalPlaneRotation(UCmdParam_Reset);
+            SmallCheckbox("Sync with earth's revolution", &moon.bOrbitalPlaneRotationSyncToParent);
             ImGui::PushItemWidth(100);
             //ImGui::SetNextItemWidth(180);
             if (ImGui::SliderFloat("Orbital Radius## moon", &moon._orbitalRadius, 120.0f, 600.0f)) {

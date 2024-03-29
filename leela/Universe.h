@@ -165,7 +165,8 @@ typedef enum
     UDemo_SixMonthLongDayAndNightOnNorthPole,
     UDemo_SixMonthLongDayAndNightOnNorthPole_AnotherAngle,
     UDemo_PrecessionMotion,
-    UDemo_StarParallex
+    UDemo_StarParallex,
+    UDemo_MoonsNodalPrecession,
 } UDemoType;
 
 
@@ -270,6 +271,7 @@ public:
     glm::vec3 getScreenCoordinates(glm::vec3 &scenePoint);
 
     bool isNoModifier();
+    bool isAllModifiers();
 
 public:
     bool bQuit = false;
