@@ -77,12 +77,12 @@ void Universe::onKeyDown(SDL_Event* event)
                 "\nS = %f, %f, %f"
                 "\nD = %f, %f, %f"
                 "\nEarth._orbitalAngle = %f"
-                "\nmoon._orbitalPlaneRotationAngle = %f"
+                "\nmoon._nodalPrecessionAngle = %f"
                 ,
                 space.S.x, space.S.y, space.S.z,
                 space.D.x, space.D.y, space.D.z,
                 earth._orbitalAngle,
-                moon._orbitalPlaneRotationAngle
+                moon._nodalPrecessionAngle
             );
             logString = logBuffer;                  // ImGui will check the logString (of type std::string), and write its contents to Windows clipboard.
             spdlog::info(logBuffer);
@@ -134,16 +134,10 @@ void Universe::onKeyDown(SDL_Event* event)
 
     // ============ Function keys =============
     case SDLK_F3:
-        bAdvanceEarthInOrbit = true;
-        break;
-    case SDLK_F4:
         bRetardEarthInOrbit = true;
         break;
-    case SDLK_F6:
-        if (bShiftModifier)
-            Earth_PrecessionMotion(UCmdParam_Reset);
-        else
-            Earth_PrecessionMotion(UCmdParam_Toggle);
+    case SDLK_F4:
+        bAdvanceEarthInOrbit = true;
         break;
     case SDLK_F5:
         if (bShiftModifier)
@@ -151,7 +145,22 @@ void Universe::onKeyDown(SDL_Event* event)
         else
             Moon_OrbitalPlaneRotation(UCmdParam_Toggle);
         break;
+    case SDLK_F6:
+        if (bShiftModifier)
+            Earth_PrecessionMotion(UCmdParam_Reset);
+        else
+            Earth_PrecessionMotion(UCmdParam_Toggle);
+        break;
+
+    case SDLK_F7:
+        bRetardMoonInOrbit = true;
+        break;
     case SDLK_F8:
+        bAdvanceMoonInOrbit = true;
+        break;
+
+
+    case SDLK_F9:
         toggleControlPanelVisibilityWhenMouseGrabbed();
         break;
     case SDLK_F11:
@@ -229,11 +238,19 @@ void Universe::onKeyUp(SDL_Event* event)
 
     // ============ Function keys =============
     case SDLK_F3:
-        bAdvanceEarthInOrbit = false;
-        break;
-    case SDLK_F4:
         bRetardEarthInOrbit = false;
         break;
+    case SDLK_F4:
+        bAdvanceEarthInOrbit = false;
+        break;
+    case SDLK_F7:
+        bRetardMoonInOrbit = false;
+        break;
+    case SDLK_F8:
+        bAdvanceMoonInOrbit = false;
+        break;
+
+
 
     case SDLK_HOME:
     case SDLK_END:

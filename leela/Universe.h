@@ -281,6 +281,8 @@ public:
 
     bool bAdvanceEarthInOrbit = false;
     bool bRetardEarthInOrbit = false;
+    bool bAdvanceMoonInOrbit = false;
+    bool bRetardMoonInOrbit = false;
 
     int previousX = 0;
     int previousY = 0;

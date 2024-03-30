@@ -112,7 +112,7 @@ void Universe::initSceneObjects()
     sun.setOrbitalParameters(0,             // radius of orbit
         0.0f,                               // initial orbital angle
         0.01f,                              // revolution velocity
-        0,                                  // orbital rotation angle
+        0,                                  // nodal precession initial angle
         0                                   // orbital tilt
     );
 
@@ -130,7 +130,7 @@ void Universe::initSceneObjects()
     earth.setOrbitalParameters(3000,        // radius of orbit
         glm::radians(30.0f),                 // initial orbital angle
         0.001f,                             // revolution velocity
-        0.0f,                               // orbital rotation angle
+        0.0f,                               // nodal precession initial angle
         0                                   // orbital  tilt
     );
     earth.setOrbitalPlaneColor(glm::vec3(0.55, 0.82, 1.0));
@@ -149,7 +149,7 @@ void Universe::initSceneObjects()
     moon.setOrbitalParameters(400,          // radius of orbit
         0.0f,                               // initial orbital angle
         0.008888888f,                       // revolution velocity
-        0,                                  // orbital rotation angle
+        0,                                  // nodal precession initial angle
         glm::radians(30.0f)                 // orbital tilt
     );
     moon.setOrbitalPlaneColor(glm::vec3(0.8f, 0.8f, 0.8f));
@@ -173,7 +173,7 @@ void Universe::initSceneObjects()
     mars.setOrbitalParameters(7000,         // radius of orbit
         0,                                  // initial orbital angle
         0.0006f,                            // revolution velocity
-        0.0f,                               // orbital rotation angle
+        0.0f,                               // nodal precession initial angle
         glm::radians(1.85f)                 // orbital tilt
     );
     mars.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
@@ -193,7 +193,7 @@ void Universe::initSceneObjects()
     jupiter.setOrbitalParameters(11000,      // radius of orbit
         glm::radians(280.0f),               // initial orbital angle
         0.0004f,                            // revolution velocity
-        0.0f,                               // orbital rotation angle
+        0.0f,                               // nodal precession initial angle
         glm::radians(1.31f)                 // orbital tilt
     );
     jupiter.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
@@ -214,7 +214,7 @@ void Universe::initSceneObjects()
     saturn.setOrbitalParameters(15000,       // radius of orbit
         glm::radians(220.0f),               // initial orbital angle
         0.0002f,                            // revolution velocity
-        0.0f,                               // orbital rotation angle
+        0.0f,                               // nodal precession initial angle
         glm::radians(2.49f)                 // orbital tilt
     );
     saturn.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
@@ -235,7 +235,7 @@ void Universe::initSceneObjects()
     uranus.setOrbitalParameters(20000,      // radius of orbit
         glm::radians(18.0f),                // initial orbital angle
         0.0001f,                            // revolution velocity
-        0.0f,                               // orbital rotation angle
+        0.0f,                               // nodal precession initial angle
         glm::radians(.77f)                  // orbital tilt
     );
     uranus.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
@@ -256,7 +256,7 @@ void Universe::initSceneObjects()
     neptune.setOrbitalParameters(25000,      // radius of orbit
         glm::radians(150.0f),                // initial orbital angle
         0.00008f,                            // revolution velocity
-        0.0f,                                // orbital rotation angle
+        0.0f,                                // nodal precession initial angle
         glm::radians(1.77f)                  // orbital tilt
     );
     neptune.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
@@ -325,7 +325,10 @@ void Universe::SetDefaultView()
     space.rotateFrame(PNT(0, 0, 0), 0, -15.0);
     //space.rotateFrame(PNT(0, 0, 0), 0, 0);
 
+    space.moveFrame(Movement_Backward, 7000.0f);
+
     ResetFollowTargetAndMode();
+
 }
 
 void Universe::SetApplicationStartView()
@@ -576,7 +579,7 @@ void Universe::Moon_OrbitalPlaneRotation(int nParam)
     if (nParam == UCmdParam_Reset)
     {
         moon.bOrbitalPlaneRotation = false;
-        moon._orbitalPlaneRotationAngle = glm::radians(0.0f);
+        moon._nodalPrecessionAngle = glm::radians(0.0f);
     }
     else
     {
@@ -798,9 +801,13 @@ void Universe::processFlags()
         else
             advance(_stepMultiplier * _stepMultiplierFrameRateAdjustment);
         if (bAdvanceEarthInOrbit)
-            earth._orbitalAngle += 0.005;
+            earth._orbitalAngle += 0.003;
         if (bRetardEarthInOrbit)
-            earth._orbitalAngle -= 0.005;
+            earth._orbitalAngle -= 0.003;
+        if (bAdvanceMoonInOrbit)
+            moon._orbitalAngle += 0.003;
+        if (bRetardMoonInOrbit)
+            moon._orbitalAngle -= 0.003;
     }
 
     // always calculate sphere positions, even when simulation paused.

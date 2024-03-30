@@ -60,6 +60,7 @@ public:
     bool bShowOrbitalPlane = false;
     bool bShowOrbit = true;
     bool bShowLatitudesAndLongitudes = false;
+    bool bOrbitalPlaneTransparency = false;
 
 
 public:

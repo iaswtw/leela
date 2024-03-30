@@ -100,14 +100,14 @@ public:
         _axisTiltAngle_Deg = glm::degrees(_axisTiltAngle);
     }
 
-    void setOrbitalParameters(float orbitalRadius, float orbitalAngle, float orbitalAngularVelocity, float orbitalPlaneRotationAngle, float orbitalPlaneTiltAngle)
+    void setOrbitalParameters(float orbitalRadius, float orbitalAngle, float orbitalAngularVelocity, float nodalPrecessionInitialAngle, float orbitalPlaneTiltAngle)
     {
         setOrbitalRadius(orbitalRadius);
         _orbitalRadius_Backup = _orbitalRadius;
 
         _orbitalAngle = orbitalAngle;
         _orbitalAngularVelocity = orbitalAngularVelocity;
-        _orbitalPlaneRotationAngle = orbitalPlaneRotationAngle;
+        _nodalPrecessionAngle = nodalPrecessionInitialAngle;
         _orbitalPlaneTiltAngle = orbitalPlaneTiltAngle;
         _orbitalPlaneTiltAngle_Deg = glm::degrees(_orbitalPlaneTiltAngle);
     }
@@ -164,7 +164,7 @@ public:
 
     inline float getOrbitalPlaneRotationAngle()
     {
-        return _orbitalPlaneRotationAngle;
+        return _nodalPrecessionAngle;
     }
      
     void setAxisTiltOrientationAngle(float axisTiltOrientationAngle)
@@ -226,13 +226,22 @@ public:
     {
         if (bRotationMotion)
         {
-            _rotationAngle += _rotationAngularVelocity * stepMultiplier;
+            float increment = _rotationAngularVelocity;
+            if (bSyncWithRevolution)
+                increment = _orbitalAngularVelocity * 356.25;
+
+            _rotationAngle += increment * stepMultiplier;
             _rotationAngle = _normalizeAngle(_rotationAngle);
         }
 
         if (bRevolutionMotion)
         {
-            _orbitalAngle += _orbitalAngularVelocity * stepMultiplier;
+            float increment = _orbitalAngularVelocity;
+            if (bOrbitalRevolutionSyncToParent) {
+                increment = _parent->_orbitalAngularVelocity * 12.3;
+            }
+           
+            _orbitalAngle += increment * stepMultiplier;
             _orbitalAngle = _normalizeAngle(_orbitalAngle);
         }
 
@@ -247,15 +256,15 @@ public:
         if (bOrbitalPlaneRotation)
         {
             float increment = 0.005f;
-            if (bOrbitalPlaneRotationSyncToParent) {
+            if (bNodalPrecessionSpeedSyncToParentsRevolution) {         // e.g. Moon's nodal precession with earth's revolution period with a factor of 18.6
                 //spdlog::info("applying orbital plane rotation sync'd to parent's revolution");
                 //spdlog::info("_parent = {}", fmt::ptr(_parent));
                 if (_parent) {
                     increment = _parent->_orbitalAngularVelocity / 18.6;        // hardcode this for moon
                 }
             }
-            _orbitalPlaneRotationAngle -= increment * stepMultiplier;
-            _orbitalPlaneRotationAngle = _normalizeAngle(_orbitalPlaneRotationAngle);
+            _nodalPrecessionAngle -= increment * stepMultiplier;
+            _nodalPrecessionAngle = _normalizeAngle(_nodalPrecessionAngle);
         }
     }
 
@@ -274,8 +283,8 @@ public:
         float x, y;
         x = _center.x;
         y = _center.y;
-        _center.x = x * cos(_orbitalPlaneRotationAngle) - y * sin(_orbitalPlaneRotationAngle);
-        _center.y = x * sin(_orbitalPlaneRotationAngle) + y * cos(_orbitalPlaneRotationAngle);
+        _center.x = x * cos(_nodalPrecessionAngle) - y * sin(_nodalPrecessionAngle);
+        _center.y = x * sin(_nodalPrecessionAngle) + y * cos(_nodalPrecessionAngle);
 
 
         // parent is assumed to have been updated
@@ -353,10 +362,11 @@ public:
 
     // Rotation variables
     float _radius = 0;
-    float _rotationAngle = 0;               // current rotation angle (increments based on rotation angular velocity). Previously called 'th'.
-    float _rotationAngularVelocity = 0;     // angular velocity or rotation around sphere's axis. Previously called 'w'.
-    float _axisRotationAngle = 0;           // previously called 'alpha'
-    float _axisTiltAngle = 0;               // previously called 'beta'
+    float _rotationAngle = 0;               // current rotation angle (increments based on rotation angular velocity).
+    float _rotationAngularVelocity = 0;     // angular velocity or rotation around sphere's axis.
+    bool   bSyncWithRevolution = false;      // sync with this sphere's revolution
+    float _axisRotationAngle = 0;           // 
+    float _axisTiltAngle = 0;               // 
     float _axisTiltAngle_Backup = 0;        // allows restoring after modifying axis tilt
     float _axisTiltAngle_Deg = 0;           // to show in ImGui for controlling via slider.
     float _axisTiltOrientationAngle = glm::radians(0.0f);
@@ -364,11 +374,12 @@ public:
     // Revolution variables
     float _orbitalRadius = 0;
     float _orbitalRadius_Backup = 0;        // allows restoring after modifying orbital radius
-    float _orbitalAngle = 0;                // current revolution (orbital) angle (increments based on revolution angular velocity). Previously called 'tho'
-    float _orbitalAngularVelocity = 0;      // angular velocity of revolution around parent sphere. Previously called 'wo'.
-    float _orbitalPlaneRotationAngle = 0;   // previously called 'alphao'
-    bool   bOrbitalPlaneRotationSyncToParent = false;
-    float _orbitalPlaneTiltAngle = 0;       // previously called 'betao'
+    float _orbitalAngle = 0;                // current revolution (orbital) angle (increments based on revolution angular velocity).
+    float _orbitalAngularVelocity = 0;      // angular velocity of revolution around parent sphere.
+    bool   bOrbitalRevolutionSyncToParent = false;
+    float _nodalPrecessionAngle = 0;   // 
+    bool   bNodalPrecessionSpeedSyncToParentsRevolution = false;
+    float _orbitalPlaneTiltAngle = 0;       // 
     float _orbitalPlaneTiltAngle_Deg = 0;   // this is initialized when _orbitalPlaneTiltAngle is initially set.  After that, Imgui will show and change the _Deg value
                                             // through the use of a slider. If modified, the radian value will be changed by the code that invokes Imgui slider.
 

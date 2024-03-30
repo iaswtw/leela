@@ -638,6 +638,9 @@ void SphereRenderer::constructOrbitalPlaneVertices()
     glm::vec3& color        = s._orbitalPlaneColor;
     float alpha             = 1.0f;
 
+    if (bOrbitalPlaneTransparency)
+        alpha = 0.5f;
+
     //---------------------------------------------------------------------------------
     // Orbital plane.  This is centered at origin.
     //---------------------------------------------------------------------------------
@@ -701,12 +704,17 @@ void SphereRenderer::constructOrbitalPlaneGridVertices()
 
     x = y = -radius * 1.2f;
 
+    // Create a grid tiny bit above and below the orbital plane
     for (int i = 0; i <= maxGridLines; i++)
     {
         vector_push_back_7(*v, x, -radius * 1.2f, +1, color.r*m, color.g*m, color.b*m, 1.0f);
         vector_push_back_7(*v, x, +radius * 1.2f, +1, color.r*m, color.g*m, color.b*m, 1.0f);
-        vector_push_back_7(*v, x, -radius * 1.2f, -1, color.r*m, color.g*m, color.b*m, 1.0f);
-        vector_push_back_7(*v, x, +radius * 1.2f, -1, color.r*m, color.g*m, color.b*m, 1.0f);
+
+        // If orbital plane is transparent, don't create the bottom grid
+        if (!bOrbitalPlaneTransparency) {
+            vector_push_back_7(*v, x, -radius * 1.2f, -1, color.r * m, color.g * m, color.b * m, 1.0f);
+            vector_push_back_7(*v, x, +radius * 1.2f, -1, color.r * m, color.g * m, color.b * m, 1.0f);
+        }
 
         x += inc;
     }
@@ -714,8 +722,12 @@ void SphereRenderer::constructOrbitalPlaneGridVertices()
     {
         vector_push_back_7(*v, -radius * 1.2f, y, +1, color.r*m, color.g*m, color.b*m, 1.0f);
         vector_push_back_7(*v, +radius * 1.2f, y, +1, color.r*m, color.g*m, color.b*m, 1.0f);
-        vector_push_back_7(*v, -radius * 1.2f, y, -1, color.r*m, color.g*m, color.b*m, 1.0f);
-        vector_push_back_7(*v, +radius * 1.2f, y, -1, color.r*m, color.g*m, color.b*m, 1.0f);
+        
+        // If orbital plane is transparent, don't create the bottom grid
+        if (!bOrbitalPlaneTransparency) {
+            vector_push_back_7(*v, -radius * 1.2f, y, -1, color.r * m, color.g * m, color.b * m, 1.0f);
+            vector_push_back_7(*v, +radius * 1.2f, y, -1, color.r * m, color.g * m, color.b * m, 1.0f);
+        }
 
         y += inc;
     }
@@ -1192,10 +1204,14 @@ void PlanetRenderer::renderOrbitalPlane(GlslProgram& glslProgram)
             glDrawArrays(GL_LINES, 0, numOrbitalPlaneGridVertices);
 
             // Draw vertices
-            //glDepthMask(GL_FALSE);
+            if (bOrbitalPlaneTransparency) {
+                glDepthMask(GL_FALSE);
+            }
             glBindVertexArray(_orbitalPlaneVao);
             glDrawArrays(GL_TRIANGLES, 0, numOrbitalPlaneVertices);
-            //glDepthMask(GL_TRUE);
+            if (bOrbitalPlaneTransparency) {
+                glDepthMask(GL_TRUE);
+            }
         }
     }
 }

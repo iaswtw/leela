@@ -917,7 +917,7 @@ void Universe::generateImGuiWidgets()
                 // Don't pass address of boolean below. if menu is activated using mouse, use the toggle function to achieve the boolean toggle.
                 // The same toggle function is used when the shorcut is handled in InputHandling file.
                 // We wouldn't have to do it this way if shortcuts were handled by Dear ImGui.
-                if (ImGui::MenuItem("Show Control Panel in Navigation mode", "F8", bAlwaysShowControlPanel, true)) {
+                if (ImGui::MenuItem("Show Control Panel in Navigation mode", "F9", bAlwaysShowControlPanel, true)) {
                     toggleControlPanelVisibilityWhenMouseGrabbed();
                 }
                 ImGui::EndMenu();
@@ -1022,11 +1022,21 @@ void Universe::generateImGuiWidgets()
             SmallCheckbox("Coordinate axis (a)", &bShowAxis);
             SmallCheckbox("Planet axis", &bShowPlanetAxis);
             SmallCheckbox("Low darkness at night", &bShowLowDarknessAtNight);
-            SmallCheckbox("Month names", &bShowMonthNames);
-            SmallCheckbox("Month names closer to planet", &bMonthLabelsCloserToSphere);
-            SmallCheckbox("Labels on top", &bShowLabelsOnTop);
+
+            //-----------------------------------------------------
+            // Month names
+            ImGui::Separator();
+            ImGui::PushFont(appFontSmall);
+            ImGui::Text("Months:");
+            ImGui::PopFont();
+            ImGui::Indent();
+
+            SmallCheckbox("Show labels", &bShowMonthNames);  ImGui::SameLine();
+            SmallCheckbox("Closer to planet", &bMonthLabelsCloserToSphere);
+            SmallCheckbox("Labels on top", &bShowLabelsOnTop);  ImGui::SameLine();
             SmallCheckbox("Large Labels", &bShowLargeLabels);
 
+            ImGui::Unindent();
             ImGui::Separator();
 
             //-----------------------------------------------------
@@ -1077,9 +1087,14 @@ void Universe::generateImGuiWidgets()
 
             ImGui::Indent();
             SmallCheckbox("Rotation## earth", &earth.bRotationMotion); ImGui::SameLine();
+            SmallCheckbox("Sync with revolution", &earth.bSyncWithRevolution);
             SmallCheckbox("Revolution  (0)## earth", &earth.bRevolutionMotion);
             SmallCheckbox("Orbit## earth", &earthRenderer.bShowOrbit);  ImGui::SameLine();
-            SmallCheckbox("Orbital plane (e)## earth", &earthRenderer.bShowOrbitalPlane);
+            SmallCheckbox("Plane (e)## earth", &earthRenderer.bShowOrbitalPlane);  ImGui::SameLine();
+            if (SmallCheckbox("Transparency##earth orbital plane", &earthRenderer.bOrbitalPlaneTransparency)) {
+                earthRenderer.constructOrbitalPlaneGridVertices();
+                earthRenderer.constructOrbitalPlaneVertices();
+            }
             SmallCheckbox("Precession (F6)## earth", &earth.bPrecessionMotion);
             ImGui::SameLine();
             if (ImGui::Button("Reset## earth precession motion"))
@@ -1116,14 +1131,21 @@ void Universe::generateImGuiWidgets()
             ImGui::PopFont();
 
             ImGui::Indent();
-            SmallCheckbox("Revolution", &moon.bRevolutionMotion);
+            SmallCheckbox("Revolution", &moon.bRevolutionMotion);  ImGui::SameLine();
+            SmallCheckbox("Sync with Earth", &moon.bOrbitalRevolutionSyncToParent);
             SmallCheckbox("Orbit## moon", &moonRenderer.bShowOrbit); ImGui::SameLine();
-            SmallCheckbox("Orbital plane (m)##moon", &moonRenderer.bShowOrbitalPlane);
+            SmallCheckbox("Plane (m)##moon", &moonRenderer.bShowOrbitalPlane);  ImGui::SameLine();
+            if (SmallCheckbox("Transparency##moon orbital plane", &moonRenderer.bOrbitalPlaneTransparency)) {
+                moonRenderer.constructOrbitalPlaneGridVertices();
+                moonRenderer.constructOrbitalPlaneVertices();
+            }
             SmallCheckbox("Nodal Precession (F5)", &moon.bOrbitalPlaneRotation);
             ImGui::SameLine();
             if (ImGui::Button("Reset## moon orbital plane rotation"))
                 Moon_OrbitalPlaneRotation(UCmdParam_Reset);
-            SmallCheckbox("Sync with earth's revolution", &moon.bOrbitalPlaneRotationSyncToParent);
+            ImGui::Indent();
+            SmallCheckbox("Sync with earth's revolution", &moon.bNodalPrecessionSpeedSyncToParentsRevolution);
+            ImGui::Unindent();
             ImGui::PushItemWidth(100);
             //ImGui::SetNextItemWidth(180);
             if (ImGui::SliderFloat("Orbital Radius## moon", &moon._orbitalRadius, 120.0f, 600.0f)) {

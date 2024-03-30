@@ -276,8 +276,14 @@ void Universe::ShowDemo(int nParam)
         bShowPlanetAxis = True;
 
         SetDotDensity(UDotDensity_Normal);
-        SetSimulationSpeed(USimulationSpeed_400_Percent);
+        //SetSimulationSpeed(USimulationSpeed_400_Percent);
+        SetSimulationSpeed(USimulationSpeed_100_Percent);
         SimulationPause(UCmdParam_Off);
+
+        bShowMonthNames = true;
+        bMonthLabelsCloserToSphere = true;
+        bShowLargeLabels = true;
+        bShowLabelsOnTop = true;
 
         break;
 
@@ -401,10 +407,11 @@ void Universe::ShowDemo(int nParam)
         bShowAxis = false;          // turn off coordinate axis
 
         Moon_OrbitalPlane(UCmdParam_On);
-        moon._orbitalPlaneRotationAngle = -1.025973;
-        moon.bOrbitalPlaneRotationSyncToParent = true;
+        moon._nodalPrecessionAngle = -1.025973;
+        moon.bNodalPrecessionSpeedSyncToParentsRevolution = true;
+        moon.bOrbitalRevolutionSyncToParent = true;
 
-        Earth_RevolutionMotion(UCmdParam_Off);
+        Earth_RevolutionMotion(UCmdParam_Off);              // pause earth
         Earth_SetOrbitalPositionAngle(0.437745);
         Earth_OrbitalPlane(UCmdParam_On);
 
@@ -412,6 +419,9 @@ void Universe::ShowDemo(int nParam)
         SetLockTargetAndMode(nullptr, TargetLockMode_ViewTarget);            // No lock on any object
         bSidewaysMotionMode = true;                                          // enable sideways shift mode
 
+        bShowMonthNames = true;
+        bMonthLabelsCloserToSphere = false;
+        bShowLargeLabels = false;
         bShowLabelsOnTop = true;
 
 
