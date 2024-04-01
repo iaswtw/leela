@@ -227,13 +227,14 @@ static inline void vector_push_back_12(std::vector<float>& v, float f1, float f2
 }
 
 
-SphereRenderer::SphereRenderer(Universe& parent, Sphere& sphere, std::string textureFilename) :
+SphereRenderer::SphereRenderer(Universe& parent, Sphere& sphere, std::string textureFilename = "", std::string textureFilename2 = "") :
     parent(parent),
     _sphere(sphere)
 {
     setNightColorDarkness(NightColorDarkness_Black);
     //setNightColorDarkness(NightColorDarkness_VeryLow);
     _textureFilename = textureFilename;
+    _textureFilename2 = textureFilename2;
     //printf("Setting _textureFilename to %s\n", _textureFilename.c_str());
 }
 
@@ -1005,25 +1006,44 @@ void SphereRenderer::constructVerticesAndSendToGpu()
 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image1.data());
         glGenerateMipmap(GL_TEXTURE_2D);
-
-
-        //int width, height, nrChannels;
-        //
-        //data = stbi_load(_textureFilename.c_str(), &width, &height, &nrChannels, 0);
-        //if (data)
-        //{
-        //    printf("\n====== Image: width = %d, height = %d, nrChannels = %d\n", width, height, nrChannels);
-        //    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        //    glGenerateMipmap(GL_TEXTURE_2D);
-        //    glBindTexture(GL_TEXTURE_2D, 0);
-        //    stbi_image_free(data);
-        //}
-        //else
-        //{
-        //    printf("ERROR: Unable to load texture image\n");
-        //    throw std::exception("Unable to load texture image");
-        //}
     }
+
+
+    if (!_textureFilename2.empty())
+    {
+        glGenTextures(1, &_texture2);
+        glBindTexture(GL_TEXTURE_2D, _texture2);
+#ifdef USE_ICOSPHERE
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+#else
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+#endif
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        // The following border color isn't used because 'clamp_to_edge' used above. 
+        // Set border color to debug problems at the edge in the future.
+        float color[] = { 1.0f, 0.0f, 0.0f, 1.0f };
+        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
+
+
+        std::vector<unsigned char> image1;
+        unsigned int width, height;
+        std::string textureFilePath = _locateTextureFile(_textureFilename2.c_str());
+        spdlog::info("Using texture 2 file " + textureFilePath);
+        unsigned int error = lodepng::decode(image1, width, height, textureFilePath.c_str());
+        if (error)
+        {
+            printf("error %d: %s\n", error, lodepng_error_text(error));
+        }
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image1.data());
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+    }
+
+
 
     // latitude and longitude
     constructLatitudesAndLongitudeVertices();
@@ -1093,8 +1113,8 @@ int SphereRenderer::_getIcoSphereSubdivisionLevel()
 
 //############################################################################################################
 
-PlanetRenderer::PlanetRenderer(Universe& parent, Sphere& sphere, std::string textureFilename)
-	: SphereRenderer(parent, sphere, textureFilename)
+PlanetRenderer::PlanetRenderer(Universe& parent, Sphere& sphere, std::string textureFilename, std::string textureFilename2)
+	: SphereRenderer(parent, sphere, textureFilename, textureFilename2)
 {
 }
 
@@ -1109,7 +1129,7 @@ PlanetRenderer::~PlanetRenderer()
  */
 void PlanetRenderer::renderSphere(GlslProgram& glslProgram)
 {
-    glslProgram.setBool("useTexture", parent.bRealisticSurfaces);
+    
 
     if (!_sphere.bIsCenterOfMass)
     {
@@ -1143,12 +1163,25 @@ void PlanetRenderer::renderSphere(GlslProgram& glslProgram)
 
         if (!_textureFilename.empty())
         {
+            glslProgram.setBool("useTexture", parent.bRealisticSurfaces);
+
             //printf("texture filename not empty. Texture = %d\n", _texture);
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, _texture);
+            glslProgram.setInt("texture1", 0);
+
+            if (!_textureFilename2.empty()) {
+                glslProgram.setBool("useTexture2", true);
+
+                glActiveTexture(GL_TEXTURE1);
+                glBindTexture(GL_TEXTURE_2D, _texture2);
+                glslProgram.setInt("texture2", 1);
+            }
+            else {
+                glslProgram.setBool("useTexture2", false);
+            }
         }
-        else
-        {
+        else {
             // usage of texture was enabled globally earlier. Disable it.
             glslProgram.setBool("useTexture", false);
         }

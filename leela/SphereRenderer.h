@@ -45,7 +45,7 @@ enum NightColorDarkness
 class SphereRenderer
 {
 public:
-    SphereRenderer(Universe& parent, Sphere& sphere, std::string textureFilename = "");
+    SphereRenderer(Universe& parent, Sphere& sphere, std::string textureFilename, std::string textureFilename2);
     ~SphereRenderer();
 
     void setAsLightSource();
@@ -92,6 +92,7 @@ protected:
     GLuint _rotationAxisVao;
     GLuint _rotationAxisVbo;
     GLuint _texture;
+    GLuint _texture2;
 
     int numMainSphereVertices = -1;
     int numMainSphereElements = -1;
@@ -107,6 +108,7 @@ protected:
 
     bool _bIsLightSource = false;
     std::string _textureFilename;
+    std::string _textureFilename2;
 
     unsigned char* data = nullptr;
 };
@@ -115,7 +117,7 @@ protected:
 class PlanetRenderer : public SphereRenderer
 {
 public:
-	PlanetRenderer(Universe& parent, Sphere& sphere, std::string textureFilename = "");
+	PlanetRenderer(Universe& parent, Sphere& sphere, std::string textureFilename = "", std::string textureFilename2 = "");
 	~PlanetRenderer();
 
 	void renderSphere(GlslProgram& glslProgram);
