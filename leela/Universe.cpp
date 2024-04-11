@@ -72,7 +72,14 @@ Universe::Universe() :
     neptuneRenderer(*this, neptune, "neptune2k.png"),
 
     axisRenderer(axis),
-    starsRenderer(stars)
+    starsRenderer(stars),
+
+    throttleFilter                  (FIR_WIDTH, fir_coeff),
+    yawFilter                       (FIR_WIDTH, fir_coeff),
+    pitchFilter                     (FIR_WIDTH, fir_coeff),
+    rollFilter                      (FIR_WIDTH, fir_coeff),
+    stepMultiplierFilterWhenPaused  (FIR_WIDTH, fir_coeff),
+    stepMultiplierFilter            (FIR_WIDTH, fir_coeff)
 {
 }
 
@@ -670,11 +677,19 @@ void Universe::resetWidgetControlMode()
 void Universe::processFlags()
 {
     //----------------------------------------------
-    // First half of this method applies single pole IIR filtering to various motion inputs.
+    // First half of this method applies FIR filtering to various motion inputs.
     //----------------------------------------------
 
     static const float EPSILON = 0.00001f;
     static const float alpha = 0.05f;
+
+    // low pass filtered inputs in various directions.
+    float throttle = 0.0f;
+    float yaw = 0.0f;
+    float pitch = 0.0f;
+    float roll = 0.0f;
+    float filtered_step_multiplier;
+
 
     // adjust gain w.r.t. current frame rate. Slower framerate result in higher gain to keep real-time behaviour same.
     float gain = 1.0f;
@@ -709,10 +724,10 @@ void Universe::processFlags()
     //-------------------------------------
     // Combine mouse and keyboard inputs.
     //-------------------------------------
-    new_throttle[0]  = mouse_throttle + keyboard_throttle + new_mouse_wheel_throttle;
-    new_yaw[0]       = mouse_yaw      + keyboard_yaw;
-    new_pitch[0]     = mouse_pitch    + keyboard_pitch;
-    new_roll[0]      = mouse_roll     + keyboard_roll;
+    throttle  = mouse_throttle + keyboard_throttle + new_mouse_wheel_throttle;
+    yaw       = mouse_yaw      + keyboard_yaw;
+    pitch     = mouse_pitch    + keyboard_pitch;
+    roll      = mouse_roll     + keyboard_roll;
 
     //-------------------------------------
     // Compensate for low/high framerate.
@@ -720,38 +735,38 @@ void Universe::processFlags()
     //-------------------------------------
     gain /= 40;
 
-    new_throttle[0]    *= gain;
-    new_yaw[0]         *= gain;
-    new_pitch[0]       *= gain;
-    new_roll[0]        *= gain;
+    throttle    *= gain;
+    yaw         *= gain;
+    pitch       *= gain;
+    roll        *= gain;
 
 
     // Amplify or attenuate the value based on keyboard modifiers.
     if (bCtrlModifier)
         if (bAltModifier)
-            new_throttle[0] /= 100;             // ctrl + alt = super slow zoom
+            throttle /= 100;             // ctrl + alt = super slow zoom
         else
-            new_throttle[0] /= 10;              // ctrl       = slow zoom
+            throttle /= 10;              // ctrl       = slow zoom
     else if (bShiftModifier)
         if (bAltModifier)
-            new_throttle[0] *= 100;             // shift + alt = super fast zoom
+            throttle *= 100;             // shift + alt = super fast zoom
         else
-            new_throttle[0] *= 10;              // shift       = fast zoom
+            throttle *= 10;              // shift       = fast zoom
 
     if (bCtrlModifier)
-        new_yaw[0] /= 10;
+        yaw /= 10;
     else if (bShiftModifier)
-        new_yaw[0] *= 10;
+        yaw *= 10;
 
     if (bCtrlModifier)
-        new_pitch[0] /= 100;
+        pitch /= 100;
     else if (bShiftModifier)
-        new_pitch[0] *= 10;
+        pitch *= 10;
 
     if (bCtrlModifier)
-        new_roll[0] /= 10;
+        roll /= 10;
     else if (bShiftModifier)
-        new_roll[0] *= 100;
+        roll *= 100;
 
 
     ////-------------------------------------
@@ -762,12 +777,10 @@ void Universe::processFlags()
     //pitch[0]     = alpha * new_pitch       + (1 - alpha) * pitch[0];
     //roll[0]      = alpha * new_roll        + (1 - alpha) * roll[0];
 
-    throttle    = applyFir(fir_coeff, new_throttle, FIR_WIDTH);
-    yaw         = applyFir(fir_coeff, new_yaw,      FIR_WIDTH);
-    pitch       = applyFir(fir_coeff, new_pitch,    FIR_WIDTH);
-    roll        = applyFir(fir_coeff, new_roll,     FIR_WIDTH);
-
-
+    throttle    = throttleFilter.filter(throttle);
+    yaw         = yawFilter.filter(yaw);
+    pitch       = pitchFilter.filter(pitch);
+    roll        = rollFilter.filter(roll);
 
     //-------------------------------------
     // Squelch motions below threshold.
@@ -792,37 +805,36 @@ void Universe::processFlags()
     new_mouse_wheel_throttle = 0.0f;
 
 
+    if (bSimulationPause) {
+        // When simulation is paused, allow for manual time forward and reverse using key/buttons.
+        // Filter the input for smooth start/stop.
 
-    filtered_step_multiplier[0] = 0.0f;
+        filtered_step_multiplier = 0.0f;
 
-    if (!bSimulationPause) {
-        _filteredStepMultiplier = _stepMultiplier;
+        if (bMinus) {
+            filtered_step_multiplier = -3 * _stepMultiplier / FIR_WIDTH;
+        }
+        if (bEquals) {
+            filtered_step_multiplier = 3 * _stepMultiplier / FIR_WIDTH;
+        }
+
+        if (bCtrlModifier)
+            filtered_step_multiplier /= 5;
+
+        _filteredStepMultiplier = stepMultiplierFilterWhenPaused.filter(filtered_step_multiplier);
+        stepMultiplierFilter.filter(0.0f);
+
+    } else {
+        // simulation is not paused.
+
+        stepMultiplierFilterWhenPaused.filter(0.0f);
+        _filteredStepMultiplier = stepMultiplierFilter.filter(_stepMultiplier/30.0);
 
         if (bEquals)
             _filteredStepMultiplier *= 5;
         else if (bMinus)
             _filteredStepMultiplier *= -5;
-
-    } else {
-
-        if (bMinus) {
-            filtered_step_multiplier[0] = -3 * _stepMultiplier / FIR_WIDTH;
-        }
-        if (bEquals) {
-            filtered_step_multiplier[0] = 3 * _stepMultiplier / FIR_WIDTH;
-        }
-
-        if (bCtrlModifier)
-            filtered_step_multiplier[0] /= 5;
-
-        _filteredStepMultiplier = applyFir(fir_coeff, filtered_step_multiplier, FIR_WIDTH);
     }
-
-    //// Fast-forward or fast-rewind.  In normal time flow or manual time flow mode.
-    //if (bEquals)
-    //    _filteredStepMultiplier *= 5;
-    //else if (bMinus)
-    //    _filteredStepMultiplier *= -5;
 
 
     advance(_filteredStepMultiplier * _stepMultiplierFrameRateAdjustment);
@@ -877,51 +889,16 @@ void Universe::processFlags()
     else if (lockTarget != nullptr)
         LookAtTarget();
 
-    shiftValues(new_throttle, FIR_WIDTH);
-    shiftValues(new_yaw,      FIR_WIDTH);
-    shiftValues(new_pitch,    FIR_WIDTH);
-    shiftValues(new_roll,     FIR_WIDTH);
-    shiftValues(filtered_step_multiplier, FIR_WIDTH);
-
-}
-
-/*
- This performs multiply and accumulate. It does not reverse the input; it is assumed
- to be reversed, i.e. index 0 is the most recent sample.
- */
-float Universe::applyFir(float * firFilterCoefficients, float* inputVector, unsigned filterWidth)
-{
-    float result = 0;
-
-    for (unsigned int i = 0; i < filterWidth; i++)
-    {
-        result += inputVector[i] * firFilterCoefficients[i];
-    }
-
-    return result;
-}
-
-/*
- Shift values in the given vector to right by 1 position.
- After the shift, index 0 is considered 'free'.
- */
-void Universe::shiftValues(float* values, unsigned int numValues)
-{
-    for (unsigned int i = numValues - 1; i > 0; i--)
-    {
-        values[i] = values[i - 1];
-    }
 }
 
 void Universe::clearAllFirFilters()
 {
-    for (int i = 0; i < FIR_WIDTH; i++)
-    {
-        new_throttle[i] = { 0.0f };
-        new_yaw[i]      = { 0.0f };
-        new_pitch[i]    = { 0.0f };
-        new_roll[i]     = { 0.0f };
-    }
+    throttleFilter.clear();
+    yawFilter.clear();
+    pitchFilter.clear();
+    rollFilter.clear();
+    stepMultiplierFilterWhenPaused.clear();
+    stepMultiplierFilter.clear();
 }
 
 

@@ -173,6 +173,7 @@
   <ItemGroup>
     <ClInclude Include="AxisRenderer.h" />
     <ClInclude Include="Class.h" />
+    <ClInclude Include="Fir.h" />
     <ClInclude Include="glcorearb.h" />
     <ClInclude Include="GlslProgram.h" />
     <ClInclude Include="imgui\imconfig.h" />

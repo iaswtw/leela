@@ -1048,12 +1048,12 @@ void Universe::generateImGuiWidgets()
 
             SmallCheckbox("Time pause (space bar)", &bSimulationPause);
 
-            ImGui::Button("Fast Rewind (r)");
+            ImGui::Button("Fast Rewind (-)");
             if (ImGui::IsItemActivated())       Rewind(UCmdParam_On);
             if (ImGui::IsItemDeactivated())     Rewind(UCmdParam_Off);
 
             ImGui::SameLine();
-            ImGui::Button("Fast Forward (f)");
+            ImGui::Button("Fast Forward (=)");
             if (ImGui::IsItemActivated())       FastForward(UCmdParam_On);
             if (ImGui::IsItemDeactivated())     FastForward(UCmdParam_Off);
 

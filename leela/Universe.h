@@ -15,6 +15,7 @@
 #include "Stars.h"
 #include "StarsRenderer.h"
 #include "Space.h"
+#include "Fir.h"
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -188,8 +189,6 @@ public:
     int runMainLoop();
 
     void processFlags();
-    float applyFir(float* firFilterCoefficients, float* inputVector, unsigned filterWidth);
-    void shiftValues(float* values, unsigned int numValues);
     void navigate(float __throttle, float __yaw, float __pitch, float __roll);
     void render();
     void renderAllNontransparentObjects();
@@ -335,13 +334,6 @@ public:
     float mouse_dy = 0.0f;
     float new_mouse_wheel_throttle = 0.0f;
 
-
-    // low pass filtered inputs in various directions.
-    float throttle    = 0.0f;
-    float yaw         = 0.0f;
-    float pitch       = 0.0f;
-    float roll        = 0.0f;
-
     //
     // use the following python to create fir coefficients
     //      set value of FIR_WIDTH
@@ -356,11 +348,12 @@ public:
     float mouse_pitch = 0.0f;
     float mouse_roll = 0.0f;
 
-    float new_throttle[FIR_WIDTH] = { 0.0f };
-    float new_yaw[FIR_WIDTH] = { 0.0f };
-    float new_pitch[FIR_WIDTH] = { 0.0f };
-    float new_roll[FIR_WIDTH] = { 0.0f };
-    float filtered_step_multiplier[FIR_WIDTH] = { 0.0f };
+    FirFilter throttleFilter;
+    FirFilter yawFilter; 
+    FirFilter pitchFilter;
+    FirFilter rollFilter;
+    FirFilter stepMultiplierFilterWhenPaused;
+    FirFilter stepMultiplierFilter;
 
     bool bCtrlModifier = false;
     bool bAltModifier = false;
