@@ -41,9 +41,6 @@ void Universe::onKeyDown(SDL_Event* event)
         //else
             Earth_OrbitalPlane(UCmdParam_Toggle);
         break;
-    case SDLK_f:
-        FastForward(UCmdParam_Start);
-        break;
     case SDLK_l:
         toggleLockMode();
         break;
@@ -64,9 +61,6 @@ void Universe::onKeyDown(SDL_Event* event)
     case SDLK_q:
         if (bAltModifier)
             space.setFrameMoveMode(D_MODE);
-        break;
-    case SDLK_r:
-        Rewind(UCmdParam_Start);
         break;
     case SDLK_s:
         if (isAllModifiers())
@@ -175,6 +169,12 @@ void Universe::onKeyDown(SDL_Event* event)
         IncreaseSimulationSpeed();
         break;
 
+    case SDLK_MINUS:
+        bMinus = true;
+        break;
+    case SDLK_EQUALS:
+        bEquals = true;
+        break;
 
     case SDLK_HOME:
         keyboard_throttle = nominalThrottle;
@@ -227,13 +227,6 @@ void Universe::onKeyDown(SDL_Event* event)
 void Universe::onKeyUp(SDL_Event* event)
 {
     switch (event->key.keysym.sym) {
-    case SDLK_f:
-        FastForward(UCmdParam_Stop);
-        break;
-    case SDLK_r:
-        Rewind(UCmdParam_Stop);
-        break;
-
 
 
     // ============ Function keys =============
@@ -250,6 +243,13 @@ void Universe::onKeyUp(SDL_Event* event)
         bAdvanceMoonInOrbit = false;
         break;
 
+
+    case SDLK_MINUS:
+        bMinus = false;
+        break;
+    case SDLK_EQUALS:
+        bEquals = false;
+        break;
 
 
     case SDLK_HOME:

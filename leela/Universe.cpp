@@ -479,13 +479,13 @@ void Universe::SetTimeDirection(int nParam)
 // Turn On/Off Fast forward motion.
 void Universe::FastForward(int nParam)
 {
-    ChangeBoolean(&bFastForward, nParam);
+    ChangeBoolean(&bEquals, nParam);
 }
 
 // Turn On/Off fast Reverse motion.
 void Universe::Rewind(int nParam)
 {
-    ChangeBoolean(&bFastReverse, nParam);
+    ChangeBoolean(&bMinus, nParam);
 }
 
 
@@ -792,14 +792,44 @@ void Universe::processFlags()
     new_mouse_wheel_throttle = 0.0f;
 
 
+
+    filtered_step_multiplier[0] = 0.0f;
+
+    if (!bSimulationPause) {
+        _filteredStepMultiplier = _stepMultiplier;
+
+        if (bEquals)
+            _filteredStepMultiplier *= 5;
+        else if (bMinus)
+            _filteredStepMultiplier *= -5;
+
+    } else {
+
+        if (bMinus) {
+            filtered_step_multiplier[0] = -3 * _stepMultiplier / FIR_WIDTH;
+        }
+        if (bEquals) {
+            filtered_step_multiplier[0] = 3 * _stepMultiplier / FIR_WIDTH;
+        }
+
+        if (bCtrlModifier)
+            filtered_step_multiplier[0] /= 5;
+
+        _filteredStepMultiplier = applyFir(fir_coeff, filtered_step_multiplier, FIR_WIDTH);
+    }
+
+    //// Fast-forward or fast-rewind.  In normal time flow or manual time flow mode.
+    //if (bEquals)
+    //    _filteredStepMultiplier *= 5;
+    //else if (bMinus)
+    //    _filteredStepMultiplier *= -5;
+
+
+    advance(_filteredStepMultiplier * _stepMultiplierFrameRateAdjustment);
+
+
     if (!bSimulationPause)
     {
-        if (bFastForward)
-            advance(5 * _stepMultiplier * _stepMultiplierFrameRateAdjustment);
-        else if (bFastReverse)
-            advance(-5 * _stepMultiplier * _stepMultiplierFrameRateAdjustment);
-        else
-            advance(_stepMultiplier * _stepMultiplierFrameRateAdjustment);
         if (bAdvanceEarthInOrbit)
             earth._orbitalAngle += 0.003;
         if (bRetardEarthInOrbit)
@@ -851,6 +881,8 @@ void Universe::processFlags()
     shiftValues(new_yaw,      FIR_WIDTH);
     shiftValues(new_pitch,    FIR_WIDTH);
     shiftValues(new_roll,     FIR_WIDTH);
+    shiftValues(filtered_step_multiplier, FIR_WIDTH);
+
 }
 
 /*

@@ -287,8 +287,11 @@ public:
     int previousX = 0;
     int previousY = 0;
     float _stepMultiplier = 1.0f;
+    float _filteredStepMultiplier = 0.0f;
     float _stepMultiplierFrameRateAdjustment = 0.0f;
 
+    bool bMinus = false;
+    bool bEquals = false;
 
     bool bLeftMouseButtonDown = false;
     bool bRightMouseButtonDown = false;
@@ -357,7 +360,7 @@ public:
     float new_yaw[FIR_WIDTH] = { 0.0f };
     float new_pitch[FIR_WIDTH] = { 0.0f };
     float new_roll[FIR_WIDTH] = { 0.0f };
-
+    float filtered_step_multiplier[FIR_WIDTH] = { 0.0f };
 
     bool bCtrlModifier = false;
     bool bAltModifier = false;
