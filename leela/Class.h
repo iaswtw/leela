@@ -206,7 +206,7 @@ public:
         return d;
     }
 
-    PNT PointAt(double k) {
+    PNT PointAtK(double k) {
         return PNT(l*k*d, m*k*d, n*k*d);
     }
 

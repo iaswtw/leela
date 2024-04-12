@@ -271,29 +271,42 @@ public:
     // Calculates center position based on the value of current parameters
     void calculateCenterPosition()
     {
-        _center.x = _orbitalRadius * cos(_orbitalAngle);
-        _center.y = _orbitalRadius * sin(_orbitalAngle);
-        _center.z = 0;       // todo - use orbital tilt
+        glm::mat4 mat(1.0f);
+
+        //-------------------------------------------------------------------
+        // Transformation matrix is created in reverse order of intended application to the transformed point.
+        //-------------------------------------------------------------------
+
+        // parent is assumed to have been updated.  Translate by an amount equal to the parent's position.
+        if (_parent != nullptr)
+            mat = glm::translate(mat, _parent->getCenter());
+
+        // apply nodal precession
+        mat = glm::rotate(
+            mat,
+            _nodalPrecessionAngle,
+            glm::vec3(0.0f, 0.0f, 1.0f)         // nodal precession application along z axis
+        );
 
         // apply orbital tilt
-        _center.z = -_center.x * sin(_orbitalPlaneTiltAngle);
-        _center.x = _center.x * cos(_orbitalPlaneTiltAngle);
+        mat = glm::rotate(
+            mat,
+            _orbitalPlaneTiltAngle,
+            glm::vec3(0.0f, 1.0f, 0.0f)         // orbital tilt application is along y axis
+        );
 
-        // apply orbital rotation
-        float x, y;
-        x = _center.x;
-        y = _center.y;
-        _center.x = x * cos(_nodalPrecessionAngle) - y * sin(_nodalPrecessionAngle);
-        _center.y = x * sin(_nodalPrecessionAngle) + y * cos(_nodalPrecessionAngle);
+        // Create point on the orbit by translating a point at 0,0,0 to the orbit.
+        mat = glm::translate(
+            mat,
+            glm::vec3(
+                _orbitalRadius * cos(_orbitalAngle),
+                _orbitalRadius * sin(_orbitalAngle),
+                0.0f
+            )
+        );
 
+        _center = mat * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
-        // parent is assumed to have been updated
-        if (_parent != nullptr)
-        {
-            _center.x += _parent->getCenter().x;
-            _center.y += _parent->getCenter().y;
-            _center.z += _parent->getCenter().z;
-        }
     }
 
     // Calculate 12 points outside the orbit suitable for drawing month labels

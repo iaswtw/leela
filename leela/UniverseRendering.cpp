@@ -1224,6 +1224,7 @@ void Universe::generateImGuiWidgets()
             TargetLockMode previousMode = mode;
             ImGui::RadioButton("View lock", (int*)& mode, int(TargetLockMode_ViewTarget)); ImGui::SameLine();
             ImGui::RadioButton("Follow lock", (int*)&mode, int(TargetLockMode_FollowTarget));
+            ImGui::RadioButton("Fixed distance View lock", (int*)&mode, int(TargetLockMode_FixedDistanceViewTarget));
             if (mode != previousMode)
                 SetLockMode(mode);
 

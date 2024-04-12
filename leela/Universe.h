@@ -173,6 +173,7 @@ typedef enum
 
 typedef enum
 {
+    TargetLockMode_FixedDistanceViewTarget,
     TargetLockMode_ViewTarget,        // camera position remains fixed, but always looks at the target
     TargetLockMode_FollowTarget       // camera moves with the object maintaining distance and direction
 } TargetLockMode;
@@ -373,6 +374,8 @@ public:
     TargetLockMode lockMode = TargetLockMode_ViewTarget;
     VECTOR followVector = VECTOR(1.0, 1.0, 1.0);
     float followDistance = 0.0f;
+    VECTOR fixedDistViewTargetLock_rotationAxis = VECTOR(1.0, 1.0, 1.0);
+
     Sphere* lockTarget = nullptr;           // If not null, the camera will change direction such that target
                                             // will always appear at the center of the screen.
     bool bEarthSurfaceLockMode = false;

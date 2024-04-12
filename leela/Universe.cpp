@@ -371,12 +371,23 @@ void Universe::SetLockMode(TargetLockMode mode)
 
     if (lockTarget != nullptr)
     {
-        if (mode == TargetLockMode_FollowTarget)
+        if ((mode == TargetLockMode_FollowTarget) || (mode == TargetLockMode_FixedDistanceViewTarget))
         {
             PNT p = lockTarget->getCenter();
             followVector = VECTOR(space.S, p);
             followDistance = float(space.S.distanceTo(p));
             bSidewaysMotionMode = false;
+
+            if (mode == TargetLockMode_FixedDistanceViewTarget)
+            {
+                glm::vec3 parentCenter = lockTarget->_parent->getCenter();
+                VECTOR targetToParent = VECTOR(p, parentCenter);
+                VECTOR targetToS = VECTOR(p, space.S);
+                fixedDistViewTargetLock_rotationAxis = space.crossProduct(targetToParent, targetToS);
+
+                // TODO
+            }
+
         }
     }
 }
@@ -423,8 +434,21 @@ void Universe::LookAtTarget()
             followVector,
             PNT(newS.x, newS.y, newS.z - 100));
     }
+    else if (lockMode == TargetLockMode_FixedDistanceViewTarget)
+    {
+        VECTOR currentDS = VECTOR(lockTarget->getCenter(), space.S);
+        PNT center = PNT(lockTarget->getCenter());
+        PNT newS = center.translated(followDistance, currentDS);
+
+        space.setFrame(
+            AT_POINT,
+            newS,
+            VECTOR(newS, lockTarget->getCenter()),
+            PNT(newS.x, newS.y, newS.z - 100));
+    }
     else
     {
+        // TargetLockMode_ViewTarget
         space.setFrame(
             AT_POINT,
             space.S,
@@ -964,11 +988,19 @@ void Universe::navigate(float __throttle, float __yaw, float __pitch, float __ro
     }
     else
     {
-        if (lockMode != TargetLockMode_FollowTarget)
+        if ((lockMode == TargetLockMode_ViewTarget) || (lockMode == TargetLockMode_FixedDistanceViewTarget))
         {
             // TODO - don't allow navigating into in a object.
-            if (__throttle != 0.0f)
-                space.moveFrame(Movement_Forward, __throttle);
+            if (lockMode == TargetLockMode_FixedDistanceViewTarget) {
+                if (__throttle != 0.0f) {
+                    followDistance -= __throttle;
+                }
+            }
+            else
+            {
+                if (__throttle != 0.0f)
+                    space.moveFrame(Movement_Forward, __throttle);
+            }
 
             // rotate frame about the target's center.
             if ((__yaw != 0.0f) || (__pitch != 0.0f)) {
@@ -997,8 +1029,9 @@ void Universe::navigate(float __throttle, float __yaw, float __pitch, float __ro
         }
         else
         {
-            if (__throttle != 0.0f)
+            if (__throttle != 0.0f) {
                 followDistance -= __throttle;
+            }
         }
     }
 }
