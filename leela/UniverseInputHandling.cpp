@@ -105,19 +105,27 @@ void Universe::onKeyDown(SDL_Event* event)
     case SDLK_0:
         Earth_RevolutionMotion(UCmdParam_Toggle);
         break;
+
     case SDLK_1:
+        // TODO  Pressing Ctrl, then 1 does not cause this even to be raised.
+        //spdlog::info("1 down");
+        bEquals = true;
+        break;
+
+
+    case SDLK_4:
         Earth_SetOrbitalPositionAngle(0);
         Earth_RevolutionMotion(UCmdParam_Off);
         break;
-    case SDLK_2:
+    case SDLK_5:
         Earth_SetOrbitalPositionAngle(M_PI / 2);
         Earth_RevolutionMotion(UCmdParam_Off);
         break;
-    case SDLK_3:
+    case SDLK_6:
         Earth_SetOrbitalPositionAngle(M_PI);
         Earth_RevolutionMotion(UCmdParam_Off);
         break;
-    case SDLK_4:
+    case SDLK_7:
         Earth_SetOrbitalPositionAngle(3 * M_PI / 2);
         Earth_RevolutionMotion(UCmdParam_Off);
         break;
@@ -160,6 +168,13 @@ void Universe::onKeyDown(SDL_Event* event)
     case SDLK_F11:
         toggleFullScreen();
         break;
+
+
+
+    case SDLK_BACKQUOTE:
+        bMinus = true;
+        break;
+
 
         // Arrow keys
     case SDLK_LEFT:
@@ -229,6 +244,12 @@ void Universe::onKeyUp(SDL_Event* event)
     switch (event->key.keysym.sym) {
 
 
+    // ============= Digits ===============
+    case SDLK_1:
+        bEquals = false;
+        break;
+
+
     // ============ Function keys =============
     case SDLK_F3:
         bRetardEarthInOrbit = false;
@@ -241,6 +262,11 @@ void Universe::onKeyUp(SDL_Event* event)
         break;
     case SDLK_F8:
         bAdvanceMoonInOrbit = false;
+        break;
+
+
+    case SDLK_BACKQUOTE:
+        bMinus = false;
         break;
 
 

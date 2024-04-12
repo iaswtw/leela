@@ -45,9 +45,9 @@ out float darknessFactor;       // multiplier to be applied to the color of vert
 
 
 //-------------------------------------------------------------------------------------------------
-// Calculate perpendicular from the given point in argument (modelTransformedPosition, i.e. thisPoint
-// transformed using its model matrix) point on the line joining the sun's center and the
-// otherSphere's center.
+// Calculate perpendicular from the given point (modelTransformedPosition, i.e. `thisPoint`
+// transformed using its model matrix) to the line joining sun's center and the otherSphere's center.
+// 
 // See formula derivation at the bottom of this file.
 //-------------------------------------------------------------------------------------------------
 vec3 nearestPointOnLine(vec3 modelTransformedPosition)
@@ -143,10 +143,11 @@ void main()
                     do
                     {
                         if (dist_sun_thisPoint < dist_sun_otherSphere)
-                            break;                                              // point might be inside the 'other' sphere, but cannot be in shadow.
-        
-                        if (dot((otherSphereCenterTransformed - modelTransformedPosition), x_normal) < 0.0f) // other sphere is below the horizon. Therefore, cannot be in its shadow.
-                            break;
+                            break;      // point is closer to the sun than center of other sphere.
+                                        // Therefore, point cannot be in the shadow of other sphere.
+                        
+                        //if (dot((otherSphereCenterTransformed - modelTransformedPosition), x_normal) < 0.0f) // other sphere is below the horizon. Therefore, cannot be in its shadow.
+                        //    break;
                         
                         // Calculate some important points and distances about umbra and penumbra.
                         vec3  N                     = nearestPointOnLine(modelTransformedPosition);
@@ -158,9 +159,35 @@ void main()
                         //===================================================================
                         // Calculate umbra, penumbra and antumbra radius at crosssection
                         //===================================================================
-
+                        
+                        //
+                        //                                                                      .=          
+                        //                                                                   .'  ^  
+                        //                                                                .      |
+                        //                                                            . "        o <------ thisPoint (e.g.)
+                        //                                     penumbraLength       '            |
+                        //        , - ~ ~ ~ - ,, _               |<------>|     . ^              | y1
+                        //    , '               ' ,, _           |        |  _.                  |
+                        //  ,                       ,  '.        |         '                     |
+                        // ,                         ,    `-_    |     .&* * . otherSphereRadius |
+                        //,                           ,       `  |  . *  \    *                  V
+                        //,             o------------------------x---*----o----*-----------------N-----
+                        //,              \            ,       ,    `  *       *
+                        // ,    sunRadius \          ,    _ '          `*___* 
+                        //  ,              \        , _ .                - _
+                        //    ,             \    , '=                     | ` 
+                        //      ' - , _ _ _ ,\ '=                         |    .
+                        //              |                                 |       .
+                        //              |<------ dist_sun_otherSphere --->|         .
+                        //                                                             .
+                        //                                                                .
+                        //                                                                  .
+                        //                                                                     .
                         //----------------------------------------------
-                        // this is the length from the start of imginary cone, between the sun and the 'other' sphere, to otherSphere center.
+                        // penumbraLength is the length:
+                        //    From: the tip of imginary cone (that starts between the sun and 'other' sphere)
+                        //      To: the center of otherSphere.
+                        // The penumbra is to the right of the otherSphere in the above diagram.
                         float penumbraLength        = (otherSphereRadius * dist_sun_otherSphere) / (sunRadius + otherSphereRadius);
                         float penumbraConeHalfAngle = asin(otherSphereRadius / penumbraLength);
         
@@ -212,21 +239,21 @@ void main()
                         }
                     
                         // TODO - after adding the below condition and the code in it, frame rate has gone down to 50 on home computer integrated graphics.
-                        if (bInUmbra || bInPenumbra || bInAntumbra) {
-                            // make sure other sphere is above horizon. if not, show as if in full day light.
-                            vec3 x_position = vec3(model * vec4(position, 1.0));
-                            float dist_position_otherSphereCenter = distance(x_position, otherSphereCenterTransformed);
-                            float dotProduct_position_otherSphereCenter = dot(normalize(x_position - otherSphereCenterTransformed), x_normal);
-                            float angleAtPositionDueToOtherSphereRadius = 2 * asin(otherSphereRadius/2 / dist_position_otherSphereCenter);
-                            if (dotProduct_position_otherSphereCenter > sin(angleAtPositionDueToOtherSphereRadius)) {
-                                // TODO As per my calculations on paper, the above condition should have been:
-                                //          dotProduct_position_otherSphereCenter < -sin(angleAtPositionDueToOtherSphereRadius
-                                //      But if I use it, it doesn't work.  Investigate.  The if condition right now works.                        
-                                bInUmbra = false;
-                                bInPenumbra = false;
-                                bInAntumbra = false;
-                            }
-                        }                
+                        //if (bInUmbra || bInPenumbra || bInAntumbra) {
+                        //    // make sure other sphere is above horizon. if not, show as if in full day light.
+                        //    vec3 x_position = vec3(model * vec4(position, 1.0));
+                        //    float dist_position_otherSphereCenter = distance(x_position, otherSphereCenterTransformed);
+                        //    float dotProduct_position_otherSphereCenter = dot(normalize(x_position - otherSphereCenterTransformed), x_normal);
+                        //    float angleAtPositionDueToOtherSphereRadius = 2 * asin(otherSphereRadius/2 / dist_position_otherSphereCenter);
+                        //    if (dotProduct_position_otherSphereCenter > sin(angleAtPositionDueToOtherSphereRadius)) {
+                        //        // TODO As per my calculations on paper, the above condition should have been:
+                        //        //          dotProduct_position_otherSphereCenter < -sin(angleAtPositionDueToOtherSphereRadius
+                        //        //      But if I use it, it doesn't work.  Investigate.  The if condition right now works.                        
+                        //        bInUmbra = false;
+                        //        bInPenumbra = false;
+                        //        bInAntumbra = false;
+                        //    }
+                        //}                
         
                     } while (false);
         

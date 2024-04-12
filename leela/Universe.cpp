@@ -688,7 +688,7 @@ void Universe::processFlags()
     float yaw = 0.0f;
     float pitch = 0.0f;
     float roll = 0.0f;
-    float filtered_step_multiplier;
+    float step_multiplier_input = 0.0f;
 
 
     // adjust gain w.r.t. current frame rate. Slower framerate result in higher gain to keep real-time behaviour same.
@@ -809,31 +809,58 @@ void Universe::processFlags()
         // When simulation is paused, allow for manual time forward and reverse using key/buttons.
         // Filter the input for smooth start/stop.
 
-        filtered_step_multiplier = 0.0f;
+        step_multiplier_input = 0.0f;
 
         if (bMinus) {
-            filtered_step_multiplier = -3 * _stepMultiplier / FIR_WIDTH;
+            step_multiplier_input = -3 * _stepMultiplier / FIR_WIDTH;
+            if (bShiftModifier)
+                step_multiplier_input *= 5;
         }
-        if (bEquals) {
-            filtered_step_multiplier = 3 * _stepMultiplier / FIR_WIDTH;
+        else {
+            if (bEquals) {
+                step_multiplier_input = 3 * _stepMultiplier / FIR_WIDTH;
+                if (bShiftModifier)
+                    step_multiplier_input *= 5;
+            }
         }
+
 
         if (bCtrlModifier)
-            filtered_step_multiplier /= 5;
+            step_multiplier_input /= 5;
 
-        _filteredStepMultiplier = stepMultiplierFilterWhenPaused.filter(filtered_step_multiplier);
-        stepMultiplierFilter.filter(0.0f);
+        _filteredStepMultiplier = stepMultiplierFilterWhenPaused.filter(step_multiplier_input);
+        stepMultiplierFilter.filter(0.0f);                  // feed zeros to filter that isn't being used.
 
     } else {
         // simulation is not paused.
 
-        stepMultiplierFilterWhenPaused.filter(0.0f);
-        _filteredStepMultiplier = stepMultiplierFilter.filter(_stepMultiplier/30.0);
+        stepMultiplierFilterWhenPaused.filter(0.0f);        // feed zeros to filter that isn't being used.
 
-        if (bEquals)
-            _filteredStepMultiplier *= 5;
-        else if (bMinus)
-            _filteredStepMultiplier *= -5;
+        if (bEquals) {
+            step_multiplier_input = _stepMultiplier / 10.0;
+            if (bShiftModifier)
+                step_multiplier_input *= 5;
+            if (bCtrlModifier)
+                step_multiplier_input /= 5;
+        }
+        else {
+            if (bMinus) {
+                step_multiplier_input = -_stepMultiplier / 10.0;
+                if (bShiftModifier)
+                    step_multiplier_input *= 5;
+                if (bCtrlModifier)
+                    step_multiplier_input /= 5;
+            }
+            else {
+                step_multiplier_input = _stepMultiplier / 30.0;
+                // Don't use Shift modifier here or else using sideways shift movement using mouse would be impossible.
+                if (bCtrlModifier)
+                    step_multiplier_input /= 5;
+            }
+        }
+
+
+        _filteredStepMultiplier = stepMultiplierFilter.filter(step_multiplier_input);
     }
 
 
