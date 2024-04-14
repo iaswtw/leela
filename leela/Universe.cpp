@@ -371,25 +371,71 @@ void Universe::SetLockMode(TargetLockMode mode)
 
     if (lockTarget != nullptr)
     {
-        if ((mode == TargetLockMode_FollowTarget) || (mode == TargetLockMode_FixedDistanceViewTarget))
+        downDirection = VECTOR(space.D, space.R);
+
+        if ((mode == TargetLockMode_FollowTarget) || (mode == TargetLockMode_OrientedViewTarget))
         {
-            PNT p = lockTarget->getCenter();
-            followVector = VECTOR(space.S, p);
-            followDistance = float(space.S.distanceTo(p));
+            PNT T = lockTarget->getCenter();
+            PNT S = space.S;
+            followVector = VECTOR(S, T);
+            followDistance = float(S.distanceTo(T));
+
+            spdlog::info("followDistance = {}", followDistance);
+
             bSidewaysMotionMode = false;
 
-            if (mode == TargetLockMode_FixedDistanceViewTarget)
+            if (mode == TargetLockMode_OrientedViewTarget)
             {
-                glm::vec3 parentCenter = lockTarget->_parent->getCenter();
-                VECTOR targetToParent = VECTOR(p, parentCenter);
-                VECTOR targetToS = VECTOR(p, space.S);
-                fixedDistViewTargetLock_rotationAxis = space.crossProduct(targetToParent, targetToS);
-
-                // TODO
+                calculateOrientedViewLockAngles();
             }
 
         }
     }
+}
+
+//
+// Calculate `orientedTargetLock_alpha` and `orientedTargetLock_beta` members.
+//
+void Universe::calculateOrientedViewLockAngles()
+{
+    // T = target's center
+    // P = target's parent's center
+    // S = observer's position
+    // 
+    // Goal is to calculate 2 things:
+    //   1. observer's angle from the normal of the orbital plane of the target sphere.
+    //   2. angle of the vector (to be used as axis of rotation for #1) from target's orbital radius vector
+    //        - this vector that lies in the target's orbital plane
+    //
+    PNT T = lockTarget->getCenter();
+    PNT S = space.S;
+    PNT P = PNT(lockTarget->_parent->getCenter());
+    VECTOR normal = VECTOR(lockTarget->_orbitalNormal);
+    VECTOR PT = VECTOR(P, T);               // e.g. if target is earth, this is a vector from center of sun to center of earth.
+    VECTOR TS = VECTOR(T, S);               // S is where we are
+
+    VECTOR axis = space.crossProduct(TS, normal);         // this is NOT the target's rotation axis!
+
+    //VECTOR axis = normal.cross(TS);         // this is NOT the target's rotation axis!
+                                            // This is the axis aroud which a `translated` T will have to be rotated to get the observer's position S for the next frame.
+    
+    //spdlog::info("--------------------------------");
+    //spdlog::info("calculateOrientedViewLockAngles:");
+    //spdlog::info("--------------------------------");
+
+    orientedTargetLock_alpha = axis.angleFrom(PT, normal.cross(PT));
+    //spdlog::info("   orientedTargetLock_alpha = {}", orientedTargetLock_alpha * 180 / M_PI);
+
+    orientedTargetLock_beta = normal.angleFrom(TS, normal);                 // reference doesn't matter since it is from normal.
+    //spdlog::info("   orientedTargetLock_beta = {}", orientedTargetLock_beta * 180 / M_PI);
+
+    //spdlog::info("   S  = {}, {}, {}", S.x, S.y, S.z);
+    //spdlog::info("   PT = {}, {}, {}", PT.x, PT.y, PT.z);
+    //spdlog::info("   TS = {}, {}, {}", TS.x, TS.y, TS.z);
+    //spdlog::info("   normal = {}, {}, {}", lockTarget->_orbitalNormal.x, lockTarget->_orbitalNormal.y, lockTarget->_orbitalNormal.z);
+    //spdlog::info("   normal x TS = {}, {}, {}", axis.x, axis.y, axis.z);
+    //spdlog::info("--------------------------------");
+    //spdlog::info("");
 }
 
 void Universe::toggleLockMode()
@@ -434,16 +480,34 @@ void Universe::LookAtTarget()
             followVector,
             PNT(newS.x, newS.y, newS.z - 100));
     }
-    else if (lockMode == TargetLockMode_FixedDistanceViewTarget)
+    else if (lockMode == TargetLockMode_OrientedViewTarget)
     {
-        VECTOR currentDS = VECTOR(lockTarget->getCenter(), space.S);
-        PNT center = PNT(lockTarget->getCenter());
-        PNT newS = center.translated(followDistance, currentDS);
+        PNT T = lockTarget->getCenter();
+        PNT P = PNT(lockTarget->_parent->getCenter());
+        VECTOR PT = VECTOR(P, T);               // e.g. if target is earth, this is a vector from center of sun to center of earth.
+        VECTOR normal = VECTOR(lockTarget->_orbitalNormal);
+
+        PNT A = T.translated(100, PT);
+        PNT N = T.translated(100, normal);
+        PNT rotatedA = space.rotate(T, N, A, space.deg(orientedTargetLock_alpha));
+
+        PNT S = T.translated(followDistance, normal);
+        PNT newS = space.rotate(rotatedA, T, S, space.deg(orientedTargetLock_beta));
+
+        //spdlog::info("Applying followDistance = {}", followDistance);
+        //spdlog::info("orientedTargetLock_alpha = {}", orientedTargetLock_alpha * 180 / M_PI);
+        //spdlog::info("orientedTargetLock_beta = {}", orientedTargetLock_beta * 180 / M_PI);
+        //spdlog::info("A = {}, {}, {}", A.x, A.y, A.z);
+        //spdlog::info("rotatedA = {}, {}, {}", rotatedA.x, rotatedA.y, rotatedA.z);
+        //spdlog::info("newS = {}, {}, {}", newS.x, newS.y, newS.z);
+        //spdlog::info("");
 
         space.setFrame(
             AT_POINT,
             newS,
             VECTOR(newS, lockTarget->getCenter()),
+            //space.S.translated(100, downDirection));
+            //PNT(space.R.x, space.R.y, space.R.z));
             PNT(newS.x, newS.y, newS.z - 100));
     }
     else
@@ -453,6 +517,9 @@ void Universe::LookAtTarget()
             AT_POINT,
             space.S,
             VECTOR(space.S, lockTarget->getCenter()),
+            //space.S.translated(100, downDirection));
+            //space.S.translated(100, VECTOR(space.D, space.R)));
+            //PNT(space.R.x, space.R.y, space.R.z));
             PNT(space.S.x, space.S.y, space.S.z - 100));
     }
 }
@@ -793,33 +860,18 @@ void Universe::processFlags()
         roll *= 100;
 
 
-    ////-------------------------------------
-    //// Apply 1st order IIR filter to all motions
-    ////-------------------------------------
-    //throttle[0]  = alpha * new_throttle    + (1 - alpha) * throttle[0];
-    //yaw[0]       = alpha * new_yaw         + (1 - alpha) * yaw[0];
-    //pitch[0]     = alpha * new_pitch       + (1 - alpha) * pitch[0];
-    //roll[0]      = alpha * new_roll        + (1 - alpha) * roll[0];
-
+    //-------------------------------------
+    // Apply filter to all motions
+    //-------------------------------------
     throttle    = throttleFilter.filter(throttle);
     yaw         = yawFilter.filter(yaw);
     pitch       = pitchFilter.filter(pitch);
     roll        = rollFilter.filter(roll);
 
     //-------------------------------------
-    // Squelch motions below threshold.
-    //-------------------------------------
-    //if (fabs(throttle) < EPSILON)     throttle = 0.0f;
-    //if (fabs(yaw)      < EPSILON)          yaw = 0.0f;
-    //if (fabs(pitch)    < EPSILON)        pitch = 0.0f;
-    //if (fabs(roll)     < EPSILON)         roll = 0.0f;
-
-
-    //-------------------------------------
     // Finally, apply the motions
     //-------------------------------------
     navigate(throttle, yaw, pitch, roll);
-
 
     //-------------------------------------
     // we have used up the mouse input, if there was any.
@@ -861,7 +913,7 @@ void Universe::processFlags()
         stepMultiplierFilterWhenPaused.filter(0.0f);        // feed zeros to filter that isn't being used.
 
         if (bEquals) {
-            step_multiplier_input = _stepMultiplier / 10.0;
+            step_multiplier_input = _stepMultiplier / 10.0f;
             if (bShiftModifier)
                 step_multiplier_input *= 5;
             if (bCtrlModifier)
@@ -869,7 +921,7 @@ void Universe::processFlags()
         }
         else {
             if (bMinus) {
-                step_multiplier_input = -_stepMultiplier / 10.0;
+                step_multiplier_input = -_stepMultiplier / 10.0f;
                 if (bShiftModifier)
                     step_multiplier_input *= 5;
                 if (bCtrlModifier)
@@ -894,13 +946,13 @@ void Universe::processFlags()
     if (!bSimulationPause)
     {
         if (bAdvanceEarthInOrbit)
-            earth._orbitalAngle += 0.003;
+            earth._orbitalAngle += 0.003f;
         if (bRetardEarthInOrbit)
-            earth._orbitalAngle -= 0.003;
+            earth._orbitalAngle -= 0.003f;
         if (bAdvanceMoonInOrbit)
-            moon._orbitalAngle += 0.003;
+            moon._orbitalAngle += 0.003f;
         if (bRetardMoonInOrbit)
-            moon._orbitalAngle -= 0.003;
+            moon._orbitalAngle -= 0.003f;
     }
 
     // always calculate sphere positions, even when simulation paused.
@@ -988,10 +1040,10 @@ void Universe::navigate(float __throttle, float __yaw, float __pitch, float __ro
     }
     else
     {
-        if ((lockMode == TargetLockMode_ViewTarget) || (lockMode == TargetLockMode_FixedDistanceViewTarget))
+        if ((lockMode == TargetLockMode_ViewTarget) || (lockMode == TargetLockMode_OrientedViewTarget))
         {
             // TODO - don't allow navigating into in a object.
-            if (lockMode == TargetLockMode_FixedDistanceViewTarget) {
+            if (lockMode == TargetLockMode_OrientedViewTarget) {
                 if (__throttle != 0.0f) {
                     followDistance -= __throttle;
                 }
@@ -1025,6 +1077,15 @@ void Universe::navigate(float __throttle, float __yaw, float __pitch, float __ro
                 //printf("AFTER  verticalAngle = %f\n", verticalAngle);
                 
                 space.rotateFrame(lockTarget->getCenter(), horizontalAngle, verticalAngle);
+
+                //space.moveFrame(Movement_RightAlongSD, -__roll);
+
+                if (lockMode == TargetLockMode_OrientedViewTarget)
+                {
+                    // Observer may have moved due to navigation inputs, thereby chainging the orientation.
+                    // Re-calculate angles to be used to set observer's position in the next iteration.
+                    calculateOrientedViewLockAngles();
+                }
             }
         }
         else

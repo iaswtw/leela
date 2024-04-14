@@ -173,7 +173,7 @@ typedef enum
 
 typedef enum
 {
-    TargetLockMode_FixedDistanceViewTarget,
+    TargetLockMode_OrientedViewTarget,
     TargetLockMode_ViewTarget,        // camera position remains fixed, but always looks at the target
     TargetLockMode_FollowTarget       // camera moves with the object maintaining distance and direction
 } TargetLockMode;
@@ -214,6 +214,7 @@ public:
     
     void SetLockTargetAndMode(Sphere* target, TargetLockMode mode);
     void SetLockMode(TargetLockMode mode);
+    void calculateOrientedViewLockAngles();
     void toggleLockMode();
     void ToggleConstantDirectionFollowMode();
     void ResetFollowTargetAndMode();
@@ -374,7 +375,9 @@ public:
     TargetLockMode lockMode = TargetLockMode_ViewTarget;
     VECTOR followVector = VECTOR(1.0, 1.0, 1.0);
     float followDistance = 0.0f;
-    VECTOR fixedDistViewTargetLock_rotationAxis = VECTOR(1.0, 1.0, 1.0);
+    float orientedTargetLock_alpha = 0.0f;
+    float orientedTargetLock_beta = 0.0f;
+    VECTOR downDirection = VECTOR(0.0f, 0.0f, 0.0f);
 
     Sphere* lockTarget = nullptr;           // If not null, the camera will change direction such that target
                                             // will always appear at the center of the screen.

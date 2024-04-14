@@ -29,7 +29,7 @@ void PNT::translate(double amount, VECTOR& direction)
  * Returns a new 3-d point that is a translated version of this point by 'amount'
  * in 'direction'.
  */
-PNT PNT::translated(double amount, VECTOR& direction)
+PNT PNT::translated(double amount, VECTOR direction)
 {
     return PNT(x + amount * direction.l,
         y + amount * direction.m,

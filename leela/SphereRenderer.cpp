@@ -1199,7 +1199,7 @@ void PlanetRenderer::renderSphere(GlslProgram& glslProgram)
 
     // Draw vertices
 #ifndef USE_ICOSPHERE
-        glDrawArrays(GL_TRIANGLES, 0, numMainSphereVertices);
+        glDrawArrays(GL_TRIANGLES, 0, (GLsizei) numMainSphereVertices);
 #else
         glDrawElements(GL_TRIANGLES, numMainSphereElements, GL_UNSIGNED_INT, 0);
 #endif
@@ -1218,7 +1218,7 @@ void PlanetRenderer::renderLatitudeAndLongitudes(GlslProgram& glslProgram)
             glslProgram.setBool("useTexture", false);
 
             // Draw vertices
-            glDrawArrays(GL_LINES, 0, numLatAndLongVertices);
+            glDrawArrays(GL_LINES, 0, (GLsizei) numLatAndLongVertices);
         }
     }
 }
@@ -1234,14 +1234,14 @@ void PlanetRenderer::renderOrbitalPlane(GlslProgram& glslProgram)
 
             // Draw orbital plane grid
             glBindVertexArray(_orbitalPlaneGridVao);
-            glDrawArrays(GL_LINES, 0, numOrbitalPlaneGridVertices);
+            glDrawArrays(GL_LINES, 0, (GLsizei) numOrbitalPlaneGridVertices);
 
             // Draw vertices
             if (bOrbitalPlaneTransparency) {
                 glDepthMask(GL_FALSE);
             }
             glBindVertexArray(_orbitalPlaneVao);
-            glDrawArrays(GL_TRIANGLES, 0, numOrbitalPlaneVertices);
+            glDrawArrays(GL_TRIANGLES, 0, (GLsizei) numOrbitalPlaneVertices);
             if (bOrbitalPlaneTransparency) {
                 glDepthMask(GL_TRUE);
             }
@@ -1260,7 +1260,7 @@ void PlanetRenderer::renderOrbit(GlslProgram& glslProgram)
             glslProgram.setMat4("model", glm::value_ptr(_sphere.getOrbitalPlaneModelMatrix()));
 
             glBindVertexArray(_orbitVao);
-            glDrawArrays(GL_LINES, 0, numOrbitVertices);
+            glDrawArrays(GL_LINES, 0, (GLsizei) numOrbitVertices);
         }
     }
 }
@@ -1302,7 +1302,7 @@ void PlanetRenderer::renderRotationAxis(GlslProgram& glslProgram)
         glslProgram.setBool("useTexture", false);
 
         glBindVertexArray(_rotationAxisVao);
-        glDrawArrays(GL_TRIANGLES, 0, numRotationAxisVertices);
+        glDrawArrays(GL_TRIANGLES, 0, (GLsizei) numRotationAxisVertices);
     }
 }
 
@@ -1340,7 +1340,7 @@ void SunRenderer::renderSphere(GlslProgram& glslProgram)
 
 	// Draw vertices
 #ifndef USE_ICOSPHERE
-    glDrawArrays(GL_TRIANGLES, 0, numMainSphereVertices);
+    glDrawArrays(GL_TRIANGLES, 0, (GLsizei) numMainSphereVertices);
 #else
     glDrawElements(GL_TRIANGLES, numMainSphereElements, GL_UNSIGNED_INT, 0);
 #endif

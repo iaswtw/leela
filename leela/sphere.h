@@ -190,10 +190,48 @@ public:
 
     glm::vec3 getModelTransformedCenter()
     {
-        //glm::vec4 center(_center.x, _center.y, _center.z, 1.0);
-        //return glm::vec3(getModelMatrix() * center);
-
         return _center;
+    }
+
+    // Get the model matrix of the center of this sphere.
+    // - This includes first getting the parent's center's model matrix.
+    glm::mat4 getCenterModelMatrix()
+    {
+        glm::mat4 mat(1.0f);
+
+        //-------------------------------------------------------------------
+        // Transformation matrix is created in reverse order of intended application to the transformed point.
+        //-------------------------------------------------------------------
+
+        // parent is assumed to have been updated.  Translate by an amount equal to the parent's position.
+        if (_parent != nullptr)
+            mat = _parent->getCenterModelMatrix();
+
+        // apply nodal precession
+        mat = glm::rotate(
+            mat,
+            _nodalPrecessionAngle,
+            glm::vec3(0.0f, 0.0f, 1.0f)         // nodal precession application along z axis
+        );
+
+        // apply orbital tilt
+        mat = glm::rotate(
+            mat,
+            _orbitalPlaneTiltAngle,
+            glm::vec3(0.0f, 1.0f, 0.0f)         // orbital tilt application is along y axis
+        );
+
+        // Create point on the orbit by translating a point at 0,0,0 to the orbit.
+        mat = glm::translate(
+            mat,
+            glm::vec3(
+                _orbitalRadius * cos(_orbitalAngle),
+                _orbitalRadius * sin(_orbitalAngle),
+                0.0f
+            )
+        );
+
+        return mat;
     }
 
     // returns a vec3 in x-y plane (z=0)
@@ -228,7 +266,7 @@ public:
         {
             float increment = _rotationAngularVelocity;
             if (bSyncWithRevolution)
-                increment = _orbitalAngularVelocity * 356.25;
+                increment = _orbitalAngularVelocity * 356.25f;
 
             _rotationAngle += increment * stepMultiplier;
             _rotationAngle = _normalizeAngle(_rotationAngle);
@@ -238,7 +276,7 @@ public:
         {
             float increment = _orbitalAngularVelocity;
             if (bOrbitalRevolutionSyncToParent) {
-                increment = _parent->_orbitalAngularVelocity * 12.3;
+                increment = _parent->_orbitalAngularVelocity * 12.3f;
             }
            
             _orbitalAngle += increment * stepMultiplier;
@@ -271,42 +309,12 @@ public:
     // Calculates center position based on the value of current parameters
     void calculateCenterPosition()
     {
-        glm::mat4 mat(1.0f);
+        glm::mat4 mat = getCenterModelMatrix();
+        glm::vec3 raisedCenter;
 
-        //-------------------------------------------------------------------
-        // Transformation matrix is created in reverse order of intended application to the transformed point.
-        //-------------------------------------------------------------------
-
-        // parent is assumed to have been updated.  Translate by an amount equal to the parent's position.
-        if (_parent != nullptr)
-            mat = glm::translate(mat, _parent->getCenter());
-
-        // apply nodal precession
-        mat = glm::rotate(
-            mat,
-            _nodalPrecessionAngle,
-            glm::vec3(0.0f, 0.0f, 1.0f)         // nodal precession application along z axis
-        );
-
-        // apply orbital tilt
-        mat = glm::rotate(
-            mat,
-            _orbitalPlaneTiltAngle,
-            glm::vec3(0.0f, 1.0f, 0.0f)         // orbital tilt application is along y axis
-        );
-
-        // Create point on the orbit by translating a point at 0,0,0 to the orbit.
-        mat = glm::translate(
-            mat,
-            glm::vec3(
-                _orbitalRadius * cos(_orbitalAngle),
-                _orbitalRadius * sin(_orbitalAngle),
-                0.0f
-            )
-        );
-
-        _center = mat * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-
+        _center         = mat * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);       // transform point at origin to form the transformed sphere's center.
+        raisedCenter    = mat * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);       // transform unit z to get the normal to the orbital plane.
+        _orbitalNormal  = raisedCenter - _center;
     }
 
     // Calculate 12 points outside the orbit suitable for drawing month labels
@@ -367,6 +375,7 @@ public:
     // angles and angle velocities are in radians
 
     glm::vec3 _center = glm::vec3(0.0, 0.0, 0.0);
+    glm::vec3 _orbitalNormal = glm::vec3(0.0f, 0.0f, 1.0f);     // perpendicular to the orbital plane
     float _r = 1;
     float _g = 1;
     float _b = 1;

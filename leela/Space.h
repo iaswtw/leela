@@ -207,6 +207,11 @@ public:
         PP.SET(D, S);
     }
 
+    void freeRotateFrame()
+    {
+
+    }
+
     void rotateFrame(PNT along, double horizontal, double vertical)
     {
         // rotate horizontally

@@ -5,12 +5,15 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <spdlog/spdlog.h>
 
 #include <iostream>
 #include <stdio.h>
 #define _USE_MATH_DEFINES
 #include <math.h>
 using namespace std;
+
+
 
 class PT
 {
@@ -70,8 +73,12 @@ public:
     {
         x = xx; y = yy; z = zz; c = cc;
     }
+    glm::vec3 toVec3()
+    {
+        return glm::vec3(x, y, z);
+    }
     void translate(double amount, VECTOR& direction);
-    PNT  translated(double amount, VECTOR& direction);
+    PNT  translated(double amount, VECTOR direction);
     PNT translatedX(double amount);
     PNT translatedY(double amount);
     PNT translatedZ(double amount);
@@ -165,6 +172,10 @@ public:
     {
         x = P2.x - P1.x; y = P2.y - P1.y; z = P2.z - P1.z; calc();
     }
+    VECTOR(glm::vec3 v)
+    {
+        x = v.x; y = v.y; z = v.z; calc();
+    }
     void SET(PNT P1, PNT P2)
     {
         x = P2.x - P1.x; y = P2.y - P1.y; z = P2.z - P1.z; calc();
@@ -205,6 +216,10 @@ public:
     {
         return d;
     }
+    VECTOR operator -()
+    {
+        return VECTOR(-x, -y, -z);
+    }
 
     PNT PointAtK(double k) {
         return PNT(l*k*d, m*k*d, n*k*d);
@@ -222,6 +237,42 @@ public:
     glm::vec3 getGlmVec3()
     {
         return glm::vec3(x, y, z);
+    }
+    // returns cross product of this vector and `other` vector.
+    VECTOR cross(VECTOR other)
+    {
+        VECTOR prod;
+        prod.x =   y * other.z - z * other.y;
+        prod.y = -(x * other.z - z * other.x);
+        prod.z =   x * other.y - y * other.x;
+        prod.calc();
+        return (prod);
+    }
+    //returns dot product of this vector and `other` vector.
+    double dot(VECTOR other)
+    {
+        double prod = x * other.x + y * other.y + z * other.z;
+        return (prod);
+    }
+    // Returns the angle to be traversed when rotating from the `other` vector to this vector.
+    // Reference vector `ref` must be perpendicular to this vector.  It is used to decide the sign of rotation.
+    //  - If `other` falls on the same side as `ref`, angle is positive.
+    //     - `other` and `ref` are on the same half circle w.r.t. `this` vector if dot product of `other` and `ref` is positive.
+    //
+    float angleFrom(VECTOR other, VECTOR ref)
+    {
+        double cos_of_angle = dot(other) / length() / other.length();
+
+        spdlog::info("angleFrom: cos_of_angle = {}", cos_of_angle);
+
+        float angle = acos(cos_of_angle);
+
+        if (ref.dot(*this) < 0.0f) {
+            spdlog::info("angle is negative");
+            angle = 2 * M_PI - angle;
+        }
+
+        return angle;
     }
 };
 
@@ -296,5 +347,4 @@ public:
     }
 
 };
-
 

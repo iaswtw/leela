@@ -94,13 +94,13 @@ protected:
     GLuint _texture;
     GLuint _texture2;
 
-    int numMainSphereVertices = -1;
-    int numMainSphereElements = -1;
-    int numLatAndLongVertices = -1;
-    int numOrbitalPlaneVertices = -1;
-    int numOrbitalPlaneGridVertices = -1;
-    int numOrbitVertices = -1;
-    int numRotationAxisVertices = -1;
+    size_t numMainSphereVertices = 0;
+    size_t numMainSphereElements = 0;
+    size_t numLatAndLongVertices = 0;
+    size_t numOrbitalPlaneVertices = 0;
+    size_t numOrbitalPlaneGridVertices = 0;
+    size_t numOrbitVertices = 0;
+    size_t numRotationAxisVertices = 0;
 
 	PolygonCountLevel _polygonCountLevel;
     NightColorDarkness _nightColorDarkness;
