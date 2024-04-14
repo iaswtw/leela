@@ -375,28 +375,44 @@ void Universe::SetLockMode(TargetLockMode mode)
 
         if ((mode == TargetLockMode_FollowTarget) || (mode == TargetLockMode_OrientedViewTarget))
         {
-            PNT T = lockTarget->getCenter();
-            PNT S = space.S;
-            followVector = VECTOR(S, T);
-            followDistance = float(S.distanceTo(T));
-
-            spdlog::info("followDistance = {}", followDistance);
+            calculateCommonTargetLockVariables();
 
             bSidewaysMotionMode = false;
 
-            if (mode == TargetLockMode_OrientedViewTarget)
+            if (mode == TargetLockMode_FollowTarget)
             {
-                calculateOrientedViewLockAngles();
+                calculateFollowTargetLockVariables();
+            }
+            else if (mode == TargetLockMode_OrientedViewTarget)
+            {
+                calculateOrientedViewLockVariables();
             }
 
         }
     }
 }
 
+void Universe::calculateCommonTargetLockVariables()
+{
+    PNT T = lockTarget->getCenter();
+    PNT S = space.S;
+    followDistance = float(S.distanceTo(T));
+
+    spdlog::info("followDistance = {}", followDistance);
+
+}
+
+void Universe::calculateFollowTargetLockVariables()
+{
+    PNT T = lockTarget->getCenter();
+    PNT S = space.S;
+    followVector = VECTOR(S, T);
+}
+
 //
 // Calculate `orientedTargetLock_alpha` and `orientedTargetLock_beta` members.
 //
-void Universe::calculateOrientedViewLockAngles()
+void Universe::calculateOrientedViewLockVariables()
 {
     // T = target's center
     // P = target's parent's center
@@ -420,7 +436,7 @@ void Universe::calculateOrientedViewLockAngles()
                                             // This is the axis aroud which a `translated` T will have to be rotated to get the observer's position S for the next frame.
     
     //spdlog::info("--------------------------------");
-    //spdlog::info("calculateOrientedViewLockAngles:");
+    //spdlog::info("calculateOrientedViewLockVariables:");
     //spdlog::info("--------------------------------");
 
     orientedTargetLock_alpha = axis.angleFrom(PT, normal.cross(PT));
@@ -1040,58 +1056,49 @@ void Universe::navigate(float __throttle, float __yaw, float __pitch, float __ro
     }
     else
     {
-        if ((lockMode == TargetLockMode_ViewTarget) || (lockMode == TargetLockMode_OrientedViewTarget))
-        {
-            // TODO - don't allow navigating into in a object.
-            if (lockMode == TargetLockMode_OrientedViewTarget) {
-                if (__throttle != 0.0f) {
-                    followDistance -= __throttle;
-                }
-            }
-            else
-            {
-                if (__throttle != 0.0f)
-                    space.moveFrame(Movement_Forward, __throttle);
-            }
-
-            // rotate frame about the target's center.
-            if ((__yaw != 0.0f) || (__pitch != 0.0f)) {
-                float horizontalAngle = -__yaw * 3.0f;
-                float verticalAngle = __pitch * 3.0f;
-                float currentAngle = space.deg(acos(glm::dot(glm::normalize(space.DS.getGlmVec3()),
-                                                      glm::normalize(glm::vec3(0, 0, 1)))));
-                
-                //printf("__pitch = %f\n", __pitch);
-                //printf("currentAngle = %f\n", currentAngle);
-                //printf("BEFORE verticalAngle = %f\n", verticalAngle);
-
-                // todo - come up with a better way to make sure angle doesn't get too close to vertical.
-                if (__pitch > 0)
-                    verticalAngle = glm::min(verticalAngle, currentAngle - 2);
-                if (__pitch < 0)
-                    if (currentAngle > 178)
-                        verticalAngle = 0;
-                    else
-                        verticalAngle = glm::min(verticalAngle, 180 - currentAngle - 2);
-
-                //printf("AFTER  verticalAngle = %f\n", verticalAngle);
-                
-                space.rotateFrame(lockTarget->getCenter(), horizontalAngle, verticalAngle);
-
-                //space.moveFrame(Movement_RightAlongSD, -__roll);
-
-                if (lockMode == TargetLockMode_OrientedViewTarget)
-                {
-                    // Observer may have moved due to navigation inputs, thereby chainging the orientation.
-                    // Re-calculate angles to be used to set observer's position in the next iteration.
-                    calculateOrientedViewLockAngles();
-                }
+        // TODO - don't allow navigating into in a object.
+        if ((lockMode == TargetLockMode_OrientedViewTarget) || (lockMode == TargetLockMode_FollowTarget)) {
+            if (__throttle != 0.0f) {
+                followDistance -= __throttle;
             }
         }
         else
         {
-            if (__throttle != 0.0f) {
-                followDistance -= __throttle;
+            if (__throttle != 0.0f)
+                space.moveFrame(Movement_Forward, __throttle);
+        }
+
+        // rotate frame about the target's center.
+        if ((__yaw != 0.0f) || (__pitch != 0.0f)) {
+            float horizontalAngle = -__yaw * 3.0f;
+            float verticalAngle = __pitch * 3.0f;
+            float currentAngle = space.deg(acos(glm::dot(glm::normalize(space.DS.getGlmVec3()),
+                                                    glm::normalize(glm::vec3(0, 0, 1)))));
+                
+            //printf("__pitch = %f\n", __pitch);
+            //printf("currentAngle = %f\n", currentAngle);
+            //printf("BEFORE verticalAngle = %f\n", verticalAngle);
+
+            // todo - come up with a better way to make sure angle doesn't get too close to vertical.
+            if (__pitch > 0)
+                verticalAngle = glm::min(verticalAngle, currentAngle - 2);
+            if (__pitch < 0)
+                if (currentAngle > 178)
+                    verticalAngle = 0;
+                else
+                    verticalAngle = glm::min(verticalAngle, 180 - currentAngle - 2);
+
+            space.rotateFrame(lockTarget->getCenter(), horizontalAngle, verticalAngle);
+
+            //space.moveFrame(Movement_RightAlongSD, -__roll);
+
+            if (lockMode == TargetLockMode_FollowTarget) {
+                calculateFollowTargetLockVariables();
+            }
+            else if (lockMode == TargetLockMode_OrientedViewTarget) {
+                // Observer may have moved due to navigation inputs, thereby chainging the orientation.
+                // Re-calculate angles to be used to set observer's position in the next iteration.
+                calculateOrientedViewLockVariables();
             }
         }
     }

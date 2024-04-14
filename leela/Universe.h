@@ -214,7 +214,9 @@ public:
     
     void SetLockTargetAndMode(Sphere* target, TargetLockMode mode);
     void SetLockMode(TargetLockMode mode);
-    void calculateOrientedViewLockAngles();
+    void calculateCommonTargetLockVariables();
+    void calculateFollowTargetLockVariables();
+    void calculateOrientedViewLockVariables();
     void toggleLockMode();
     void ToggleConstantDirectionFollowMode();
     void ResetFollowTargetAndMode();

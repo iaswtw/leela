@@ -263,12 +263,12 @@ public:
     {
         double cos_of_angle = dot(other) / length() / other.length();
 
-        spdlog::info("angleFrom: cos_of_angle = {}", cos_of_angle);
+        //spdlog::info("angleFrom: cos_of_angle = {}", cos_of_angle);
 
         float angle = acos(cos_of_angle);
 
         if (ref.dot(*this) < 0.0f) {
-            spdlog::info("angle is negative");
+            //spdlog::info("angle is negative");
             angle = 2 * M_PI - angle;
         }
 
