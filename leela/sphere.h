@@ -241,6 +241,9 @@ public:
         return axisTiltOrientationAxis;
     }
 
+    // Transforms a point on an upright sphere at origin to the tilted sphere in its orbit.
+    //    - usis axial tilt, rotation position and precession of the sphere.
+    //    - uses orbital radius, tilt and nodal precession. 
     glm::mat4 getModelMatrix()
     {
         glm::mat4 modelTrans(1.0f);
@@ -317,6 +320,34 @@ public:
         _orbitalNormal  = raisedCenter - _center;
     }
 
+    // Get a point defined in untranslated coordinates to be translated by this sphere's model matrix.
+    glm::vec3 getTranslatedSpherePoint(glm::vec3 p)
+    {
+        return getCenterModelMatrix() * glm::vec4(p, 1.0);
+        //return getModelMatrix() * getCenterModelMatrix() * glm::vec4(p, 1.0);
+    }
+
+    glm::vec3 getTransformedNorthPole()
+    {
+        return getModelMatrix() * glm::vec4(0.0f, 0.0f, _radius, 1.0);
+    }
+
+    glm::vec3 getTransformedLatitudeLongitude(float lat, float lon, float radiusScale = 1.0f)
+    {
+        // convert latitude and longitude to point on sphere.
+        float alpha = 180 + lon;                // angle from +ve x axis rotating towards +ve y axis.  range: 0 to 360.
+        float theta = 90 - lat;                 // angle from +ve z axis.  range: 0 to 180.
+
+        float alpha_rad = glm::radians(alpha);
+        float theta_rad = glm::radians(theta);
+
+        float x = _radius * radiusScale * sin(theta_rad) * cos(alpha_rad);
+        float y = _radius * radiusScale * sin(theta_rad) * sin(alpha_rad);
+        float z = _radius * radiusScale * cos(theta_rad);
+
+        return getModelMatrix() * glm::vec4(x, y, z, 1.0);
+    }
+
     // Calculate 12 points outside the orbit suitable for drawing month labels
     // labelPositionScale - if 1.0, labels are at sphere's orbital radius from the parent's (e.g. sun's) center.
     void calculateMonthPositions(float labelPositionScale)
@@ -383,7 +414,7 @@ public:
 
 
     // Rotation variables
-    float _radius = 0;
+    float _radius = 0;                      // radius of sphere
     float _rotationAngle = 0;               // current rotation angle (increments based on rotation angular velocity).
     float _rotationAngularVelocity = 0;     // angular velocity or rotation around sphere's axis.
     bool   bSyncWithRevolution = false;      // sync with this sphere's revolution

@@ -178,6 +178,16 @@ typedef enum
     TargetLockMode_FollowTarget       // camera moves with the object maintaining distance and direction
 } TargetLockMode;
 
+
+typedef enum
+{
+    RenderTextType_ObjectText,      // text is like a 3d object such as sphere and is to be placed at x,y,z in the scene.
+                                    //  - text size changes based on the distance and orientation of text w.r.t the observer
+    RenderTextType_ScreenText       // text is to be placed closest to the user at the beginning of the frustm
+                                    //  - text appears the same size regardless of observer's position
+} RenderTextType;
+
+
 class Universe
 {
 public:
@@ -200,7 +210,7 @@ public:
     void renderUsingSimpleGlslProgram();
     void renderTransparentUsingSimpleGlslProgram();
     void renderUsingFontGlslProgram();
-    void RenderText(std::string text, float x, float y, float scale, glm::vec3 color);
+    void RenderText(RenderTextType renderType, std::string text, float x, float y, float z, float scale, glm::vec3 color);
 
     void constructFontInfrastructureAndSendToGpu();
 
@@ -271,7 +281,7 @@ public:
 
     void createFontCharacterTexture();
 
-    glm::vec3 getScreenCoordinates(glm::vec3 &scenePoint);
+    glm::vec3 getScreenCoordinates(glm::vec3 scenePoint);
 
     bool isNoModifier();
     bool isAllModifiers();

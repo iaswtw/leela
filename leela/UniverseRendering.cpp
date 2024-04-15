@@ -95,9 +95,18 @@ void Universe::constructFontInfrastructureAndSendToGpu()
 
     glBindVertexArray(fontVao);
     glBindBuffer(GL_ARRAY_BUFFER, fontVbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+    //glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+    //glEnableVertexAttribArray(0);
+    //glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+
+
+    //-------------
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 5, NULL, GL_DYNAMIC_DRAW);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    //-------------
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -110,9 +119,19 @@ void Universe::constructFontInfrastructureAndSendToGpu()
 
     glBindVertexArray(largeFontVao);
     glBindBuffer(GL_ARRAY_BUFFER, largeFontVbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+    //glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+    //glEnableVertexAttribArray(0);
+    //glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+
+
+    //-------------
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 5, NULL, GL_DYNAMIC_DRAW);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    //-------------
+
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -313,12 +332,53 @@ void Universe::renderTransparentUsingSimpleGlslProgram()
 
 void Universe::renderUsingFontGlslProgram()
 {
+    glm::vec3 projected;
+    float z = 0.0f;
+
     if (bShowMonthNames)
     {
         if (bMonthLabelsCloserToSphere)
             earth.calculateMonthPositions((earth._orbitalRadius + 1.5f*earth._radius) / earth._orbitalRadius);
         else
             earth.calculateMonthPositions(1.2f);
+
+        float aus_lat = 30.2f;
+        float aus_lon = -97.7;
+
+        float ord_lat = 41.8f;
+        float ord_lon = -87.6f;
+
+
+        glm::mat4 combinedMatrix = projectionMatrix * viewMatrix;
+        fontGlslProgram.setMat4("projection", glm::value_ptr(combinedMatrix));
+
+
+        //projected = getScreenCoordinates(earth.getTransformedLatitudeLongitude(aus_lat, aus_lon));
+        projected = earth.getTransformedLatitudeLongitude(aus_lat, aus_lon, 1.1f);
+        RenderText(
+            RenderTextType_ObjectText,
+            "Austin",
+            projected.x,
+            projected.y,
+            projected.z,
+            1.0f,
+            glm::vec3(1.0f, 1.0f, 0.0f));
+
+        projected = earth.getTransformedLatitudeLongitude(ord_lat, ord_lon, 1.1f);
+        RenderText(
+            RenderTextType_ObjectText,
+            "Chicago",
+            projected.x,
+            projected.y,
+            projected.z,
+            1.0f,
+            glm::vec3(1.0f, 1.0f, 0.0f));
+
+
+        //----- TEMP ------
+        glm::mat4 projection = glm::ortho(0.0f, float(curWidth), 0.0f, float(curHeight));
+        fontGlslProgram.setMat4("projection", glm::value_ptr(projection));
+        //----- TEMP ------
 
 
         //glm::vec2 projected = getScreenCoordinates(earth.getModelTransformedCenter());
@@ -328,7 +388,7 @@ void Universe::renderUsingFontGlslProgram()
 
         for (int i = 0; i < 12; i++)
         {
-            glm::vec3 projected = getScreenCoordinates(earth.monthPositions[i]);
+            projected = getScreenCoordinates(earth.monthPositions[i]);
             //glm::vec2 projected = getScreenCoordinates(glm::vec3(0.0f, 0.0f, 0.0f));
 
             //spdlog::info("month Position {}: {}", i, glm::to_string(projected));
@@ -336,21 +396,23 @@ void Universe::renderUsingFontGlslProgram()
             if (projected.z < 1.0f)
             {
                 RenderText(
+                    RenderTextType_ScreenText,
                     monthNames[i].c_str(),
                     projected.x,
                     projected.y,
+                    z,
                     1.0f,
                     glm::vec3(1.0f, 1.0f, 0.0f));
             }
         }
     }
-    //RenderText("Hello World", 100.0f, 100.0f, 1.0f, glm::vec3(1.0f, 1.0f, 0.0f));
+    //RenderText(RenderTextType_ScreenText, "Hello World", 100.0f, 100.0f, z, 1.0f, glm::vec3(1.0f, 1.0f, 0.0f));
 }
 
 
 // prerequisites: fontGlslProgram must be active before calling this method.
 
-void Universe::RenderText(std::string text, float x, float y, float scale, glm::vec3 color)
+void Universe::RenderText(RenderTextType renderType, std::string text, float x, float y, float z, float scale, glm::vec3 color)
 {
     fontGlslProgram.setVec3("textColor", glm::value_ptr(color));
 
@@ -374,6 +436,9 @@ void Universe::RenderText(std::string text, float x, float y, float scale, glm::
     else
         glBindVertexArray(fontVao);
 
+
+    PNT p(x, y, z), p1, p2, p3, p4, p5, p6;
+
     // iterate through all characters
     std::string::const_iterator c;
     for (c = text.begin(); c != text.end(); c++)
@@ -386,22 +451,8 @@ void Universe::RenderText(std::string text, float x, float y, float scale, glm::
         else
             ch = characters[*c];
 
-        float xpos = x + ch.bearing.x * scale;
-        float ypos = y - (ch.size.y - ch.bearing.y) * scale;
-
-        float w = ch.size.x * scale;
-        float h = ch.size.y * scale;
-
-        // update VBO for each character
-        float vertices[6][4] = {
-            {xpos,      ypos + h,  0.0f, 0.0f },
-            {xpos,      ypos,      0.0f, 1.0f },
-            {xpos + w,  ypos,      1.0f, 1.0f },
-
-            {xpos,      ypos + h,  0.0f, 0.0f },
-            {xpos + w,  ypos,      1.0f, 1.0f },
-            {xpos + w,  ypos + h,  1.0f, 0.0f },
-        };
+        float ch_w = ch.size.x * scale;
+        float ch_h = ch.size.y * scale;
 
         // render glyph texture over quad
         glBindTexture(GL_TEXTURE_2D, ch.textureID);
@@ -411,15 +462,80 @@ void Universe::RenderText(std::string text, float x, float y, float scale, glm::
             glBindBuffer(GL_ARRAY_BUFFER, largeFontVbo);
         else
             glBindBuffer(GL_ARRAY_BUFFER, fontVbo);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+
+
+        if (renderType == RenderTextType_ScreenText) {
+            float xpos = x + ch.bearing.x * scale;
+            float ypos = y - (ch.size.y - ch.bearing.y) * scale;
+
+            // update VBO for each character
+            float vertices[6][5] = {
+                // point coordiinates                 Texture coordinates
+                //---------------------------------   -------------------------
+                {xpos,         ypos + ch_h,  0.0f,    0.0f, 0.0f },                 // the point here is equivalent to p1 in the `else` part
+                {xpos,         ypos,         0.0f,    0.0f, 1.0f },                 // the point here is equivalent to p2 in the `else` part
+                {xpos + ch_w,  ypos,         0.0f,    1.0f, 1.0f },                 // the point here is equivalent to p3 in the `else` part
+
+                {xpos,         ypos + ch_h,  0.0f,    0.0f, 0.0f },                 // the point here is equivalent to p1 in the `else` part
+                {xpos + ch_w,  ypos,         0.0f,    1.0f, 1.0f },                 // the point here is equivalent to p3 in the `else` part
+                {xpos + ch_w,  ypos + ch_h,  0.0f,    1.0f, 0.0f },                 // the point here is equivalent to p6 in the `else` part
+            };
+
+            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+
+            // advance cursors for next glyph (advance is 1/64 pixels)
+            x += (ch.advance >> 6) * scale;
+
+        }
+        else {
+            // text is upright in z direction and perpendicular to the observer.
+            // find the 4 unique points of the two triangles of the character glyph.
+            // starting with x, y and z given to this function, move in the "right" direction given observer's position and down direction.
+            // 
+            // p1/p4 o--o p6   
+            //       |\ |
+            //       | \|
+            // p2    o--o p3/p5
+
+            // find the "right" direction vector
+            // assume `space` object's S, D, R and correctly set.  (R gives downward direction with DR perpendicular to SD)
+            VECTOR DS = VECTOR(space.D, space.S);
+            VECTOR DR = VECTOR(space.D, space.R);
+            VECTOR DL = DS.cross(DR);
+
+
+            // Calculate p2 which is equivalent of this coordinate.
+            //      - float xpos = x + ch.bearing.x * scale;
+            //      - float ypos = y - (ch.size.y - ch.bearing.y) * scale;
+            p2 = p.translated(ch.bearing.x * scale, DL).translated((ch.size.y - ch.bearing.y) * scale, DR);
+            p1 = p2.translated(-ch_h, DR);           // -ve sign for `ch_h` because DR is pointing down
+            p3 = p2.translated(ch_w, DL);
+            p6 = p3.translated(-ch_h, DR);
+
+            float vertices[6][5] = {
+                // point coordiinates                 Texture coordinates
+                //---------------------------------   -------------------------
+                {p1.x, p1.y, p1.z,                    0.0f, 0.0f },
+                {p2.x, p2.y, p2.z,                    0.0f, 1.0f },
+                {p3.x, p3.y, p3.z,                    1.0f, 1.0f },
+                                                    
+                {p1.x, p1.y, p1.z,                    0.0f, 0.0f },
+                {p3.x, p3.y, p3.z,                    1.0f, 1.0f },
+                {p6.x, p6.y, p6.z,                    1.0f, 0.0f },
+            };
+
+            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+
+            // advance cursors for next glyph (advance is 1/64 pixels)
+            p.translate((ch.advance >> 6) * scale, DL);
+        }
+
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         // render quad
         glDrawArrays(GL_TRIANGLES, 0, 6);
-        // advance cursors for next glyph (advance is 1/64 pixels)
-        x += (ch.advance >> 6) * scale;
-
     }
+
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -508,7 +624,7 @@ void Universe::createFontCharacterTexture()
 //          where w and h are width and height of the viewport.
 //
 // `scenePoint` is a model-transformed point.
-glm::vec3 Universe::getScreenCoordinates(glm::vec3& scenePoint)
+glm::vec3 Universe::getScreenCoordinates(glm::vec3 scenePoint)
 {
     //spdlog::info("getScreenCoordinates: {}", glm::to_string(scenePoint));
 
