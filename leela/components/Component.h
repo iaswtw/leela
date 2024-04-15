@@ -2,37 +2,31 @@
 
 #include "GlslProgram.h"
 
-// All known component types
-typedef enum
-{
-	ComponentType_Body,
-	ComponentType_OrbitalPlane,
-	ComponentType_OrbitalPlaneGrid,
-	ComponentType_LatitudesLongitudes,
-	ComponentType_Axis,
 
-
-} ComponentType;
-
-
+//
+// A component adds to the functionality of a scene object.
+//  - A subclassed component typically has a handle to the scene object (subclass of SceneObject).
+//  - On each advance(), the component can examine the scene object and derive other information.
+// 
+// TODO examples.
+//
 class Component
 {
 public:
-	Component(ComponentType type)
+	Component(std::string componentName)
 	{
-		_componentType = type;
+		_componentName = componentName;
 	}
 
 	virtual void init() = 0;
 	virtual void advance(float stepMultiplier) = 0;
-	virtual void render(GlslProgram& glslProgram) = 0;
-	virtual void renderTransparent() {}
 
-	ComponentType getComponentType()
+
+	std::string getComponentName()
 	{
-		return _componentType;
+		return _componentName;
 	}
 
 private:
-	ComponentType _componentType;
+	std::string _componentName;
 };

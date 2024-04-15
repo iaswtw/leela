@@ -6,7 +6,6 @@
     <ClCompile Include="lodepng.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="StarsRenderer.cpp" />
     <ClCompile Include="Universe.cpp" />
     <ClCompile Include="UniverseDemo.cpp" />
@@ -86,6 +85,11 @@
       <Filter>Components</Filter>
     </ClInclude>
     <ClInclude Include="components\OrbitalPlaneComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Fir.h" />
+    <ClInclude Include="SceneObject.h" />
+    <ClInclude Include="components\Renderer.h">
       <Filter>Components</Filter>
     </ClInclude>
   </ItemGroup>

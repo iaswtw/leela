@@ -98,8 +98,6 @@ void Universe::initSceneObjects()
         0.6f                                // radio of single pixel starts to all stars
     );
 
-    sceneObjects.push_back(&miscComponentContainer);
-
 
     axis.setSpan(3600, 3600, 1200);
     axis.setColors(
@@ -107,7 +105,7 @@ void Universe::initSceneObjects()
         glm::vec3(0.2f, 0.5f, 0.2f),        // Y axis color
         glm::vec3(0.2f, 0.5f, 0.5f)         // Z axis color
     );
-    miscComponentContainer.addComponent(&axis);
+    scene.addComponent(&axis);
 
     // Sun
     //---------------------------------------
@@ -125,7 +123,7 @@ void Universe::initSceneObjects()
         0,                                  // nodal precession initial angle
         0                                   // orbital tilt
     );
-
+    scene.addChildSceneObject(&sun);
 
     // Earth
     //---------------------------------------
@@ -145,6 +143,7 @@ void Universe::initSceneObjects()
     );
     earth.setOrbitalPlaneColor(glm::vec3(0.55, 0.82, 1.0));
     earth.setSunSphere(&sun);
+    sun.addChildSceneObject(&earth)
 
     // Moon
     //---------------------------------------
@@ -168,7 +167,7 @@ void Universe::initSceneObjects()
     moon.setSunSphere(&sun);
     moon.setRelatedSphere(&earth);
     earth.setRelatedSphere(&moon);
-
+    earth.addChildSceneObject(&moon);
 
     // Mars
     //---------------------------------------
@@ -189,6 +188,7 @@ void Universe::initSceneObjects()
     mars.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
     mars.setParentSphere(&sun);
     mars.setSunSphere(&sun);
+    sun.addChildSceneObject(&mars);
 
     // Jupiter
     //---------------------------------------
@@ -209,6 +209,7 @@ void Universe::initSceneObjects()
     jupiter.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
     jupiter.setParentSphere(&sun);
     jupiter.setSunSphere(&sun);
+    sun.addChildSceneObject(&jupiter);
 
 
     // Saturn
@@ -230,6 +231,7 @@ void Universe::initSceneObjects()
     saturn.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
     saturn.setParentSphere(&sun);
     saturn.setSunSphere(&sun);
+    sun.addChildSceneObject(&saturn);
 
 
     // Uranus
@@ -251,6 +253,7 @@ void Universe::initSceneObjects()
     uranus.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
     uranus.setParentSphere(&sun);
     uranus.setSunSphere(&sun);
+    sun.addChildSceneObject(&uranus);
 
 
     // Neptune
@@ -272,6 +275,7 @@ void Universe::initSceneObjects()
     neptune.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
     neptune.setParentSphere(&sun);
     neptune.setSunSphere(&sun);
+    sun.addChildSceneObject(&neptune);
 
 
     //---------------------------------------------------------------
@@ -301,24 +305,33 @@ void Universe::printGlError()
     }
 }
 
-
-void Universe::advance(float stepMultiplier)
+void Universe::_advanceSceneObject(SceneObject* sceneObject, float stepMultiplier)
 {
-    // Advance parents before children
-    sun.advance(stepMultiplier);
-    earth.advance(stepMultiplier);
-    moon.advance(stepMultiplier);
-    mars.advance(stepMultiplier);
-    jupiter.advance(stepMultiplier);
-    saturn.advance(stepMultiplier);
-    uranus.advance(stepMultiplier);
-    neptune.advance(stepMultiplier);
+    //----------------------------------------
+    // todo - eventually implement this without recursion
+    //----------------------------------------
 
-    // TODO: how to ensure parents are advanced before children when using a loop?
-    //for (int i = 0; allSpheres[i] != NULL; i++)
-    //{
-    //    allSpheres[i]->advance(stepMultiplier);
-    //}
+    // Advance just the given scene object
+    sceneObject->advance(stepMultiplier);
+
+    // advance all compnents of this scene object
+    for (Component *c : sceneObject->_components)
+    {
+        c->advance(stepMultiplier);
+    }
+
+    // finally, advance each child scene object (recursively)
+    //  - advancing `this` (i.e. given scene object) first ensures children are advanced after parent.
+    for (SceneObject* obj : sceneObject->_childSceneObjects)
+    {
+        _advanceSceneObject(obj, stepMultiplier);
+    }
+
+}
+
+void Universe::advanceScene(float stepMultiplier)
+{
+    _advanceSceneObject(&scene, stepMultiplier);
 }
 
 
@@ -959,7 +972,7 @@ void Universe::processFlags()
     }
 
 
-    advance(_filteredStepMultiplier * _stepMultiplierFrameRateAdjustment);
+    advanceScene(_filteredStepMultiplier * _stepMultiplierFrameRateAdjustment);
 
 
     if (!bSimulationPause)
@@ -984,7 +997,7 @@ void Universe::processFlags()
 
     if (bEarthSurfaceLockMode)
     {
-        glm::mat4 emm = earth.getModelMatrix();
+        glm::mat4 emm = earth.getTransform();
         glm::vec3 xCenter = earth.getModelTransformedCenter();
 
         glm::vec4 S = glm::vec4(
