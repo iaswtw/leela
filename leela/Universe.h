@@ -279,9 +279,11 @@ public:
 
     void clearAllFirFilters();
 
+    int getHeightOfCharA();
     void createFontCharacterTexture();
 
     glm::vec3 getScreenCoordinates(glm::vec3 scenePoint);
+    float findScreenProjectedHeight(float segmentLength, glm::vec3 atPoint);
 
     bool isNoModifier();
     bool isAllModifiers();

@@ -342,10 +342,10 @@ void Universe::renderUsingFontGlslProgram()
         else
             earth.calculateMonthPositions(1.2f);
 
-        float aus_lat = 30.2f;
+        float aus_lat = 30.2f;      // Austin latitude/longitude
         float aus_lon = -97.7;
 
-        float ord_lat = 41.8f;
+        float ord_lat = 41.8f;      // Chicago latitude/longitude
         float ord_lon = -87.6f;
 
 
@@ -353,25 +353,38 @@ void Universe::renderUsingFontGlslProgram()
         fontGlslProgram.setMat4("projection", glm::value_ptr(combinedMatrix));
 
 
+        // adjust scale based on zoom level to ensure font size is not too large.
+        float heightOfCharA = getHeightOfCharA();
+        float screenProjectedHeight = findScreenProjectedHeight(heightOfCharA, earth._center);
+        //spdlog::info("heightOfCharA = {}", heightOfCharA);
+        //spdlog::info("screenProjectedHeight of A = {}", screenProjectedHeight);
+        
+        float fontScale = 1.0;
+        if (screenProjectedHeight > 10.0) {
+            // adjust scale such that screen projected height is 10
+            fontScale = 10.0 / screenProjectedHeight;
+        }
+
+
         //projected = getScreenCoordinates(earth.getTransformedLatitudeLongitude(aus_lat, aus_lon));
-        projected = earth.getTransformedLatitudeLongitude(aus_lat, aus_lon, 1.1f);
+        projected = earth.getTransformedLatitudeLongitude(aus_lat, aus_lon, (earth._radius + 1) / earth._radius);
         RenderText(
             RenderTextType_ObjectText,
             "Austin",
             projected.x,
             projected.y,
             projected.z,
-            1.0f,
+            fontScale,
             glm::vec3(1.0f, 1.0f, 0.0f));
 
-        projected = earth.getTransformedLatitudeLongitude(ord_lat, ord_lon, 1.1f);
+        projected = earth.getTransformedLatitudeLongitude(ord_lat, ord_lon, (earth._radius + 1) / earth._radius);
         RenderText(
             RenderTextType_ObjectText,
             "Chicago",
             projected.x,
             projected.y,
             projected.z,
-            1.0f,
+            fontScale,
             glm::vec3(1.0f, 1.0f, 0.0f));
 
 
@@ -423,11 +436,13 @@ void Universe::RenderText(RenderTextType renderType, std::string text, float x, 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glGetBooleanv(GL_DEPTH_WRITEMASK, &curDepthMaskEnable);       // backup current depth mask before disabling it
+    if (renderType == RenderTextType_ScreenText) {
+        glGetBooleanv(GL_DEPTH_WRITEMASK, &curDepthMaskEnable);       // backup current depth mask before disabling it
+        if (!bShowLabelsOnTop)
+            glDepthMask(GL_FALSE);            // disable writing to depth buffer.  This will allow other objects (spheres, etc) to
+                                              // overwrite the label when they are drawn later.
+    }
 
-    if (!bShowLabelsOnTop)
-        glDepthMask(GL_FALSE);            // disable writing to depth buffer.  This will allow other objects (spheres, etc) to
-                                          // overwrite the label when they are drawn later.
     //---------------------------------
 
     glActiveTexture(GL_TEXTURE0);
@@ -539,13 +554,20 @@ void Universe::RenderText(RenderTextType renderType, std::string text, float x, 
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    glDepthMask(curDepthMaskEnable);    // restore depth mask
+    if (renderType == RenderTextType_ScreenText) {
+        glDepthMask(curDepthMaskEnable);    // restore depth mask
+    }
+
     if (!prevBlendEnable)               // disabled blending if it was previously disabled
         glDisable(GL_BLEND);
 
 }
 
-
+int Universe::getHeightOfCharA()
+{
+    Character ch = characters['A'];
+    return ch.size.y;
+}
 
 void Universe::createFontCharacterTexture()
 {
@@ -640,6 +662,15 @@ glm::vec3 Universe::getScreenCoordinates(glm::vec3 scenePoint)
     return projected;
     //return glm::vec2(projected.x, projected.y);
     //return glm::vec2(0.0f, 0.0f);
+}
+
+// atPoint      - segment of length `segmentLength` is located at this point
+float Universe::findScreenProjectedHeight(float segmentLength, glm::vec3 atPoint)
+{
+    glm::vec3 screenProj1 = getScreenCoordinates(PNT(atPoint).translated(-segmentLength/2, space.DR).toVec3());
+    glm::vec3 screenProj2 = getScreenCoordinates(PNT(atPoint).translated(segmentLength /2, space.DR).toVec3());
+
+    return fabs(screenProj1.y - screenProj2.y);
 }
 
 
