@@ -2,27 +2,27 @@
 
 #include <SDL.h>
 
-class OneShotBoolean
+class OneShotTimer
 {
 public:
-    OneShotBoolean()
+    OneShotTimer()
     {
     }
 
     void set(int timeout_ms)
     {
         endTime = SDL_GetTicks() + timeout_ms;
-        _bValue = true;
+        _bActive = true;
     }
 
     /* This must be called in the application main loop. */
     void tick()
     {
-        if (_bValue)
+        if (_bActive)
         {
             if (endTime <= SDL_GetTicks())
             {
-                _bValue = false;
+                _bActive = false;
             }
         }
         else
@@ -33,10 +33,10 @@ public:
 
     bool get()
     {
-        return _bValue;
+        return _bActive;
     }
 
 private:
     unsigned int endTime = 0;
-    bool _bValue = false;
+    bool _bActive = false;          // true if oneshot timer is active
 };

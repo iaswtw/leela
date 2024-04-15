@@ -197,7 +197,7 @@
     <ClInclude Include="stbi_image.h" />
     <ClInclude Include="Universe.h" />
     <ClInclude Include="Utils.h" />
-    <ClInclude Include="OneShotBoolean.h" />
+    <ClInclude Include="OneShotTimer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AxisRenderer.cpp" />

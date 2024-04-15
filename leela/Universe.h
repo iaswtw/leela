@@ -21,7 +21,7 @@
 #include <string>
 
 #include "imgui.h"
-#include "OneShotBoolean.h"
+#include "OneShotTimer.h"
 #include "GlslProgram.h"
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -501,7 +501,7 @@ public:
     ImFont *appFontGiant = nullptr;
     ImFont *fixedWidthSmall = nullptr;
 
-    OneShotBoolean doubleClicked = OneShotBoolean();
+    OneShotTimer doubleClicked = OneShotTimer();
 
     std::string logString = "";
 
