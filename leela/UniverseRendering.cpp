@@ -29,6 +29,7 @@ void Universe::initializeGL()
 
     //---------------------------------------------------------------------------------------------------
 
+    axis.init();
 
     sunRenderer.setAsLightSource();
     sunRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
@@ -81,7 +82,6 @@ void Universe::initializeGL()
 
     //---------------------------------------------------------------------------------------------------
     // Axis
-    axisRenderer.constructVerticesAndSendToGpu();
     starsRenderer.constructVerticesAndSendToGpu();
 
     glBindVertexArray(0);       // Disable VBO
@@ -310,7 +310,7 @@ void Universe::renderUsingSimpleGlslProgram()
 {
     if (bShowAxis)
     {
-        axisRenderer.render(simpleGlslProgram);
+        axis.render(simpleGlslProgram);
     }
 
     if (bShowOrbitsGlobalEnable)

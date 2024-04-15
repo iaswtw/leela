@@ -71,7 +71,6 @@ Universe::Universe() :
     uranusRenderer(*this, uranus, "uranus2k.png"),
     neptuneRenderer(*this, neptune, "neptune2k.png"),
 
-    axisRenderer(axis),
     starsRenderer(stars),
 
     throttleFilter                  (FIR_WIDTH, fir_coeff),
@@ -99,6 +98,8 @@ void Universe::initSceneObjects()
         0.6f                                // radio of single pixel starts to all stars
     );
 
+    sceneObjects.push_back(&miscComponentContainer);
+
 
     axis.setSpan(3600, 3600, 1200);
     axis.setColors(
@@ -106,6 +107,8 @@ void Universe::initSceneObjects()
         glm::vec3(0.2f, 0.5f, 0.2f),        // Y axis color
         glm::vec3(0.2f, 0.5f, 0.5f)         // Z axis color
     );
+    miscComponentContainer.addComponent(&axis);
+
     // Sun
     //---------------------------------------
     //sun.setColor(0.7f, 0.7f, 0.1f);

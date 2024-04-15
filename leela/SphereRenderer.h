@@ -57,10 +57,8 @@ public:
     std::string _locateTextureFile(const char * filenName);
 
 public:
-    bool bShowOrbitalPlane = false;
     bool bShowOrbit = true;
     bool bShowLatitudesAndLongitudes = false;
-    bool bOrbitalPlaneTransparency = false;
 
 
 public:
@@ -70,7 +68,6 @@ public:
     std::pair<std::vector<float>*, std::vector<Triangle>*> _constructMainIcoSphereVertices();
     void constructLatitudesAndLongitudeVertices();
     void constructOrbit();
-    void constructOrbitalPlaneVertices();
     void constructOrbitalPlaneGridVertices();
 
 	float _getPolygonIncrement();
@@ -81,10 +78,6 @@ protected:
     Sphere& _sphere;
 
     GLuint _mainVao;
-    GLuint _orbitalPlaneVao;
-    GLuint _orbitalPlaneVbo;
-    GLuint _orbitalPlaneGridVao;            // grid lines in the orbital plane
-    GLuint _orbitalPlaneGridVbo;
     GLuint _orbitVao = 0;
     GLuint _orbitVbo = 0;
     GLuint _latAndLongVao;
@@ -97,8 +90,6 @@ protected:
     size_t numMainSphereVertices = 0;
     size_t numMainSphereElements = 0;
     size_t numLatAndLongVertices = 0;
-    size_t numOrbitalPlaneVertices = 0;
-    size_t numOrbitalPlaneGridVertices = 0;
     size_t numOrbitVertices = 0;
     size_t numRotationAxisVertices = 0;
 

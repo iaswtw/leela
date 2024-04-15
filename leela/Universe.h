@@ -9,9 +9,10 @@
 #include <SDL.h>
 #include <SDL_opengl.h>
 
+#include "SceneObject.h"
 #include "sphere.h"
 #include "SphereRenderer.h"
-#include "AxisRenderer.h"
+#include "AxisComponent.h"
 #include "Stars.h"
 #include "StarsRenderer.h"
 #include "Space.h"
@@ -187,6 +188,11 @@ typedef enum
                                     //  - text appears the same size regardless of observer's position
 } RenderTextType;
 
+
+// This will hold components for the top level
+class MiscComponentContainer : public SceneObject
+{
+};
 
 class Universe
 {
@@ -433,7 +439,7 @@ public:
 
 
     // Sphere and other objects to be drawn on the screen. Instantiate them here. Their data (vertices) will be created later.
-    Axis axis;
+    AxisComponent axis;
     Sphere earth;
     Sphere sun;
     Sphere mars;
@@ -444,10 +450,12 @@ public:
     Sphere neptune;
     Stars stars;
 
+    MiscComponentContainer miscComponentContainer;
+    std::vector<SceneObject*> sceneObjects;
+
     Sphere* allSpheres[9] = { &sun, &earth, &moon, &mars, &jupiter, &saturn, &uranus, &neptune, NULL };
     Sphere* allPlanets[8] = {       &earth, &moon, &mars, &jupiter, &saturn, &uranus, &neptune, NULL };
 
-    AxisRenderer axisRenderer;
     PlanetRenderer earthRenderer;
     PlanetRenderer moonRenderer;
     PlanetRenderer marsRenderer;
@@ -460,6 +468,8 @@ public:
     SunRenderer sunRenderer;
     StarsRenderer starsRenderer;
     
+
+
     Space space;
 
     PNT gstar[MAXGALAXYSTARS];
