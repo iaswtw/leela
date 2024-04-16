@@ -473,6 +473,7 @@ public:
     SunRenderer sunRenderer;
     StarsRenderer starsRenderer;
     MonthLabelsRenderer monthLabelsRenderer;        // for earth
+    CityBookmarks cityBookmarks;                    // for earth
     CityBookmarkRenderer cityBookmarkRenderer;      // for earth
 
     Space space;
