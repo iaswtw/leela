@@ -4,6 +4,12 @@
 #include <vector>
 #include <Component.h>
 
+// GLM includes
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+
 class SceneObject
 {
 public:
@@ -17,6 +23,7 @@ public:
 	{	
 	}
 
+	virtual void init() = 0;
 	virtual void advance(float stepMultiplier) = 0;
 
 	// transform to move this scene object from its parent's position
@@ -58,5 +65,6 @@ public:
 
 class Scene : public SceneObject
 {
+	void init() {}
 	void advance(float stepMultiplier) {}
 };

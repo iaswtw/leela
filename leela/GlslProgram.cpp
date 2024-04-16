@@ -3,20 +3,15 @@
 #include <exception>
 #include "spdlog/spdlog.h"
 
-GlslProgram::GlslProgram()
+GlslProgram::GlslProgram(GlslProgramType type)
+	: _type(type)
 {
-
 }
 
 GlslProgram::~GlslProgram()
 {
-
 }
 
-/*************************************************************************************************
-
-
-**************************************************************************************************/
 void GlslProgram::printShaderCompileStatus(GLuint shader)
 {
 	GLint status;

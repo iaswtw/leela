@@ -172,7 +172,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Class.h" />
-    <ClInclude Include="components\AxisComponent.h" />
+    <ClInclude Include="components\CoordinateAxisRenderer.h" />
     <ClInclude Include="components\Component.h" />
     <ClInclude Include="components\OrbitalPlaneComponent.h" />
     <ClInclude Include="components\Renderer.h" />
@@ -192,6 +192,7 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="SceneObject.h" />
+    <ClInclude Include="SceneObjects\CoordinateAxis.h" />
     <ClInclude Include="Space.h" />
     <ClInclude Include="sphere.h" />
     <ClInclude Include="SphereRenderer.h" />
@@ -204,7 +205,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Class.cpp" />
-    <ClCompile Include="components\AxisComponent.cpp" />
+    <ClCompile Include="components\CoordinateAxisRenderer.cpp" />
     <ClCompile Include="GlslProgram.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
@@ -221,6 +222,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="SphereRenderer.cpp" />
     <ClCompile Include="StarsRenderer.cpp" />
     <ClCompile Include="Universe.cpp" />
     <ClCompile Include="UniverseDemo.cpp" />

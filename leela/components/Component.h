@@ -13,7 +13,8 @@
 class Component
 {
 public:
-	Component(std::string componentName)
+
+	Component(std::string componentName = "NoName")
 	{
 		_componentName = componentName;
 	}

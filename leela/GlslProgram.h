@@ -4,10 +4,24 @@
 #include <string>
 #include <vector>
 
+
+
+typedef enum
+{
+	GlslProgramType_None,
+	GlslProgramType_Font,
+	GlslProgramType_Planet,
+	GlslProgramType_Star,
+	GlslProgramType_Sun,
+	GlslProgramType_Simple,
+
+} GlslProgramType;
+
+
 class GlslProgram
 {
 public:
-	GlslProgram();
+	GlslProgram(GlslProgramType type = GlslProgramType_None);
 	~GlslProgram();
 	void printShaderCompileStatus(GLuint shader);
 	void compileShadersFromFile(const char * vertShaderFilenames, const char * fragShaderFilename);
@@ -23,6 +37,7 @@ public:
 	void setVec3(const std::string& uniformName, const float* value);
 	void setMat4(const std::string& uniformName, const float* value);
 
+	GlslProgramType type() { return _type;  }
 
 private:
     void _readFile(const char * fileName, std::string& fileContents);
@@ -35,4 +50,10 @@ private:
     GLuint geomShaderId		= 0;
     GLuint fragShaderId		= 0;
 	GLuint shaderProgramId	= 0;
+
+	GlslProgramType _type;
 };
+
+
+
+

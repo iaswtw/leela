@@ -7,86 +7,6 @@
 #include "spdlog/spdlog.h"
 
 
-void Universe::initializeGL()
-{
-    printf("Inside initializeGL\n");
-
-    spdlog::info("Opening planet.frag.glsl");
-    planetGlslProgram.compileShadersFromFile("planet.vert.glsl", "planet.frag.glsl");
-    planetGlslProgram.link();
-
-    sunGlslProgram.compileShadersFromFile("sun.vert.glsl", "sun.frag.glsl");
-    sunGlslProgram.link();
-
-    starGlslProgram.compileShadersFromFile("star.vert.glsl", "star.frag.glsl");
-    starGlslProgram.link();
-
-    simpleGlslProgram.compileShadersFromFile("simple.vert.glsl", "simple.frag.glsl");
-    simpleGlslProgram.link();
-
-    fontGlslProgram.compileShadersFromFile("font.vert.glsl", "font.frag.glsl");
-    fontGlslProgram.link();
-
-    //---------------------------------------------------------------------------------------------------
-
-    axis.init();
-
-    sunRenderer.setAsLightSource();
-    sunRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
-    sunRenderer.constructVerticesAndSendToGpu();
-
-#ifdef DRAW_LINES_INSTEAD_OF_TRIANGLES
-    earthRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
-#else
-    earthRenderer.setPolygonCountLevel(PolygonCountLevel_Medium);
-#endif
-    earthRenderer.constructVerticesAndSendToGpu();
-    earthRenderer.bShowLatitudesAndLongitudes = true;
-    earthRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
-
-
-    moonRenderer.setPolygonCountLevel(PolygonCountLevel_Medium);
-    moonRenderer.constructVerticesAndSendToGpu();
-    moonRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
-
-
-    marsRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
-    marsRenderer.constructVerticesAndSendToGpu();
-    marsRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
-    marsRenderer.bShowOrbit = False;
-
-    jupiterRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
-    jupiterRenderer.constructVerticesAndSendToGpu();
-    jupiterRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
-    jupiterRenderer.bShowOrbit = False;
-
-    saturnRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
-    saturnRenderer.constructVerticesAndSendToGpu();
-    saturnRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
-    saturnRenderer.bShowOrbit = False;
-
-    uranusRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
-    uranusRenderer.constructVerticesAndSendToGpu();
-    uranusRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
-    uranusRenderer.bShowOrbit = False;
-
-    neptuneRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
-    neptuneRenderer.constructVerticesAndSendToGpu();
-    neptuneRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
-    neptuneRenderer.bShowOrbit = False;
-
-    //------------------------------
-
-    constructFontInfrastructureAndSendToGpu();
-
-
-    //---------------------------------------------------------------------------------------------------
-    // Axis
-    starsRenderer.constructVerticesAndSendToGpu();
-
-    glBindVertexArray(0);       // Disable VBO
-}
-
 
 void Universe::constructFontInfrastructureAndSendToGpu()
 {
@@ -145,6 +65,7 @@ void Universe::constructFontInfrastructureAndSendToGpu()
  */
 void Universe::render()
 {
+    //spdlog::info("Universe::render()");
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -194,7 +115,7 @@ void Universe::renderAllNontransparentObjects()
     glm::mat4 projection = glm::ortho(0.0f, float(curWidth), 0.0f, float(curHeight));
     fontGlslProgram.setMat4("projection", glm::value_ptr(projection));
 
-    renderUsingFontGlslProgram();
+    renderSceneUsingGlslProgram(fontGlslProgram);
 
     fontGlslProgram.unuse();
 
@@ -208,7 +129,11 @@ void Universe::renderAllNontransparentObjects()
     // depending on whether they have texture set up.
     planetGlslProgram.setBool("useTexture", bRealisticSurfaces);
 
-    renderUsingPlanetGlslProgram();
+    planetGlslProgram.setVec3("sunCenterTransformed", glm::value_ptr(sun.getModelTransformedCenter()));
+    planetGlslProgram.setFloat("sunRadius", sun.getRadius());
+    planetGlslProgram.setBool("realisticShading", bRealisticShading);
+
+    renderSceneUsingGlslProgram(planetGlslProgram);
 
     planetGlslProgram.unuse();
 
@@ -219,7 +144,7 @@ void Universe::renderAllNontransparentObjects()
     starGlslProgram.setMat4("view", glm::value_ptr(viewMatrix));
     starGlslProgram.setMat4("proj", glm::value_ptr(projectionMatrix));
 
-    renderUsingStarGlslProgram();
+    renderSceneUsingGlslProgram(starGlslProgram);
 
     starGlslProgram.unuse();
 
@@ -228,8 +153,9 @@ void Universe::renderAllNontransparentObjects()
     sunGlslProgram.use();
     sunGlslProgram.setMat4("view", glm::value_ptr(viewMatrix));
     sunGlslProgram.setMat4("proj", glm::value_ptr(projectionMatrix));
+    sunGlslProgram.setBool("useTexture", bRealisticSurfaces);
 
-    renderUsingSunGlslProgram();
+    renderSceneUsingGlslProgram(sunGlslProgram);
 
     sunGlslProgram.unuse();
 
@@ -239,7 +165,7 @@ void Universe::renderAllNontransparentObjects()
     simpleGlslProgram.setMat4("view", glm::value_ptr(viewMatrix));
     simpleGlslProgram.setMat4("proj", glm::value_ptr(projectionMatrix));
 
-    renderUsingSimpleGlslProgram();
+    renderSceneUsingGlslProgram(simpleGlslProgram);
 
     simpleGlslProgram.unuse();
 
@@ -257,7 +183,7 @@ void Universe::renderAllTransparentObjects()
     simpleGlslProgram.setMat4("view", glm::value_ptr(viewMatrix));
     simpleGlslProgram.setMat4("proj", glm::value_ptr(projectionMatrix));
 
-    renderTransparentUsingSimpleGlslProgram();
+    renderTransparentSceneUsingGlslProgram(simpleGlslProgram);
 
     simpleGlslProgram.unuse();
 
@@ -267,68 +193,118 @@ void Universe::renderAllTransparentObjects()
 
 }
 
-void Universe::renderUsingPlanetGlslProgram()
+//void Universe::renderUsingPlanetGlslProgram()
+//{
+//    planetGlslProgram.setVec3("sunCenterTransformed", glm::value_ptr(sun.getModelTransformedCenter()));
+//    planetGlslProgram.setFloat("sunRadius", sun.getRadius());
+//    planetGlslProgram.setBool("realisticShading", bRealisticShading);
+//
+//    for (int i = 0; systemRenderers[i] != NULL; i++)
+//    {
+//        systemRenderers[i]->renderSphere(planetGlslProgram);
+//        systemRenderers[i]->renderLatitudeAndLongitudes(planetGlslProgram);
+//    }
+//
+//    if (bShowPlanetAxis)
+//    {
+//        for (int i = 0; systemRenderers[i] != NULL; i++)
+//        {
+//            systemRenderers[i]->renderRotationAxis(planetGlslProgram);
+//        }
+//    }
+//}
+//
+//void Universe::renderUsingStarGlslProgram()
+//{
+//    if (!bGalaxyStars)
+//    {
+//        starsRenderer.renderCubeStars(starGlslProgram);
+//    }
+//    else
+//    {
+//        starsRenderer.renderGalaxyStars(starGlslProgram);
+//    }
+//}
+//
+//void Universe::renderUsingSunGlslProgram()
+//{
+//    sunGlslProgram.setBool("useTexture", bRealisticSurfaces);
+//    sunRenderer.renderSphere(sunGlslProgram);
+//}
+//
+//void Universe::renderUsingSimpleGlslProgram()
+//{
+//    if (bShowAxis)
+//    {
+//        axis.render(simpleGlslProgram);
+//    }
+//
+//    if (bShowOrbitsGlobalEnable)
+//    {
+//        for (int i = 0; systemRenderers[i] != NULL; i++)
+//        {
+//            systemRenderers[i]->renderOrbit(simpleGlslProgram);
+//        }
+//    }
+//}
+
+void Universe::renderTransparentSceneUsingGlslProgram(GlslProgram& glslProgram)
 {
-    planetGlslProgram.setVec3("sunCenterTransformed", glm::value_ptr(sun.getModelTransformedCenter()));
-    planetGlslProgram.setFloat("sunRadius", sun.getRadius());
-    planetGlslProgram.setBool("realisticShading", bRealisticShading);
+    renderTransparentSceneObjectUsingGlslProgram(&scene, glslProgram);
+}
 
-    for (int i = 0; systemRenderers[i] != NULL; i++)
+void Universe::renderTransparentSceneObjectUsingGlslProgram(SceneObject* sceneObject, GlslProgram& glslProgram)
+{
+    for (Component* c : sceneObject->_components)
     {
-        systemRenderers[i]->renderSphere(planetGlslProgram);
-        systemRenderers[i]->renderLatitudeAndLongitudes(planetGlslProgram);
-    }
+        Renderer* r = dynamic_cast<Renderer*>(c);
+        if (r != nullptr) {
+            std::vector<GlslProgramType> neededProgramTypes = r->getNeededGlslProgramTypes();
 
-    if (bShowPlanetAxis)
-    {
-        for (int i = 0; systemRenderers[i] != NULL; i++)
-        {
-            systemRenderers[i]->renderRotationAxis(planetGlslProgram);
+            for (GlslProgramType type : neededProgramTypes)
+            {
+                if (type == glslProgram.type())
+                    r->renderTransparent(glslProgram);
+            }
         }
     }
-}
 
-void Universe::renderUsingStarGlslProgram()
-{
-    if (!bGalaxyStars)
+    for (SceneObject* obj : sceneObject->_childSceneObjects)
     {
-        starsRenderer.renderCubeStars(starGlslProgram);
-    }
-    else
-    {
-        starsRenderer.renderGalaxyStars(starGlslProgram);
-    }
-}
-
-void Universe::renderUsingSunGlslProgram()
-{
-    sunGlslProgram.setBool("useTexture", bRealisticSurfaces);
-    sunRenderer.renderSphere(sunGlslProgram);
-}
-
-void Universe::renderUsingSimpleGlslProgram()
-{
-    if (bShowAxis)
-    {
-        axis.render(simpleGlslProgram);
+        renderSceneObjectUsingGlslProgram(obj, glslProgram);
     }
 
-    if (bShowOrbitsGlobalEnable)
+}
+
+
+void Universe::renderSceneUsingGlslProgram(GlslProgram& glslProgram)
+{
+    //spdlog::info("renderSceneUsingGlslProgram: glslProgram type = {}", (int)glslProgram.type());
+    renderSceneObjectUsingGlslProgram(&scene, glslProgram);
+}
+
+void Universe::renderSceneObjectUsingGlslProgram(SceneObject * sceneObject, GlslProgram& glslProgram)
+{
+    for (Component* c : sceneObject->_components)
     {
-        for (int i = 0; systemRenderers[i] != NULL; i++)
-        {
-            systemRenderers[i]->renderOrbit(simpleGlslProgram);
+        Renderer * r = dynamic_cast<Renderer*>(c);
+        if (r != nullptr) {
+            std::vector<GlslProgramType> neededProgramTypes = r->getNeededGlslProgramTypes();
+
+            for (GlslProgramType type : neededProgramTypes)
+            {
+                if (type == glslProgram.type())
+                    r->render(glslProgram);
+            }
         }
     }
-}
 
-void Universe::renderTransparentUsingSimpleGlslProgram()
-{
-    for (int i = 0; systemRenderers[i] != NULL; i++)
+    for (SceneObject * obj : sceneObject->_childSceneObjects)
     {
-        systemRenderers[i]->renderOrbitalPlane(simpleGlslProgram);
+        renderSceneObjectUsingGlslProgram(obj, glslProgram);
     }
 }
+
 
 void Universe::renderUsingFontGlslProgram()
 {
