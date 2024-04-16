@@ -1085,7 +1085,7 @@ PlanetRenderer::~PlanetRenderer()
 
 }
 
-void PlanetRenderer::render(GlslProgram& glslProgram)
+void PlanetRenderer::renderMain(GlslProgram& glslProgram)
 {
     //spdlog::info("PlanetRenderer::render()");
     if (glslProgram.type() == GlslProgramType_Planet)
@@ -1103,13 +1103,12 @@ void PlanetRenderer::render(GlslProgram& glslProgram)
 }
 
 
-void PlanetRenderer::renderTransparent(GlslProgram& glslProgram)
+void PlanetRenderer::renderTranslucentMain(GlslProgram& glslProgram)
 {
     if (glslProgram.type() == GlslProgramType_Simple)
     {
         renderOrbitalPlane(glslProgram);
     }
-
 }
 
 /*
@@ -1313,12 +1312,13 @@ SunRenderer::~SunRenderer()
 
 }
 
-void SunRenderer::render(GlslProgram& glslProgram)
+void SunRenderer::renderMain(GlslProgram& glslProgram)
 {
-    renderSphere(glslProgram);
+    if (glslProgram.type() == GlslProgramType_Sun)
+        _renderSphere(glslProgram);
 }
 
-void SunRenderer::renderSphere(GlslProgram& glslProgram)
+void SunRenderer::_renderSphere(GlslProgram& glslProgram)
 {
     glslProgram.setMat4("model", glm::value_ptr(_sphere.getTransform()));
 

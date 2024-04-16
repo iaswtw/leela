@@ -4,6 +4,7 @@
 #include "Renderer.h"
 #include "GlslProgram.h"
 #include "sphere.h"
+#include "UniverseMinimal.h"
 
 
 class MonthLabelsRenderer : public Renderer
@@ -15,13 +16,6 @@ public:
 
     ~MonthLabelsRenderer() {}
 
-	std::vector<GlslProgramType> getNeededGlslProgramTypes() {
-		return { GlslProgramType_Font };
-	}
-    std::vector<GlslProgramType> getNeededTransparentGlslProgramTypes() {
-        return {};
-    }
-
 	void init()
     {
 	}
@@ -30,8 +24,10 @@ public:
 
     void calculateMonthPositions(float labelPositionScale);
 
-    void render(GlslProgram& glslProgram);
-    void renderTransparent(GlslProgram& glslProgram) {};
+    void _renderLabels(GlslProgram& glslProgram, bool isPre);
+
+    virtual void renderPre(GlslProgram& glslProgram);
+    virtual void renderPost(GlslProgram& glslProgram);
 
 private:
 	Sphere& _sphere;

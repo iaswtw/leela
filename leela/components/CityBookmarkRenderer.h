@@ -18,10 +18,13 @@ public:
 		return {};
 	}
 
+	bool isSpherePointHidden(glm::vec3 p);
+
+	void _renderBookmarks(GlslProgram& glslProgram);
+
 	void init() {}
 	void advance(float stepMultiplier) {}
-	void render(GlslProgram& glslProgram);
-	void renderTransparent(GlslProgram& glslProgram) { };
+	virtual void renderPost(GlslProgram& glslProgram);
 
 private:
 	Sphere& _sphere;

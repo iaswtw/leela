@@ -1,7 +1,31 @@
 #include "CityBookmarkRenderer.h"
 #include "Universe.h"
 
-void CityBookmarkRenderer::render(GlslProgram& glslProgram)
+
+bool CityBookmarkRenderer::isSpherePointHidden(glm::vec3 p)
+{
+    VECTOR SC = VECTOR(g_space->S, _sphere._center);
+    //PNT U = PNT(_sphere._center).translated(_sphere._radius, g_space->DR).toVec3();     // point on sphere with roughly the most separation from observer's point of view.
+
+    //VECTOR SU = VECTOR(g_space->S, U);
+    VECTOR Sp = VECTOR(g_space->S, p);
+
+    //float max_angle = SU.angleFrom(SC, SU);
+    //float angle = SU.angleFrom(SC, SU);
+
+    //if (angle < max_angle)
+    //{
+    //}
+
+    //spdlog::info("Sp.length() = {}", Sp.length());
+    //spdlog::info("SC.length() = {}", SC.length());
+    if (Sp.length() > SC.length())
+        return true;
+    
+    return false;
+}
+
+void CityBookmarkRenderer::_renderBookmarks(GlslProgram& glslProgram)
 {
     float aus_lat = 30.2f;      // Austin latitude/longitude
     float aus_lon = -97.7;
@@ -10,8 +34,14 @@ void CityBookmarkRenderer::render(GlslProgram& glslProgram)
     float ord_lon = -87.6f;
 
 
-    glm::mat4 combinedMatrix = g_universe->projectionMatrix * g_universe->viewMatrix;
-    glslProgram.setMat4("projection", glm::value_ptr(combinedMatrix));
+    //glm::mat4 combinedMatrix = g_universe->projectionMatrix * g_universe->viewMatrix;
+    //glslProgram.setMat4("projection", glm::value_ptr(combinedMatrix));
+
+    //----- TEMP ------
+    glm::mat4 projection = glm::ortho(0.0f, float(g_universe->curWidth), 0.0f, float(g_universe->curHeight));
+    glslProgram.setMat4("projection", glm::value_ptr(projection));
+    //----- TEMP ------
+
 
 
     // adjust scale based on zoom level to ensure font size is not too large.
@@ -21,32 +51,58 @@ void CityBookmarkRenderer::render(GlslProgram& glslProgram)
     //spdlog::info("screenProjectedHeight of A = {}", screenProjectedHeight);
 
     float fontScale = 1.0;
-    if (screenProjectedHeight > 10.0) {
-        // adjust scale such that screen projected height is 10
-        fontScale = 10.0 / screenProjectedHeight;
-    }
+    //if (screenProjectedHeight > 10.0) {
+    //    // adjust scale such that screen projected height is 10
+    //    fontScale = 10.0 / screenProjectedHeight;
+    //}
 
     glm::vec3 projected;
+    glm::vec3 bookmarkPoint;
 
-    //projected = getScreenCoordinates(_sphere.getTransformedLatitudeLongitude(aus_lat, aus_lon));
-    projected = _sphere.getTransformedLatitudeLongitude(aus_lat, aus_lon, (_sphere._radius + 1) / _sphere._radius);
-    g_universe->RenderText(
-        RenderTextType_ObjectText,
-        "Austin",
-        projected.x,
-        projected.y,
-        projected.z,
-        fontScale,
-        glm::vec3(1.0f, 1.0f, 0.0f));
+    bookmarkPoint = _sphere.getTransformedLatitudeLongitude(aus_lat, aus_lon, (_sphere._radius + 1) / _sphere._radius);
+    if (!isSpherePointHidden(bookmarkPoint))
+    {
+        projected = g_universe->getScreenCoordinates(bookmarkPoint);
+        //projected = _sphere.getTransformedLatitudeLongitude(aus_lat, aus_lon, (_sphere._radius + 1) / _sphere._radius);
+        if (projected.z < 1.0f)
+        {
+            g_universe->RenderText(
+                //RenderTextType_ObjectText,
+                RenderTextType_ScreenText,
+                "Austin",
+                projected.x,
+                projected.y,
+                projected.z,
+                fontScale,
+                glm::vec3(1.0f, 1.0f, 0.0f));
+        }
+    }
 
-    projected = _sphere.getTransformedLatitudeLongitude(ord_lat, ord_lon, (_sphere._radius + 1) / _sphere._radius);
-    g_universe->RenderText(
-        RenderTextType_ObjectText,
-        "Chicago",
-        projected.x,
-        projected.y,
-        projected.z,
-        fontScale,
-        glm::vec3(1.0f, 1.0f, 0.0f));
+    bookmarkPoint = _sphere.getTransformedLatitudeLongitude(ord_lat, ord_lon, (_sphere._radius + 1) / _sphere._radius);
+    if (!isSpherePointHidden(bookmarkPoint))
+    {
+        projected = g_universe->getScreenCoordinates(bookmarkPoint);
+        //projected = _sphere.getTransformedLatitudeLongitude(ord_lat, ord_lon, (_sphere._radius + 1) / _sphere._radius);
+        if (projected.z < 1.0f)
+        {
+            g_universe->RenderText(
+                //RenderTextType_ObjectText,
+                RenderTextType_ScreenText,
+                "Chicago",
+                projected.x,
+                projected.y,
+                projected.z,
+                fontScale,
+                glm::vec3(1.0f, 1.0f, 0.0f));
+        }
+    }
 
+}
+
+void CityBookmarkRenderer::renderPost(GlslProgram& glslProgram)
+{
+    if (glslProgram.type() == GlslProgramType_Font)
+    {
+        _renderBookmarks(glslProgram);
+    }
 }

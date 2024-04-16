@@ -16,7 +16,6 @@ void Universe::onKeyDown(SDL_Event* event)
                 space.setFrameMoveMode(MEDIUM_D_MODE);
         break;
     case SDLK_b:
-        ToggleConstantDirectionFollowMode();
         break;
     case SDLK_c:
         ToggleFollowTarget(&sun, TargetLockMode_ViewTarget);
@@ -45,7 +44,7 @@ void Universe::onKeyDown(SDL_Event* event)
         bEquals = true;
         break;
     case SDLK_l:
-        toggleLockMode();
+        cycleLockMode();
         break;
     case SDLK_n:
         bEarthSurfaceLockMode = !bEarthSurfaceLockMode;

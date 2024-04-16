@@ -26,50 +26,71 @@ void MonthLabelsRenderer::calculateMonthPositions(float labelPositionScale)
     }
 }
 
-void MonthLabelsRenderer::render(GlslProgram& glslProgram)
+void MonthLabelsRenderer::_renderLabels(GlslProgram& glslProgram, bool isPre)
 {
-    glm::vec3 projected;
-    float z = 0.0f;
-
-    if (g_universe->bShowMonthNames)
+    if ((!isPre && g_universe->bShowLabelsOnTop) || (isPre && !g_universe->bShowLabelsOnTop))
     {
-        if (g_universe->bMonthLabelsCloserToSphere)
-            calculateMonthPositions((_sphere._orbitalRadius + 1.5f * _sphere._radius) / _sphere._orbitalRadius);
-        else
-            calculateMonthPositions(1.2f);
+        // This code is exiected in either Pre or Post render stage; not both.
+        // If labels are to be shown on top, render them in `post` render stage.
 
+        glm::vec3 projected;
+        float z = 0.0f;
 
-        //----- TEMP ------
-        glm::mat4 projection = glm::ortho(0.0f, float(g_universe->curWidth), 0.0f, float(g_universe->curHeight));
-        glslProgram.setMat4("projection", glm::value_ptr(projection));
-        //----- TEMP ------
-
-
-        //glm::vec2 projected = getScreenCoordinates(earth.getModelTransformedCenter());
-        //spdlog::info("projected = {}", glm::to_string(projected));
-
-        std::vector<std::string> monthNames = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
-
-        for (int i = 0; i < 12; i++)
+        if (g_universe->bShowMonthNames)
         {
-            projected = g_universe->getScreenCoordinates(monthPositions[i]);
-            //glm::vec2 projected = getScreenCoordinates(glm::vec3(0.0f, 0.0f, 0.0f));
+            if (g_universe->bMonthLabelsCloserToSphere)
+                calculateMonthPositions((_sphere._orbitalRadius + 1.5f * _sphere._radius) / _sphere._orbitalRadius);
+            else
+                calculateMonthPositions(1.2f);
 
-            //spdlog::info("month Position {}: {}", i, glm::to_string(projected));
 
-            if (projected.z < 1.0f)
+            //----- TEMP ------
+            glm::mat4 projection = glm::ortho(0.0f, float(g_universe->curWidth), 0.0f, float(g_universe->curHeight));
+            glslProgram.setMat4("projection", glm::value_ptr(projection));
+            //----- TEMP ------
+
+
+            //glm::vec2 projected = getScreenCoordinates(earth.getModelTransformedCenter());
+            //spdlog::info("projected = {}", glm::to_string(projected));
+
+            std::vector<std::string> monthNames = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+
+            for (int i = 0; i < 12; i++)
             {
-                g_universe->RenderText(
-                    RenderTextType_ScreenText,
-                    monthNames[i].c_str(),
-                    projected.x,
-                    projected.y,
-                    z,
-                    1.0f,
-                    glm::vec3(1.0f, 1.0f, 0.0f));
+                projected = g_universe->getScreenCoordinates(monthPositions[i]);
+                //glm::vec2 projected = getScreenCoordinates(glm::vec3(0.0f, 0.0f, 0.0f));
+
+                //spdlog::info("month Position {}: {}", i, glm::to_string(projected));
+
+                if (projected.z < 1.0f)
+                {
+                    g_universe->RenderText(
+                        RenderTextType_ScreenText,
+                        monthNames[i].c_str(),
+                        projected.x,
+                        projected.y,
+                        z,
+                        1.0f,
+                        glm::vec3(1.0f, 1.0f, 0.0f));
+                }
             }
         }
+        //RenderText(RenderTextType_ScreenText, "Hello World", 100.0f, 100.0f, z, 1.0f, glm::vec3(1.0f, 1.0f, 0.0f));
     }
-    //RenderText(RenderTextType_ScreenText, "Hello World", 100.0f, 100.0f, z, 1.0f, glm::vec3(1.0f, 1.0f, 0.0f));
+}
 
+void MonthLabelsRenderer::renderPre(GlslProgram& glslProgram)
+{
+    if (glslProgram.type() == GlslProgramType_Font)
+    {
+        _renderLabels(glslProgram, true);
+    }
+}
+
+void MonthLabelsRenderer::renderPost(GlslProgram& glslProgram)
+{
+    if (glslProgram.type() == GlslProgramType_Font)
+    {
+        _renderLabels(glslProgram, false);
+    }
 }

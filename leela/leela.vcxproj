@@ -201,6 +201,7 @@
     <ClInclude Include="StarsRenderer.h" />
     <ClInclude Include="stbi_image.h" />
     <ClInclude Include="Universe.h" />
+    <ClInclude Include="UniverseMinimal.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="OneShotTimer.h" />
   </ItemGroup>

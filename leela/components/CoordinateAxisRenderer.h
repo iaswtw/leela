@@ -13,15 +13,8 @@ public:
     void init();
 
     void constructVerticesAndSendToGpu();
-    void render(GlslProgram& glslProgram);
-    void renderTransparent(GlslProgram& glslProgram) {};
-
-    std::vector<GlslProgramType> getNeededGlslProgramTypes() {
-        return { GlslProgramType_Simple };
-    }
-    std::vector<GlslProgramType> getNeededTransparentGlslProgramTypes() {
-        return {};
-    }
+    void _renderAxis(GlslProgram glslProgram);
+    virtual void renderMain(GlslProgram& glslProgram);
 
     void advance(float stepMultiplier) {}
 

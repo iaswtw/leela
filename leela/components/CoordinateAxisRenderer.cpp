@@ -62,7 +62,8 @@ void CoordinateAxisRenderer::constructVerticesAndSendToGpu()
 
 }
 
-void CoordinateAxisRenderer::render(GlslProgram& glslProgram)
+
+void CoordinateAxisRenderer::_renderAxis(GlslProgram glslProgram)
 {
     if (g_universe->bShowAxis) {
         //----------------------------------------------
@@ -72,5 +73,15 @@ void CoordinateAxisRenderer::render(GlslProgram& glslProgram)
         glBindVertexArray(_axisVao);
         // Draw vertices
         glDrawArrays(GL_LINES, 0, numVertices);
+    }
+}
+
+
+
+void CoordinateAxisRenderer::renderMain(GlslProgram& glslProgram)
+{
+    if (glslProgram.type() == GlslProgramType_Simple)
+    {
+        _renderAxis(glslProgram);
     }
 }

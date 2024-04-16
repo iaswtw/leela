@@ -106,6 +106,7 @@ void Universe::render()
 
 void Universe::renderAllNontransparentObjects()
 {
+
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     // Labels that are allowed to hide under other objects should be written before the objects.
     // This is because all labels, regardless of what object they are for, are written at a
@@ -115,9 +116,10 @@ void Universe::renderAllNontransparentObjects()
     glm::mat4 projection = glm::ortho(0.0f, float(curWidth), 0.0f, float(curHeight));
     fontGlslProgram.setMat4("projection", glm::value_ptr(projection));
 
-    renderSceneUsingGlslProgram(fontGlslProgram);
+    renderSceneUsingGlslProgram(fontGlslProgram, RenderStage_Pre);
 
     fontGlslProgram.unuse();
+
 
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
@@ -133,7 +135,7 @@ void Universe::renderAllNontransparentObjects()
     planetGlslProgram.setFloat("sunRadius", sun.getRadius());
     planetGlslProgram.setBool("realisticShading", bRealisticShading);
 
-    renderSceneUsingGlslProgram(planetGlslProgram);
+    renderSceneUsingGlslProgram(planetGlslProgram, RenderStage_Main);
 
     planetGlslProgram.unuse();
 
@@ -144,7 +146,7 @@ void Universe::renderAllNontransparentObjects()
     starGlslProgram.setMat4("view", glm::value_ptr(viewMatrix));
     starGlslProgram.setMat4("proj", glm::value_ptr(projectionMatrix));
 
-    renderSceneUsingGlslProgram(starGlslProgram);
+    renderSceneUsingGlslProgram(starGlslProgram, RenderStage_Main);
 
     starGlslProgram.unuse();
 
@@ -155,7 +157,7 @@ void Universe::renderAllNontransparentObjects()
     sunGlslProgram.setMat4("proj", glm::value_ptr(projectionMatrix));
     sunGlslProgram.setBool("useTexture", bRealisticSurfaces);
 
-    renderSceneUsingGlslProgram(sunGlslProgram);
+    renderSceneUsingGlslProgram(sunGlslProgram, RenderStage_Main);
 
     sunGlslProgram.unuse();
 
@@ -165,11 +167,22 @@ void Universe::renderAllNontransparentObjects()
     simpleGlslProgram.setMat4("view", glm::value_ptr(viewMatrix));
     simpleGlslProgram.setMat4("proj", glm::value_ptr(projectionMatrix));
 
-    renderSceneUsingGlslProgram(simpleGlslProgram);
+    renderSceneUsingGlslProgram(simpleGlslProgram, RenderStage_Main);
 
     simpleGlslProgram.unuse();
 
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    // Labels that are allowed to hide under other objects should be written before the objects.
+    // This is because all labels, regardless of what object they are for, are written at a
+    // very shallow depth.
+
+    fontGlslProgram.use();
+    projection = glm::ortho(0.0f, float(curWidth), 0.0f, float(curHeight));
+    fontGlslProgram.setMat4("projection", glm::value_ptr(projection));
+
+    renderSceneUsingGlslProgram(fontGlslProgram, RenderStage_Post);
+
+    fontGlslProgram.unuse();
 
 }
 
@@ -183,7 +196,7 @@ void Universe::renderAllTransparentObjects()
     simpleGlslProgram.setMat4("view", glm::value_ptr(viewMatrix));
     simpleGlslProgram.setMat4("proj", glm::value_ptr(projectionMatrix));
 
-    renderTransparentSceneUsingGlslProgram(simpleGlslProgram);
+    renderSceneUsingGlslProgram(simpleGlslProgram, RenderStage_Translucent_Main);
 
     simpleGlslProgram.unuse();
 
@@ -193,116 +206,25 @@ void Universe::renderAllTransparentObjects()
 
 }
 
-//void Universe::renderUsingPlanetGlslProgram()
-//{
-//    planetGlslProgram.setVec3("sunCenterTransformed", glm::value_ptr(sun.getModelTransformedCenter()));
-//    planetGlslProgram.setFloat("sunRadius", sun.getRadius());
-//    planetGlslProgram.setBool("realisticShading", bRealisticShading);
-//
-//    for (int i = 0; systemRenderers[i] != NULL; i++)
-//    {
-//        systemRenderers[i]->renderSphere(planetGlslProgram);
-//        systemRenderers[i]->renderLatitudeAndLongitudes(planetGlslProgram);
-//    }
-//
-//    if (bShowPlanetAxis)
-//    {
-//        for (int i = 0; systemRenderers[i] != NULL; i++)
-//        {
-//            systemRenderers[i]->renderRotationAxis(planetGlslProgram);
-//        }
-//    }
-//}
-//
-//void Universe::renderUsingStarGlslProgram()
-//{
-//    if (!bGalaxyStars)
-//    {
-//        starsRenderer.renderCubeStars(starGlslProgram);
-//    }
-//    else
-//    {
-//        starsRenderer.renderGalaxyStars(starGlslProgram);
-//    }
-//}
-//
-//void Universe::renderUsingSunGlslProgram()
-//{
-//    sunGlslProgram.setBool("useTexture", bRealisticSurfaces);
-//    sunRenderer.renderSphere(sunGlslProgram);
-//}
-//
-//void Universe::renderUsingSimpleGlslProgram()
-//{
-//    if (bShowAxis)
-//    {
-//        axis.render(simpleGlslProgram);
-//    }
-//
-//    if (bShowOrbitsGlobalEnable)
-//    {
-//        for (int i = 0; systemRenderers[i] != NULL; i++)
-//        {
-//            systemRenderers[i]->renderOrbit(simpleGlslProgram);
-//        }
-//    }
-//}
 
-void Universe::renderTransparentSceneUsingGlslProgram(GlslProgram& glslProgram)
-{
-    renderTransparentSceneObjectUsingGlslProgram(&scene, glslProgram);
-}
-
-void Universe::renderTransparentSceneObjectUsingGlslProgram(SceneObject* sceneObject, GlslProgram& glslProgram)
-{
-    for (Component* c : sceneObject->_components)
-    {
-        Renderer* r = dynamic_cast<Renderer*>(c);
-        if (r != nullptr) {
-            std::vector<GlslProgramType> neededProgramTypes = r->getNeededTransparentGlslProgramTypes();
-
-            for (GlslProgramType type : neededProgramTypes)
-            {
-                if (type == glslProgram.type()) {
-                    r->renderTransparent(glslProgram);
-                }
-            }
-        }
-    }
-
-    for (SceneObject* obj : sceneObject->_childSceneObjects)
-    {
-        renderTransparentSceneObjectUsingGlslProgram(obj, glslProgram);
-    }
-
-}
-
-
-void Universe::renderSceneUsingGlslProgram(GlslProgram& glslProgram)
+void Universe::renderSceneUsingGlslProgram(GlslProgram& glslProgram, RenderStage stage)
 {
     //spdlog::info("renderSceneUsingGlslProgram: glslProgram type = {}", (int)glslProgram.type());
-    renderSceneObjectUsingGlslProgram(&scene, glslProgram);
+    renderSceneObjectUsingGlslProgram(&scene, glslProgram, stage);
 }
 
-void Universe::renderSceneObjectUsingGlslProgram(SceneObject * sceneObject, GlslProgram& glslProgram)
+void Universe::renderSceneObjectUsingGlslProgram(SceneObject * sceneObject, GlslProgram& glslProgram, RenderStage stage)
 {
     for (Component* c : sceneObject->_components)
     {
         Renderer * r = dynamic_cast<Renderer*>(c);
-        if (r != nullptr) {
-            std::vector<GlslProgramType> neededProgramTypes = r->getNeededGlslProgramTypes();
-
-            for (GlslProgramType type : neededProgramTypes)
-            {
-                if (type == glslProgram.type())
-                    r->render(glslProgram);
-            }
-        }
+        if (r != nullptr)
+            r->render(glslProgram, stage);
     }
 
     for (SceneObject * obj : sceneObject->_childSceneObjects)
     {
-        renderSceneObjectUsingGlslProgram(obj, glslProgram);
+        renderSceneObjectUsingGlslProgram(obj, glslProgram, stage);
     }
 }
 
