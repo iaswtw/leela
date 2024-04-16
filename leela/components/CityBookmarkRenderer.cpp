@@ -27,22 +27,12 @@ bool CityBookmarkRenderer::isSpherePointHidden(glm::vec3 p)
 
 void CityBookmarkRenderer::_renderBookmarks(GlslProgram& glslProgram)
 {
-    float aus_lat = 30.2f;      // Austin latitude/longitude
-    float aus_lon = -97.7;
-
-    float ord_lat = 41.8f;      // Chicago latitude/longitude
-    float ord_lon = -87.6f;
-
-
     //glm::mat4 combinedMatrix = g_universe->projectionMatrix * g_universe->viewMatrix;
     //glslProgram.setMat4("projection", glm::value_ptr(combinedMatrix));
 
-    //----- TEMP ------
     glm::mat4 projection = glm::ortho(0.0f, float(g_universe->curWidth), 0.0f, float(g_universe->curHeight));
     glslProgram.setMat4("projection", glm::value_ptr(projection));
-    //----- TEMP ------
-
-
+    
 
     // adjust scale based on zoom level to ensure font size is not too large.
     float heightOfCharA = g_universe->getHeightOfCharA();
@@ -59,44 +49,28 @@ void CityBookmarkRenderer::_renderBookmarks(GlslProgram& glslProgram)
     glm::vec3 projected;
     glm::vec3 bookmarkPoint;
 
-    bookmarkPoint = _sphere.getTransformedLatitudeLongitude(aus_lat, aus_lon, (_sphere._radius + 1) / _sphere._radius);
-    if (!isSpherePointHidden(bookmarkPoint))
+    for (BookmarkInfo bi : _cityBookmarks.bookmarks)
     {
-        projected = g_universe->getScreenCoordinates(bookmarkPoint);
-        //projected = _sphere.getTransformedLatitudeLongitude(aus_lat, aus_lon, (_sphere._radius + 1) / _sphere._radius);
-        if (projected.z < 1.0f)
+
+        bookmarkPoint = _sphere.getTransformedLatitudeLongitude(bi.lat, bi.lon, (_sphere._radius + 1) / _sphere._radius);
+        if (!isSpherePointHidden(bookmarkPoint))
         {
-            g_universe->RenderText(
-                //RenderTextType_ObjectText,
-                RenderTextType_ScreenText,
-                "Austin",
-                projected.x,
-                projected.y,
-                projected.z,
-                fontScale,
-                glm::vec3(1.0f, 1.0f, 0.0f));
+            projected = g_universe->getScreenCoordinates(bookmarkPoint);
+            //projected = _sphere.getTransformedLatitudeLongitude(aus_lat, aus_lon, (_sphere._radius + 1) / _sphere._radius);
+            if (projected.z < 1.0f)
+            {
+                g_universe->RenderText(
+                    //RenderTextType_ObjectText,
+                    RenderTextType_ScreenText,
+                    bi.label.c_str(),
+                    projected.x,
+                    projected.y,
+                    projected.z,
+                    fontScale,
+                    glm::vec3(1.0f, 1.0f, 0.0f));
+            }
         }
     }
-
-    bookmarkPoint = _sphere.getTransformedLatitudeLongitude(ord_lat, ord_lon, (_sphere._radius + 1) / _sphere._radius);
-    if (!isSpherePointHidden(bookmarkPoint))
-    {
-        projected = g_universe->getScreenCoordinates(bookmarkPoint);
-        //projected = _sphere.getTransformedLatitudeLongitude(ord_lat, ord_lon, (_sphere._radius + 1) / _sphere._radius);
-        if (projected.z < 1.0f)
-        {
-            g_universe->RenderText(
-                //RenderTextType_ObjectText,
-                RenderTextType_ScreenText,
-                "Chicago",
-                projected.x,
-                projected.y,
-                projected.z,
-                fontScale,
-                glm::vec3(1.0f, 1.0f, 0.0f));
-        }
-    }
-
 }
 
 void CityBookmarkRenderer::renderPost(GlslProgram& glslProgram)

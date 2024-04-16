@@ -81,7 +81,7 @@ Universe::Universe() :
     stepMultiplierFilter            (FIR_WIDTH, fir_coeff),
 
     monthLabelsRenderer(earth),
-    cityBookmarkRenderer(earth)
+    cityBookmarkRenderer(earth, cityBookmarks)
 {
 }
 
@@ -371,7 +371,8 @@ void Universe::initSceneObjectsAndComponents()
     cityBookmarkRenderer.init();
 
     earth.addComponent(&monthLabelsRenderer);
-    earth.addComponent(&cityBookmarkRenderer);
+    earth.addChildSceneObject(&cityBookmarks);
+    cityBookmarks.addComponent(&cityBookmarkRenderer);
 
     //---------------------------------------------------------------------------------------------------
     

@@ -4,22 +4,15 @@
 #include "Renderer.h"
 #include "GlslProgram.h"
 #include <vector>
+#include "CityBookmarks.h"
 
 class CityBookmarkRenderer : public Renderer
 {
 public:
-	CityBookmarkRenderer(Sphere& sphere) : _sphere(sphere) {}
+	CityBookmarkRenderer(Sphere& sphere, CityBookmarks& cityBookmarks) : _sphere(sphere), _cityBookmarks(cityBookmarks) {}
 	~CityBookmarkRenderer() {}
 
-	std::vector<GlslProgramType> getNeededGlslProgramTypes() {
-		return { GlslProgramType_Font };
-	}
-	std::vector<GlslProgramType> getNeededTransparentGlslProgramTypes() {
-		return {};
-	}
-
 	bool isSpherePointHidden(glm::vec3 p);
-
 	void _renderBookmarks(GlslProgram& glslProgram);
 
 	void init() {}
@@ -28,4 +21,5 @@ public:
 
 private:
 	Sphere& _sphere;
+	CityBookmarks& _cityBookmarks;
 };

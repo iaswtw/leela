@@ -173,6 +173,7 @@
   <ItemGroup>
     <ClInclude Include="Class.h" />
     <ClInclude Include="components\CityBookmarkRenderer.h" />
+    <ClInclude Include="components\CityBookmarks.h" />
     <ClInclude Include="components\CoordinateAxisRenderer.h" />
     <ClInclude Include="components\Component.h" />
     <ClInclude Include="components\MonthLabelsRenderer.h" />
