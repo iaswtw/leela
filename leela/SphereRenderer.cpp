@@ -28,7 +28,7 @@
 using TriangleList = std::vector<Triangle>;
 using VertexList = std::vector<glm::vec3>;
 
-
+extern Universe* p_universe;
 
 namespace icosahedron
 {
@@ -1092,12 +1092,12 @@ void PlanetRenderer::render(GlslProgram& glslProgram)
     {
         renderSphere(glslProgram);
         renderLatitudeAndLongitudes(glslProgram);
-        if (universe->bShowPlanetAxis)
+        if (g_universe->bShowPlanetAxis)
             renderRotationAxis(glslProgram);
     }
     else if (glslProgram.type() == GlslProgramType_Simple)
     {
-        if (universe->bShowOrbitsGlobalEnable)
+        if (g_universe->bShowOrbitsGlobalEnable)
             renderOrbit(glslProgram);
     }
 }

@@ -39,7 +39,7 @@ bool changeDirToParentOfExecutable()
 
 #undef main
 
-Universe * universe = new Universe();  // global instance accessible to all objects
+Universe * g_universe = new Universe();  // global instance accessible to all objects
 
 int main(int argc, char *argv[])
 {
@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    auto retval = universe->run();
+    auto retval = g_universe->run();
 
     if (retval != 0)
     {

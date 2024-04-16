@@ -78,7 +78,10 @@ Universe::Universe() :
     pitchFilter                     (FIR_WIDTH, fir_coeff),
     rollFilter                      (FIR_WIDTH, fir_coeff),
     stepMultiplierFilterWhenPaused  (FIR_WIDTH, fir_coeff),
-    stepMultiplierFilter            (FIR_WIDTH, fir_coeff)
+    stepMultiplierFilter            (FIR_WIDTH, fir_coeff),
+
+    monthLabelsRenderer(earth),
+    cityBookmarkRenderer(earth)
 {
 }
 
@@ -362,6 +365,12 @@ void Universe::initSceneObjectsAndComponents()
 
     constructFontInfrastructureAndSendToGpu();
 
+
+    monthLabelsRenderer.init();
+    cityBookmarkRenderer.init();
+
+    earth.addComponent(&monthLabelsRenderer);
+    earth.addComponent(&cityBookmarkRenderer);
 
     //---------------------------------------------------------------------------------------------------
     

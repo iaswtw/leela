@@ -37,6 +37,12 @@
       <Filter>Components</Filter>
     </ClCompile>
     <ClCompile Include="SphereRenderer.cpp" />
+    <ClCompile Include="components\MonthLabelsRenderer.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="components\CityBookmarkRenderer.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Class.h" />
@@ -85,9 +91,6 @@
     <ClInclude Include="components\CoordinateAxisRenderer.h">
       <Filter>Components</Filter>
     </ClInclude>
-    <ClInclude Include="components\OrbitalPlaneComponent.h">
-      <Filter>Components</Filter>
-    </ClInclude>
     <ClInclude Include="Fir.h" />
     <ClInclude Include="SceneObject.h" />
     <ClInclude Include="components\Renderer.h">
@@ -95,6 +98,12 @@
     </ClInclude>
     <ClInclude Include="SceneObjects\CoordinateAxis.h">
       <Filter>SceneObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="components\MonthLabelsRenderer.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="components\CityBookmarkRenderer.h">
+      <Filter>Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

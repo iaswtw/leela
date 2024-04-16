@@ -16,6 +16,4 @@ public:
 
 	virtual std::vector<GlslProgramType> getNeededGlslProgramTypes() = 0;
 
-private:
-
 };

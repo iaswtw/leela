@@ -40,8 +40,6 @@ private:
     int numGalaxyStarsSinglePixelVertices = 0;
     int numGalaxyStarsDoublePixelVertices = 0;
 
-    
-
     Stars& _stars;
 };
 

@@ -1,6 +1,6 @@
 #include "Utils.h"
 #include "CoordinateAxisRenderer.h"
-#include "universe.h"
+#include "Universe.h"
 
 
 CoordinateAxisRenderer::CoordinateAxisRenderer()
@@ -64,7 +64,7 @@ void CoordinateAxisRenderer::constructVerticesAndSendToGpu()
 
 void CoordinateAxisRenderer::render(GlslProgram& glslProgram)
 {
-    if (universe->bShowAxis) {
+    if (g_universe->bShowAxis) {
         //----------------------------------------------
         // Axis model transformation
         //----------------------------------------------
