@@ -49,16 +49,8 @@ public:
     SphereRenderer(Universe& parent, Sphere& sphere, std::string textureFilename, std::string textureFilename2);
     ~SphereRenderer();
 
-    virtual std::vector<GlslProgramType> getNeededGlslProgramTypes() {
-        return { GlslProgramType_Planet, GlslProgramType_Simple };
-    }
-    std::vector<GlslProgramType> getNeededTransparentGlslProgramTypes() {
-        return { GlslProgramType_Simple };
-    }
-
     virtual void init();
     virtual void advance(float stepMultiplier) {};
-    virtual void renderTransparent(GlslProgram& glslProgram) {}
 
     void setAsLightSource();
     void setNightColorDarkness(NightColorDarkness darkness);
@@ -133,8 +125,8 @@ public:
 	PlanetRenderer(Universe& parent, Sphere& sphere, std::string textureFilename = "", std::string textureFilename2 = "");
 	~PlanetRenderer();
 
-    void render(GlslProgram& glslProgram);
-    virtual void renderTransparent(GlslProgram& glslProgram);
+    virtual void renderMain(GlslProgram& glslProgram);
+    virtual void renderTranslucentMain(GlslProgram& glslProgram);
 
 	void renderSphere(GlslProgram& glslProgram);
 	void renderLatitudeAndLongitudes(GlslProgram& glslProgram);
@@ -150,16 +142,7 @@ public:
 	SunRenderer(Universe& parent, Sphere& sphere, std::string textureFilename = "");
 	~SunRenderer();
 
-    virtual std::vector<GlslProgramType> getNeededGlslProgramTypes() {
-        return { GlslProgramType_Sun };
-    }
-    std::vector<GlslProgramType> getNeededTransparentGlslProgramTypes() {
-        return {  };
-    }
-
-    void render(GlslProgram& glslProgram);
-    void renderTransparent(GlslProgram& glslProgram) {}
-
-	void renderSphere(GlslProgram& glslProgram);
+    void renderMain(GlslProgram& glslProgram);
+	void _renderSphere(GlslProgram& glslProgram);
 
 };

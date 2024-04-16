@@ -572,20 +572,14 @@ void Universe::calculateOrientedViewLockVariables()
     //spdlog::info("");
 }
 
-void Universe::toggleLockMode()
+void Universe::cycleLockMode()
 {
     if (lockMode == TargetLockMode_ViewTarget)
         SetLockMode(TargetLockMode_FollowTarget);
+    else if (lockMode == TargetLockMode_FollowTarget)
+        SetLockMode(TargetLockMode_OrientedViewTarget);
     else
         SetLockMode(TargetLockMode_ViewTarget);
-}
-
-void Universe::ToggleConstantDirectionFollowMode()
-{
-    if (lockMode == TargetLockMode_FollowTarget)
-        SetLockMode(TargetLockMode_ViewTarget);
-    else
-        SetLockMode(TargetLockMode_FollowTarget);
 }
 
 void Universe::ResetFollowTargetAndMode()

@@ -22,6 +22,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include "UniverseMinimal.h"
 
 #include "imgui.h"
 #include "OneShotTimer.h"
@@ -189,9 +190,18 @@ typedef enum
                                     //  - text appears the same size regardless of observer's position
 } RenderTextType;
 
-class Universe;
 
+
+
+class Universe;
+class Space;
+
+//-----------------------------------------
+// Globally available handles
+//-----------------------------------------
 extern Universe* g_universe;
+extern Space* g_space;
+
 
 
 class Universe
@@ -210,10 +220,8 @@ public:
     void render();
     void renderAllNontransparentObjects();
     void renderAllTransparentObjects();
-    void renderTransparentSceneUsingGlslProgram(GlslProgram& glslProgram);
-    void renderTransparentSceneObjectUsingGlslProgram(SceneObject* sceneObject, GlslProgram& glslProgram);
-    void renderSceneUsingGlslProgram(GlslProgram& glslProgram);
-    void renderSceneObjectUsingGlslProgram(SceneObject* sceneObject, GlslProgram& glslProgram);
+    void renderSceneUsingGlslProgram(GlslProgram& glslProgram, RenderStage stage);
+    void renderSceneObjectUsingGlslProgram(SceneObject* sceneObject, GlslProgram& glslProgram, RenderStage stage);
     void RenderText(RenderTextType renderType, std::string text, float x, float y, float z, float scale, glm::vec3 color);
 
     void constructFontInfrastructureAndSendToGpu();
@@ -231,8 +239,7 @@ public:
     void calculateCommonTargetLockVariables();
     void calculateFollowTargetLockVariables();
     void calculateOrientedViewLockVariables();
-    void toggleLockMode();
-    void ToggleConstantDirectionFollowMode();
+    void cycleLockMode();
     void ResetFollowTargetAndMode();
     void ToggleFollowTarget(Sphere* target, TargetLockMode mode);
 

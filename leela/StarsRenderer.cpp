@@ -33,8 +33,7 @@ void StarsRenderer::init()
     constructVerticesAndSendToGpu();
 }
 
-
-void StarsRenderer::render(GlslProgram& glslProgram)
+void StarsRenderer::_renderStars(GlslProgram& glslProgram)
 {
     if (!g_universe->bGalaxyStars)
     {
@@ -44,7 +43,14 @@ void StarsRenderer::render(GlslProgram& glslProgram)
     {
         renderGalaxyStars(glslProgram);
     }
+}
 
+void StarsRenderer::renderMain(GlslProgram& glslProgram)
+{
+    if (glslProgram.type() == GlslProgramType_Star)
+    {
+        _renderStars(glslProgram);
+    }
 }
 
 std::tuple<std::vector<float>*, std::vector<float>*> StarsRenderer::_constructCubeStars()

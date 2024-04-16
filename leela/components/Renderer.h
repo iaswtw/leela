@@ -3,6 +3,7 @@
 #include "Component.h"
 #include "GlslProgram.h"
 #include <spdlog/spdlog.h>
+#include "UniverseMinimal.h"
 
 //
 // Render certain aspects of a scene object.
@@ -12,10 +13,26 @@ class Renderer : public Component
 public:
 	Renderer() {}
 
-	virtual void render(GlslProgram& glslProgram) = 0;
-	virtual void renderTransparent(GlslProgram& glslProgram) = 0;
-	
-	virtual std::vector<GlslProgramType> getNeededGlslProgramTypes() = 0;
-	virtual std::vector<GlslProgramType> getNeededTransparentGlslProgramTypes() = 0;
-
+	virtual void render(GlslProgram& glslProgram, RenderStage stage) final
+	{
+		switch (stage)
+		{
+		case RenderStage_Pre:
+			renderPre(glslProgram);
+			break;
+		case RenderStage_Main:
+			renderMain(glslProgram);
+			break;
+		case RenderStage_Post:
+			renderPost(glslProgram);
+			break;
+		case RenderStage_Translucent_Main:
+			renderTranslucentMain(glslProgram);
+			break;
+		}
+	}
+	virtual void renderPre(GlslProgram& glslProgram) {}
+	virtual void renderMain(GlslProgram& glslProgram) {}
+	virtual void renderPost(GlslProgram& glslProgram) {}
+	virtual void renderTranslucentMain(GlslProgram& glslProgram) {}
 };

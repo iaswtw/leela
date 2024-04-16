@@ -105,6 +105,7 @@
     <ClInclude Include="components\CityBookmarkRenderer.h">
       <Filter>Components</Filter>
     </ClInclude>
+    <ClInclude Include="UniverseMinimal.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="leela.rc" />
