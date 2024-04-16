@@ -351,28 +351,6 @@ public:
         return getTransform() * glm::vec4(x, y, z, 1.0);
     }
 
-    // Calculate 12 points outside the orbit suitable for drawing month labels
-    // labelPositionScale - if 1.0, labels are at sphere's orbital radius from the parent's (e.g. sun's) center.
-    void calculateMonthPositions(float labelPositionScale)
-    {
-        glm::vec3 axis = getAxisTiltOrientationAxis();
-        glm::vec3 perp = glm::vec3(axis.y, -axis.x, axis.z);
-
-        float scaler = labelPositionScale * _orbitalRadius;
-        perp = perp * scaler;
-
-        float theta = float(2 * M_PI / 12);
-        for (int i = 0; i < 12; i++)
-        {
-            monthPositions[i].x = perp.x * cos(theta) - perp.y * sin(theta);
-            monthPositions[i].y = perp.x * sin(theta) + perp.y * cos(theta);
-            monthPositions[i].z = 0;
-
-            //monthPositions[i] += _center;
-
-            theta += float(2 * M_PI / 12);
-        }
-    }
 
     inline float _normalizeAngle(float angle)
     {
@@ -446,18 +424,4 @@ public:
                                             // TODO: this will change when we bring in center of mass virtual Sphere object.
     std::string _name = "NoName";
 
-    std::vector<glm::vec3> monthPositions = {
-        {0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f},
-    };
 };

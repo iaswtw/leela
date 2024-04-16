@@ -13,9 +13,11 @@
 #include "sphere.h"
 #include "SphereRenderer.h"
 #include "CoordinateAxisRenderer.h"
+#include "CityBookmarkRenderer.h"
 #include "Stars.h"
 #include "StarsRenderer.h"
 #include "Space.h"
+#include "MonthLabelsRenderer.h"
 #include "Fir.h"
 #include <fstream>
 #include <iostream>
@@ -189,7 +191,7 @@ typedef enum
 
 class Universe;
 
-extern Universe* universe;
+extern Universe* g_universe;
 
 
 class Universe
@@ -210,7 +212,6 @@ public:
     void renderAllTransparentObjects();
     void renderTransparentSceneUsingGlslProgram(GlslProgram& glslProgram);
     void renderTransparentSceneObjectUsingGlslProgram(SceneObject* sceneObject, GlslProgram& glslProgram);
-    void renderUsingFontGlslProgram();
     void renderSceneUsingGlslProgram(GlslProgram& glslProgram);
     void renderSceneObjectUsingGlslProgram(SceneObject* sceneObject, GlslProgram& glslProgram);
     void RenderText(RenderTextType renderType, std::string text, float x, float y, float z, float scale, glm::vec3 color);
@@ -463,8 +464,8 @@ public:
     PlanetRenderer * systemRenderers[8] = { &earthRenderer, &moonRenderer, &marsRenderer, &jupiterRenderer, &saturnRenderer , &uranusRenderer, &neptuneRenderer, NULL};
     SunRenderer sunRenderer;
     StarsRenderer starsRenderer;
-    
-
+    MonthLabelsRenderer monthLabelsRenderer;        // for earth
+    CityBookmarkRenderer cityBookmarkRenderer;      // for earth
 
     Space space;
 
