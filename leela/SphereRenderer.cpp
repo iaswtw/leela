@@ -606,7 +606,7 @@ void SphereRenderer::constructOrbitalPlaneGridVertices()
     // generate parallel lines along Y axis in the orbital plane
     //float inc = float(_orbitalRadius) / int(_orbitalRadius / 50.0);
 
-    float maxGridLines = 120;
+    float maxGridLines = 20;
     float inc = (s._orbitalRadius * 2 * 1.2f) / maxGridLines;
     //inc = std::max(inc, 50.0f);
     //printf("inc = %f\n", inc);

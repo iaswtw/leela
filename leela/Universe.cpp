@@ -90,6 +90,26 @@ Universe::~Universe()
 {
 }
 
+void Universe::compileShaders()
+{
+    spdlog::info("Compiling all GLSL programs");
+
+    planetGlslProgram.compileShadersFromFile("planet.vert.glsl", "planet.frag.glsl");
+    planetGlslProgram.link();
+
+    sunGlslProgram.compileShadersFromFile("sun.vert.glsl", "sun.frag.glsl");
+    sunGlslProgram.link();
+
+    starGlslProgram.compileShadersFromFile("star.vert.glsl", "star.frag.glsl");
+    starGlslProgram.link();
+
+    simpleGlslProgram.compileShadersFromFile("simple.vert.glsl", "simple.frag.glsl");
+    simpleGlslProgram.link();
+
+    fontGlslProgram.compileShadersFromFile("font.vert.glsl", "font.frag.glsl");
+    fontGlslProgram.link();
+}
+
 /*************************************************************************************************
  Initialize various parameters of planets, stars, etc.  Parameters include radius of objects,
  time periods of rotation and revolution, colors, etc.
@@ -287,25 +307,6 @@ void Universe::initSceneObjectsAndComponents()
 
     //=================================================================
 
-    spdlog::info("Compiling all GLSL programs");
-
-    planetGlslProgram.compileShadersFromFile("planet.vert.glsl", "planet.frag.glsl");
-    planetGlslProgram.link();
-
-    sunGlslProgram.compileShadersFromFile("sun.vert.glsl", "sun.frag.glsl");
-    sunGlslProgram.link();
-
-    starGlslProgram.compileShadersFromFile("star.vert.glsl", "star.frag.glsl");
-    starGlslProgram.link();
-
-    simpleGlslProgram.compileShadersFromFile("simple.vert.glsl", "simple.frag.glsl");
-    simpleGlslProgram.link();
-
-    fontGlslProgram.compileShadersFromFile("font.vert.glsl", "font.frag.glsl");
-    fontGlslProgram.link();
-
-    //---------------------------------------------------------------------------------------------------
-
     coordinateAxisRenderer.init();
 
     sunRenderer.setAsLightSource();
@@ -377,6 +378,8 @@ void Universe::initSceneObjectsAndComponents()
     scene.addComponent(&starsRenderer);
     starsRenderer.init();
 
+
+    SceneObject::printTree(&scene);
 
     glBindVertexArray(0);       // Disable VBO
 
@@ -1392,6 +1395,7 @@ int Universe::run()
 	int retval = 0;
 	try
 	{
+        compileShaders();
 		initSceneObjectsAndComponents();
 		printf("done\n");
 

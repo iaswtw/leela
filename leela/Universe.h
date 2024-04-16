@@ -218,6 +218,7 @@ public:
 
     void constructFontInfrastructureAndSendToGpu();
 
+    void compileShaders();
     void initSceneObjectsAndComponents();
     void printGlError();
 
@@ -438,14 +439,14 @@ public:
 
     // Sphere and other objects to be drawn on the screen. Instantiate them here. Their data (vertices) will be created later.
     CoordinateAxisRenderer coordinateAxisRenderer;
-    Sphere earth;
-    Sphere sun;
-    Sphere mars;
-    Sphere moon;
-    Sphere jupiter;
-    Sphere saturn;
-    Sphere uranus;
-    Sphere neptune;
+    Sphere earth = Sphere(nullptr, "Earth");
+    Sphere sun = Sphere(nullptr, "Sun");
+    Sphere mars = Sphere(nullptr, "Mars");
+    Sphere moon = Sphere(nullptr, "Moon");
+    Sphere jupiter = Sphere(nullptr, "Jupiter");
+    Sphere saturn = Sphere(nullptr, "Saturn");
+    Sphere uranus = Sphere(nullptr, "Uranus");
+    Sphere neptune = Sphere(nullptr, "Neptune");
     Stars stars;
 
     Scene scene;

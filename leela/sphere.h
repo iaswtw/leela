@@ -49,7 +49,8 @@ public:
 class Sphere : public SceneObject
 {
 public:
-    Sphere()
+    Sphere(SceneObject * parent, std::string name)
+        : SceneObject(parent, name)
     {
     }
 
