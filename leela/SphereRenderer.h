@@ -52,9 +52,13 @@ public:
     virtual std::vector<GlslProgramType> getNeededGlslProgramTypes() {
         return { GlslProgramType_Planet, GlslProgramType_Simple };
     }
+    std::vector<GlslProgramType> getNeededTransparentGlslProgramTypes() {
+        return { GlslProgramType_Simple };
+    }
+
     virtual void init();
     virtual void advance(float stepMultiplier) {};
-
+    virtual void renderTransparent(GlslProgram& glslProgram) {}
 
     void setAsLightSource();
     void setNightColorDarkness(NightColorDarkness darkness);
@@ -130,7 +134,7 @@ public:
 	~PlanetRenderer();
 
     void render(GlslProgram& glslProgram);
-    void renderTransparent(GlslProgram& glslProgram);
+    virtual void renderTransparent(GlslProgram& glslProgram);
 
 	void renderSphere(GlslProgram& glslProgram);
 	void renderLatitudeAndLongitudes(GlslProgram& glslProgram);
@@ -149,7 +153,13 @@ public:
     virtual std::vector<GlslProgramType> getNeededGlslProgramTypes() {
         return { GlslProgramType_Sun };
     }
+    std::vector<GlslProgramType> getNeededTransparentGlslProgramTypes() {
+        return {  };
+    }
+
     void render(GlslProgram& glslProgram);
+    void renderTransparent(GlslProgram& glslProgram) {}
+
 	void renderSphere(GlslProgram& glslProgram);
 
 };

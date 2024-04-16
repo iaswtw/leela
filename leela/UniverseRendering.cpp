@@ -259,19 +259,20 @@ void Universe::renderTransparentSceneObjectUsingGlslProgram(SceneObject* sceneOb
     {
         Renderer* r = dynamic_cast<Renderer*>(c);
         if (r != nullptr) {
-            std::vector<GlslProgramType> neededProgramTypes = r->getNeededGlslProgramTypes();
+            std::vector<GlslProgramType> neededProgramTypes = r->getNeededTransparentGlslProgramTypes();
 
             for (GlslProgramType type : neededProgramTypes)
             {
-                if (type == glslProgram.type())
+                if (type == glslProgram.type()) {
                     r->renderTransparent(glslProgram);
+                }
             }
         }
     }
 
     for (SceneObject* obj : sceneObject->_childSceneObjects)
     {
-        renderSceneObjectUsingGlslProgram(obj, glslProgram);
+        renderTransparentSceneObjectUsingGlslProgram(obj, glslProgram);
     }
 
 }

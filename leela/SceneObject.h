@@ -1,6 +1,6 @@
 #pragma once
 
-
+#include <typeinfo>
 #include <vector>
 #include <Component.h>
 
@@ -13,13 +13,9 @@
 class SceneObject
 {
 public:
-	SceneObject()
-		: _parent(nullptr)
-	{
-	}
-	
-	SceneObject(SceneObject * parent)
-		: _parent(parent)
+	SceneObject(SceneObject * parent = nullptr, std::string name = "NoName")
+		: _parent(parent),
+		  _name(name)
 	{	
 	}
 
@@ -44,7 +40,6 @@ public:
 		return getPositionTransform() * getOrientationTransform();
 	}
 
-
 	void addComponent(Component* component)
 	{
 		_components.push_back(component);
@@ -55,12 +50,37 @@ public:
 		_childSceneObjects.push_back(sceneObject);
 	}
 
+	static void _printIndent(int indent)
+	{
+		for (int i = 0; i < indent; i++)
+			printf(" ");
+	}
+
+	static void printTree(SceneObject * obj, int indent = 0)
+	{
+		_printIndent(indent);
+		printf("%s:\n", obj->_name.c_str());
+
+		indent += 4;
+		for (Component* c : obj->_components)
+		{
+			_printIndent(indent);
+			printf("%s\n", typeid(*c).name());
+		}
+
+		for (SceneObject* o : obj->_childSceneObjects)
+		{
+			printTree(o, indent);
+		}
+	}
+
 public:
 
-	SceneObject * _parent = nullptr;
 	std::vector<SceneObject*> _childSceneObjects;
 	std::vector<Component*> _components;					// components of this scene object
 
+	SceneObject * _parent = nullptr;
+	std::string _name;
 };
 
 class Scene : public SceneObject

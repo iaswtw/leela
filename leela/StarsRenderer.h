@@ -14,10 +14,14 @@ public:
 
     void init();
     void render(GlslProgram& glslProgram);
+    void renderTransparent(GlslProgram& glslProgram) {};
 
     void advance(float stepMultiplier) {}
     std::vector<GlslProgramType> getNeededGlslProgramTypes() {
         return { GlslProgramType_Star };
+    }
+    std::vector<GlslProgramType> getNeededTransparentGlslProgramTypes() {
+        return { };
     }
 
     void constructVerticesAndSendToGpu();
