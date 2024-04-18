@@ -13,14 +13,17 @@
 class SceneObject
 {
 public:
-	SceneObject(SceneObject * parent = nullptr, std::string name = "NoName")
-		: _parent(parent),
-		  _name(name)
+	SceneObject(std::string name = "NoName")
+		: _name(name)
 	{	
 	}
 
 	virtual void init() = 0;
 	virtual void advance(float stepMultiplier) = 0;
+
+	// subclass is expected to examine _sceneParent in order to typecast and save as a point to a subclass.
+	// For e.g. SphericalBody class might want to know if _sceneParent is another SphericalBody instance, and use it later.
+	virtual void sceneParentChanged() {}
 
 	// transform to move this scene object from its parent's position
 	virtual glm::mat4 getPositionTransform()
@@ -45,9 +48,16 @@ public:
 		_components.push_back(component);
 	}
 
-	void addChildSceneObject(SceneObject* sceneObject)
+	void addChildSceneObject(SceneObject* childObject)
 	{
-		_childSceneObjects.push_back(sceneObject);
+		childObject->_setSceneParent(this);			// tell the child it has a new parent
+		_childSceneObjects.push_back(childObject);
+	}
+
+	void _setSceneParent(SceneObject* parent)
+	{
+		_sceneParent = parent;
+		sceneParentChanged();		// allow subclasses to process this change
 	}
 
 	static void _printIndent(int indent)
@@ -79,7 +89,7 @@ public:
 	std::vector<SceneObject*> _childSceneObjects;
 	std::vector<Component*> _components;					// components of this scene object
 
-	SceneObject * _parent = nullptr;
+	SceneObject * _sceneParent = nullptr;
 	std::string _name;
 };
 

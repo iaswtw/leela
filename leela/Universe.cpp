@@ -185,8 +185,6 @@ void Universe::initSceneObjectsAndComponents()
         glm::radians(30.0f)                 // orbital tilt
     );
     moon.setOrbitalPlaneColor(glm::vec3(0.8f, 0.8f, 0.8f));
-    moon.setParentSphere(&earth);
-    earth.setParentSphere(&sun);
     moon.setSunSphere(&sun);
     moon.setRelatedSphere(&earth);
     earth.setRelatedSphere(&moon);
@@ -209,7 +207,6 @@ void Universe::initSceneObjectsAndComponents()
         glm::radians(1.85f)                 // orbital tilt
     );
     mars.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
-    mars.setParentSphere(&sun);
     mars.setSunSphere(&sun);
     sun.addChildSceneObject(&mars);
 
@@ -230,7 +227,6 @@ void Universe::initSceneObjectsAndComponents()
         glm::radians(1.31f)                 // orbital tilt
     );
     jupiter.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
-    jupiter.setParentSphere(&sun);
     jupiter.setSunSphere(&sun);
     sun.addChildSceneObject(&jupiter);
 
@@ -252,7 +248,6 @@ void Universe::initSceneObjectsAndComponents()
         glm::radians(2.49f)                 // orbital tilt
     );
     saturn.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
-    saturn.setParentSphere(&sun);
     saturn.setSunSphere(&sun);
     sun.addChildSceneObject(&saturn);
 
@@ -274,7 +269,6 @@ void Universe::initSceneObjectsAndComponents()
         glm::radians(.77f)                  // orbital tilt
     );
     uranus.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
-    uranus.setParentSphere(&sun);
     uranus.setSunSphere(&sun);
     sun.addChildSceneObject(&uranus);
 
@@ -296,7 +290,6 @@ void Universe::initSceneObjectsAndComponents()
         glm::radians(1.77f)                  // orbital tilt
     );
     neptune.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
-    neptune.setParentSphere(&sun);
     neptune.setSunSphere(&sun);
     sun.addChildSceneObject(&neptune);
 
@@ -543,35 +536,41 @@ void Universe::calculateOrientedViewLockVariables()
     //   2. angle of the vector (to be used as axis of rotation for #1) from target's orbital radius vector
     //        - this vector that lies in the target's orbital plane
     //
-    PNT T = lockTarget->getCenter();
-    PNT S = space.S;
-    PNT P = PNT(lockTarget->_parent->getCenter());
-    VECTOR normal = VECTOR(lockTarget->_orbitalNormal);
-    VECTOR PT = VECTOR(P, T);               // e.g. if target is earth, this is a vector from center of sun to center of earth.
-    VECTOR TS = VECTOR(T, S);               // S is where we are
 
-    VECTOR axis = space.crossProduct(TS, normal);         // this is NOT the target's rotation axis!
+    orientedTargetLock_alpha = 0.0f;
+    orientedTargetLock_beta = 0.0f;
+    if (lockTarget->_sphericalBodyParent)
+    {
+        PNT T = lockTarget->getCenter();
+        PNT S = space.S;
+        PNT P = PNT(lockTarget->_sphericalBodyParent->getCenter());
+        VECTOR normal = VECTOR(lockTarget->_orbitalNormal);
+        VECTOR PT = VECTOR(P, T);               // e.g. if target is earth, this is a vector from center of sun to center of earth.
+        VECTOR TS = VECTOR(T, S);               // S is where we are
 
-    //VECTOR axis = normal.cross(TS);         // this is NOT the target's rotation axis!
-                                            // This is the axis aroud which a `translated` T will have to be rotated to get the observer's position S for the next frame.
-    
-    //spdlog::info("--------------------------------");
-    //spdlog::info("calculateOrientedViewLockVariables:");
-    //spdlog::info("--------------------------------");
+        VECTOR axis = space.crossProduct(TS, normal);         // this is NOT the target's rotation axis!
 
-    orientedTargetLock_alpha = axis.angleFrom(PT, normal.cross(PT));
-    //spdlog::info("   orientedTargetLock_alpha = {}", orientedTargetLock_alpha * 180 / M_PI);
+        //VECTOR axis = normal.cross(TS);         // this is NOT the target's rotation axis!
+                                                // This is the axis aroud which a `translated` T will have to be rotated to get the observer's position S for the next frame.
 
-    orientedTargetLock_beta = normal.angleFrom(TS, normal);                 // reference doesn't matter since it is from normal.
-    //spdlog::info("   orientedTargetLock_beta = {}", orientedTargetLock_beta * 180 / M_PI);
+        //spdlog::info("--------------------------------");
+        //spdlog::info("calculateOrientedViewLockVariables:");
+        //spdlog::info("--------------------------------");
 
-    //spdlog::info("   S  = {}, {}, {}", S.x, S.y, S.z);
-    //spdlog::info("   PT = {}, {}, {}", PT.x, PT.y, PT.z);
-    //spdlog::info("   TS = {}, {}, {}", TS.x, TS.y, TS.z);
-    //spdlog::info("   normal = {}, {}, {}", lockTarget->_orbitalNormal.x, lockTarget->_orbitalNormal.y, lockTarget->_orbitalNormal.z);
-    //spdlog::info("   normal x TS = {}, {}, {}", axis.x, axis.y, axis.z);
-    //spdlog::info("--------------------------------");
-    //spdlog::info("");
+        orientedTargetLock_alpha = axis.angleFrom(PT, normal.cross(PT));
+        //spdlog::info("   orientedTargetLock_alpha = {}", orientedTargetLock_alpha * 180 / M_PI);
+
+        orientedTargetLock_beta = normal.angleFrom(TS, normal);                 // reference doesn't matter since it is from normal.
+        //spdlog::info("   orientedTargetLock_beta = {}", orientedTargetLock_beta * 180 / M_PI);
+
+        //spdlog::info("   S  = {}, {}, {}", S.x, S.y, S.z);
+        //spdlog::info("   PT = {}, {}, {}", PT.x, PT.y, PT.z);
+        //spdlog::info("   TS = {}, {}, {}", TS.x, TS.y, TS.z);
+        //spdlog::info("   normal = {}, {}, {}", lockTarget->_orbitalNormal.x, lockTarget->_orbitalNormal.y, lockTarget->_orbitalNormal.z);
+        //spdlog::info("   normal x TS = {}, {}, {}", axis.x, axis.y, axis.z);
+        //spdlog::info("--------------------------------");
+        //spdlog::info("");
+    }
 }
 
 void Universe::cycleLockMode()
@@ -613,7 +612,10 @@ void Universe::LookAtTarget()
     else if (lockMode == TargetLockMode_OrientedViewTarget)
     {
         PNT T = lockTarget->getCenter();
-        PNT P = PNT(lockTarget->_parent->getCenter());
+
+        // TODO _sphericalBodyParent may be null
+        PNT P = PNT(lockTarget->_sphericalBodyParent->getCenter());
+
         VECTOR PT = VECTOR(P, T);               // e.g. if target is earth, this is a vector from center of sun to center of earth.
         VECTOR normal = VECTOR(lockTarget->_orbitalNormal);
 

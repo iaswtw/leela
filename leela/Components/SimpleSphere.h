@@ -5,8 +5,16 @@
 class SimpleSphere : SceneObject
 {
 public:
-	SimpleSphere() {}
+	SimpleSphere(SceneObject& parent) {}
 	~SimpleSphere() {}
+
+
+	virtual void init() {}
+	virtual void advance(float stepMultiplier) {}
+
+	virtual glm::mat4 getPositionTransform() {
+
+	}
 
 
 	float _radius = 1.0f;
