@@ -172,12 +172,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Class.h" />
+    <ClInclude Include="Component.h" />
     <ClInclude Include="components\CityBookmarkRenderer.h" />
     <ClInclude Include="components\CityBookmarks.h" />
     <ClInclude Include="components\CoordinateAxisRenderer.h" />
-    <ClInclude Include="components\Component.h" />
     <ClInclude Include="components\MonthLabelsRenderer.h" />
-    <ClInclude Include="components\Renderer.h" />
+    <ClInclude Include="components\SimpleSphere.h" />
+    <ClInclude Include="components\SimpleSphereRenderer.h" />
+    <ClInclude Include="components\sphere.h" />
+    <ClInclude Include="components\SphereRenderer.h" />
+    <ClInclude Include="components\StarsRenderer.h" />
     <ClInclude Include="Fir.h" />
     <ClInclude Include="glcorearb.h" />
     <ClInclude Include="GlslProgram.h" />
@@ -192,14 +196,12 @@
     <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="lodepng.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Renderer.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="SceneObject.h" />
     <ClInclude Include="SceneObjects\CoordinateAxis.h" />
     <ClInclude Include="Space.h" />
-    <ClInclude Include="sphere.h" />
-    <ClInclude Include="SphereRenderer.h" />
     <ClInclude Include="Stars.h" />
-    <ClInclude Include="StarsRenderer.h" />
     <ClInclude Include="stbi_image.h" />
     <ClInclude Include="Universe.h" />
     <ClInclude Include="UniverseMinimal.h" />
@@ -211,6 +213,9 @@
     <ClCompile Include="components\CityBookmarkRenderer.cpp" />
     <ClCompile Include="components\CoordinateAxisRenderer.cpp" />
     <ClCompile Include="components\MonthLabelsRenderer.cpp" />
+    <ClCompile Include="components\SimpleSphereRenderer.cpp" />
+    <ClCompile Include="components\SphereRenderer.cpp" />
+    <ClCompile Include="components\StarsRenderer.cpp" />
     <ClCompile Include="GlslProgram.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
@@ -227,8 +232,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="SphereRenderer.cpp" />
-    <ClCompile Include="StarsRenderer.cpp" />
     <ClCompile Include="Universe.cpp" />
     <ClCompile Include="UniverseDemo.cpp" />
     <ClCompile Include="UniverseInputHandling.cpp" />

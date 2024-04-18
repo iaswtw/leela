@@ -6,7 +6,6 @@
     <ClCompile Include="lodepng.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="StarsRenderer.cpp" />
     <ClCompile Include="Universe.cpp" />
     <ClCompile Include="UniverseDemo.cpp" />
     <ClCompile Include="UniverseInputHandling.cpp" />
@@ -36,11 +35,19 @@
     <ClCompile Include="components\CoordinateAxisRenderer.cpp">
       <Filter>Components</Filter>
     </ClCompile>
-    <ClCompile Include="SphereRenderer.cpp" />
     <ClCompile Include="components\MonthLabelsRenderer.cpp">
       <Filter>Components</Filter>
     </ClCompile>
     <ClCompile Include="components\CityBookmarkRenderer.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="components\SimpleSphereRenderer.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="components\SphereRenderer.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="components\StarsRenderer.cpp">
       <Filter>Components</Filter>
     </ClCompile>
   </ItemGroup>
@@ -53,10 +60,7 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Space.h" />
-    <ClInclude Include="sphere.h" />
-    <ClInclude Include="SphereRenderer.h" />
     <ClInclude Include="Stars.h" />
-    <ClInclude Include="StarsRenderer.h" />
     <ClInclude Include="stbi_image.h" />
     <ClInclude Include="Universe.h" />
     <ClInclude Include="Utils.h" />
@@ -85,17 +89,11 @@
     <ClInclude Include="imgui\imstb_truetype.h">
       <Filter>ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="components\Component.h">
-      <Filter>Components</Filter>
-    </ClInclude>
     <ClInclude Include="components\CoordinateAxisRenderer.h">
       <Filter>Components</Filter>
     </ClInclude>
     <ClInclude Include="Fir.h" />
     <ClInclude Include="SceneObject.h" />
-    <ClInclude Include="components\Renderer.h">
-      <Filter>Components</Filter>
-    </ClInclude>
     <ClInclude Include="SceneObjects\CoordinateAxis.h">
       <Filter>SceneObjects</Filter>
     </ClInclude>
@@ -109,6 +107,23 @@
     <ClInclude Include="components\CityBookmarks.h">
       <Filter>Components</Filter>
     </ClInclude>
+    <ClInclude Include="components\SimpleSphere.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="components\SimpleSphereRenderer.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="components\sphere.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="components\SphereRenderer.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="components\StarsRenderer.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h" />
+    <ClInclude Include="Component.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="leela.rc" />
