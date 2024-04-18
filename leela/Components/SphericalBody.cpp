@@ -1,4 +1,4 @@
-#include "Sphere.h"
+#include "SphericalBody.h"
 
 
 void SphericalBody::setRotationParameters(float radius, float rotationAngle, float rotationAngularVelocity, float axisTiltOrientationAngle, float axisTiltAngle)

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Sphere.h"
+#include "SphericalBody.h"
 #include "GlslProgram.h"
 #include <GL/glew.h>
 #include "Renderer.h"
