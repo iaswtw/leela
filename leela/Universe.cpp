@@ -379,6 +379,7 @@ void Universe::initSceneObjectsAndComponents()
     scene.addComponent(&starsRenderer);
     starsRenderer.init();
 
+    SphereRenderer(*this, earth);
 
     SceneObject::printTree(&scene);
 

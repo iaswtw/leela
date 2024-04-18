@@ -46,7 +46,7 @@ enum NightColorDarkness
 class SphereRenderer : public Renderer
 {
 public:
-    SphereRenderer(Universe& parent, Sphere& sphere, std::string textureFilename, std::string textureFilename2);
+    SphereRenderer(Universe& parent, Sphere& sphere, std::string textureFilename="", std::string textureFilename2="");
     ~SphereRenderer();
 
     virtual void init();

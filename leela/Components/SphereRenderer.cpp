@@ -186,7 +186,7 @@ IndexedMesh make_icosphere(int subdivisions)
 
 
 
-SphereRenderer::SphereRenderer(Universe& parent, Sphere& sphere, std::string textureFilename = "", std::string textureFilename2 = "") :
+SphereRenderer::SphereRenderer(Universe& parent, Sphere& sphere, std::string textureFilename, std::string textureFilename2) :
     parent(parent),
     _sphere(sphere)
 
