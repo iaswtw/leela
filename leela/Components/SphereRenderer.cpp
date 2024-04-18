@@ -186,7 +186,7 @@ IndexedMesh make_icosphere(int subdivisions)
 
 
 
-SphereRenderer::SphereRenderer(Universe& parent, Sphere& sphere, std::string textureFilename, std::string textureFilename2) :
+SphereRenderer::SphereRenderer(Universe& parent, SphericalBody& sphere, std::string textureFilename, std::string textureFilename2) :
     parent(parent),
     _sphere(sphere)
 
@@ -263,7 +263,7 @@ std::tuple<float, float, float, glm::vec3, float, float> SphereRenderer::calcPoi
 std::vector<float>* SphereRenderer::_constructMainSphereVertices()
 {
     std::vector<float>* v = new std::vector<float>();
-    Sphere& s = _sphere;
+    SphericalBody& s = _sphere;
 
 	float polygonIncrement = _getPolygonIncrement();
 
@@ -304,7 +304,7 @@ std::vector<float>* SphereRenderer::_constructMainSphereVertices()
 std::pair<std::vector<float>*, std::vector<Triangle>*>  SphereRenderer::_constructMainIcoSphereVertices()
 {
     std::vector<float>* v = new std::vector<float>();
-    Sphere& s = _sphere;
+    SphericalBody& s = _sphere;
 
     IndexedMesh indexMesh = make_icosphere(_getIcoSphereSubdivisionLevel());
     //IndexedMesh indexMesh = make_icosphere(1);
@@ -418,8 +418,8 @@ std::pair<std::vector<float>*, std::vector<Triangle>*>  SphereRenderer::_constru
     }
 
     spdlog::info("");
-    spdlog::info("{}: Sphere: Num vertices = {}", _sphere._name, v->size()/10);
-    spdlog::info("{}: Sphere: Num elements = {}", _sphere._name, indexMesh.second->size() / 6);
+    spdlog::info("{}: SphericalBody: Num vertices = {}", _sphere._name, v->size()/10);
+    spdlog::info("{}: SphericalBody: Num elements = {}", _sphere._name, indexMesh.second->size() / 6);
 
     delete indexMesh.first;
     return std::pair<std::vector<float>*, std::vector<Triangle>*>(v, indexMesh.second);
@@ -428,7 +428,7 @@ std::pair<std::vector<float>*, std::vector<Triangle>*>  SphereRenderer::_constru
 void SphereRenderer::constructLatitudesAndLongitudeVertices()
 {
     std::vector<float>* v = new std::vector<float>();
-    Sphere& s = _sphere;
+    SphericalBody& s = _sphere;
 
 	float polygonIncrement = _getPolygonIncrement();
     float inc = float(2 * float(M_PI)) / polygonIncrement;
@@ -542,7 +542,7 @@ void SphereRenderer::constructLatitudesAndLongitudeVertices()
 void SphereRenderer::constructOrbit()
 {
     std::vector<float>* v   = new std::vector<float>();
-    Sphere& s               = _sphere;
+    SphericalBody& s               = _sphere;
     glm::vec3& color        = s._orbitalPlaneColor;
     float m                 = 0.7f;
 
@@ -598,7 +598,7 @@ void SphereRenderer::constructOrbit()
 void SphereRenderer::constructOrbitalPlaneGridVertices()
 {
     std::vector<float>* v = new std::vector<float>();
-    Sphere& s = _sphere;
+    SphericalBody& s = _sphere;
 
     //---------------------------------------------------------------------------------
     // Orbital plane grid.
@@ -680,7 +680,7 @@ void SphereRenderer::constructOrbitalPlaneGridVertices()
 void SphereRenderer::constructOrbitalPlaneVertices()
 {
     std::vector<float>* v = new std::vector<float>();
-    Sphere& s = _sphere;
+    SphericalBody& s = _sphere;
     float m = 0.3f;                          // color multiplier
     float radius = s._orbitalRadius;
     glm::vec3& color = s._orbitalPlaneColor;
@@ -732,7 +732,7 @@ void SphereRenderer::constructOrbitalPlaneVertices()
 void SphereRenderer::constructRotationAxis()
 {
     std::vector<float>* v = new std::vector<float>();
-    Sphere& s = _sphere;
+    SphericalBody& s = _sphere;
 
     float m = 0.4f;      // color multiplier
     float radius = s._radius;
@@ -1075,7 +1075,7 @@ int SphereRenderer::_getIcoSphereSubdivisionLevel()
 
 //############################################################################################################
 
-PlanetRenderer::PlanetRenderer(Universe& parent, Sphere& sphere, std::string textureFilename, std::string textureFilename2)
+PlanetRenderer::PlanetRenderer(Universe& parent, SphericalBody& sphere, std::string textureFilename, std::string textureFilename2)
 	: SphereRenderer(parent, sphere, textureFilename, textureFilename2)
 {
 }
@@ -1229,7 +1229,7 @@ void PlanetRenderer::renderOrbit(GlslProgram& glslProgram)
 
 void PlanetRenderer::renderOrbitalPlane(GlslProgram& glslProgram)
 {
-    Sphere& s = _sphere;
+    SphericalBody& s = _sphere;
 
     if (!s.bIsCenterOfMass)
     {
@@ -1302,7 +1302,7 @@ void PlanetRenderer::renderRotationAxis(GlslProgram& glslProgram)
 
 
 
-SunRenderer::SunRenderer(Universe& parent, Sphere& sphere, std::string textureFilename)
+SunRenderer::SunRenderer(Universe& parent, SphericalBody& sphere, std::string textureFilename)
 	: SphereRenderer(parent, sphere, textureFilename)
 {
 }

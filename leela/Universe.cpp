@@ -477,7 +477,7 @@ void Universe::SetApplicationStartView()
 }
 
 
-void Universe::SetLockTargetAndMode(Sphere* target, TargetLockMode mode)
+void Universe::SetLockTargetAndMode(SphericalBody* target, TargetLockMode mode)
 {
     lockTarget = target;
 
@@ -589,7 +589,7 @@ void Universe::ResetFollowTargetAndMode()
     SetLockTargetAndMode(nullptr, TargetLockMode_ViewTarget);
 }
 
-void Universe::ToggleFollowTarget(Sphere* target, TargetLockMode mode)
+void Universe::ToggleFollowTarget(SphericalBody* target, TargetLockMode mode)
 {
     if (lockTarget == target)
         lockTarget = nullptr;

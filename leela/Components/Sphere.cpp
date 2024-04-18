@@ -1,7 +1,7 @@
 #include "Sphere.h"
 
 
-void Sphere::setRotationParameters(float radius, float rotationAngle, float rotationAngularVelocity, float axisTiltOrientationAngle, float axisTiltAngle)
+void SphericalBody::setRotationParameters(float radius, float rotationAngle, float rotationAngularVelocity, float axisTiltOrientationAngle, float axisTiltAngle)
 {
     _radius = radius;
     _rotationAngle = rotationAngle;
@@ -12,7 +12,7 @@ void Sphere::setRotationParameters(float radius, float rotationAngle, float rota
     _axisTiltAngle_Deg = glm::degrees(_axisTiltAngle);
 }
 
-void Sphere::setOrbitalParameters(float orbitalRadius, float orbitalAngle, float orbitalAngularVelocity, float nodalPrecessionInitialAngle, float orbitalPlaneTiltAngle)
+void SphericalBody::setOrbitalParameters(float orbitalRadius, float orbitalAngle, float orbitalAngularVelocity, float nodalPrecessionInitialAngle, float orbitalPlaneTiltAngle)
 {
     setOrbitalRadius(orbitalRadius);
     _orbitalRadius_Backup = _orbitalRadius;
@@ -27,7 +27,7 @@ void Sphere::setOrbitalParameters(float orbitalRadius, float orbitalAngle, float
 
 
 
-void Sphere::advance(float stepMultiplier)
+void SphericalBody::advance(float stepMultiplier)
 {
     if (bRotationMotion)
     {
@@ -76,7 +76,7 @@ void Sphere::advance(float stepMultiplier)
 
 
 // Calculates center position based on the value of current parameters
-void Sphere::calculateCenterPosition()
+void SphericalBody::calculateCenterPosition()
 {
     glm::mat4 mat = getPositionTransform();
     glm::vec3 raisedCenter;
@@ -87,18 +87,18 @@ void Sphere::calculateCenterPosition()
 }
 
 // Get a point defined in untranslated coordinates to be translated by this sphere's model matrix.
-glm::vec3 Sphere::getTranslatedSpherePoint(glm::vec3 p)
+glm::vec3 SphericalBody::getTranslatedSpherePoint(glm::vec3 p)
 {
     return getPositionTransform() * glm::vec4(p, 1.0);
     //return getTransform() * glm::vec4(p, 1.0);
 }
 
-glm::vec3 Sphere::getTransformedNorthPole()
+glm::vec3 SphericalBody::getTransformedNorthPole()
 {
     return getTransform() * glm::vec4(0.0f, 0.0f, _radius, 1.0);
 }
 
-glm::vec3 Sphere::getTransformedLatitudeLongitude(float lat, float lon, float radiusScale)
+glm::vec3 SphericalBody::getTransformedLatitudeLongitude(float lat, float lon, float radiusScale)
 {
     // convert latitude and longitude to point on sphere.
     float alpha = 180 + lon;                // angle from +ve x axis rotating towards +ve y axis.  range: 0 to 360.
@@ -118,7 +118,7 @@ glm::vec3 Sphere::getTransformedLatitudeLongitude(float lat, float lon, float ra
 
 // Transforms a point on an upright sphere at origin to the tilted sphere at origin.
 //    - use axial tilt, rotation position and precession of the sphere.
-glm::mat4 Sphere::getOrientationTransform()
+glm::mat4 SphericalBody::getOrientationTransform()
 {
     glm::mat4 mat(1.0f);
 
@@ -140,13 +140,13 @@ glm::mat4 Sphere::getOrientationTransform()
 
 
 // returns a vec3 in x-y plane (z=0)
-glm::vec3 Sphere::getAxisTiltOrientationAxis()
+glm::vec3 SphericalBody::getAxisTiltOrientationAxis()
 {
     glm::vec3 axisTiltOrientationAxis = glm::vec3(cos(_axisTiltOrientationAngle), sin(_axisTiltOrientationAngle), 0.0f);
     return axisTiltOrientationAxis;
 }
 
-glm::mat4 Sphere::getOrbitalPlaneModelMatrix()
+glm::mat4 SphericalBody::getOrbitalPlaneModelMatrix()
 {
     glm::mat4 modelTrans(1.0f);
 
@@ -162,14 +162,14 @@ glm::mat4 Sphere::getOrbitalPlaneModelMatrix()
     return modelTrans;
 }
 
-glm::vec3 Sphere::getModelTransformedCenter()
+glm::vec3 SphericalBody::getModelTransformedCenter()
 {
     return _center;
 }
 
 // Get the model matrix of the center of this sphere.
 // - This includes first getting the parent's center's model matrix.
-glm::mat4 Sphere::getPositionTransform()
+glm::mat4 SphericalBody::getPositionTransform()
 {
     glm::mat4 mat(1.0f);
 

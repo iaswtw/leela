@@ -4,7 +4,7 @@
 //std::vector<float>* constructSphereVertices()
 //{
 //    std::vector<float>* v = new std::vector<float>();
-//    Sphere& s = _sphere;
+//    SphericalBody& s = _sphere;
 //
 //    float polygonIncrement = _getPolygonIncrement();
 //

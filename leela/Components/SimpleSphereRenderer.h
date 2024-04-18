@@ -1,12 +1,12 @@
 #pragma once
 
 #include "Renderer.h"
-class Sphere;
+class SphericalBody;
 
 class SimpleSphereRenderer : public Renderer
 {
 public:
-	SimpleSphereRenderer(Sphere& sphere) : _sphere(sphere) {}
+	SimpleSphereRenderer(SphericalBody& sphere) : _sphere(sphere) {}
 	~SimpleSphereRenderer() {}
 
 	void init();
@@ -14,6 +14,6 @@ public:
 
 	virtual void renderMain(GlslProgram& glslProgram);
 
-	Sphere& _sphere;
+	SphericalBody& _sphere;
 
 };
