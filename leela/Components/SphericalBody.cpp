@@ -43,7 +43,8 @@ void SphericalBody::advance(float stepMultiplier)
     {
         float increment = _orbitalAngularVelocity;
         if (bOrbitalRevolutionSyncToParent) {
-            increment = _parent->_orbitalAngularVelocity * 12.3f;
+            if (_sphericalBodyParent != nullptr)
+                increment = _sphericalBodyParent->_orbitalAngularVelocity * 12.3f;       // hardcode for moon
         }
 
         _orbitalAngle += increment * stepMultiplier;
@@ -64,13 +65,22 @@ void SphericalBody::advance(float stepMultiplier)
         if (bNodalPrecessionSpeedSyncToParentsRevolution) {         // e.g. Moon's nodal precession with earth's revolution period with a factor of 18.6
             //spdlog::info("applying orbital plane rotation sync'd to parent's revolution");
             //spdlog::info("_parent = {}", fmt::ptr(_parent));
-            if (_parent) {
-                increment = _parent->_orbitalAngularVelocity / 18.6;        // hardcode this for moon
-            }
+
+            if (_sphericalBodyParent != nullptr)
+                increment = _sphericalBodyParent->_orbitalAngularVelocity / 18.6;        // hardcode this for moon
         }
         _nodalPrecessionAngle -= increment * stepMultiplier;
         _nodalPrecessionAngle = _normalizeAngle(_nodalPrecessionAngle);
     }
+}
+
+void SphericalBody::sceneParentChanged()
+{
+    _sphericalBodyParent = nullptr;
+
+    SphericalBody* parent = dynamic_cast<SphericalBody*>(_sceneParent);
+    if (parent != nullptr)
+        _sphericalBodyParent = parent;
 }
 
 
@@ -152,9 +162,9 @@ glm::mat4 SphericalBody::getOrbitalPlaneModelMatrix()
 
     // translate to the parent's center.
     //printf("getOrbitalPlaneModelMatrix: sphere name = %s, _parent = %p\n", _name.c_str(), _parent);
-    if (_parent != nullptr)
+    if (_sceneParent != nullptr)
     {
-        modelTrans = glm::translate(modelTrans, _parent->getCenter());
+        modelTrans = _sceneParent->getPositionTransform();
         modelTrans = glm::rotate(modelTrans, _nodalPrecessionAngle, glm::vec3(0.0f, 0.0f, 1.0f));
         modelTrans = glm::rotate(modelTrans, _orbitalPlaneTiltAngle, glm::vec3(0.0f, 1.0f, 0.0f));
     }
@@ -178,8 +188,8 @@ glm::mat4 SphericalBody::getPositionTransform()
     //-------------------------------------------------------------------
 
     // parent is assumed to have been updated.  Translate by an amount equal to the parent's position.
-    if (_parent != nullptr)
-        mat = _parent->getPositionTransform();
+    if (_sceneParent != nullptr)
+        mat = _sceneParent->getPositionTransform();
 
     // apply nodal precession
     mat = glm::rotate(

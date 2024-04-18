@@ -40,8 +40,8 @@ public:
 class SphericalBody : public SceneObject
 {
 public:
-    SphericalBody(SceneObject * parent, std::string name)
-        : SceneObject(parent, name)
+    SphericalBody(std::string name)
+        : SceneObject(name)
     {}
     ~SphericalBody() {}
 
@@ -52,7 +52,6 @@ public:
     void setName(std::string name)                          { _name = name; }
     void setOrbitalPlaneColor(glm::vec3 orbitalPlaneColor)  { _orbitalPlaneColor = orbitalPlaneColor; }
     void setOrbitalRadius(float orbitalRadius)              { _orbitalRadius = orbitalRadius; }
-    void setParentSphere(SphericalBody* parent)                    { _parent = parent; }
     void setOrbitalAngle(float orbitalAngle)                { _orbitalAngle = orbitalAngle; }
     inline glm::vec3& getCenter()                           { return _center; }
     inline float getRadius()                                { return _radius; }
@@ -67,6 +66,8 @@ public:
 
     void setRotationParameters(float radius, float rotationAngle, float rotationAngularVelocity, float axisTiltOrientationAngle, float axisTiltAngle);
     void setOrbitalParameters(float orbitalRadius, float orbitalAngle, float orbitalAngularVelocity, float nodalPrecessionInitialAngle, float orbitalPlaneTiltAngle);
+    virtual void sceneParentChanged();
+
     glm::mat4 getOrbitalPlaneModelMatrix();
     glm::vec3 getModelTransformedCenter();
     glm::mat4 getPositionTransform();
@@ -120,8 +121,8 @@ public:
     SphericalBody* _relatedSphere = nullptr;
     SphericalBody* _sunSphere = nullptr;
 
-    SphericalBody *_parent = nullptr;              // e.g. if this is moon, _parent is earth.
-                                            // TODO: this will change when we bring in center of mass virtual SphericalBody object.
+    SphericalBody* _sphericalBodyParent = nullptr;  // e.g. if this is moon, _parent is earth.
+                                                    // TODO: this will change when we bring in center of mass virtual SphericalBody object.
     std::string _name = "NoName";
 
 };

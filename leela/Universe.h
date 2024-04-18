@@ -446,14 +446,14 @@ public:
 
     // SphericalBody and other objects to be drawn on the screen. Instantiate them here. Their data (vertices) will be created later.
     CoordinateAxisRenderer coordinateAxisRenderer;
-    SphericalBody earth = SphericalBody(nullptr, "Earth");
-    SphericalBody sun = SphericalBody(nullptr, "Sun");
-    SphericalBody mars = SphericalBody(nullptr, "Mars");
-    SphericalBody moon = SphericalBody(nullptr, "Moon");
-    SphericalBody jupiter = SphericalBody(nullptr, "Jupiter");
-    SphericalBody saturn = SphericalBody(nullptr, "Saturn");
-    SphericalBody uranus = SphericalBody(nullptr, "Uranus");
-    SphericalBody neptune = SphericalBody(nullptr, "Neptune");
+    SphericalBody earth = SphericalBody("Earth");
+    SphericalBody sun = SphericalBody("Sun");
+    SphericalBody mars = SphericalBody("Mars");
+    SphericalBody moon = SphericalBody("Moon");
+    SphericalBody jupiter = SphericalBody("Jupiter");
+    SphericalBody saturn = SphericalBody("Saturn");
+    SphericalBody uranus = SphericalBody("Uranus");
+    SphericalBody neptune = SphericalBody("Neptune");
     Stars stars;
 
     Scene scene;
