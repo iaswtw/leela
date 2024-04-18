@@ -179,7 +179,7 @@
     <ClInclude Include="components\MonthLabelsRenderer.h" />
     <ClInclude Include="components\SimpleSphere.h" />
     <ClInclude Include="components\SimpleSphereRenderer.h" />
-    <ClInclude Include="components\sphere.h" />
+    <ClInclude Include="components\Sphere.h" />
     <ClInclude Include="components\SphereRenderer.h" />
     <ClInclude Include="components\StarsRenderer.h" />
     <ClInclude Include="Fir.h" />
@@ -214,6 +214,7 @@
     <ClCompile Include="components\CoordinateAxisRenderer.cpp" />
     <ClCompile Include="components\MonthLabelsRenderer.cpp" />
     <ClCompile Include="components\SimpleSphereRenderer.cpp" />
+    <ClCompile Include="Components\Sphere.cpp" />
     <ClCompile Include="components\SphereRenderer.cpp" />
     <ClCompile Include="components\StarsRenderer.cpp" />
     <ClCompile Include="GlslProgram.cpp" />
@@ -232,6 +233,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="TesselationHelper.cpp" />
     <ClCompile Include="Universe.cpp" />
     <ClCompile Include="UniverseDemo.cpp" />
     <ClCompile Include="UniverseInputHandling.cpp" />
