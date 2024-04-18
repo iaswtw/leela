@@ -1333,8 +1333,8 @@ int Universe::run()
     SDL_Init(SDL_INIT_EVERYTHING);
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -1345,6 +1345,7 @@ int Universe::run()
 
     spdlog::info("Created SDL GL window");
     context = SDL_GL_CreateContext(window);
+
 
     glewInit();
 
@@ -1385,6 +1386,23 @@ int Universe::run()
     spdlog::info("height = {}", curHeight);
     
     spdlog::info("initializing scene objects... ");
+
+
+    //---------------------------------------------------
+    // Print OpenGL and Shading Language versions
+    //---------------------------------------------------
+    const GLubyte* glVersion;
+    GLint glMajor, glMinor;
+    
+    glVersion = glGetString(GL_VERSION);
+    glGetIntegerv(GL_MAJOR_VERSION, &glMajor);
+    glGetIntegerv(GL_MAJOR_VERSION, &glMinor);
+
+    spdlog::info("OpenGL version string: {}", (char*)(glVersion));
+    spdlog::info("OpenGL major = {}, minor = {}", glMajor, glMinor);
+    spdlog::info("Shading language version string: {}", (char*)glGetString(GL_SHADING_LANGUAGE_VERSION));
+    //---------------------------------------------------
+
 
 	SDL_GL_SetSwapInterval(1);
 	int retval = 0;

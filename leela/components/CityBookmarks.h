@@ -21,7 +21,8 @@ public:
 
 	std::vector<BookmarkInfo> bookmarks = {
 		{ "Austin",			30.2f, -97.7},
-		{ "Chicago",		41.8f, -87.6f}
+		{ "Chicago",		41.8f, -87.6f},
+		{ "Cheyenne",		41.1f, -104.8}
 	};
 
 };
