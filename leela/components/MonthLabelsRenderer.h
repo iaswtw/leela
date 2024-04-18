@@ -3,7 +3,7 @@
 #include <vector>
 #include "Renderer.h"
 #include "GlslProgram.h"
-#include "sphere.h"
+#include "SphericalBody.h"
 #include "UniverseMinimal.h"
 
 

@@ -10,8 +10,8 @@
 #include <SDL_opengl.h>
 
 #include "SceneObject.h"
-#include "sphere.h"
-#include "SphereRenderer.h"
+#include "SphericalBody.h"
+#include "SphericalBodyRenderer.h"
 #include "CoordinateAxisRenderer.h"
 #include "CityBookmarkRenderer.h"
 #include "Stars.h"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sphere.h"
+#include "SphericalBody.h"
 #include "Renderer.h"
 
 class Universe;
@@ -43,11 +43,11 @@ enum NightColorDarkness
     NightColorDarkness_None,            // night vertex color same as day color
 };
 
-class SphereRenderer : public Renderer
+class SphericalBodyRenderer : public Renderer
 {
 public:
-    SphereRenderer(Universe& parent, SphericalBody& sphere, std::string textureFilename="", std::string textureFilename2="");
-    ~SphereRenderer();
+    SphericalBodyRenderer(Universe& parent, SphericalBody& sphere, std::string textureFilename="", std::string textureFilename2="");
+    ~SphericalBodyRenderer();
 
     virtual void init();
     virtual void advance(float stepMultiplier) {};
@@ -119,7 +119,7 @@ protected:
 };
 
 
-class PlanetRenderer : public SphereRenderer
+class PlanetRenderer : public SphericalBodyRenderer
 {
 public:
 	PlanetRenderer(Universe& parent, SphericalBody& sphere, std::string textureFilename = "", std::string textureFilename2 = "");
@@ -136,7 +136,7 @@ public:
 
 };
 
-class SunRenderer : public SphereRenderer
+class SunRenderer : public SphericalBodyRenderer
 {
 public:
 	SunRenderer(Universe& parent, SphericalBody& sphere, std::string textureFilename = "");
