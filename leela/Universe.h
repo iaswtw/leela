@@ -234,14 +234,14 @@ public:
     void SetDefaultView();
     void SetApplicationStartView();
     
-    void SetLockTargetAndMode(Sphere* target, TargetLockMode mode);
+    void SetLockTargetAndMode(SphericalBody* target, TargetLockMode mode);
     void SetLockMode(TargetLockMode mode);
     void calculateCommonTargetLockVariables();
     void calculateFollowTargetLockVariables();
     void calculateOrientedViewLockVariables();
     void cycleLockMode();
     void ResetFollowTargetAndMode();
-    void ToggleFollowTarget(Sphere* target, TargetLockMode mode);
+    void ToggleFollowTarget(SphericalBody* target, TargetLockMode mode);
 
     void LookAtTarget();
 
@@ -405,7 +405,7 @@ public:
     float orientedTargetLock_beta = 0.0f;
     VECTOR downDirection = VECTOR(0.0f, 0.0f, 0.0f);
 
-    Sphere* lockTarget = nullptr;           // If not null, the camera will change direction such that target
+    SphericalBody* lockTarget = nullptr;           // If not null, the camera will change direction such that target
                                             // will always appear at the center of the screen.
     bool bEarthSurfaceLockMode = false;
     float surfaceLockTheta = 1.0f;      // change which latitude camera is at.
@@ -444,22 +444,22 @@ public:
     glm::mat4 projectionMatrix;
 
 
-    // Sphere and other objects to be drawn on the screen. Instantiate them here. Their data (vertices) will be created later.
+    // SphericalBody and other objects to be drawn on the screen. Instantiate them here. Their data (vertices) will be created later.
     CoordinateAxisRenderer coordinateAxisRenderer;
-    Sphere earth = Sphere(nullptr, "Earth");
-    Sphere sun = Sphere(nullptr, "Sun");
-    Sphere mars = Sphere(nullptr, "Mars");
-    Sphere moon = Sphere(nullptr, "Moon");
-    Sphere jupiter = Sphere(nullptr, "Jupiter");
-    Sphere saturn = Sphere(nullptr, "Saturn");
-    Sphere uranus = Sphere(nullptr, "Uranus");
-    Sphere neptune = Sphere(nullptr, "Neptune");
+    SphericalBody earth = SphericalBody(nullptr, "Earth");
+    SphericalBody sun = SphericalBody(nullptr, "Sun");
+    SphericalBody mars = SphericalBody(nullptr, "Mars");
+    SphericalBody moon = SphericalBody(nullptr, "Moon");
+    SphericalBody jupiter = SphericalBody(nullptr, "Jupiter");
+    SphericalBody saturn = SphericalBody(nullptr, "Saturn");
+    SphericalBody uranus = SphericalBody(nullptr, "Uranus");
+    SphericalBody neptune = SphericalBody(nullptr, "Neptune");
     Stars stars;
 
     Scene scene;
 
-    Sphere* allSpheres[9] = { &sun, &earth, &moon, &mars, &jupiter, &saturn, &uranus, &neptune, NULL };
-    Sphere* allPlanets[8] = {       &earth, &moon, &mars, &jupiter, &saturn, &uranus, &neptune, NULL };
+    SphericalBody* allSpheres[9] = { &sun, &earth, &moon, &mars, &jupiter, &saturn, &uranus, &neptune, NULL };
+    SphericalBody* allPlanets[8] = {       &earth, &moon, &mars, &jupiter, &saturn, &uranus, &neptune, NULL };
 
     PlanetRenderer earthRenderer;
     PlanetRenderer moonRenderer;

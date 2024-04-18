@@ -9,7 +9,7 @@
 class CityBookmarkRenderer : public Renderer
 {
 public:
-	CityBookmarkRenderer(Sphere& sphere, CityBookmarks& cityBookmarks) : _sphere(sphere), _cityBookmarks(cityBookmarks) {}
+	CityBookmarkRenderer(SphericalBody& sphere, CityBookmarks& cityBookmarks) : _sphere(sphere), _cityBookmarks(cityBookmarks) {}
 	~CityBookmarkRenderer() {}
 
 	bool isSpherePointHidden(glm::vec3 p);
@@ -20,6 +20,6 @@ public:
 	virtual void renderPost(GlslProgram& glslProgram);
 
 private:
-	Sphere& _sphere;
+	SphericalBody& _sphere;
 	CityBookmarks& _cityBookmarks;
 };

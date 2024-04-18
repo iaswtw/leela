@@ -37,13 +37,13 @@ public:
 };
 
 
-class Sphere : public SceneObject
+class SphericalBody : public SceneObject
 {
 public:
-    Sphere(SceneObject * parent, std::string name)
+    SphericalBody(SceneObject * parent, std::string name)
         : SceneObject(parent, name)
     {}
-    ~Sphere() {}
+    ~SphericalBody() {}
 
     virtual void init() {}
     void advance(float stepMultiplier);
@@ -52,7 +52,7 @@ public:
     void setName(std::string name)                          { _name = name; }
     void setOrbitalPlaneColor(glm::vec3 orbitalPlaneColor)  { _orbitalPlaneColor = orbitalPlaneColor; }
     void setOrbitalRadius(float orbitalRadius)              { _orbitalRadius = orbitalRadius; }
-    void setParentSphere(Sphere* parent)                    { _parent = parent; }
+    void setParentSphere(SphericalBody* parent)                    { _parent = parent; }
     void setOrbitalAngle(float orbitalAngle)                { _orbitalAngle = orbitalAngle; }
     inline glm::vec3& getCenter()                           { return _center; }
     inline float getRadius()                                { return _radius; }
@@ -60,8 +60,8 @@ public:
 
     // related sphere is a sphere that is close enough to this sphere so as to possibly cast a shadow
     // on this sphere.
-    void setRelatedSphere(Sphere * relatedSphere)           { _relatedSphere = relatedSphere; }
-    void setSunSphere(Sphere* sunSphere)                    { _sunSphere = sunSphere; }
+    void setRelatedSphere(SphericalBody * relatedSphere)           { _relatedSphere = relatedSphere; }
+    void setSunSphere(SphericalBody* sunSphere)                    { _sunSphere = sunSphere; }
     void restoreOrbitalRadius()                             { _orbitalRadius = _orbitalRadius_Backup; }
     void restoreAxisTiltAngleFromBackup()                   { _axisTiltAngle = _axisTiltAngle_Backup;  _axisTiltAngle_Deg = glm::degrees(_axisTiltAngle); }
 
@@ -117,11 +117,11 @@ public:
     float _orbitalPlaneTiltAngle_Deg = 0;   // this is initialized when _orbitalPlaneTiltAngle is initially set.  After that, Imgui will show and change the _Deg value
                                             // through the use of a slider. If modified, the radian value will be changed by the code that invokes Imgui slider.
 
-    Sphere* _relatedSphere = nullptr;
-    Sphere* _sunSphere = nullptr;
+    SphericalBody* _relatedSphere = nullptr;
+    SphericalBody* _sunSphere = nullptr;
 
-    Sphere *_parent = nullptr;              // e.g. if this is moon, _parent is earth.
-                                            // TODO: this will change when we bring in center of mass virtual Sphere object.
+    SphericalBody *_parent = nullptr;              // e.g. if this is moon, _parent is earth.
+                                            // TODO: this will change when we bring in center of mass virtual SphericalBody object.
     std::string _name = "NoName";
 
 };
