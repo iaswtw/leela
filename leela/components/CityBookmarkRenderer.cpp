@@ -77,6 +77,7 @@ void CityBookmarkRenderer::renderPost(GlslProgram& glslProgram)
 {
     if (glslProgram.type() == GlslProgramType_Font)
     {
-        _renderBookmarks(glslProgram);
+        if (_cityBookmarks.bShowBookmarks)
+            _renderBookmarks(glslProgram);
     }
 }

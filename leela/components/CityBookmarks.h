@@ -25,4 +25,5 @@ public:
 		{ "Cheyenne",		41.1f, -104.8}
 	};
 
+	bool bShowBookmarks = false;
 };
