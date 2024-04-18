@@ -1074,18 +1074,23 @@ void Universe::processFlags()
 
     advanceScene(_filteredStepMultiplier * _stepMultiplierFrameRateAdjustment);
 
+    //-------------------------------------
+    // Manual movement of earth and moon in their orbit.
+    // Intended to be used when simulation is paused or the earth/moon revolution is paused.
+    float inc = 0.003f;
+    if (bShiftModifier)
+        inc *= 10;
 
-    if (!bSimulationPause)
-    {
-        if (bAdvanceEarthInOrbit)
-            earth._orbitalAngle += 0.003f;
-        if (bRetardEarthInOrbit)
-            earth._orbitalAngle -= 0.003f;
-        if (bAdvanceMoonInOrbit)
-            moon._orbitalAngle += 0.003f;
-        if (bRetardMoonInOrbit)
-            moon._orbitalAngle -= 0.003f;
-    }
+    if (bAdvanceEarthInOrbit)
+        earth._orbitalAngle += inc;
+    if (bRetardEarthInOrbit)
+        earth._orbitalAngle -= inc;
+    if (bAdvanceMoonInOrbit)
+        moon._orbitalAngle += inc;
+    if (bRetardMoonInOrbit)
+        moon._orbitalAngle -= inc;
+    //-------------------------------------
+
 
     // always calculate sphere positions, even when simulation paused.
     // This is because ImGui may change variables of scene objects, and it must be
