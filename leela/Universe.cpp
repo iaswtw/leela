@@ -81,7 +81,11 @@ Universe::Universe() :
     stepMultiplierFilter            (FIR_WIDTH, fir_coeff),
 
     monthLabelsRenderer(earth),
-    cityBookmarkRenderer(earth, cityBookmarks)
+
+    bm1(&earth),
+    bm2(&earth),
+    bm3(&earth)
+    
 {
 }
 
@@ -146,7 +150,7 @@ void Universe::initSceneObjectsAndComponents()
         0,                                  // nodal precession initial angle
         0                                   // orbital tilt
     );
-    scene.addChildSceneObject(&sun);
+    scene.addSceneObject(&sun);
 
     // Earth
     //---------------------------------------
@@ -166,7 +170,7 @@ void Universe::initSceneObjectsAndComponents()
     );
     earth.setOrbitalPlaneColor(glm::vec3(0.55, 0.82, 1.0));
     earth.setSunSphere(&sun);
-    sun.addChildSceneObject(&earth);
+    sun.addSceneObject(&earth);
 
     // Moon
     //---------------------------------------
@@ -188,7 +192,7 @@ void Universe::initSceneObjectsAndComponents()
     moon.setSunSphere(&sun);
     moon.setRelatedSphere(&earth);
     earth.setRelatedSphere(&moon);
-    earth.addChildSceneObject(&moon);
+    earth.addSceneObject(&moon);
 
     // Mars
     //---------------------------------------
@@ -208,7 +212,7 @@ void Universe::initSceneObjectsAndComponents()
     );
     mars.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
     mars.setSunSphere(&sun);
-    sun.addChildSceneObject(&mars);
+    sun.addSceneObject(&mars);
 
     // Jupiter
     //---------------------------------------
@@ -228,7 +232,7 @@ void Universe::initSceneObjectsAndComponents()
     );
     jupiter.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
     jupiter.setSunSphere(&sun);
-    sun.addChildSceneObject(&jupiter);
+    sun.addSceneObject(&jupiter);
 
 
     // Saturn
@@ -249,7 +253,7 @@ void Universe::initSceneObjectsAndComponents()
     );
     saturn.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
     saturn.setSunSphere(&sun);
-    sun.addChildSceneObject(&saturn);
+    sun.addSceneObject(&saturn);
 
 
     // Uranus
@@ -270,7 +274,7 @@ void Universe::initSceneObjectsAndComponents()
     );
     uranus.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
     uranus.setSunSphere(&sun);
-    sun.addChildSceneObject(&uranus);
+    sun.addSceneObject(&uranus);
 
 
     // Neptune
@@ -291,7 +295,7 @@ void Universe::initSceneObjectsAndComponents()
     );
     neptune.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
     neptune.setSunSphere(&sun);
-    sun.addChildSceneObject(&neptune);
+    sun.addSceneObject(&neptune);
 
 
     //---------------------------------------------------------------
@@ -361,12 +365,26 @@ void Universe::initSceneObjectsAndComponents()
 
 
     monthLabelsRenderer.init();
-    cityBookmarkRenderer.init();
+
+    bm1.init();
+    bm2.init();
+    bm3.init();
+
+    bm1.addComponent(&bmr1);
+    bm2.addComponent(&bmr2);
+    bm3.addComponent(&bmr3);
+
+    bm1.set("Austin", 30.2f, -97.7);
+    bm2.set("Chicago", 41.8f, -87.6f);
+    bm3.set("Cheyenne", 41.1f, -104.8);
+
 
     earth.addComponent(&monthLabelsRenderer);
-    earth.addChildSceneObject(&cityBookmarks);
-    cityBookmarks.addComponent(&cityBookmarkRenderer);
+    earth.addSceneObject(&bm1);
+    earth.addSceneObject(&bm2);
+    earth.addSceneObject(&bm3);
 
+    
     //---------------------------------------------------------------------------------------------------
     
     scene.addComponent(&starsRenderer);

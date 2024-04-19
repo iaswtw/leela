@@ -5,9 +5,10 @@
 class SimpleSphere : SceneObject
 {
 public:
-	SimpleSphere(SceneObject& parent) {}
+	SimpleSphere() {}
 	~SimpleSphere() {}
 
+	void setPositionOffsetFromParent(glm::vec3 offset) { positionOffset = offset; }
 
 	virtual void init() {}
 	virtual void advance(float stepMultiplier) {}
@@ -24,9 +25,12 @@ public:
 			mat = _sceneParent->getPositionTransform();
 
 		// TODO transform this simple sphere from t he parent's position.
+		mat = glm::translate(mat, positionOffset);
 
+		return mat;
 	}
 
+	glm::vec3 positionOffset = {0.0f, 0.0f, 0.0f};			// offset from parent's position
 
 	float _radius = 1.0f;
 	glm::vec3 color = { 0.0f, 0.0f, 0.0f };

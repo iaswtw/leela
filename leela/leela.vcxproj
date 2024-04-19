@@ -174,7 +174,7 @@
     <ClInclude Include="Class.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="components\CityBookmarkRenderer.h" />
-    <ClInclude Include="components\CityBookmarks.h" />
+    <ClInclude Include="components\CityBookmark.h" />
     <ClInclude Include="components\CoordinateAxisRenderer.h" />
     <ClInclude Include="components\MonthLabelsRenderer.h" />
     <ClInclude Include="components\SimpleSphere.h" />
@@ -233,6 +233,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="SceneObject.cpp" />
     <ClCompile Include="TesselationHelper.cpp" />
     <ClCompile Include="Universe.cpp" />
     <ClCompile Include="UniverseDemo.cpp" />

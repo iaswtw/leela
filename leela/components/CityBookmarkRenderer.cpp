@@ -4,7 +4,7 @@
 
 bool CityBookmarkRenderer::isSpherePointHidden(glm::vec3 p)
 {
-    VECTOR SC = VECTOR(g_space->S, _sphere._center);
+    VECTOR SC = VECTOR(g_space->S, _cityBookmark->_sphericalBody->_center);
     //PNT U = PNT(_sphere._center).translated(_sphere._radius, g_space->DR).toVec3();     // point on sphere with roughly the most separation from observer's point of view.
 
     //VECTOR SU = VECTOR(g_space->S, U);
@@ -36,7 +36,7 @@ void CityBookmarkRenderer::_renderBookmarks(GlslProgram& glslProgram)
 
     // adjust scale based on zoom level to ensure font size is not too large.
     float heightOfCharA = g_universe->getHeightOfCharA();
-    float screenProjectedHeight = g_universe->findScreenProjectedHeight(heightOfCharA, _sphere._center);
+    float screenProjectedHeight = g_universe->findScreenProjectedHeight(heightOfCharA, _cityBookmark->_sphericalBody->_center);
     //spdlog::info("heightOfCharA = {}", heightOfCharA);
     //spdlog::info("screenProjectedHeight of A = {}", screenProjectedHeight);
 
@@ -48,27 +48,24 @@ void CityBookmarkRenderer::_renderBookmarks(GlslProgram& glslProgram)
 
     glm::vec3 projected;
     glm::vec3 bookmarkPoint;
+    float radius = _cityBookmark->_sphericalBody->_radius;
 
-    for (BookmarkInfo bi : _cityBookmarks.bookmarks)
+    bookmarkPoint = _cityBookmark->_sphericalBody->getTransformedLatitudeLongitude(_cityBookmark->_lat, _cityBookmark->_lon, (radius + 1) / radius);
+    if (!isSpherePointHidden(bookmarkPoint))
     {
-
-        bookmarkPoint = _sphere.getTransformedLatitudeLongitude(bi.lat, bi.lon, (_sphere._radius + 1) / _sphere._radius);
-        if (!isSpherePointHidden(bookmarkPoint))
+        projected = g_universe->getScreenCoordinates(bookmarkPoint);
+        //projected = _sphere.getTransformedLatitudeLongitude(aus_lat, aus_lon, (_sphere._radius + 1) / _sphere._radius);
+        if (projected.z < 1.0f)
         {
-            projected = g_universe->getScreenCoordinates(bookmarkPoint);
-            //projected = _sphere.getTransformedLatitudeLongitude(aus_lat, aus_lon, (_sphere._radius + 1) / _sphere._radius);
-            if (projected.z < 1.0f)
-            {
-                g_universe->RenderText(
-                    //RenderTextType_ObjectText,
-                    RenderTextType_ScreenText,
-                    bi.label.c_str(),
-                    projected.x,
-                    projected.y,
-                    projected.z,
-                    fontScale,
-                    glm::vec3(1.0f, 1.0f, 0.0f));
-            }
+            g_universe->RenderText(
+                //RenderTextType_ObjectText,
+                RenderTextType_ScreenText,
+                _cityBookmark->_label.c_str(),
+                projected.x,
+                projected.y,
+                projected.z,
+                fontScale,
+                glm::vec3(1.0f, 1.0f, 0.0f));
         }
     }
 }
@@ -77,7 +74,7 @@ void CityBookmarkRenderer::renderPost(GlslProgram& glslProgram)
 {
     if (glslProgram.type() == GlslProgramType_Font)
     {
-        if (_cityBookmarks.bShowBookmarks)
+        if (g_universe->bShowCityBookmarks)
             _renderBookmarks(glslProgram);
     }
 }

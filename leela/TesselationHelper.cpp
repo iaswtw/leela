@@ -34,7 +34,9 @@ std::tuple<float, float, float, glm::vec3, float, float> CalcPointOnSphere(float
     return { x, y, z, N, texX, texY };
 }
 
-
+//
+//  numEquatorVertices      Number of vertices on the circumference. determines the increment.
+//
 std::vector<float>* ConstructSphereVertices(float radius, glm::vec3 color, int numEquatorVertices, bool bTextureCoord)
 {
     std::vector<float>* v = new std::vector<float>();
@@ -59,12 +61,22 @@ std::vector<float>* ConstructSphereVertices(float radius, glm::vec3 color, int n
             auto [x3, y3, z3, N3, texX3, texY3] = CalcPointOnSphere(radius, alpha_2, theta);
             auto [x4, y4, z4, N4, texX4, texY4] = CalcPointOnSphere(radius, alpha_2, theta_2);
 
-            vector_push_back_12(*v, x1, y1, z1, color.r, color.g, color.b, 1.0f, N1.x, N1.y, N1.z, texX1, texY1);
-            vector_push_back_12(*v, x2, y2, z2, color.r, color.g, color.b, 1.0f, N2.x, N2.y, N2.z, texX2, texY2);
-            vector_push_back_12(*v, x3, y3, z3, color.r, color.g, color.b, 1.0f, N3.x, N3.y, N3.z, texX3, texY3);
-            vector_push_back_12(*v, x3, y3, z3, color.r, color.g, color.b, 1.0f, N3.x, N3.y, N3.z, texX3, texY3);
-            vector_push_back_12(*v, x2, y2, z2, color.r, color.g, color.b, 1.0f, N2.x, N2.y, N2.z, texX2, texY2);
-            vector_push_back_12(*v, x4, y4, z4, color.r, color.g, color.b, 1.0f, N4.x, N4.y, N4.z, texX4, texY4);
+            if (bTextureCoord) {
+                vector_push_back_12(*v, x1, y1, z1, color.r, color.g, color.b, 1.0f, N1.x, N1.y, N1.z, texX1, texY1);
+                vector_push_back_12(*v, x2, y2, z2, color.r, color.g, color.b, 1.0f, N2.x, N2.y, N2.z, texX2, texY2);
+                vector_push_back_12(*v, x3, y3, z3, color.r, color.g, color.b, 1.0f, N3.x, N3.y, N3.z, texX3, texY3);
+                vector_push_back_12(*v, x3, y3, z3, color.r, color.g, color.b, 1.0f, N3.x, N3.y, N3.z, texX3, texY3);
+                vector_push_back_12(*v, x2, y2, z2, color.r, color.g, color.b, 1.0f, N2.x, N2.y, N2.z, texX2, texY2);
+                vector_push_back_12(*v, x4, y4, z4, color.r, color.g, color.b, 1.0f, N4.x, N4.y, N4.z, texX4, texY4);
+            }
+            else {
+                vector_push_back_10(*v, x1, y1, z1, color.r, color.g, color.b, 1.0f, N1.x, N1.y, N1.z);
+                vector_push_back_10(*v, x2, y2, z2, color.r, color.g, color.b, 1.0f, N2.x, N2.y, N2.z);
+                vector_push_back_10(*v, x3, y3, z3, color.r, color.g, color.b, 1.0f, N3.x, N3.y, N3.z);
+                vector_push_back_10(*v, x3, y3, z3, color.r, color.g, color.b, 1.0f, N3.x, N3.y, N3.z);
+                vector_push_back_10(*v, x2, y2, z2, color.r, color.g, color.b, 1.0f, N2.x, N2.y, N2.z);
+                vector_push_back_10(*v, x4, y4, z4, color.r, color.g, color.b, 1.0f, N4.x, N4.y, N4.z);
+            }
         }
     }
 

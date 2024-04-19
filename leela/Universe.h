@@ -412,6 +412,7 @@ public:
     float surfaceLockAlpha = 0.0f;      // don't intend to use this. Don't see enough value.
 
     bool bSimulationPause = false;
+    bool bShowCityBookmarks = true;
 
     USimulationSpeedType eSimulationSpeed;
     UTimeDirectionType eTimeDirection;
@@ -473,8 +474,15 @@ public:
     SunRenderer sunRenderer;
     StarsRenderer starsRenderer;
     MonthLabelsRenderer monthLabelsRenderer;        // for earth
-    CityBookmarks cityBookmarks;                    // for earth
-    CityBookmarkRenderer cityBookmarkRenderer;      // for earth
+    
+    // bookmarks on earth
+    CityBookmark bm1;
+    CityBookmark bm2;
+    CityBookmark bm3;
+
+    CityBookmarkRenderer bmr1;
+    CityBookmarkRenderer bmr2;
+    CityBookmarkRenderer bmr3;
 
     Space space;
 

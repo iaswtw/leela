@@ -4,13 +4,17 @@
 #include "Renderer.h"
 #include "GlslProgram.h"
 #include <vector>
-#include "CityBookmarks.h"
+#include "CityBookmark.h"
 
 class CityBookmarkRenderer : public Renderer
 {
 public:
-	CityBookmarkRenderer(SphericalBody& sphere, CityBookmarks& cityBookmarks) : _sphere(sphere), _cityBookmarks(cityBookmarks) {}
+	CityBookmarkRenderer() {}
 	~CityBookmarkRenderer() {}
+
+	virtual void parentChanged() {
+		_cityBookmark = dynamic_cast<CityBookmark*>(_sceneParent);
+	}
 
 	bool isSpherePointHidden(glm::vec3 p);
 	void _renderBookmarks(GlslProgram& glslProgram);
@@ -19,7 +23,6 @@ public:
 	void advance(float stepMultiplier) {}
 	virtual void renderPost(GlslProgram& glslProgram);
 
-private:
-	SphericalBody& _sphere;
-	CityBookmarks& _cityBookmarks;
+public:
+	CityBookmark * _cityBookmark = nullptr;
 };
