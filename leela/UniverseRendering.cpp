@@ -107,6 +107,10 @@ void Universe::render()
 void Universe::renderAllNontransparentObjects()
 {
 
+    //---------------------------------
+    // Pre stage
+    //---------------------------------
+
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     // Labels that are allowed to hide under other objects should be written before the objects.
     // This is because all labels, regardless of what object they are for, are written at a
@@ -120,6 +124,10 @@ void Universe::renderAllNontransparentObjects()
 
     fontGlslProgram.unuse();
 
+
+    //---------------------------------
+    // Main stage
+    //---------------------------------
 
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
@@ -172,9 +180,21 @@ void Universe::renderAllNontransparentObjects()
     simpleGlslProgram.unuse();
 
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    // Labels that are allowed to hide under other objects should be written before the objects.
-    // This is because all labels, regardless of what object they are for, are written at a
-    // very shallow depth.
+
+    bookmarkGlslProgram.use();
+    projection = glm::ortho(0.0f, float(curWidth), 0.0f, float(curHeight));
+    bookmarkGlslProgram.setMat4("projection", glm::value_ptr(projection));
+
+    renderSceneUsingGlslProgram(bookmarkGlslProgram, RenderStage_Main);
+
+    bookmarkGlslProgram.unuse();
+
+    //---------------------------------
+    // Post stage
+    //---------------------------------
+
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    // Draw labels "on top"
 
     fontGlslProgram.use();
     projection = glm::ortho(0.0f, float(curWidth), 0.0f, float(curHeight));
@@ -184,6 +204,7 @@ void Universe::renderAllNontransparentObjects()
 
     fontGlslProgram.unuse();
 
+    
 }
 
 void Universe::renderAllTransparentObjects()

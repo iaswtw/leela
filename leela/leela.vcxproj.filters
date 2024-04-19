@@ -44,12 +44,13 @@
     <ClCompile Include="components\SimpleSphereRenderer.cpp">
       <Filter>Components</Filter>
     </ClCompile>
-    <ClCompile Include="components\SphereRenderer.cpp">
-      <Filter>Components</Filter>
-    </ClCompile>
     <ClCompile Include="components\StarsRenderer.cpp">
       <Filter>Components</Filter>
     </ClCompile>
+    <ClCompile Include="Components\SphericalBody.cpp" />
+    <ClCompile Include="components\SphericalBodyRenderer.cpp" />
+    <ClCompile Include="SceneObject.cpp" />
+    <ClCompile Include="TessellationHelper.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Class.h" />
@@ -104,19 +105,10 @@
       <Filter>Components</Filter>
     </ClInclude>
     <ClInclude Include="UniverseMinimal.h" />
-    <ClInclude Include="components\CityBookmarks.h">
-      <Filter>Components</Filter>
-    </ClInclude>
     <ClInclude Include="components\SimpleSphere.h">
       <Filter>Components</Filter>
     </ClInclude>
     <ClInclude Include="components\SimpleSphereRenderer.h">
-      <Filter>Components</Filter>
-    </ClInclude>
-    <ClInclude Include="components\sphere.h">
-      <Filter>Components</Filter>
-    </ClInclude>
-    <ClInclude Include="components\SphereRenderer.h">
       <Filter>Components</Filter>
     </ClInclude>
     <ClInclude Include="components\StarsRenderer.h">
@@ -124,6 +116,10 @@
     </ClInclude>
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Component.h" />
+    <ClInclude Include="components\CityBookmark.h" />
+    <ClInclude Include="components\SphericalBody.h" />
+    <ClInclude Include="components\SphericalBodyRenderer.h" />
+    <ClInclude Include="TessellationHelper.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="leela.rc" />
