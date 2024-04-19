@@ -14,6 +14,7 @@ typedef enum
 	GlslProgramType_Star,
 	GlslProgramType_Sun,
 	GlslProgramType_Simple,
+	GlslProgramType_BookmarkSphere,
 
 } GlslProgramType;
 

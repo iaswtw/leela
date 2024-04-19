@@ -112,6 +112,9 @@ void Universe::compileShaders()
 
     fontGlslProgram.compileShadersFromFile("font.vert.glsl", "font.frag.glsl");
     fontGlslProgram.link();
+
+    bookmarkGlslProgram.compileShadersFromFile("bookmark.vert.glsl", "bookmark.frag.glsl");
+    bookmarkGlslProgram.link();
 }
 
 /*************************************************************************************************
@@ -383,6 +386,10 @@ void Universe::initSceneObjectsAndComponents()
     earth.addSceneObject(&bm1);
     earth.addSceneObject(&bm2);
     earth.addSceneObject(&bm3);
+
+    bmr1.init();
+    bmr2.init();
+    bmr3.init();
 
     
     //---------------------------------------------------------------------------------------------------

@@ -497,6 +497,7 @@ public:
 	GlslProgram starGlslProgram = GlslProgram(GlslProgramType_Star);
     GlslProgram simpleGlslProgram = GlslProgram(GlslProgramType_Simple);
     GlslProgram fontGlslProgram = GlslProgram(GlslProgramType_Font);
+    GlslProgram bookmarkGlslProgram = GlslProgram(GlslProgramType_BookmarkSphere);
 
     // Realistic day/night shading, shadow shading.
     // Effect on day & nights:

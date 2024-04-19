@@ -203,6 +203,7 @@
     <ClInclude Include="Space.h" />
     <ClInclude Include="Stars.h" />
     <ClInclude Include="stbi_image.h" />
+    <ClInclude Include="TessellationHelper.h" />
     <ClInclude Include="Universe.h" />
     <ClInclude Include="UniverseMinimal.h" />
     <ClInclude Include="Utils.h" />
@@ -234,7 +235,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="SceneObject.cpp" />
-    <ClCompile Include="TesselationHelper.cpp" />
+    <ClCompile Include="TessellationHelper.cpp" />
     <ClCompile Include="Universe.cpp" />
     <ClCompile Include="UniverseDemo.cpp" />
     <ClCompile Include="UniverseInputHandling.cpp" />
