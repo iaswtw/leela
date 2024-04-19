@@ -48,6 +48,8 @@ public:
     virtual void init() {}
     void advance(float stepMultiplier);
 
+    virtual void parentChanged();
+
     void setColor(float r, float g, float b)                { _r = r; _g = g; _b = b; }
     void setName(std::string name)                          { _name = name; }
     void setOrbitalPlaneColor(glm::vec3 orbitalPlaneColor)  { _orbitalPlaneColor = orbitalPlaneColor; }
@@ -66,7 +68,6 @@ public:
 
     void setRotationParameters(float radius, float rotationAngle, float rotationAngularVelocity, float axisTiltOrientationAngle, float axisTiltAngle);
     void setOrbitalParameters(float orbitalRadius, float orbitalAngle, float orbitalAngularVelocity, float nodalPrecessionInitialAngle, float orbitalPlaneTiltAngle);
-    virtual void sceneParentChanged();
 
     glm::mat4 getOrbitalPlaneModelMatrix();
     glm::vec3 getModelTransformedCenter();

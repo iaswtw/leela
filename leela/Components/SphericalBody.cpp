@@ -74,7 +74,7 @@ void SphericalBody::advance(float stepMultiplier)
     }
 }
 
-void SphericalBody::sceneParentChanged()
+void SphericalBody::parentChanged()
 {
     _sphericalBodyParent = nullptr;
 
