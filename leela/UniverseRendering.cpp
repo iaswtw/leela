@@ -474,7 +474,7 @@ void Universe::createFontCharacterTexture()
 // E.g. if the view is locked on earth, the return value will be (w/2, h/2),
 //          where w and h are width and height of the viewport.
 //
-// `scenePoint` is a model-transformed point.
+// `scenePoint` is a model-transformed point in world coordinates.
 glm::vec3 Universe::getScreenCoordinates(glm::vec3 scenePoint)
 {
     //spdlog::info("getScreenCoordinates: {}", glm::to_string(scenePoint));
@@ -1108,6 +1108,7 @@ void Universe::generateImGuiWidgets()
             ImGui::PopFont();
 
             ImGui::Indent();
+            SmallCheckbox("Show body", &moonRenderer.bShowBody);
             SmallCheckbox("Revolution", &moon.bRevolutionMotion);  ImGui::SameLine();
             SmallCheckbox("Sync with Earth", &moon.bOrbitalRevolutionSyncToParent);
             SmallCheckbox("Orbit## moon", &moonRenderer.bShowOrbit); ImGui::SameLine();

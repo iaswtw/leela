@@ -66,6 +66,7 @@ public:
     bool bShowLatitudesAndLongitudes = false;
     bool bOrbitalPlaneTransparency = false;
     bool bShowOrbitalPlane = false;
+    bool bShowBody = true;
 
 
 public:
@@ -110,6 +111,7 @@ protected:
 	PolygonCountLevel _polygonCountLevel = PolygonCountLevel_Low;
     NightColorDarkness _nightColorDarkness;
     float _nightColorMultiplier;
+
 
     bool _bIsLightSource = false;
     std::string _textureFilename;

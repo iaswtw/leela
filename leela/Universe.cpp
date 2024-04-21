@@ -80,12 +80,7 @@ Universe::Universe() :
     stepMultiplierFilterWhenPaused  (FIR_WIDTH, fir_coeff),
     stepMultiplierFilter            (FIR_WIDTH, fir_coeff),
 
-    monthLabelsRenderer(earth),
-
-    bm1(&earth),
-    bm2(&earth),
-    bm3(&earth)
-    
+    monthLabelsRenderer(earth)
 {
 }
 
@@ -369,29 +364,37 @@ void Universe::initSceneObjectsAndComponents()
 
     monthLabelsRenderer.init();
 
-    bm1.init();
-    bm2.init();
-    bm3.init();
 
-    bm1.addComponent(&bmr1);
-    bm2.addComponent(&bmr2);
-    bm3.addComponent(&bmr3);
-
-    bm1.set("Austin", 30.2f, -97.7);
-    bm2.set("Chicago", 41.8f, -87.6f);
-    bm3.set("Cheyenne", 41.1f, -104.8);
+    typedef struct {
+        std::string label;
+        float lat;
+        float lon;
+    } BookmarkInfo;
 
 
-    earth.addComponent(&monthLabelsRenderer);
-    earth.addSceneObject(&bm1);
-    earth.addSceneObject(&bm2);
-    earth.addSceneObject(&bm3);
+    BookmarkInfo bminfo[] = {
+        {"Austin", 30.2f, -97.7},
+        {"Chicago", 41.8f, -87.6f},
+        {"Cheyenne", 41.1f, -104.8f},
+        {"Fairbanks", 64.8f, -147.7f},
+        {"Nuuk", 64.17f, -51.73f}
+    };
 
-    bmr1.init();
-    bmr2.init();
-    bmr3.init();
+    for (auto _bminfo : bminfo)
+    {
+        auto bm = new CityBookmark(&earth);
+        auto bmr = new CityBookmarkRenderer();
+        
+        bm->init();
+        bm->addComponent(bmr);
+        bm->set(_bminfo.label, _bminfo.lat, _bminfo.lon);
 
-    
+        // bm is owned by earth scene object after this call.
+        earth.addSceneObject(bm);
+        bmr->init();
+    }
+
+
     //---------------------------------------------------------------------------------------------------
     
     scene.addComponent(&starsRenderer);

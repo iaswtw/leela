@@ -1061,7 +1061,8 @@ void PlanetRenderer::renderMain(GlslProgram& glslProgram)
     //spdlog::info("PlanetRenderer::render()");
     if (glslProgram.type() == GlslProgramType_Planet)
     {
-        renderSphere(glslProgram);
+        if (bShowBody)
+            renderSphere(glslProgram);
         renderLatitudeAndLongitudes(glslProgram);
         if (g_universe->bShowPlanetAxis)
             renderRotationAxis(glslProgram);
@@ -1286,7 +1287,8 @@ SunRenderer::~SunRenderer()
 void SunRenderer::renderMain(GlslProgram& glslProgram)
 {
     if (glslProgram.type() == GlslProgramType_Sun)
-        _renderSphere(glslProgram);
+        if (bShowBody)
+            _renderSphere(glslProgram);
 }
 
 void SunRenderer::_renderSphere(GlslProgram& glslProgram)

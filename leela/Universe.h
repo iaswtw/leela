@@ -476,13 +476,8 @@ public:
     MonthLabelsRenderer monthLabelsRenderer;        // for earth
     
     // bookmarks on earth
-    CityBookmark bm1;
-    CityBookmark bm2;
-    CityBookmark bm3;
-
-    CityBookmarkRenderer bmr1;
-    CityBookmarkRenderer bmr2;
-    CityBookmarkRenderer bmr3;
+    //CityBookmark bm[4];
+    //CityBookmarkRenderer bmr[4];
 
     Space space;
 
