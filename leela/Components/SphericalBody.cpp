@@ -108,6 +108,11 @@ glm::vec3 SphericalBody::getTransformedNorthPole()
     return getTransform() * glm::vec4(0.0f, 0.0f, _radius, 1.0);
 }
 
+//
+// Return world coordinates of a point at given latitude and longitude.
+// `radiusScale` tells where the point is along the radius vector of the latitude and longitude.
+//    - if 1, point is on the sphere
+// 
 glm::vec3 SphericalBody::getTransformedLatitudeLongitude(float lat, float lon, float radiusScale)
 {
     // convert latitude and longitude to point on sphere.

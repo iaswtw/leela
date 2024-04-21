@@ -73,33 +73,53 @@ void CityBookmarkRenderer::_renderBookmarks(GlslProgram& glslProgram)
 
 void CityBookmarkRenderer::_renderBookmarkSpheres(GlslProgram& glslProgram)
 {
-    glm::mat4 projection = glm::ortho(0.0f, float(g_universe->curWidth), 0.0f, float(g_universe->curHeight));
+    glm::mat4 projection = glm::ortho(0.0f, float(g_universe->curWidth), 0.0f, float(g_universe->curHeight), 0.1f, 100.0f);
     glslProgram.setMat4("projection", glm::value_ptr(projection));
 
     glm::vec3 projected;
     glm::vec3 bookmarkPoint;
     float radius = _cityBookmark->_sphericalBody->_radius;
 
+
     bookmarkPoint = _cityBookmark->_sphericalBody->getTransformedLatitudeLongitude(_cityBookmark->_lat, _cityBookmark->_lon, 1.0f);
+
+    //projected = g_universe->getScreenCoordinates(bookmarkPoint);
+    //spdlog::info("projected.z = {}", projected.z);
+
+
     if (!isSpherePointHidden(bookmarkPoint))
     {
         projected = g_universe->getScreenCoordinates(bookmarkPoint);
-        //projected = _sphere.getTransformedLatitudeLongitude(aus_lat, aus_lon, (_sphere._radius + 1) / _sphere._radius);
+        spdlog::info("projected.z = {}", projected.z);
+
+        GLboolean curDepthMaskEnable;
+
+        glGetBooleanv(GL_DEPTH_WRITEMASK, &curDepthMaskEnable);       // backup current depth mask before disabling it
+        glDepthMask(GL_FALSE);            // disable writing to depth buffer.  This will allow other objects (spheres, etc) to
+        // overwrite the label when they are drawn later.
+
         if (projected.z < 1.0f)
         {
             //-----------------------
             // TODO setting the model matrix may be needed to transform the sphere properly
             //-----------------------
-            glm::mat4 model = glm::translate(glm::mat4(1.0), glm::vec3(projected.x, projected.y, projected.z - 10));
+            glm::mat4 drawModel = glm::translate(glm::mat4(1.0), glm::vec3(projected.x, projected.y, projected.z));
+            glslProgram.setMat4("drawModel", glm::value_ptr(drawModel));
+
+            glm::mat4 model = glm::translate(glm::mat4(1.0), bookmarkPoint);
             glslProgram.setMat4("model", glm::value_ptr(model));
 
-            glm::vec3 S = glm::vec3(float(g_universe->curWidth / 2), float(g_universe->curHeight / 2), 0.0f);
-            glslProgram.setVec3("S", glm::value_ptr(S));
+            glslProgram.setVec3("S", glm::value_ptr(g_space->S.toVec3()));
+            //glm::vec3 myS(0.0, 0.0, 1000.0);
+            //glslProgram.setVec3("S", glm::value_ptr(myS));
 
             //spdlog::info("Binding vertex and drawing bookmark spheres");
             glBindVertexArray(_bookmarkVao);
             glDrawArrays(GL_TRIANGLES, 0, (GLsizei)numBookmarkSphereVertices);
         }
+
+        glDepthMask(curDepthMaskEnable);    // restore depth mask
+
     }
 
 }
@@ -108,7 +128,7 @@ void CityBookmarkRenderer::_renderBookmarkSpheres(GlslProgram& glslProgram)
 void CityBookmarkRenderer::init()
 {
     vector<float> * v = ConstructSphereVertices(
-                            9,                             // constant radius. Sphere will be drawn near the screen
+                            8,                             // constant radius. Sphere will be drawn near the screen
                             glm::vec3(0.5f, 0.1f, 0.1f),
                             20,
                             false);
