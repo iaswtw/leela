@@ -5,6 +5,7 @@
 #include <math.h>
 
 #include "TessellationHelper.h"
+#include "spdlog/spdlog.h"
 
 /*
 *
@@ -24,7 +25,9 @@ std::tuple<float, float, float, glm::vec3, float, float> CalcPointOnSphere(float
     float x = radius * sin(theta) * cos(alpha);
     float y = radius * sin(theta) * sin(alpha);
     float z = radius * cos(theta);
+
     glm::vec3 N = glm::normalize(glm::vec3(x, y, z) - glm::vec3(0.0f, 0.0f, 0.0f));
+
     float texX = float(alpha / (2 * M_PI));
     float texY = float(theta / M_PI);
 
@@ -51,7 +54,7 @@ std::vector<float>* ConstructSphereVertices(float radius, glm::vec3 color, int n
     float theta;
     for (alpha = 0; alpha < float(2 * float(M_PI)); alpha += alpha_inc)
     {
-        for (theta = 0; theta < float(float(M_PI)); theta += theta_inc)
+        for (theta = 0; theta < float(M_PI); theta += theta_inc)
         {
             float theta_2 = theta + theta_inc;
             float alpha_2 = alpha + alpha_inc;

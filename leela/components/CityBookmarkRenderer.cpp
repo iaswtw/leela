@@ -78,19 +78,14 @@ void CityBookmarkRenderer::_renderBookmarkSpheres(GlslProgram& glslProgram)
 
     glm::vec3 projected;
     glm::vec3 bookmarkPoint;
-    float radius = _cityBookmark->_sphericalBody->_radius;
 
 
     bookmarkPoint = _cityBookmark->_sphericalBody->getTransformedLatitudeLongitude(_cityBookmark->_lat, _cityBookmark->_lon, 1.0f);
 
-    //projected = g_universe->getScreenCoordinates(bookmarkPoint);
-    //spdlog::info("projected.z = {}", projected.z);
-
-
     if (!isSpherePointHidden(bookmarkPoint))
     {
         projected = g_universe->getScreenCoordinates(bookmarkPoint);
-        spdlog::info("projected.z = {}", projected.z);
+        //spdlog::info("projected.z = {}", projected.z);
 
         GLboolean curDepthMaskEnable;
 
@@ -100,18 +95,7 @@ void CityBookmarkRenderer::_renderBookmarkSpheres(GlslProgram& glslProgram)
 
         if (projected.z < 1.0f)
         {
-            //-----------------------
-            // TODO setting the model matrix may be needed to transform the sphere properly
-            //-----------------------
-            glm::mat4 drawModel = glm::translate(glm::mat4(1.0), glm::vec3(projected.x, projected.y, projected.z));
-            glslProgram.setMat4("drawModel", glm::value_ptr(drawModel));
-
-            glm::mat4 model = glm::translate(glm::mat4(1.0), bookmarkPoint);
-            glslProgram.setMat4("model", glm::value_ptr(model));
-
-            glslProgram.setVec3("S", glm::value_ptr(g_space->S.toVec3()));
-            //glm::vec3 myS(0.0, 0.0, 1000.0);
-            //glslProgram.setVec3("S", glm::value_ptr(myS));
+            glslProgram.setVec3("offset", glm::value_ptr(projected));
 
             //spdlog::info("Binding vertex and drawing bookmark spheres");
             glBindVertexArray(_bookmarkVao);
@@ -128,10 +112,11 @@ void CityBookmarkRenderer::_renderBookmarkSpheres(GlslProgram& glslProgram)
 void CityBookmarkRenderer::init()
 {
     vector<float> * v = ConstructSphereVertices(
-                            8,                             // constant radius. Sphere will be drawn near the screen
-                            glm::vec3(0.5f, 0.1f, 0.1f),
-                            20,
-                            false);
+                            5,                             // constant radius. Sphere will be drawn near the screen
+                            glm::vec3(1.0f, 0.0f, 0.0f),
+                            120,
+                            false
+    );
 
     int stride_in_vbo = 10;
 
