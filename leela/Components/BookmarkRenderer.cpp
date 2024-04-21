@@ -1,10 +1,10 @@
-#include "CityBookmarkRenderer.h"
+#include "BookmarkRenderer.h"
 #include "Universe.h"
 #include "TessellationHelper.h"
 
-bool CityBookmarkRenderer::isSpherePointHidden(glm::vec3 p)
+bool BookmarkRenderer::isSpherePointHidden(glm::vec3 p)
 {
-    VECTOR SC = VECTOR(g_space->S, _cityBookmark->_sphericalBody->_center);
+    VECTOR SC = VECTOR(g_space->S, _bookmark->_sphericalBody->_center);
     //PNT U = PNT(_sphere._center).translated(_sphere._radius, g_space->DR).toVec3();     // point on sphere with roughly the most separation from observer's point of view.
 
     //VECTOR SU = VECTOR(g_space->S, U);
@@ -25,7 +25,7 @@ bool CityBookmarkRenderer::isSpherePointHidden(glm::vec3 p)
     return false;
 }
 
-void CityBookmarkRenderer::_renderBookmarks(GlslProgram& glslProgram)
+void BookmarkRenderer::_renderBookmarks(GlslProgram& glslProgram)
 {
     //glm::mat4 combinedMatrix = g_universe->projectionMatrix * g_universe->viewMatrix;
     //glslProgram.setMat4("projection", glm::value_ptr(combinedMatrix));
@@ -36,7 +36,7 @@ void CityBookmarkRenderer::_renderBookmarks(GlslProgram& glslProgram)
 
     // adjust scale based on zoom level to ensure font size is not too large.
     float heightOfCharA = g_universe->getHeightOfCharA();
-    float screenProjectedHeight = g_universe->findScreenProjectedHeight(heightOfCharA, _cityBookmark->_sphericalBody->_center);
+    float screenProjectedHeight = g_universe->findScreenProjectedHeight(heightOfCharA, _bookmark->_sphericalBody->_center);
     //spdlog::info("heightOfCharA = {}", heightOfCharA);
     //spdlog::info("screenProjectedHeight of A = {}", screenProjectedHeight);
 
@@ -48,9 +48,9 @@ void CityBookmarkRenderer::_renderBookmarks(GlslProgram& glslProgram)
 
     glm::vec3 projected;
     glm::vec3 bookmarkPoint;
-    float radius = _cityBookmark->_sphericalBody->_radius;
+    float radius = _bookmark->_sphericalBody->_radius;
 
-    bookmarkPoint = _cityBookmark->_sphericalBody->getTransformedLatitudeLongitude(_cityBookmark->_lat, _cityBookmark->_lon, 1.0f);
+    bookmarkPoint = _bookmark->_sphericalBody->getTransformedLatitudeLongitude(_bookmark->_lat, _bookmark->_lon, 1.0f);
     if (!isSpherePointHidden(bookmarkPoint))
     {
         projected = g_universe->getScreenCoordinates(bookmarkPoint);
@@ -60,7 +60,7 @@ void CityBookmarkRenderer::_renderBookmarks(GlslProgram& glslProgram)
             g_universe->RenderText(
                 //RenderTextType_ObjectText,
                 RenderTextType_ScreenText,
-                _cityBookmark->_label.c_str(),
+                _bookmark->_label.c_str(),
                 projected.x + heightOfCharA / 2,
                 projected.y - heightOfCharA / 2,
                 projected.z,
@@ -71,7 +71,7 @@ void CityBookmarkRenderer::_renderBookmarks(GlslProgram& glslProgram)
 }
 
 
-void CityBookmarkRenderer::_renderBookmarkSpheres(GlslProgram& glslProgram)
+void BookmarkRenderer::_renderBookmarkSpheres(GlslProgram& glslProgram)
 {
     glm::mat4 projection = glm::ortho(0.0f, float(g_universe->curWidth), 0.0f, float(g_universe->curHeight), 0.1f, 100.0f);
     glslProgram.setMat4("projection", glm::value_ptr(projection));
@@ -80,7 +80,7 @@ void CityBookmarkRenderer::_renderBookmarkSpheres(GlslProgram& glslProgram)
     glm::vec3 bookmarkPoint;
 
 
-    bookmarkPoint = _cityBookmark->_sphericalBody->getTransformedLatitudeLongitude(_cityBookmark->_lat, _cityBookmark->_lon, 1.0f);
+    bookmarkPoint = _bookmark->_sphericalBody->getTransformedLatitudeLongitude(_bookmark->_lat, _bookmark->_lon, 1.0f);
 
     if (!isSpherePointHidden(bookmarkPoint))
     {
@@ -109,7 +109,7 @@ void CityBookmarkRenderer::_renderBookmarkSpheres(GlslProgram& glslProgram)
 }
 
 
-void CityBookmarkRenderer::init()
+void BookmarkRenderer::init()
 {
     vector<float> * v = ConstructSphereVertices(
                             5,                             // constant radius. Sphere will be drawn near the screen
@@ -120,7 +120,7 @@ void CityBookmarkRenderer::init()
 
     int stride_in_vbo = 10;
 
-    //spdlog::info("CityBookmarkRenderer:  sending spheres to GPU");
+    //spdlog::info("BookmarkRenderer:  sending spheres to GPU");
 
     if (_bookmarkVbo != 0) {
         glDeleteBuffers(1, &_bookmarkVbo);
@@ -156,7 +156,7 @@ void CityBookmarkRenderer::init()
 }
 
 
-void CityBookmarkRenderer::renderMain(GlslProgram& glslProgram)
+void BookmarkRenderer::renderMain(GlslProgram& glslProgram)
 {
     if (glslProgram.type() == GlslProgramType_BookmarkSphere)
     {
@@ -165,7 +165,7 @@ void CityBookmarkRenderer::renderMain(GlslProgram& glslProgram)
     }
 }
 
-void CityBookmarkRenderer::renderPost(GlslProgram& glslProgram)
+void BookmarkRenderer::renderPost(GlslProgram& glslProgram)
 {
     if (glslProgram.type() == GlslProgramType_Font)
     {
