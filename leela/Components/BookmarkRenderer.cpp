@@ -5,23 +5,13 @@
 bool BookmarkRenderer::isSpherePointHidden(glm::vec3 p)
 {
     VECTOR SC = VECTOR(g_space->S, _bookmark->_sphericalBody->_center);
-    //PNT U = PNT(_sphere._center).translated(_sphere._radius, g_space->DR).toVec3();     // point on sphere with roughly the most separation from observer's point of view.
-
-    //VECTOR SU = VECTOR(g_space->S, U);
     VECTOR Sp = VECTOR(g_space->S, p);
 
-    //float max_angle = SU.angleFrom(SC, SU);
-    //float angle = SU.angleFrom(SC, SU);
-
-    //if (angle < max_angle)
-    //{
-    //}
-
-    //spdlog::info("Sp.length() = {}", Sp.length());
-    //spdlog::info("SC.length() = {}", SC.length());
-    if (Sp.length() > SC.length())
+    // length-squared of tangent using pythagorean theorem.
+    float tangentLengthSquared = (SC.length() * SC.length())  -  (double(_bookmark->_sphericalBody->_radius) * double(_bookmark->_sphericalBody->_radius));
+    if (tangentLengthSquared < Sp.length() * Sp.length())
         return true;
-    
+
     return false;
 }
 
