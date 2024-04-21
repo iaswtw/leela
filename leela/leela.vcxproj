@@ -173,7 +173,7 @@
   <ItemGroup>
     <ClInclude Include="Class.h" />
     <ClInclude Include="Component.h" />
-    <ClInclude Include="components\CityBookmarkRenderer.h" />
+    <ClInclude Include="components\BookmarkRenderer.h" />
     <ClInclude Include="components\CityBookmark.h" />
     <ClInclude Include="components\CoordinateAxisRenderer.h" />
     <ClInclude Include="components\MonthLabelsRenderer.h" />
@@ -211,7 +211,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Class.cpp" />
-    <ClCompile Include="components\CityBookmarkRenderer.cpp" />
+    <ClCompile Include="components\BookmarkRenderer.cpp" />
     <ClCompile Include="components\CoordinateAxisRenderer.cpp" />
     <ClCompile Include="components\MonthLabelsRenderer.cpp" />
     <ClCompile Include="components\SimpleSphereRenderer.cpp" />

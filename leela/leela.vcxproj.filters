@@ -38,7 +38,7 @@
     <ClCompile Include="components\MonthLabelsRenderer.cpp">
       <Filter>Components</Filter>
     </ClCompile>
-    <ClCompile Include="components\CityBookmarkRenderer.cpp">
+    <ClCompile Include="components\BookmarkRenderer.cpp">
       <Filter>Components</Filter>
     </ClCompile>
     <ClCompile Include="components\SimpleSphereRenderer.cpp">
@@ -103,7 +103,7 @@
     <ClInclude Include="components\MonthLabelsRenderer.h">
       <Filter>Components</Filter>
     </ClInclude>
-    <ClInclude Include="components\CityBookmarkRenderer.h">
+    <ClInclude Include="components\BookmarkRenderer.h">
       <Filter>Components</Filter>
     </ClInclude>
     <ClInclude Include="UniverseMinimal.h" />

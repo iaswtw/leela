@@ -13,7 +13,7 @@
 #include "SphericalBody.h"
 #include "SphericalBodyRenderer.h"
 #include "CoordinateAxisRenderer.h"
-#include "CityBookmarkRenderer.h"
+#include "BookmarkRenderer.h"
 #include "Stars.h"
 #include "StarsRenderer.h"
 #include "Space.h"
@@ -476,8 +476,8 @@ public:
     MonthLabelsRenderer monthLabelsRenderer;        // for earth
     
     // bookmarks on earth
-    //CityBookmark bm[4];
-    //CityBookmarkRenderer bmr[4];
+    //Bookmark bm[4];
+    //BookmarkRenderer bmr[4];
 
     Space space;
 

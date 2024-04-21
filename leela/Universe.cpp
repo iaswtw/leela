@@ -382,8 +382,8 @@ void Universe::initSceneObjectsAndComponents()
 
     for (auto _bminfo : bminfo)
     {
-        auto bm = new CityBookmark(&earth);
-        auto bmr = new CityBookmarkRenderer();
+        auto bm = new Bookmark(&earth);
+        auto bmr = new BookmarkRenderer();
         
         bm->init();
         bm->addComponent(bmr);

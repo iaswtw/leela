@@ -4,10 +4,10 @@
 #include "SimpleSphere.h"
 
 
-class CityBookmark : public SceneObject
+class Bookmark : public SceneObject
 {
 public:
-	CityBookmark(SphericalBody * sphericalBody) : _sphericalBody(sphericalBody) {}
+	Bookmark(SphericalBody * sphericalBody) : _sphericalBody(sphericalBody) {}
 
 	void init() {}
 	void advance(float stepMultiplier) {}

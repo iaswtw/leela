@@ -6,14 +6,14 @@
 #include <vector>
 #include "CityBookmark.h"
 
-class CityBookmarkRenderer : public Renderer
+class BookmarkRenderer : public Renderer
 {
 public:
-	CityBookmarkRenderer() {}
-	~CityBookmarkRenderer() {}
+	BookmarkRenderer() {}
+	~BookmarkRenderer() {}
 
 	virtual void parentChanged() {
-		_cityBookmark = dynamic_cast<CityBookmark*>(_sceneParent);
+		_bookmark = dynamic_cast<Bookmark*>(_sceneParent);
 	}
 
 	bool isSpherePointHidden(glm::vec3 p);
@@ -30,5 +30,5 @@ public:
 	GLuint _bookmarkVbo = 0;
 	size_t numBookmarkSphereVertices = 0;
 
-	CityBookmark * _cityBookmark = nullptr;
+	Bookmark * _bookmark = nullptr;
 };
