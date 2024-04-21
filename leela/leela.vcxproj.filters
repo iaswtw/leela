@@ -48,9 +48,11 @@
       <Filter>Components</Filter>
     </ClCompile>
     <ClCompile Include="Components\SphericalBody.cpp" />
-    <ClCompile Include="components\SphericalBodyRenderer.cpp" />
     <ClCompile Include="SceneObject.cpp" />
     <ClCompile Include="TessellationHelper.cpp" />
+    <ClCompile Include="Components\SphericalBodyRenderer.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Class.h" />
@@ -117,9 +119,13 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="components\CityBookmark.h" />
-    <ClInclude Include="components\SphericalBody.h" />
-    <ClInclude Include="components\SphericalBodyRenderer.h" />
     <ClInclude Include="TessellationHelper.h" />
+    <ClInclude Include="Components\SphericalBody.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\SphericalBodyRenderer.h">
+      <Filter>Components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="leela.rc" />

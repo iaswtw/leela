@@ -179,8 +179,8 @@
     <ClInclude Include="components\MonthLabelsRenderer.h" />
     <ClInclude Include="components\SimpleSphere.h" />
     <ClInclude Include="components\SimpleSphereRenderer.h" />
-    <ClInclude Include="components\SphericalBody.h" />
-    <ClInclude Include="components\SphericalBodyRenderer.h" />
+    <ClInclude Include="Components\SphericalBody.h" />
+    <ClInclude Include="Components\SphericalBodyRenderer.h" />
     <ClInclude Include="components\StarsRenderer.h" />
     <ClInclude Include="Fir.h" />
     <ClInclude Include="glcorearb.h" />
@@ -216,7 +216,7 @@
     <ClCompile Include="components\MonthLabelsRenderer.cpp" />
     <ClCompile Include="components\SimpleSphereRenderer.cpp" />
     <ClCompile Include="Components\SphericalBody.cpp" />
-    <ClCompile Include="components\SphericalBodyRenderer.cpp" />
+    <ClCompile Include="Components\SphericalBodyRenderer.cpp" />
     <ClCompile Include="components\StarsRenderer.cpp" />
     <ClCompile Include="GlslProgram.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
