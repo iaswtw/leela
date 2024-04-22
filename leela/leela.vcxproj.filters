@@ -53,6 +53,7 @@
     <ClCompile Include="Components\SphericalBodyRenderer.cpp">
       <Filter>Components</Filter>
     </ClCompile>
+    <ClCompile Include="Components\CityBookmark.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Class.h" />
@@ -126,6 +127,7 @@
     <ClInclude Include="Components\SphericalBodyRenderer.h">
       <Filter>Components</Filter>
     </ClInclude>
+    <ClInclude Include="Elements.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="leela.rc" />

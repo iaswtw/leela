@@ -22,8 +22,8 @@ public:
     virtual void init() = 0;
     virtual void advance(float stepMultiplier) = 0;
 
-    // subclass is expected to examine _sceneParent in order to typecast and save as a point to a subclass.
-    // For e.g. SphericalBody class might want to know if _sceneParent is another SphericalBody instance, and use it later.
+    // subclass of SceneObject is expected to examine _sceneParent in order to typecast it and save it as a pointer to the desired subclass.
+    //  - For e.g. SphericalBody class might want to know if _sceneParent is another SphericalBody instance, and use it later.
     virtual void parentChanged() {}
 
     // transform to move this scene object from its parent's position
@@ -42,6 +42,7 @@ public:
     void _setParent(SceneObject* parent);
     static void _printIndent(int indent);
     static void printTree(SceneObject* obj, int indent = 0);
+    static SceneObject* getSceneObjectByName(SceneObject* obj, std::string name);
 
 public:
 

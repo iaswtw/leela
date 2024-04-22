@@ -3,14 +3,24 @@
 #include "Universe.h"
 
 
+void MonthLabelsRenderer::init()
+{
+    // nothing to send to GPU
+}
+
+void MonthLabelsRenderer::parentChanged()
+{
+    _sphere = dynamic_cast<SphericalBody*>(_sceneParent);
+}
+
 // Calculate 12 points outside the orbit suitable for drawing month labels
 // labelPositionScale - if 1.0, labels are at sphere's orbital radius from the parent's (e.g. sun's) center.
 void MonthLabelsRenderer::calculateMonthPositions(float labelPositionScale)
 {
-    glm::vec3 axis = _sphere.getAxisTiltOrientationAxis();
+    glm::vec3 axis = _sphere->getAxisTiltOrientationAxis();
     glm::vec3 perp = glm::vec3(axis.y, -axis.x, axis.z);
 
-    float scaler = labelPositionScale * _sphere._orbitalRadius;
+    float scaler = labelPositionScale * _sphere->_orbitalRadius;
     perp = perp * scaler;
 
     float theta = float(2 * M_PI / 12);
@@ -39,7 +49,7 @@ void MonthLabelsRenderer::_renderLabels(GlslProgram& glslProgram, bool isPre)
         if (g_universe->bShowMonthNames)
         {
             if (g_universe->bMonthLabelsCloserToSphere)
-                calculateMonthPositions((_sphere._orbitalRadius + 1.5f * _sphere._radius) / _sphere._orbitalRadius);
+                calculateMonthPositions((_sphere->_orbitalRadius + 1.5f * _sphere->_radius) / _sphere->_orbitalRadius);
             else
                 calculateMonthPositions(1.2f);
 

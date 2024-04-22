@@ -72,15 +72,13 @@ void SphericalBody::advance(float stepMultiplier)
         _nodalPrecessionAngle -= increment * stepMultiplier;
         _nodalPrecessionAngle = _normalizeAngle(_nodalPrecessionAngle);
     }
+
+    calculateCenterPosition();
 }
 
 void SphericalBody::parentChanged()
 {
-    _sphericalBodyParent = nullptr;
-
-    SphericalBody* parent = dynamic_cast<SphericalBody*>(_sceneParent);
-    if (parent != nullptr)
-        _sphericalBodyParent = parent;
+    _sphericalBodyParent = dynamic_cast<SphericalBody*>(_sceneParent);
 }
 
 

@@ -188,16 +188,16 @@ IndexedMesh make_icosphere(int subdivisions)
 
 
 
-SphericalBodyRenderer::SphericalBodyRenderer(Universe& parent, SphericalBody& sphere, std::string textureFilename, std::string textureFilename2) :
-    parent(parent),
-    _sphere(sphere)
-
+SphericalBodyRenderer::SphericalBodyRenderer(std::string textureFilename, std::string textureFilename2)
 {
     setNightColorDarkness(NightColorDarkness_Black);
     //setNightColorDarkness(NightColorDarkness_VeryLow);
     _textureFilename = textureFilename;
     _textureFilename2 = textureFilename2;
     //printf("Setting _textureFilename to %s\n", _textureFilename.c_str());
+    
+    setNightColorDarkness(NightColorDarkness_VeryHigh);
+
 }
 
 SphericalBodyRenderer::~SphericalBodyRenderer()
@@ -207,6 +207,11 @@ SphericalBodyRenderer::~SphericalBodyRenderer()
 void SphericalBodyRenderer::init()
 {
     constructVerticesAndSendToGpu();
+}
+
+void SphericalBodyRenderer::parentChanged()
+{
+    _sphere = dynamic_cast<SphericalBody*>(_sceneParent);
 }
 
 void SphericalBodyRenderer::setAsLightSource()
@@ -229,9 +234,14 @@ void SphericalBodyRenderer::setNightColorDarkness(NightColorDarkness darkness)
     }
 }
 
-void SphericalBodyRenderer::setPolygonCountLevel(PolygonCountLevel polygonCountLevel)
+void SphericalBodyRenderer::setPolygonCountLevel(std::string polygonCountLevel)
 {
-	_polygonCountLevel = polygonCountLevel;
+    if (polygonCountLevel == "low")
+        _polygonCountLevel = PolygonCountLevel_Low;
+    else if (polygonCountLevel == "medium")
+        _polygonCountLevel = PolygonCountLevel_Medium;
+    else if (polygonCountLevel == "high")
+        _polygonCountLevel = PolygonCountLevel_High;
 }
 
 /*
@@ -264,7 +274,7 @@ std::tuple<float, float, float, glm::vec3, float, float> SphericalBodyRenderer::
 
 std::vector<float>* SphericalBodyRenderer::_constructMainSphereVertices()
 {
-    SphericalBody& s = _sphere;
+    SphericalBody& s = *_sphere;
     float numEquatorVertices = _getPolygonIncrement();
 
     std::vector<float>* v = ConstructSphereVertices(s._radius, s._color, numEquatorVertices, true);
@@ -275,7 +285,7 @@ std::vector<float>* SphericalBodyRenderer::_constructMainSphereVertices()
 std::pair<std::vector<float>*, std::vector<Triangle>*>  SphericalBodyRenderer::_constructMainIcoSphereVertices()
 {
     std::vector<float>* v = new std::vector<float>();
-    SphericalBody& s = _sphere;
+    SphericalBody& s = *_sphere;
 
     IndexedMesh indexMesh = make_icosphere(_getIcoSphereSubdivisionLevel());
     //IndexedMesh indexMesh = make_icosphere(1);
@@ -389,8 +399,8 @@ std::pair<std::vector<float>*, std::vector<Triangle>*>  SphericalBodyRenderer::_
     }
 
     spdlog::info("");
-    spdlog::info("{}: SphericalBody: Num vertices = {}", _sphere._name, v->size()/10);
-    spdlog::info("{}: SphericalBody: Num elements = {}", _sphere._name, indexMesh.second->size() / 6);
+    spdlog::info("{}: SphericalBody: Num vertices = {}", _sphere->_name, v->size()/10);
+    spdlog::info("{}: SphericalBody: Num elements = {}", _sphere->_name, indexMesh.second->size() / 6);
 
     delete indexMesh.first;
     return std::pair<std::vector<float>*, std::vector<Triangle>*>(v, indexMesh.second);
@@ -399,10 +409,11 @@ std::pair<std::vector<float>*, std::vector<Triangle>*>  SphericalBodyRenderer::_
 void SphericalBodyRenderer::constructLatitudesAndLongitudeVertices()
 {
     std::vector<float>* v = new std::vector<float>();
-    SphericalBody& s = _sphere;
+    SphericalBody& s = *_sphere;
 
 	float polygonIncrement = _getPolygonIncrement();
     float inc = float(2 * float(M_PI)) / polygonIncrement;
+    float c_a = 0.1f;       // color alpha
 
     //---------------------------------------------------------------------------------
     // Longitudes
@@ -421,12 +432,12 @@ void SphericalBodyRenderer::constructLatitudesAndLongitudeVertices()
 
             float cMult;
             if (alpha == 0.0f)
-                cMult = 0.8f;
+                cMult = 0.6f;
             else
-                cMult = 0.9f;
+                cMult = 0.4f;
 
-            vector_push_back_12(*v, x1, y1, z1, s._r*cMult, s._g*cMult, s._b*cMult, 1.0, N1.x, N1.y, N1.z, 0.0f, 0.0f);
-            vector_push_back_12(*v, x2, y2, z2, s._r*cMult, s._g*cMult, s._b*cMult, 1.0, N2.x, N2.y, N2.z, 0.0f, 0.0f);
+            vector_push_back_12(*v, x1, y1, z1, s._r*cMult, s._g*cMult, s._b*cMult, c_a, N1.x, N1.y, N1.z, 0.0f, 0.0f);
+            vector_push_back_12(*v, x2, y2, z2, s._r*cMult, s._g*cMult, s._b*cMult, c_a, N2.x, N2.y, N2.z, 0.0f, 0.0f);
 
             //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
         }
@@ -446,8 +457,8 @@ void SphericalBodyRenderer::constructLatitudesAndLongitudeVertices()
             auto [x1, y1, z1, N1, texX1, texY1] = calcPointOnSphere(1.001f * s._radius, alpha, theta);
             auto [x2, y2, z2, N2, texX2, texY2] = calcPointOnSphere(1.001f * s._radius, alpha + inc, theta);
 
-            vector_push_back_12(*v, x1, y1, z1, s._r*0.9f, s._g*0.3f, s._b*0.3f, 1.0f, N1.x, N1.y, N1.z, 0.0f, 0.0f);
-            vector_push_back_12(*v, x2, y2, z2, s._r*0.9f, s._g*0.3f, s._b*0.3f, 1.0f, N2.x, N2.y, N2.z, 0.0f, 0.0f);
+            vector_push_back_12(*v, x1, y1, z1, s._r*0.9f, s._g*0.3f, s._b*0.3f, c_a, N1.x, N1.y, N1.z, 0.0f, 0.0f);
+            vector_push_back_12(*v, x2, y2, z2, s._r*0.9f, s._g*0.3f, s._b*0.3f, c_a, N2.x, N2.y, N2.z, 0.0f, 0.0f);
 
             //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
         }
@@ -459,15 +470,15 @@ void SphericalBodyRenderer::constructLatitudesAndLongitudeVertices()
     for (float thetas = 0; thetas < 180; thetas += 10)
     {
         float theta = glm::radians(thetas);
-        float cMult = 0.9f;
+        float cMult = 0.4f;
 
         for (float alpha = 0; alpha < float(2 * M_PI); alpha += inc)
         {
             auto [x1, y1, z1, N1, texX1, texY1] = calcPointOnSphere(1.001f * s._radius, alpha, theta);
             auto [x2, y2, z2, N2, texX2, texY2] = calcPointOnSphere(1.001f * s._radius, alpha + inc, theta);
 
-            vector_push_back_12(*v, x1, y1, z1, s._r*cMult, s._g*cMult, s._b*cMult, 1.0f, N1.x, N1.y, N1.z, 0.0f, 0.0f);
-            vector_push_back_12(*v, x2, y2, z2, s._r*cMult, s._g*cMult, s._b*cMult, 1.0f, N2.x, N2.y, N2.z, 0.0f, 0.0f);
+            vector_push_back_12(*v, x1, y1, z1, s._r*cMult, s._g*cMult, s._b*cMult, c_a, N1.x, N1.y, N1.z, 0.0f, 0.0f);
+            vector_push_back_12(*v, x2, y2, z2, s._r*cMult, s._g*cMult, s._b*cMult, c_a, N2.x, N2.y, N2.z, 0.0f, 0.0f);
 
             //printf("point generated for alpha = %f, theta = %f\n", alpha, theta);
         }
@@ -513,8 +524,8 @@ void SphericalBodyRenderer::constructLatitudesAndLongitudeVertices()
 void SphericalBodyRenderer::constructOrbit()
 {
     std::vector<float>* v   = new std::vector<float>();
-    SphericalBody& s               = _sphere;
-    glm::vec3& color        = s._orbitalPlaneColor;
+    SphericalBody& s               = *_sphere;
+    glm::vec3& color        = s._color;
     float m                 = 0.7f;
 
     float alpha_inc = float(2 * M_PI) / 500;
@@ -569,7 +580,7 @@ void SphericalBodyRenderer::constructOrbit()
 void SphericalBodyRenderer::constructOrbitalPlaneGridVertices()
 {
     std::vector<float>* v = new std::vector<float>();
-    SphericalBody& s = _sphere;
+    SphericalBody& s = *_sphere;
 
     //---------------------------------------------------------------------------------
     // Orbital plane grid.
@@ -585,7 +596,7 @@ void SphericalBodyRenderer::constructOrbitalPlaneGridVertices()
     float x, y;
     float m = 0.4f;      // color multiplier
     float radius = s._orbitalRadius;
-    glm::vec3& color = s._orbitalPlaneColor;
+    glm::vec3& color = s._color;
 
     x = y = -radius * 1.2f;
 
@@ -651,10 +662,10 @@ void SphericalBodyRenderer::constructOrbitalPlaneGridVertices()
 void SphericalBodyRenderer::constructOrbitalPlaneVertices()
 {
     std::vector<float>* v = new std::vector<float>();
-    SphericalBody& s = _sphere;
+    SphericalBody& s = *_sphere;
     float m = 0.3f;                          // color multiplier
     float radius = s._orbitalRadius;
-    glm::vec3& color = s._orbitalPlaneColor;
+    glm::vec3& color = s._color;
     float alpha = 1.0f;
 
     if (bOrbitalPlaneTransparency)
@@ -703,11 +714,11 @@ void SphericalBodyRenderer::constructOrbitalPlaneVertices()
 void SphericalBodyRenderer::constructRotationAxis()
 {
     std::vector<float>* v = new std::vector<float>();
-    SphericalBody& s = _sphere;
+    SphericalBody& s = *_sphere;
 
     float m = 0.4f;      // color multiplier
     float radius = s._radius;
-    glm::vec3& color = s._orbitalPlaneColor;
+    glm::vec3& color = s._color;
 
     float polygonIncrement = _getPolygonIncrement();
     float alpha_inc = float(2 * M_PI) / polygonIncrement;
@@ -1046,8 +1057,8 @@ int SphericalBodyRenderer::_getIcoSphereSubdivisionLevel()
 
 //############################################################################################################
 
-PlanetRenderer::PlanetRenderer(Universe& parent, SphericalBody& sphere, std::string textureFilename, std::string textureFilename2)
-	: SphericalBodyRenderer(parent, sphere, textureFilename, textureFilename2)
+PlanetRenderer::PlanetRenderer(std::string textureFilename, std::string textureFilename2)
+	: SphericalBodyRenderer(textureFilename, textureFilename2)
 {
 }
 
@@ -1089,20 +1100,22 @@ void PlanetRenderer::renderTranslucentMain(GlslProgram& glslProgram)
  * otherSphere      the sphere that could eclipse the sun for this planet/moon. 
  */
 void PlanetRenderer::renderSphere(GlslProgram& glslProgram)
-{   
-    if (!_sphere.bIsCenterOfMass)
+{
+    SphericalBody& s = *_sphere;
+
+    if (!_sphere->bIsCenterOfMass)
     {
-        PNT sphereCenter = PNT(_sphere.getCenter());
-        float distSunToThisSphere = (float)PNT(_sphere._sunSphere->getCenter()).distanceTo(sphereCenter);
-        float selfUmbraLength = (_sphere.getRadius() * distSunToThisSphere) / (_sphere._sunSphere->getRadius() - _sphere.getRadius());
-        float sineOfSelfUmbraConeHalfAngle = asin(_sphere.getRadius() / selfUmbraLength);
+        PNT sphereCenter = PNT(s.getCenter());
+        float distSunToThisSphere = (float)PNT(s._sunSphere->getCenter()).distanceTo(sphereCenter);
+        float selfUmbraLength = (s.getRadius() * distSunToThisSphere) / (s._sunSphere->getRadius() - s.getRadius());
+        float sineOfSelfUmbraConeHalfAngle = asin(s.getRadius() / selfUmbraLength);
 
 
-        glslProgram.setMat4("model", glm::value_ptr(_sphere.getTransform()));
-        glslProgram.setVec3("sphereInfo.centerTransformed", glm::value_ptr(_sphere.getCenter()));
-        glslProgram.setFloat("sphereInfo.radius", _sphere.getRadius());
+        glslProgram.setMat4("model", glm::value_ptr(s.getTransform()));
+        glslProgram.setVec3("sphereInfo.centerTransformed", glm::value_ptr(s.getCenter()));
+        glslProgram.setFloat("sphereInfo.radius", s.getRadius());
         float multiplierAdjust = 1.0f;
-        if (parent.bShowLowDarknessAtNight)
+        if (g_universe->bShowLowDarknessAtNight)
         {
             multiplierAdjust = 2.0f;
         }
@@ -1111,18 +1124,18 @@ void PlanetRenderer::renderSphere(GlslProgram& glslProgram)
 
         //glEnable(GL_MULTISAMPLE);
 
-        if (_sphere._relatedSphere != nullptr)
+        if (s._relatedSphere != nullptr)
         {
             // When drawing earth, other sphere is moon.
-            glslProgram.setFloat("otherSphereRadius", _sphere._relatedSphere->getRadius());
-            glslProgram.setVec3("otherSphereCenterTransformed", glm::value_ptr(_sphere._relatedSphere->getModelTransformedCenter()));
+            glslProgram.setFloat("otherSphereRadius", s._relatedSphere->getRadius());
+            glslProgram.setVec3("otherSphereCenterTransformed", glm::value_ptr(s._relatedSphere->getModelTransformedCenter()));
         } else {
             glslProgram.setFloat("otherSphereRadius", 0.0f);
         }
 
         if (!_textureFilename.empty())
         {
-            glslProgram.setBool("useTexture", parent.bRealisticSurfaces);
+            glslProgram.setBool("useTexture", g_universe->bRealisticSurfaces);
 
             //printf("texture filename not empty. Texture = %d\n", _texture);
             glActiveTexture(GL_TEXTURE0);
@@ -1147,7 +1160,7 @@ void PlanetRenderer::renderSphere(GlslProgram& glslProgram)
         glBindVertexArray(_mainVao);
 
 
-        if (parent.bShowWireframeSurfaces)
+        if (g_universe->bShowWireframeSurfaces)
         {
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         }
@@ -1167,11 +1180,13 @@ void PlanetRenderer::renderSphere(GlslProgram& glslProgram)
 
 void PlanetRenderer::renderLatitudeAndLongitudes(GlslProgram& glslProgram)
 {
-    if (!_sphere.bIsCenterOfMass)
+    SphericalBody& s = *_sphere;
+
+    if (!s.bIsCenterOfMass)
     {
         if (bShowLatitudesAndLongitudes)
         {
-            glslProgram.setMat4("model", glm::value_ptr(_sphere.getTransform()));
+            glslProgram.setMat4("model", glm::value_ptr(s.getTransform()));
             glBindVertexArray(_latAndLongVao);
 
             glslProgram.setBool("useTexture", false);
@@ -1184,13 +1199,15 @@ void PlanetRenderer::renderLatitudeAndLongitudes(GlslProgram& glslProgram)
 
 void PlanetRenderer::renderOrbit(GlslProgram& glslProgram)
 {
-    if (!_sphere.bIsCenterOfMass)
+    SphericalBody& s = *_sphere;
+
+    if (!s.bIsCenterOfMass)
     {
         // Uses same transform as that of orbital plane. But orbital plane may not be drawn depending on flags. Hence
         // set the model matrix again.
         if (bShowOrbit)
         {
-            glslProgram.setMat4("model", glm::value_ptr(_sphere.getOrbitalPlaneModelMatrix()));
+            glslProgram.setMat4("model", glm::value_ptr(s.getOrbitalPlaneModelMatrix()));
 
             glBindVertexArray(_orbitVao);
             glDrawArrays(GL_LINES, 0, (GLsizei) numOrbitVertices);
@@ -1201,7 +1218,7 @@ void PlanetRenderer::renderOrbit(GlslProgram& glslProgram)
 
 void PlanetRenderer::renderOrbitalPlane(GlslProgram& glslProgram)
 {
-    SphericalBody& s = _sphere;
+    SphericalBody& s = *_sphere;
 
     if (!s.bIsCenterOfMass)
     {
@@ -1233,31 +1250,33 @@ void PlanetRenderer::renderOrbitalPlane(GlslProgram& glslProgram)
  */
 void PlanetRenderer::renderRotationAxis(GlslProgram& glslProgram)
 {
-    if (!_sphere.bIsCenterOfMass)
+    SphericalBody& s = *_sphere;
+
+    if (!s.bIsCenterOfMass)
     {
 
         //glslProgram.setMat4("model", glm::value_ptr(_sphere.getModelMatrix()));
 
-        PNT sphereCenter = PNT(_sphere.getCenter());
-        float distSunToThisSphere = (float)PNT(_sphere._sunSphere->getCenter()).distanceTo(sphereCenter);
-        float selfUmbraLength = (_sphere.getRadius() * distSunToThisSphere) / (_sphere._sunSphere->getRadius() - _sphere.getRadius());
-        float sineOfSelfUmbraConeHalfAngle = asin(_sphere.getRadius() / selfUmbraLength);
+        PNT sphereCenter = PNT(s.getCenter());
+        float distSunToThisSphere = (float)PNT(s._sunSphere->getCenter()).distanceTo(sphereCenter);
+        float selfUmbraLength = (s.getRadius() * distSunToThisSphere) / (s._sunSphere->getRadius() - s.getRadius());
+        float sineOfSelfUmbraConeHalfAngle = asin(s.getRadius() / selfUmbraLength);
 
 
-        glslProgram.setMat4("model", glm::value_ptr(_sphere.getTransform()));
-        glslProgram.setVec3("sphereInfo.centerTransformed", glm::value_ptr(_sphere.getCenter()));
-        glslProgram.setFloat("sphereInfo.radius", _sphere.getRadius());
+        glslProgram.setMat4("model", glm::value_ptr(s.getTransform()));
+        glslProgram.setVec3("sphereInfo.centerTransformed", glm::value_ptr(s.getCenter()));
+        glslProgram.setFloat("sphereInfo.radius", s.getRadius());
         //glslProgram.setFloat("nightColorMultiplier", 0.1);
         glslProgram.setFloat("nightColorMultiplier", _nightColorMultiplier);
         glslProgram.setFloat("sphereInfo.sineOfSelfUmbraConeHalfAngle", sineOfSelfUmbraConeHalfAngle);
 
         //glEnable(GL_MULTISAMPLE);
 
-        if (_sphere._relatedSphere != nullptr)
+        if (s._relatedSphere != nullptr)
         {
             // When drawing earth, other sphere is moon.
-            glslProgram.setFloat("otherSphereRadius", _sphere._relatedSphere->getRadius());
-            glslProgram.setVec3("otherSphereCenterTransformed", glm::value_ptr(_sphere._relatedSphere->getModelTransformedCenter()));
+            glslProgram.setFloat("otherSphereRadius", s._relatedSphere->getRadius());
+            glslProgram.setVec3("otherSphereCenterTransformed", glm::value_ptr(s._relatedSphere->getModelTransformedCenter()));
         }
 
 
@@ -1274,8 +1293,8 @@ void PlanetRenderer::renderRotationAxis(GlslProgram& glslProgram)
 
 
 
-SunRenderer::SunRenderer(Universe& parent, SphericalBody& sphere, std::string textureFilename)
-	: SphericalBodyRenderer(parent, sphere, textureFilename)
+SunRenderer::SunRenderer( std::string textureFilename)
+	: SphericalBodyRenderer(textureFilename)
 {
 }
 
@@ -1293,7 +1312,9 @@ void SunRenderer::renderMain(GlslProgram& glslProgram)
 
 void SunRenderer::_renderSphere(GlslProgram& glslProgram)
 {
-    glslProgram.setMat4("model", glm::value_ptr(_sphere.getTransform()));
+    SphericalBody& s = *_sphere;
+
+    glslProgram.setMat4("model", glm::value_ptr(s.getTransform()));
 
     if (!_textureFilename.empty())
     {

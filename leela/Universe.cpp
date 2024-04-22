@@ -13,6 +13,7 @@
 #include "Utils.h"
 #include <stdio.h>
 #include <string>
+#include "Elements.h"
 
 #include <spdlog/spdlog.h>
 
@@ -62,15 +63,6 @@ static std::string FindFontFile(const char * fileName)
 
 Universe::Universe() :
 
-    sunRenderer(*this, sun, "sunmap.png"),
-    earthRenderer(*this, earth, "earth-erde-mit-wolken-2k.png"),
-    moonRenderer(*this, moon, "moonmap1k.png"),
-    marsRenderer(*this, mars, "mars2k.png"),
-    jupiterRenderer(*this, jupiter, "jupiter2k.png"),
-    saturnRenderer(*this, saturn, "saturn2k.png"),
-    uranusRenderer(*this, uranus, "uranus2k.png"),
-    neptuneRenderer(*this, neptune, "neptune2k.png"),
-
     starsRenderer(stars),
 
     throttleFilter                  (FIR_WIDTH, fir_coeff),
@@ -78,9 +70,7 @@ Universe::Universe() :
     pitchFilter                     (FIR_WIDTH, fir_coeff),
     rollFilter                      (FIR_WIDTH, fir_coeff),
     stepMultiplierFilterWhenPaused  (FIR_WIDTH, fir_coeff),
-    stepMultiplierFilter            (FIR_WIDTH, fir_coeff),
-
-    monthLabelsRenderer(earth)
+    stepMultiplierFilter            (FIR_WIDTH, fir_coeff)
 {
 }
 
@@ -93,23 +83,30 @@ void Universe::compileShaders()
 {
     spdlog::info("Compiling all GLSL programs");
 
-    planetGlslProgram.compileShadersFromFile("planet.vert.glsl", "planet.frag.glsl");
-    planetGlslProgram.link();
+    planetGlslProgram       = new GlslProgram(GlslProgramType_Planet);
+    sunGlslProgram          = new GlslProgram(GlslProgramType_Sun);
+    starGlslProgram         = new GlslProgram(GlslProgramType_Star);
+    simpleGlslProgram       = new GlslProgram(GlslProgramType_Simple);
+    fontGlslProgram         = new GlslProgram(GlslProgramType_Font);
+    bookmarkGlslProgram     = new GlslProgram(GlslProgramType_BookmarkSphere);
 
-    sunGlslProgram.compileShadersFromFile("sun.vert.glsl", "sun.frag.glsl");
-    sunGlslProgram.link();
+    planetGlslProgram->compileShadersFromFile("planet.vert.glsl", "planet.frag.glsl");
+    planetGlslProgram->link();
 
-    starGlslProgram.compileShadersFromFile("star.vert.glsl", "star.frag.glsl");
-    starGlslProgram.link();
+    sunGlslProgram->compileShadersFromFile("sun.vert.glsl", "sun.frag.glsl");
+    sunGlslProgram->link();
 
-    simpleGlslProgram.compileShadersFromFile("simple.vert.glsl", "simple.frag.glsl");
-    simpleGlslProgram.link();
+    starGlslProgram->compileShadersFromFile("star.vert.glsl", "star.frag.glsl");
+    starGlslProgram->link();
 
-    fontGlslProgram.compileShadersFromFile("font.vert.glsl", "font.frag.glsl");
-    fontGlslProgram.link();
+    simpleGlslProgram->compileShadersFromFile("simple.vert.glsl", "simple.frag.glsl");
+    simpleGlslProgram->link();
 
-    bookmarkGlslProgram.compileShadersFromFile("bookmark.vert.glsl", "bookmark.frag.glsl");
-    bookmarkGlslProgram.link();
+    fontGlslProgram->compileShadersFromFile("font.vert.glsl", "font.frag.glsl");
+    fontGlslProgram->link();
+
+    bookmarkGlslProgram->compileShadersFromFile("bookmark.vert.glsl", "bookmark.frag.glsl");
+    bookmarkGlslProgram->link();
 }
 
 /*************************************************************************************************
@@ -132,168 +129,262 @@ void Universe::initSceneObjectsAndComponents()
     );
     scene.addComponent(&coordinateAxisRenderer);
 
+
+    //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
+    for (PlanetInfo pi : planetInfo)
+    {
+        SphericalBody * sb = new SphericalBody(pi.name);
+        sb->setRotationParameters(pi.radius,
+                                  glm::radians(pi.rotationAngle),
+                                  pi.rotationAngularVelocity,
+                                  glm::radians(pi.axisTiltOrientationAngle),
+                                  glm::radians(pi.axisTiltAngle)
+        );
+        sb->setOrbitalParameters(pi.orbitalRadius,
+                                 glm::radians(pi.orbitalAngle),
+                                 pi.orbitalAngularVelocity,
+                                 glm::radians(pi.nodalPrecessionInitialAngle),
+                                 glm::radians(pi.orbitalPlaneTiltAngle)
+        );
+
+        // set related object.  Only 1 related object is supported at the moment.
+        for (std::string relatedObjName : pi.relatedObjectNames)
+        {
+            sb->setRelatedSphere(
+                dynamic_cast<SphericalBody*>(
+                    SceneObject::getSceneObjectByName(&scene, relatedObjName)
+                )
+            );
+            break;      // shader supports only 1 related scene object
+        }
+
+        //------------------------------
+        // Create and configure renderer
+        //------------------------------
+
+        Renderer* renderer = nullptr;
+        PlanetRenderer* planetRenderer = nullptr;
+        SphericalBodyRenderer* sphericalBodyRenderer = nullptr;
+
+        if (pi.name == "Sun") {
+            sunRenderer = new SunRenderer(pi.textureFilename);
+            renderer = sphericalBodyRenderer = sunRenderer;             // initialize superclass handles for later use in this function
+        }
+        else {
+            planetRenderer = new PlanetRenderer(pi.textureFilename);
+            renderer = sphericalBodyRenderer = planetRenderer;          // initialize superclass handles for later use in this function
+        }
+        
+        sphericalBodyRenderer->setPolygonCountLevel(pi.polygonCountLevel);
+
+        if (pi.name == "Sun") {
+            sun = sb;
+            sunRenderer->setAsLightSource();
+        }
+        else if (pi.name == "Earth") {
+            earth = sb;
+            earthRenderer = planetRenderer;
+            earthRenderer->bShowLatitudesAndLongitudes = true;
+            sphericalBodyRenderer->bShowOrbit = true;
+        }
+        else if (pi.name == "Moon") {
+            moon = sb;
+            moonRenderer = planetRenderer;
+            sphericalBodyRenderer->bShowOrbit = true;
+        }
+        else if (pi.name == "Mars") {
+            mars = sb;
+            marsRenderer = planetRenderer;
+        }
+        else {
+        }
+
+        // this assums sun was created before other bodies in the system
+        if (pi.name != "Sun")
+            sb->setSunSphere(sun);
+
+        sb->addComponent(renderer);         // Spherical body now owns the renderer.
+        renderer->init();                   // construct spheres and send data to GPU
+
+        //----------------------------------------------------
+        
+        // find parent scene object and the newly created scene object as its child.
+        SceneObject* parentObj = &scene;
+        if (pi.parentName != "") {
+            parentObj = SceneObject::getSceneObjectByName(&scene, pi.parentName);
+        }
+        // todo: assert on parentObj
+        parentObj->addSceneObject(sb);
+
+
+    }
+
+    //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
     // Sun
     //---------------------------------------
     //sun.setColor(0.7f, 0.7f, 0.1f);
-    sun.setColor(1.0f, 1.0f, 0.6f);
-    sun.setRotationParameters(160,          // radius
-        0,                                  // initial rotation angle
-        0.002f,                              // rotation velocity
-        glm::radians(0.0f),                 // axis tilt orientation angle
-        glm::radians(0.0f)                  // axis tilt angle
-    );
-    sun.setOrbitalParameters(0,             // radius of orbit
-        0.0f,                               // initial orbital angle
-        0.01f,                              // revolution velocity
-        0,                                  // nodal precession initial angle
-        0                                   // orbital tilt
-    );
-    scene.addSceneObject(&sun);
+    //sun.setColor(1.0f, 1.0f, 0.6f);
+    //sun.setRotationParameters(160,          // radius
+    //    0,                                  // initial rotation angle
+    //    0.002f,                              // rotation velocity
+    //    glm::radians(0.0f),                 // axis tilt orientation angle
+    //    glm::radians(0.0f)                  // axis tilt angle
+    //);
+    //sun.setOrbitalParameters(0,             // radius of orbit
+    //    0.0f,                               // initial orbital angle
+    //    0.01f,                              // revolution velocity
+    //    0,                                  // nodal precession initial angle
+    //    0                                   // orbital tilt
+    //);
+    //scene.addSceneObject(&sun);
 
-    // Earth
-    //---------------------------------------
-    earth.setName("Earth");
-    earth.setColor(0.55f, 0.82f, 1.0f);
-    earth.setRotationParameters(80,         // radius
-        0,                                  // initial rotation angle
-        0.02f,                              // rotation velocity
-        glm::radians(0.0f),                 // axis tilt orientation angle
-        glm::radians(23.5f)                 // axis tilt angle
-    );
-    earth.setOrbitalParameters(3000,        // radius of orbit
-        glm::radians(30.0f),                 // initial orbital angle
-        0.001f,                             // revolution velocity
-        0.0f,                               // nodal precession initial angle
-        0                                   // orbital  tilt
-    );
-    earth.setOrbitalPlaneColor(glm::vec3(0.55, 0.82, 1.0));
-    earth.setSunSphere(&sun);
-    sun.addSceneObject(&earth);
+    //// Earth
+    ////---------------------------------------
+    //earth.setName("Earth");
+    //earth.setColor(0.55f, 0.82f, 1.0f);
+    //earth.setRotationParameters(80,         // radius
+    //    0,                                  // initial rotation angle
+    //    0.02f,                              // rotation velocity
+    //    glm::radians(0.0f),                 // axis tilt orientation angle
+    //    glm::radians(23.5f)                 // axis tilt angle
+    //);
+    //earth.setOrbitalParameters(3000,        // radius of orbit
+    //    glm::radians(30.0f),                 // initial orbital angle
+    //    0.001f,                             // revolution velocity
+    //    0.0f,                               // nodal precession initial angle
+    //    0                                   // orbital  tilt
+    //);
+    //earth.setOrbitalPlaneColor(glm::vec3(0.55, 0.82, 1.0));
+    //earth.setSunSphere(&sun);
+    //sun.addSceneObject(&earth);
 
-    // Moon
-    //---------------------------------------
-    moon.setName("Moon");
-    moon.setColor(0.8f, 0.8f, 0.8f);
-    moon.setRotationParameters(22,          // radius
-        0,                                  // initial rotation angle
-        0.008888888f,                       // rotation velocity
-        glm::radians(0.0f),                 // axis tilt orientation angle
-        glm::radians(10.0f)                 // axis tilt angle
-    );
-    moon.setOrbitalParameters(400,          // radius of orbit
-        0.0f,                               // initial orbital angle
-        0.008888888f,                       // revolution velocity
-        0,                                  // nodal precession initial angle
-        glm::radians(30.0f)                 // orbital tilt
-    );
-    moon.setOrbitalPlaneColor(glm::vec3(0.8f, 0.8f, 0.8f));
-    moon.setSunSphere(&sun);
-    moon.setRelatedSphere(&earth);
-    earth.setRelatedSphere(&moon);
-    earth.addSceneObject(&moon);
+    //// Moon
+    ////---------------------------------------
+    //moon.setName("Moon");
+    //moon.setColor(0.8f, 0.8f, 0.8f);
+    //moon.setRotationParameters(22,          // radius
+    //    0,                                  // initial rotation angle
+    //    0.008888888f,                       // rotation velocity
+    //    glm::radians(0.0f),                 // axis tilt orientation angle
+    //    glm::radians(10.0f)                 // axis tilt angle
+    //);
+    //moon.setOrbitalParameters(400,          // radius of orbit
+    //    0.0f,                               // initial orbital angle
+    //    0.008888888f,                       // revolution velocity
+    //    0,                                  // nodal precession initial angle
+    //    glm::radians(30.0f)                 // orbital tilt
+    //);
+    //moon.setOrbitalPlaneColor(glm::vec3(0.8f, 0.8f, 0.8f));
+    //moon.setSunSphere(&sun);
+    //moon.setRelatedSphere(&earth);
+    //earth.setRelatedSphere(&moon);
+    //earth.addSceneObject(&moon);
 
-    // Mars
-    //---------------------------------------
-    mars.setName("Mars");
-    mars.setColor(0.85f, 0.5f, 0.5f);
-    mars.setRotationParameters(60,          // radius
-        0,                                  // initial rotation angle
-        0.02f,                              // rotation velocity
-        glm::radians(270.0f),               // axis tilt orientation angle
-        glm::radians(25.0f)                 // axis tilt angle
-    );
-    mars.setOrbitalParameters(7000,         // radius of orbit
-        0,                                  // initial orbital angle
-        0.0006f,                            // revolution velocity
-        0.0f,                               // nodal precession initial angle
-        glm::radians(1.85f)                 // orbital tilt
-    );
-    mars.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
-    mars.setSunSphere(&sun);
-    sun.addSceneObject(&mars);
+    //// Mars
+    ////---------------------------------------
+    //mars.setName("Mars");
+    //mars.setColor(0.85f, 0.5f, 0.5f);
+    //mars.setRotationParameters(60,          // radius
+    //    0,                                  // initial rotation angle
+    //    0.02f,                              // rotation velocity
+    //    glm::radians(270.0f),               // axis tilt orientation angle
+    //    glm::radians(25.0f)                 // axis tilt angle
+    //);
+    //mars.setOrbitalParameters(7000,         // radius of orbit
+    //    0,                                  // initial orbital angle
+    //    0.0006f,                            // revolution velocity
+    //    0.0f,                               // nodal precession initial angle
+    //    glm::radians(1.85f)                 // orbital tilt
+    //);
+    //mars.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
+    //mars.setSunSphere(&sun);
+    //sun.addSceneObject(&mars);
 
-    // Jupiter
-    //---------------------------------------
-    jupiter.setName("Jupiter");
-    jupiter.setColor(0.85f, 0.7f, 0.6f);
-    jupiter.setRotationParameters(140,      // radius
-        0,                                  // initial rotation angle
-        0.02f,                              // rotation velocity
-        glm::radians(270.0f),               // axis tilt orientation angle
-        glm::radians(3.1f)                  // axis tilt angle
-    );
-    jupiter.setOrbitalParameters(11000,      // radius of orbit
-        glm::radians(280.0f),               // initial orbital angle
-        0.0004f,                            // revolution velocity
-        0.0f,                               // nodal precession initial angle
-        glm::radians(1.31f)                 // orbital tilt
-    );
-    jupiter.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
-    jupiter.setSunSphere(&sun);
-    sun.addSceneObject(&jupiter);
-
-
-    // Saturn
-    //---------------------------------------
-    saturn.setName("Saturn");
-    saturn.setColor(0.7f, 0.7f, 0.4f);
-    saturn.setRotationParameters(110,       // radius
-        0,                                  // initial rotation angle
-        0.02f,                              // rotation velocity
-        glm::radians(270.0f),               // axis tilt orientation angle
-        glm::radians(26.7f)                 // axis tilt angle
-    );
-    saturn.setOrbitalParameters(15000,       // radius of orbit
-        glm::radians(220.0f),               // initial orbital angle
-        0.0002f,                            // revolution velocity
-        0.0f,                               // nodal precession initial angle
-        glm::radians(2.49f)                 // orbital tilt
-    );
-    saturn.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
-    saturn.setSunSphere(&sun);
-    sun.addSceneObject(&saturn);
+    //// Jupiter
+    ////---------------------------------------
+    //jupiter.setName("Jupiter");
+    //jupiter.setColor(0.85f, 0.7f, 0.6f);
+    //jupiter.setRotationParameters(140,      // radius
+    //    0,                                  // initial rotation angle
+    //    0.02f,                              // rotation velocity
+    //    glm::radians(270.0f),               // axis tilt orientation angle
+    //    glm::radians(3.1f)                  // axis tilt angle
+    //);
+    //jupiter.setOrbitalParameters(11000,      // radius of orbit
+    //    glm::radians(280.0f),               // initial orbital angle
+    //    0.0004f,                            // revolution velocity
+    //    0.0f,                               // nodal precession initial angle
+    //    glm::radians(1.31f)                 // orbital tilt
+    //);
+    //jupiter.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
+    //jupiter.setSunSphere(&sun);
+    //sun.addSceneObject(&jupiter);
 
 
-    // Uranus
-    //---------------------------------------
-    uranus.setName("Uranus");
-    uranus.setColor(0.7f, 0.7f, 0.85f);
-    uranus.setRotationParameters(90,       // radius
-        0,                                  // initial rotation angle
-        0.02f,                              // rotation velocity
-        glm::radians(270.0f),               // axis tilt orientation angle
-        glm::radians(97.7f)                 // axis tilt angle
-    );
-    uranus.setOrbitalParameters(20000,      // radius of orbit
-        glm::radians(18.0f),                // initial orbital angle
-        0.0001f,                            // revolution velocity
-        0.0f,                               // nodal precession initial angle
-        glm::radians(.77f)                  // orbital tilt
-    );
-    uranus.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
-    uranus.setSunSphere(&sun);
-    sun.addSceneObject(&uranus);
+    //// Saturn
+    ////---------------------------------------
+    //saturn.setName("Saturn");
+    //saturn.setColor(0.7f, 0.7f, 0.4f);
+    //saturn.setRotationParameters(110,       // radius
+    //    0,                                  // initial rotation angle
+    //    0.02f,                              // rotation velocity
+    //    glm::radians(270.0f),               // axis tilt orientation angle
+    //    glm::radians(26.7f)                 // axis tilt angle
+    //);
+    //saturn.setOrbitalParameters(15000,       // radius of orbit
+    //    glm::radians(220.0f),               // initial orbital angle
+    //    0.0002f,                            // revolution velocity
+    //    0.0f,                               // nodal precession initial angle
+    //    glm::radians(2.49f)                 // orbital tilt
+    //);
+    //saturn.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
+    //saturn.setSunSphere(&sun);
+    //sun.addSceneObject(&saturn);
 
 
-    // Neptune
-    //---------------------------------------
-    neptune.setName("Neptune");
-    neptune.setColor(0.4f, 0.4f, 0.9f);
-    neptune.setRotationParameters(80,        // radius
-        0,                                   // initial rotation angle
-        0.02f,                               // rotation velocity
-        glm::radians(270.0f),                // axis tilt orientation angle
-        glm::radians(28.0f)                  // axis tilt angle
-    );
-    neptune.setOrbitalParameters(25000,      // radius of orbit
-        glm::radians(150.0f),                // initial orbital angle
-        0.00008f,                            // revolution velocity
-        0.0f,                                // nodal precession initial angle
-        glm::radians(1.77f)                  // orbital tilt
-    );
-    neptune.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
-    neptune.setSunSphere(&sun);
-    sun.addSceneObject(&neptune);
+    //// Uranus
+    ////---------------------------------------
+    //uranus.setName("Uranus");
+    //uranus.setColor(0.7f, 0.7f, 0.85f);
+    //uranus.setRotationParameters(90,       // radius
+    //    0,                                  // initial rotation angle
+    //    0.02f,                              // rotation velocity
+    //    glm::radians(270.0f),               // axis tilt orientation angle
+    //    glm::radians(97.7f)                 // axis tilt angle
+    //);
+    //uranus.setOrbitalParameters(20000,      // radius of orbit
+    //    glm::radians(18.0f),                // initial orbital angle
+    //    0.0001f,                            // revolution velocity
+    //    0.0f,                               // nodal precession initial angle
+    //    glm::radians(.77f)                  // orbital tilt
+    //);
+    //uranus.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
+    //uranus.setSunSphere(&sun);
+    //sun.addSceneObject(&uranus);
+
+
+    //// Neptune
+    ////---------------------------------------
+    //neptune.setName("Neptune");
+    //neptune.setColor(0.4f, 0.4f, 0.9f);
+    //neptune.setRotationParameters(80,        // radius
+    //    0,                                   // initial rotation angle
+    //    0.02f,                               // rotation velocity
+    //    glm::radians(270.0f),                // axis tilt orientation angle
+    //    glm::radians(28.0f)                  // axis tilt angle
+    //);
+    //neptune.setOrbitalParameters(25000,      // radius of orbit
+    //    glm::radians(150.0f),                // initial orbital angle
+    //    0.00008f,                            // revolution velocity
+    //    0.0f,                                // nodal precession initial angle
+    //    glm::radians(1.77f)                  // orbital tilt
+    //);
+    //neptune.setOrbitalPlaneColor(glm::vec3(0.85, 0.5, 0.5f));
+    //neptune.setSunSphere(&sun);
+    //sun.addSceneObject(&neptune);
 
 
     //---------------------------------------------------------------
@@ -304,66 +395,70 @@ void Universe::initSceneObjectsAndComponents()
 
     coordinateAxisRenderer.init();
 
-    sunRenderer.setAsLightSource();
-    sunRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
-    sun.addComponent(&sunRenderer);
-    sunRenderer.init();
+    //sunRenderer->setAsLightSource();
+    //sunRenderer->setPolygonCountLevel(PolygonCountLevel_Low);
+    //sun.addComponent(&sunRenderer);
+    //sunRenderer->init();
 
-    earthRenderer.setPolygonCountLevel(PolygonCountLevel_Medium);
-    earthRenderer.constructVerticesAndSendToGpu();
-    earthRenderer.bShowLatitudesAndLongitudes = true;
-    earthRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
-    earthRenderer.init();
-    earth.addComponent(&earthRenderer);
+    //earthRenderer->setPolygonCountLevel(PolygonCountLevel_Medium);
+    //earthRenderer->constructVerticesAndSendToGpu();
+    //earthRenderer->bShowLatitudesAndLongitudes = true;
+    //earthRenderer->setNightColorDarkness(NightColorDarkness_VeryHigh);
+    //earthRenderer->init();
+    //earth.addComponent(&earthRenderer);
 
-    moonRenderer.setPolygonCountLevel(PolygonCountLevel_Medium);
-    moonRenderer.constructVerticesAndSendToGpu();
-    moonRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
-    moonRenderer.init();
-    moon.addComponent(&moonRenderer);
+    //moonRenderer.setPolygonCountLevel(PolygonCountLevel_Medium);
+    //moonRenderer.constructVerticesAndSendToGpu();
+    //moonRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
+    //moonRenderer.init();
+    //moon.addComponent(&moonRenderer);
 
-    marsRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
-    marsRenderer.constructVerticesAndSendToGpu();
-    marsRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
-    marsRenderer.bShowOrbit = False;
-    marsRenderer.init();
-    mars.addComponent(&marsRenderer);
+    //marsRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
+    //marsRenderer.constructVerticesAndSendToGpu();
+    //marsRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
+    //marsRenderer.bShowOrbit = False;
+    //marsRenderer.init();
+    //mars.addComponent(&marsRenderer);
 
-    jupiterRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
-    jupiterRenderer.constructVerticesAndSendToGpu();
-    jupiterRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
-    jupiterRenderer.bShowOrbit = False;
-    jupiterRenderer.init();
-    jupiter.addComponent(&jupiterRenderer);
+    //jupiterRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
+    //jupiterRenderer.constructVerticesAndSendToGpu();
+    //jupiterRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
+    //jupiterRenderer.bShowOrbit = False;
+    //jupiterRenderer.init();
+    //jupiter.addComponent(&jupiterRenderer);
 
-    saturnRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
-    saturnRenderer.constructVerticesAndSendToGpu();
-    saturnRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
-    saturnRenderer.bShowOrbit = False;
-    saturnRenderer.init();
-    saturn.addComponent(&saturnRenderer);
+    //saturnRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
+    //saturnRenderer.constructVerticesAndSendToGpu();
+    //saturnRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
+    //saturnRenderer.bShowOrbit = False;
+    //saturnRenderer.init();
+    //saturn.addComponent(&saturnRenderer);
 
-    uranusRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
-    uranusRenderer.constructVerticesAndSendToGpu();
-    uranusRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
-    uranusRenderer.bShowOrbit = False;
-    uranusRenderer.init();
-    uranus.addComponent(&uranusRenderer);
+    //uranusRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
+    //uranusRenderer.constructVerticesAndSendToGpu();
+    //uranusRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
+    //uranusRenderer.bShowOrbit = False;
+    //uranusRenderer.init();
+    //uranus.addComponent(&uranusRenderer);
 
-    neptuneRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
-    neptuneRenderer.constructVerticesAndSendToGpu();
-    neptuneRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
-    neptuneRenderer.bShowOrbit = False;
-    neptuneRenderer.init();
-    neptune.addComponent(&neptuneRenderer);
+    //neptuneRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
+    //neptuneRenderer.constructVerticesAndSendToGpu();
+    //neptuneRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
+    //neptuneRenderer.bShowOrbit = False;
+    //neptuneRenderer.init();
+    //neptune.addComponent(&neptuneRenderer);
 
     //------------------------------
 
     constructFontInfrastructureAndSendToGpu();
 
+    monthLabelsRenderer = new MonthLabelsRenderer();
+    earth->addComponent(monthLabelsRenderer);
+    monthLabelsRenderer->init();
 
-    monthLabelsRenderer.init();
 
+    //---------------------------------------------------------------------------------------------------
+    // Bookmarks for various position on earth
 
     typedef struct {
         std::string label;
@@ -382,15 +477,13 @@ void Universe::initSceneObjectsAndComponents()
 
     for (auto _bminfo : bminfo)
     {
-        auto bm = new Bookmark(&earth);
-        auto bmr = new BookmarkRenderer();
-        
+        auto bm = new Bookmark();
         bm->init();
-        bm->addComponent(bmr);
         bm->set(_bminfo.label, _bminfo.lat, _bminfo.lon);
+        earth->addSceneObject(bm);               // bm is owned by earth scene object after this call.
 
-        // bm is owned by earth scene object after this call.
-        earth.addSceneObject(bm);
+        auto bmr = new BookmarkRenderer();
+        bm->addComponent(bmr);
         bmr->init();
     }
 
@@ -399,8 +492,6 @@ void Universe::initSceneObjectsAndComponents()
     
     scene.addComponent(&starsRenderer);
     starsRenderer.init();
-
-    SphericalBodyRenderer(*this, earth);
 
     SceneObject::printTree(&scene);
 
@@ -489,12 +580,12 @@ void Universe::SetApplicationStartView()
     PNT newS = PNT(-266.775859, 2177.232389, 266.224952);
     space.setFrame(AT_POINT,
         newS,
-        VECTOR(newS, earth.getCenter()),
+        VECTOR(newS, earth->getCenter()),
         PNT(newS.x, newS.y, newS.z - 100));
 
     // Adjust navigation view locks on earth and sun
-    SetLockTargetAndMode(&earth, TargetLockMode_ViewTarget);
-    earth.bRevolutionMotion = true;
+    SetLockTargetAndMode(earth, TargetLockMode_ViewTarget);
+    earth->bRevolutionMotion = true;
 }
 
 
@@ -786,12 +877,12 @@ void Universe::SimulationPause(int nParam)
 
 void Universe::Earth_RotationMotion(int nParam)
 {
-    ChangeBoolean(&earth.bRotationMotion, nParam);
+    ChangeBoolean(&earth->bRotationMotion, nParam);
 }
 
 void Universe::Earth_RevolutionMotion(int nParam)
 {
-    ChangeBoolean(&earth.bRevolutionMotion, nParam);
+    ChangeBoolean(&earth->bRevolutionMotion, nParam);
     //F_REFERENCE_VECTOR_ALONG_Z = 0;
     //bLockOntoEarth = false;
 }
@@ -801,34 +892,34 @@ void Universe::Earth_PrecessionMotion(int nParam)
 {
     if (nParam == UCmdParam_Reset)
     {
-        earth.bPrecessionMotion = false;
-        earth._axisTiltOrientationAngle = glm::radians(0.0f);
+        earth->bPrecessionMotion = false;
+        earth->_axisTiltOrientationAngle = glm::radians(0.0f);
     }
     else
     {
-        ChangeBoolean(&earth.bPrecessionMotion, nParam);
+        ChangeBoolean(&earth->bPrecessionMotion, nParam);
     }
 }
 
 void Universe::Earth_OrbitalPlane(int nParam)
 {
-    ChangeBoolean(&earthRenderer.bShowOrbitalPlane, nParam);
+    ChangeBoolean(&earthRenderer->bShowOrbitalPlane, nParam);
 }
 
 void Universe::Earth_Orbit(int nParam)
 {
-    ChangeBoolean(&earthRenderer.bShowOrbit, nParam);
+    ChangeBoolean(&earthRenderer->bShowOrbit, nParam);
 }
 
 void Universe::Moon_OrbitalPlane(int nParam)
 {
-    ChangeBoolean(&moonRenderer.bShowOrbitalPlane, nParam);
+    ChangeBoolean(&moonRenderer->bShowOrbitalPlane, nParam);
 }
 
 
 void Universe::Moon_Orbit(int nParam)
 {
-    ChangeBoolean(&moonRenderer.bShowOrbit, nParam);
+    ChangeBoolean(&moonRenderer->bShowOrbit, nParam);
 }
 
 void Universe::Moon_OrbitalPlaneRotation(int nParam)
@@ -836,18 +927,18 @@ void Universe::Moon_OrbitalPlaneRotation(int nParam)
 
     if (nParam == UCmdParam_Reset)
     {
-        moon.bOrbitalPlaneRotation = false;
-        moon._nodalPrecessionAngle = glm::radians(0.0f);
+        moon->bOrbitalPlaneRotation = false;
+        moon->_nodalPrecessionAngle = glm::radians(0.0f);
     }
     else
     {
-        ChangeBoolean(&moon.bOrbitalPlaneRotation, nParam);
+        ChangeBoolean(&moon->bOrbitalPlaneRotation, nParam);
     }
 }
 
 void Universe::Moon_RevolutionMotion(int nParam)
 {
-    ChangeBoolean(&moon.bRevolutionMotion, nParam);
+    ChangeBoolean(&moon->bRevolutionMotion, nParam);
 }
 
 void Universe::SetDotDensity(int nParam)
@@ -901,14 +992,14 @@ void Universe::cleanupAndExitApplication()
 
 void Universe::Moon_SetOrbitalPositionAngle(double fAngle)
 {
-    moon.setOrbitalAngle(float(fAngle));
-    moon.calculateCenterPosition();
+    moon->setOrbitalAngle(float(fAngle));
+    moon->calculateCenterPosition();
 }
 
 void Universe::Earth_SetOrbitalPositionAngle(double fAngle)
 {
-    earth.setOrbitalAngle(float(fAngle));
-    earth.calculateCenterPosition();
+    earth->setOrbitalAngle(float(fAngle));
+    earth->calculateCenterPosition();
 }
 
 
@@ -1099,7 +1190,10 @@ void Universe::processFlags()
         _filteredStepMultiplier = stepMultiplierFilter.filter(step_multiplier_input);
     }
 
-
+    // - advance is called even if scene is paused.
+    //      - _filteredStepMultiplier will eventually become zero if simulation is paused.
+    // - positions/orientations etc. are calculated as part of advancing (even if the increment is zero).
+    //      - This is necessary to draw updated objects if their are manipulated through ImGui widgets.
     advanceScene(_filteredStepMultiplier * _stepMultiplierFrameRateAdjustment);
 
     //-------------------------------------
@@ -1110,33 +1204,24 @@ void Universe::processFlags()
         inc *= 10;
 
     if (bAdvanceEarthInOrbit)
-        earth._orbitalAngle += inc;
+        earth->_orbitalAngle += inc;
     if (bRetardEarthInOrbit)
-        earth._orbitalAngle -= inc;
+        earth->_orbitalAngle -= inc;
     if (bAdvanceMoonInOrbit)
-        moon._orbitalAngle += inc;
+        moon->_orbitalAngle += inc;
     if (bRetardMoonInOrbit)
-        moon._orbitalAngle -= inc;
+        moon->_orbitalAngle -= inc;
     //-------------------------------------
-
-
-    // always calculate sphere positions, even when simulation paused.
-    // This is because ImGui may change variables of scene objects, and it must be
-    // reflected by drawing updated objects.
-    for (int i = 0; allSpheres[i] != NULL; i++)
-    {
-        allSpheres[i]->calculateCenterPosition();
-    }
 
     if (bEarthSurfaceLockMode)
     {
-        glm::mat4 emm = earth.getTransform();
-        glm::vec3 xCenter = earth.getModelTransformedCenter();
+        glm::mat4 emm = earth->getTransform();
+        glm::vec3 xCenter = earth->getModelTransformedCenter();
 
         glm::vec4 S = glm::vec4(
-            1.01f * earth._radius * sinf((float)space.rad(surfaceLockTheta)),
+            1.01f * earth->_radius * sinf((float)space.rad(surfaceLockTheta)),
             0.0f,
-            1.01f * earth._radius * cosf((float)space.rad(surfaceLockTheta)),
+            1.01f * earth->_radius * cosf((float)space.rad(surfaceLockTheta)),
             1.0f);
 
         glm::vec3 xS = emm * S;
