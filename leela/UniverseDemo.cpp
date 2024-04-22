@@ -17,14 +17,14 @@ void Universe::ShowDemo(int nParam)
 
         // Adjust navigation view locks on earth and sun
         
-        SetLockTargetAndMode(&earth, TargetLockMode_ViewTarget);
+        SetLockTargetAndMode(earth, TargetLockMode_ViewTarget);
 
         // Set S
         //newS = PNT(earth.getCenter().x + 500, earth.getCenter().y - 700, earth.getCenter().z + 150);
         newS = PNT(-262.135429, 2403.108632, 54.783701);
         space.setFrame(AT_POINT,
             newS,
-            VECTOR(newS, earth.getCenter()),
+            VECTOR(newS, earth->getCenter()),
             PNT(newS.x, newS.y, newS.z - 100));
 
         /* Set proper moon's position so that the moon's shadow will
@@ -57,7 +57,7 @@ void Universe::ShowDemo(int nParam)
 
         // Adjust navigation view locks on earth and sun
 
-        SetLockTargetAndMode(&earth, TargetLockMode_ViewTarget);
+        SetLockTargetAndMode(earth, TargetLockMode_ViewTarget);
 
         // Set S
         //newS = PNT(earth.getCenter().x + 500, earth.getCenter().y - 700, earth.getCenter().z + 150);
@@ -65,7 +65,7 @@ void Universe::ShowDemo(int nParam)
         );
         space.setFrame(AT_POINT,
             newS,
-            VECTOR(newS, earth.getCenter()),
+            VECTOR(newS, earth->getCenter()),
             PNT(newS.x, newS.y, newS.z - 100));
 
         /* Set proper moon's position so that the moon's shadow will
@@ -94,14 +94,14 @@ void Universe::ShowDemo(int nParam)
         Moon_OrbitalPlane(UCmdParam_Off);
 
         // Adjust navigation view locks on earth and sun
-        SetLockTargetAndMode(&earth, TargetLockMode_ViewTarget);
+        SetLockTargetAndMode(earth, TargetLockMode_ViewTarget);
 
         // Set S
         //newS = PNT(earth.getCenter().x + 500, earth.getCenter().y - 700, earth.getCenter().z + 150);
         newS = PNT(1044.233749, 2147.958797, 190.950815);
         space.setFrame(AT_POINT,
             newS,
-            VECTOR(newS, earth.getCenter()),
+            VECTOR(newS, earth->getCenter()),
             PNT(newS.x, newS.y, newS.z - 100));
 
         /* Set proper moon's position so that the moon's shadow will
@@ -173,14 +173,14 @@ void Universe::ShowDemo(int nParam)
         Moon_OrbitalPlane(UCmdParam_Off);
 
         // Adjust navigation view locks on earth and sun
-        SetLockTargetAndMode(&earth, TargetLockMode_ViewTarget);
+        SetLockTargetAndMode(earth, TargetLockMode_ViewTarget);
 
         // Set S
         //newS = PNT(earth.getCenter().x + 500, earth.getCenter().y - 700, earth.getCenter().z + 150);
         newS = PNT(-452.441935, 1933.795838, 265.271073);
         space.setFrame(AT_POINT,
             newS,
-            VECTOR(newS, earth.getCenter()),
+            VECTOR(newS, earth->getCenter()),
             PNT(newS.x, newS.y, newS.z - 100));
 
         /* Set proper moon's position so that the moon's shadow will
@@ -213,13 +213,13 @@ void Universe::ShowDemo(int nParam)
         Moon_SetOrbitalPositionAngle(0);
 
         // Adjust navigation view locks on earth and sun
-        SetLockTargetAndMode(&earth, TargetLockMode_ViewTarget);
+        SetLockTargetAndMode(earth, TargetLockMode_ViewTarget);
 
         // Set S
-        newS = PNT(earth.getCenter().x + 300, earth.getCenter().y - 400, earth.getCenter().z + 300);
+        newS = PNT(earth->getCenter().x + 300, earth->getCenter().y - 400, earth->getCenter().z + 300);
         space.setFrame(AT_POINT,
             newS,
-            VECTOR(newS, earth.getCenter()),
+            VECTOR(newS, earth->getCenter()),
             PNT(newS.x, newS.y, newS.z - 100));
 
 
@@ -251,13 +251,13 @@ void Universe::ShowDemo(int nParam)
         Earth_SetOrbitalPositionAngle(0.0f);
 
         // Set S
-        newS = PNT(earth.getCenter().x + 250, earth.getCenter().y - 350, earth.getCenter().z + 300);
+        newS = PNT(earth->getCenter().x + 250, earth->getCenter().y - 350, earth->getCenter().z + 300);
         space.setFrame(AT_POINT,
             newS,
-            VECTOR(newS, earth.getCenter()),
+            VECTOR(newS, earth->getCenter()),
             PNT(newS.x, newS.y, newS.z - 100));
 
-        SetLockTargetAndMode(&earth, TargetLockMode_FollowTarget);
+        SetLockTargetAndMode(earth, TargetLockMode_FollowTarget);
         // Adjust navigation view locks on earth and sun
 
         // Adjust earth's motions
@@ -294,13 +294,13 @@ void Universe::ShowDemo(int nParam)
         Earth_SetOrbitalPositionAngle(0.0f);
 
         // Set S
-        newS = PNT(earth.getCenter().x, earth.getCenter().y - 350, earth.getCenter().z + 100);
+        newS = PNT(earth->getCenter().x, earth->getCenter().y - 350, earth->getCenter().z + 100);
         space.setFrame(AT_POINT,
             newS,
-            VECTOR(newS, earth.getCenter()),
+            VECTOR(newS, earth->getCenter()),
             PNT(newS.x, newS.y, newS.z - 100));
 
-        SetLockTargetAndMode(&earth, TargetLockMode_FollowTarget);
+        SetLockTargetAndMode(earth, TargetLockMode_FollowTarget);
         // Adjust navigation view locks on earth and sun
 
         // Adjust earth's motions
@@ -332,7 +332,7 @@ void Universe::ShowDemo(int nParam)
         Moon_OrbitalPlane(UCmdParam_On);
 
         // Adjust navigation view locks on earth and sun
-        SetLockTargetAndMode(&earth, TargetLockMode_ViewTarget);
+        SetLockTargetAndMode(earth, TargetLockMode_ViewTarget);
 
         newS = PNT(691.508170, 5287.321976, 305.415363);
         space.setFrame(AT_POINT,
@@ -365,13 +365,13 @@ void Universe::ShowDemo(int nParam)
         Earth_SetOrbitalPositionAngle(M_PI + M_PI / 4);
 
         // Set S
-        newS = PNT(earth.getCenter().x, earth.getCenter().y - 700, earth.getCenter().z + 200);
+        newS = PNT(earth->getCenter().x, earth->getCenter().y - 700, earth->getCenter().z + 200);
         space.setFrame(AT_POINT,
             newS,
-            VECTOR(newS, earth.getCenter()),
+            VECTOR(newS, earth->getCenter()),
             PNT(newS.x, newS.y, newS.z - 100));
 
-        SetLockTargetAndMode(&earth, TargetLockMode_FollowTarget);
+        SetLockTargetAndMode(earth, TargetLockMode_FollowTarget);
         // Adjust navigation view locks on earth and sun
 
         // Adjust earth's motions
@@ -407,9 +407,9 @@ void Universe::ShowDemo(int nParam)
         bShowAxis = false;          // turn off coordinate axis
 
         Moon_OrbitalPlane(UCmdParam_On);
-        moon._nodalPrecessionAngle = -1.025973;
-        moon.bNodalPrecessionSpeedSyncToParentsRevolution = true;
-        moon.bOrbitalRevolutionSyncToParent = true;
+        moon->_nodalPrecessionAngle = -1.025973;
+        moon->bNodalPrecessionSpeedSyncToParentsRevolution = true;
+        moon->bOrbitalRevolutionSyncToParent = true;
 
         Earth_RevolutionMotion(UCmdParam_Off);              // pause earth
         Earth_SetOrbitalPositionAngle(0.437745);

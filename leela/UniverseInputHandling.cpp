@@ -18,7 +18,7 @@ void Universe::onKeyDown(SDL_Event* event)
     case SDLK_b:
         break;
     case SDLK_c:
-        ToggleFollowTarget(&sun, TargetLockMode_ViewTarget);
+        ToggleFollowTarget(sun, TargetLockMode_ViewTarget);
         break;
     case SDLK_d:
         //if (isAllModifiers()) {
@@ -75,13 +75,13 @@ void Universe::onKeyDown(SDL_Event* event)
                 LOG_BUFFER_SIZE,
                 "\nS = %f, %f, %f"
                 "\nD = %f, %f, %f"
-                "\nEarth._orbitalAngle = %f"
-                "\nmoon._nodalPrecessionAngle = %f"
+                "\nEarth->_orbitalAngle = %f"
+                "\nmoon->_nodalPrecessionAngle = %f"
                 ,
                 space.S.x, space.S.y, space.S.z,
                 space.D.x, space.D.y, space.D.z,
-                earth._orbitalAngle,
-                moon._nodalPrecessionAngle
+                earth->_orbitalAngle,
+                moon->_nodalPrecessionAngle
             );
             logString = logBuffer;                  // ImGui will check the logString (of type std::string), and write its contents to Windows clipboard.
             spdlog::info(logBuffer);
@@ -96,11 +96,11 @@ void Universe::onKeyDown(SDL_Event* event)
         ChangeSidewaysMotionMode();
         break;
     case SDLK_x:
-        ToggleFollowTarget(&moon, TargetLockMode_ViewTarget);
+        ToggleFollowTarget(moon, TargetLockMode_ViewTarget);
         break;
     case SDLK_z:
         if (isNoModifier())
-            ToggleFollowTarget(&earth, TargetLockMode_ViewTarget);
+            ToggleFollowTarget(earth, TargetLockMode_ViewTarget);
         else
             if (bAltModifier)
                 space.setFrameMoveMode(SHORT_D_MODE);

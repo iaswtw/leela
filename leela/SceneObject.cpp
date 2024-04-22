@@ -62,3 +62,19 @@ void SceneObject::printTree(SceneObject* obj, int indent)
         printTree(o, indent);
     }
 }
+
+SceneObject* SceneObject::getSceneObjectByName(SceneObject* obj, std::string name)
+{
+    if (obj->_name == name)
+        return obj;
+    else {
+        for (SceneObject* o : obj->_childSceneObjects)
+        {
+            SceneObject * foundObj = getSceneObjectByName(o, name);
+            if (foundObj)
+                return foundObj;
+        }
+    }
+    return nullptr;
+}
+

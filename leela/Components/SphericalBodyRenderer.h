@@ -14,6 +14,7 @@ class Universe;
 
 #include "GlslProgram.h"
 
+
 struct Triangle
 {
     unsigned int vertex[3];
@@ -43,18 +44,20 @@ enum NightColorDarkness
     NightColorDarkness_None,            // night vertex color same as day color
 };
 
+
 class SphericalBodyRenderer : public Renderer
 {
 public:
-    SphericalBodyRenderer(Universe& parent, SphericalBody& sphere, std::string textureFilename="", std::string textureFilename2="");
+    SphericalBodyRenderer(std::string textureFilename="", std::string textureFilename2="");
     ~SphericalBodyRenderer();
 
     virtual void init();
+    virtual void parentChanged();
     virtual void advance(float stepMultiplier) {};
 
     void setAsLightSource();
     void setNightColorDarkness(NightColorDarkness darkness);
-	void setPolygonCountLevel(PolygonCountLevel polygonCountLevel);
+	void setPolygonCountLevel(std::string polygonCountLevel);
     void constructRotationAxis();
     void constructVerticesAndSendToGpu();
 
@@ -62,11 +65,11 @@ public:
 
 
 public:
-    bool bShowOrbit = true;
+    bool bShowOrbit = false;
     bool bShowLatitudesAndLongitudes = false;
     bool bOrbitalPlaneTransparency = false;
     bool bShowOrbitalPlane = false;
-    bool bShowBody = true;
+    bool bShowBody = true;                  // if true, draw the planet/moon
 
 
 public:
@@ -83,8 +86,7 @@ public:
     int _getIcoSphereSubdivisionLevel();
 
 protected:
-    Universe& parent;
-    SphericalBody& _sphere;
+    SphericalBody * _sphere = nullptr;
 
     GLuint _mainVao;
     GLuint _orbitVao = 0;
@@ -109,7 +111,7 @@ protected:
     size_t numOrbitalPlaneGridVertices = 0;
 
 	PolygonCountLevel _polygonCountLevel = PolygonCountLevel_Low;
-    NightColorDarkness _nightColorDarkness;
+    NightColorDarkness _nightColorDarkness = NightColorDarkness_VeryHigh;
     float _nightColorMultiplier;
 
 
@@ -124,7 +126,7 @@ protected:
 class PlanetRenderer : public SphericalBodyRenderer
 {
 public:
-	PlanetRenderer(Universe& parent, SphericalBody& sphere, std::string textureFilename = "", std::string textureFilename2 = "");
+	PlanetRenderer(std::string textureFilename = "", std::string textureFilename2 = "");
 	~PlanetRenderer();
 
     virtual void renderMain(GlslProgram& glslProgram);
@@ -141,7 +143,7 @@ public:
 class SunRenderer : public SphericalBodyRenderer
 {
 public:
-	SunRenderer(Universe& parent, SphericalBody& sphere, std::string textureFilename = "");
+	SunRenderer(std::string textureFilename = "");
 	~SunRenderer();
 
     void renderMain(GlslProgram& glslProgram);

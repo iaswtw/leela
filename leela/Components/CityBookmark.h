@@ -3,14 +3,16 @@
 #include "SceneObject.h"
 #include "SimpleSphere.h"
 
+class SphericalBody;
 
 class Bookmark : public SceneObject
 {
 public:
-	Bookmark(SphericalBody * sphericalBody) : _sphericalBody(sphericalBody) {}
+	Bookmark() {}
 
 	void init() {}
 	void advance(float stepMultiplier) {}
+	virtual void parentChanged();
 
 	void set(std::string label, float lat, float lon)
 	{
@@ -22,6 +24,4 @@ public:
 	std::string _label = "";
 	float _lat = 0.0f;
 	float _lon = 0.0f;
-
-	//bool bShowBookmarks = false;
 };

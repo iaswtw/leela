@@ -116,13 +116,13 @@ void Universe::renderAllNontransparentObjects()
     // This is because all labels, regardless of what object they are for, are written at a
     // very shallow depth.
 
-    fontGlslProgram.use();
+    fontGlslProgram->use();
     glm::mat4 projection = glm::ortho(0.0f, float(curWidth), 0.0f, float(curHeight));
-    fontGlslProgram.setMat4("projection", glm::value_ptr(projection));
+    fontGlslProgram->setMat4("projection", glm::value_ptr(projection));
 
-    renderSceneUsingGlslProgram(fontGlslProgram, RenderStage_Pre);
+    renderSceneUsingGlslProgram(*fontGlslProgram, RenderStage_Pre);
 
-    fontGlslProgram.unuse();
+    fontGlslProgram->unuse();
 
 
     //---------------------------------
@@ -131,63 +131,63 @@ void Universe::renderAllNontransparentObjects()
 
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    planetGlslProgram.use();
-    planetGlslProgram.setMat4("view", glm::value_ptr(viewMatrix));
-    planetGlslProgram.setMat4("proj", glm::value_ptr(projectionMatrix));
+    planetGlslProgram->use();
+    planetGlslProgram->setMat4("view", glm::value_ptr(viewMatrix));
+    planetGlslProgram->setMat4("proj", glm::value_ptr(projectionMatrix));
 
     // turn usage of texture on/off based on global setting. Individual spheres might change this
     // depending on whether they have texture set up.
-    planetGlslProgram.setBool("useTexture", bRealisticSurfaces);
+    planetGlslProgram->setBool("useTexture", bRealisticSurfaces);
 
-    planetGlslProgram.setVec3("sunCenterTransformed", glm::value_ptr(sun.getModelTransformedCenter()));
-    planetGlslProgram.setFloat("sunRadius", sun.getRadius());
-    planetGlslProgram.setBool("realisticShading", bRealisticShading);
+    planetGlslProgram->setVec3("sunCenterTransformed", glm::value_ptr(sun->getModelTransformedCenter()));
+    planetGlslProgram->setFloat("sunRadius", sun->getRadius());
+    planetGlslProgram->setBool("realisticShading", bRealisticShading);
 
-    renderSceneUsingGlslProgram(planetGlslProgram, RenderStage_Main);
+    renderSceneUsingGlslProgram(*planetGlslProgram, RenderStage_Main);
 
-    planetGlslProgram.unuse();
+    planetGlslProgram->unuse();
 
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    starGlslProgram.use();
+    starGlslProgram->use();
     printGlError();
-    starGlslProgram.setMat4("view", glm::value_ptr(viewMatrix));
-    starGlslProgram.setMat4("proj", glm::value_ptr(projectionMatrix));
+    starGlslProgram->setMat4("view", glm::value_ptr(viewMatrix));
+    starGlslProgram->setMat4("proj", glm::value_ptr(projectionMatrix));
 
-    renderSceneUsingGlslProgram(starGlslProgram, RenderStage_Main);
+    renderSceneUsingGlslProgram(*starGlslProgram, RenderStage_Main);
 
-    starGlslProgram.unuse();
-
-    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-    sunGlslProgram.use();
-    sunGlslProgram.setMat4("view", glm::value_ptr(viewMatrix));
-    sunGlslProgram.setMat4("proj", glm::value_ptr(projectionMatrix));
-    sunGlslProgram.setBool("useTexture", bRealisticSurfaces);
-
-    renderSceneUsingGlslProgram(sunGlslProgram, RenderStage_Main);
-
-    sunGlslProgram.unuse();
+    starGlslProgram->unuse();
 
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    simpleGlslProgram.use();
-    simpleGlslProgram.setMat4("view", glm::value_ptr(viewMatrix));
-    simpleGlslProgram.setMat4("proj", glm::value_ptr(projectionMatrix));
+    sunGlslProgram->use();
+    sunGlslProgram->setMat4("view", glm::value_ptr(viewMatrix));
+    sunGlslProgram->setMat4("proj", glm::value_ptr(projectionMatrix));
+    sunGlslProgram->setBool("useTexture", bRealisticSurfaces);
 
-    renderSceneUsingGlslProgram(simpleGlslProgram, RenderStage_Main);
+    renderSceneUsingGlslProgram(*sunGlslProgram, RenderStage_Main);
 
-    simpleGlslProgram.unuse();
+    sunGlslProgram->unuse();
 
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    bookmarkGlslProgram.use();
+    simpleGlslProgram->use();
+    simpleGlslProgram->setMat4("view", glm::value_ptr(viewMatrix));
+    simpleGlslProgram->setMat4("proj", glm::value_ptr(projectionMatrix));
+
+    renderSceneUsingGlslProgram(*simpleGlslProgram, RenderStage_Main);
+
+    simpleGlslProgram->unuse();
+
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    bookmarkGlslProgram->use();
     projection = glm::ortho(0.0f, float(curWidth), 0.0f, float(curHeight));
-    bookmarkGlslProgram.setMat4("projection", glm::value_ptr(projection));
+    bookmarkGlslProgram->setMat4("projection", glm::value_ptr(projection));
 
-    renderSceneUsingGlslProgram(bookmarkGlslProgram, RenderStage_Main);
+    renderSceneUsingGlslProgram(*bookmarkGlslProgram, RenderStage_Main);
 
-    bookmarkGlslProgram.unuse();
+    bookmarkGlslProgram->unuse();
 
     //---------------------------------
     // Post stage
@@ -196,13 +196,13 @@ void Universe::renderAllNontransparentObjects()
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     // Draw labels "on top"
 
-    fontGlslProgram.use();
+    fontGlslProgram->use();
     projection = glm::ortho(0.0f, float(curWidth), 0.0f, float(curHeight));
-    fontGlslProgram.setMat4("projection", glm::value_ptr(projection));
+    fontGlslProgram->setMat4("projection", glm::value_ptr(projection));
 
-    renderSceneUsingGlslProgram(fontGlslProgram, RenderStage_Post);
+    renderSceneUsingGlslProgram(*fontGlslProgram, RenderStage_Post);
 
-    fontGlslProgram.unuse();
+    fontGlslProgram->unuse();
 
     
 }
@@ -213,13 +213,13 @@ void Universe::renderAllTransparentObjects()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    simpleGlslProgram.use();
-    simpleGlslProgram.setMat4("view", glm::value_ptr(viewMatrix));
-    simpleGlslProgram.setMat4("proj", glm::value_ptr(projectionMatrix));
+    simpleGlslProgram->use();
+    simpleGlslProgram->setMat4("view", glm::value_ptr(viewMatrix));
+    simpleGlslProgram->setMat4("proj", glm::value_ptr(projectionMatrix));
 
-    renderSceneUsingGlslProgram(simpleGlslProgram, RenderStage_Translucent_Main);
+    renderSceneUsingGlslProgram(*simpleGlslProgram, RenderStage_Translucent_Main);
 
-    simpleGlslProgram.unuse();
+    simpleGlslProgram->unuse();
 
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -256,7 +256,7 @@ void Universe::renderSceneObjectUsingGlslProgram(SceneObject * sceneObject, Glsl
 
 void Universe::RenderText(RenderTextType renderType, std::string text, float x, float y, float z, float scale, glm::vec3 color)
 {
-    fontGlslProgram.setVec3("textColor", glm::value_ptr(color));
+    fontGlslProgram->setVec3("textColor", glm::value_ptr(color));
 
     GLboolean curDepthMaskEnable;
     GLboolean prevBlendEnable;
@@ -551,7 +551,7 @@ void Universe::generateImGuiWidgets()
         //ImGui::Button("z"); ImGui::SameLine();
         //ImGui::PopStyleColor();
 
-        if (!earth.bRevolutionMotion) color = onColor; else color = offColor;
+        if (!earth->bRevolutionMotion) color = onColor; else color = offColor;
         ImGui::PushStyleColor(ImGuiCol_Button, color);
         ImGui::Button("0"); ImGui::SameLine();
         ImGui::PopStyleColor();
@@ -561,12 +561,12 @@ void Universe::generateImGuiWidgets()
         ImGui::Button("Pause"); ImGui::SameLine();
         ImGui::PopStyleColor();
 
-        if (earthRenderer.bShowOrbitalPlane) color = onColor; else color = offColor;
+        if (earthRenderer->bShowOrbitalPlane) color = onColor; else color = offColor;
         ImGui::PushStyleColor(ImGuiCol_Button, color);
         ImGui::Button("e"); ImGui::SameLine();
         ImGui::PopStyleColor();
 
-        if (moonRenderer.bShowOrbitalPlane) color = onColor; else color = offColor;
+        if (moonRenderer->bShowOrbitalPlane) color = onColor; else color = offColor;
         ImGui::PushStyleColor(ImGuiCol_Button, color);
         ImGui::Button("m"); ImGui::SameLine();
         ImGui::PopStyleColor();
@@ -1024,12 +1024,12 @@ void Universe::generateImGuiWidgets()
 
             SmallCheckbox("Time pause (space bar)", &bSimulationPause);
 
-            ImGui::Button("Fast Rewind (-)");
+            ImGui::Button("Fast Rewind (r)");
             if (ImGui::IsItemActivated())       Rewind(UCmdParam_On);
             if (ImGui::IsItemDeactivated())     Rewind(UCmdParam_Off);
 
             ImGui::SameLine();
-            ImGui::Button("Fast Forward (=)");
+            ImGui::Button("Fast Forward (f)");
             if (ImGui::IsItemActivated())       FastForward(UCmdParam_On);
             if (ImGui::IsItemDeactivated())     FastForward(UCmdParam_Off);
 
@@ -1062,39 +1062,39 @@ void Universe::generateImGuiWidgets()
             ImGui::PopFont();
 
             ImGui::Indent();
-            SmallCheckbox("Rotation## earth", &earth.bRotationMotion); ImGui::SameLine();
-            SmallCheckbox("Sync with revolution", &earth.bSyncWithRevolution);
-            SmallCheckbox("Revolution  (0)## earth", &earth.bRevolutionMotion);
-            SmallCheckbox("Orbit## earth", &earthRenderer.bShowOrbit);  ImGui::SameLine();
-            SmallCheckbox("Plane (e)## earth", &earthRenderer.bShowOrbitalPlane);  ImGui::SameLine();
-            if (SmallCheckbox("Transparency##earth orbital plane", &earthRenderer.bOrbitalPlaneTransparency)) {
-                earthRenderer.constructOrbitalPlaneGridVertices();
-                earthRenderer.constructOrbitalPlaneVertices();
+            SmallCheckbox("Rotation## earth", &earth->bRotationMotion); ImGui::SameLine();
+            SmallCheckbox("Sync with revolution", &earth->bSyncWithRevolution);
+            SmallCheckbox("Revolution  (0)## earth", &earth->bRevolutionMotion);
+            SmallCheckbox("Orbit## earth", &earthRenderer->bShowOrbit);  ImGui::SameLine();
+            SmallCheckbox("Plane (e)## earth", &earthRenderer->bShowOrbitalPlane);  ImGui::SameLine();
+            if (SmallCheckbox("Transparency##earth orbital plane", &earthRenderer->bOrbitalPlaneTransparency)) {
+                earthRenderer->constructOrbitalPlaneGridVertices();
+                earthRenderer->constructOrbitalPlaneVertices();
             }
-            SmallCheckbox("Precession (F6)## earth", &earth.bPrecessionMotion);
+            SmallCheckbox("Precession (F6)## earth", &earth->bPrecessionMotion);
             ImGui::SameLine();
             if (ImGui::Button("Reset## earth precession motion"))
                 Earth_PrecessionMotion(UCmdParam_Reset);
-            SmallCheckbox("Show latitudes/longituedes## earth", &earthRenderer.bShowLatitudesAndLongitudes);
+            SmallCheckbox("Show latitudes/longituedes## earth", &earthRenderer->bShowLatitudesAndLongitudes);
             SmallCheckbox("City labels## earth", &bShowCityBookmarks);
             ImGui::PushItemWidth(100);
-            if (ImGui::SliderFloat("Orbital Radius## earth", &earth._orbitalRadius, 500.0f, 4000.0f)) {
-                earthRenderer.constructOrbit();
-                earthRenderer.constructOrbitalPlaneVertices();
-                earthRenderer.constructOrbitalPlaneGridVertices();
+            if (ImGui::SliderFloat("Orbital Radius## earth", &earth->_orbitalRadius, 500.0f, 4000.0f)) {
+                earthRenderer->constructOrbit();
+                earthRenderer->constructOrbitalPlaneVertices();
+                earthRenderer->constructOrbitalPlaneGridVertices();
             } ImGui::SameLine();
             if (ImGui::Button("Reset## earth orbital radius")) {
-                earth.restoreOrbitalRadius();
-                earthRenderer.constructOrbit();
-                earthRenderer.constructOrbitalPlaneVertices();
-                earthRenderer.constructOrbitalPlaneGridVertices();
+                earth->restoreOrbitalRadius();
+                earthRenderer->constructOrbit();
+                earthRenderer->constructOrbitalPlaneVertices();
+                earthRenderer->constructOrbitalPlaneGridVertices();
             }
-            if (ImGui::SliderFloat("Axis tilt## earth", &earth._axisTiltAngle_Deg, 0.0f, 90.0f)) {
-                earth._axisTiltAngle = glm::radians(earth._axisTiltAngle_Deg);
+            if (ImGui::SliderFloat("Axis tilt## earth", &earth->_axisTiltAngle_Deg, 0.0f, 90.0f)) {
+                earth->_axisTiltAngle = glm::radians(earth->_axisTiltAngle_Deg);
             } ImGui::SameLine();
             ImGui::PopItemWidth();
             if (ImGui::Button("Reset## earth axis tilt")) {
-                earth.restoreAxisTiltAngleFromBackup();
+                earth->restoreAxisTiltAngleFromBackup();
             }
             ImGui::Unindent();
 
@@ -1108,40 +1108,40 @@ void Universe::generateImGuiWidgets()
             ImGui::PopFont();
 
             ImGui::Indent();
-            SmallCheckbox("Show body", &moonRenderer.bShowBody);
-            SmallCheckbox("Revolution", &moon.bRevolutionMotion);  ImGui::SameLine();
-            SmallCheckbox("Sync with Earth", &moon.bOrbitalRevolutionSyncToParent);
-            SmallCheckbox("Orbit## moon", &moonRenderer.bShowOrbit); ImGui::SameLine();
-            SmallCheckbox("Plane (m)##moon", &moonRenderer.bShowOrbitalPlane);  ImGui::SameLine();
-            if (SmallCheckbox("Transparency##moon orbital plane", &moonRenderer.bOrbitalPlaneTransparency)) {
-                moonRenderer.constructOrbitalPlaneGridVertices();
-                moonRenderer.constructOrbitalPlaneVertices();
+            SmallCheckbox("Show body", &moonRenderer->bShowBody);
+            SmallCheckbox("Revolution", &moon->bRevolutionMotion);  ImGui::SameLine();
+            SmallCheckbox("Sync with Earth", &moon->bOrbitalRevolutionSyncToParent);
+            SmallCheckbox("Orbit## moon", &moonRenderer->bShowOrbit); ImGui::SameLine();
+            SmallCheckbox("Plane (m)##moon", &moonRenderer->bShowOrbitalPlane);  ImGui::SameLine();
+            if (SmallCheckbox("Transparency##moon orbital plane", &moonRenderer->bOrbitalPlaneTransparency)) {
+                moonRenderer->constructOrbitalPlaneGridVertices();
+                moonRenderer->constructOrbitalPlaneVertices();
             }
-            SmallCheckbox("Nodal Precession (F5)", &moon.bOrbitalPlaneRotation);
+            SmallCheckbox("Nodal Precession (F5)", &moon->bOrbitalPlaneRotation);
             ImGui::SameLine();
             if (ImGui::Button("Reset## moon orbital plane rotation"))
                 Moon_OrbitalPlaneRotation(UCmdParam_Reset);
             ImGui::Indent();
-            SmallCheckbox("Sync with earth's revolution", &moon.bNodalPrecessionSpeedSyncToParentsRevolution);
+            SmallCheckbox("Sync with earth's revolution", &moon->bNodalPrecessionSpeedSyncToParentsRevolution);
             ImGui::Unindent();
             ImGui::PushItemWidth(100);
             //ImGui::SetNextItemWidth(180);
-            if (ImGui::SliderFloat("Orbital Radius## moon", &moon._orbitalRadius, 120.0f, 600.0f)) {
-                moonRenderer.constructOrbit();
-                moonRenderer.constructOrbitalPlaneVertices();
-                moonRenderer.constructOrbitalPlaneGridVertices();
+            if (ImGui::SliderFloat("Orbital Radius## moon", &moon->_orbitalRadius, 120.0f, 600.0f)) {
+                moonRenderer->constructOrbit();
+                moonRenderer->constructOrbitalPlaneVertices();
+                moonRenderer->constructOrbitalPlaneGridVertices();
             } ImGui::SameLine();
             if (ImGui::Button("Reset## moon orbital radius")) {
-                moon.restoreOrbitalRadius();
-                moonRenderer.constructOrbit();
-                moonRenderer.constructOrbitalPlaneVertices();
-                moonRenderer.constructOrbitalPlaneGridVertices();
+                moon->restoreOrbitalRadius();
+                moonRenderer->constructOrbit();
+                moonRenderer->constructOrbitalPlaneVertices();
+                moonRenderer->constructOrbitalPlaneGridVertices();
             }
-            if (ImGui::SliderFloat("Orbital Tilt", &moon._orbitalPlaneTiltAngle_Deg, 0.0f, 30.0f)) {
-                moon._orbitalPlaneTiltAngle = glm::radians(moon._orbitalPlaneTiltAngle_Deg);
-                moonRenderer.constructOrbit();
-                moonRenderer.constructOrbitalPlaneVertices();
-                moonRenderer.constructOrbitalPlaneGridVertices();
+            if (ImGui::SliderFloat("Orbital Tilt", &moon->_orbitalPlaneTiltAngle_Deg, 0.0f, 30.0f)) {
+                moon->_orbitalPlaneTiltAngle = glm::radians(moon->_orbitalPlaneTiltAngle_Deg);
+                moonRenderer->constructOrbit();
+                moonRenderer->constructOrbitalPlaneVertices();
+                moonRenderer->constructOrbitalPlaneGridVertices();
             }
             ImGui::PopItemWidth();
             ImGui::Unindent();
@@ -1155,9 +1155,9 @@ void Universe::generateImGuiWidgets()
             ImGui::PopFont();
 
             ImGui::Indent();
-            SmallCheckbox("Revolution", &mars.bRevolutionMotion);
-            SmallCheckbox("Orbit## mars", &marsRenderer.bShowOrbit); ImGui::SameLine();
-            SmallCheckbox("Orbital plane (,)##mars", &marsRenderer.bShowOrbitalPlane);
+            SmallCheckbox("Revolution", &mars->bRevolutionMotion);
+            SmallCheckbox("Orbit## mars", &marsRenderer->bShowOrbit); ImGui::SameLine();
+            SmallCheckbox("Orbital plane (,)##mars", &marsRenderer->bShowOrbitalPlane);
             ImGui::Unindent();
 
             ImGui::Separator();
@@ -1185,7 +1185,7 @@ void Universe::generateImGuiWidgets()
 
             //----------------------------------------------------------
             ImGui::Text("Lock target:");  ImGui::SameLine(); HelpMarker("Camera will always look at the selected target.");
-            int lock = (lockTarget == &earth) ? 0 : (lockTarget == &sun) ? 1 : (lockTarget == &moon) ? 2 : 3;
+            int lock = (lockTarget == earth) ? 0 : (lockTarget == sun) ? 1 : (lockTarget == moon) ? 2 : 3;
             int previousLock = lock;
             ImGui::RadioButton("earth", &lock, 0); ImGui::SameLine();
             ImGui::RadioButton("sun", &lock, 1); ImGui::SameLine();
@@ -1193,7 +1193,7 @@ void Universe::generateImGuiWidgets()
             ImGui::RadioButton("none", &lock, 3);
             if (lock != previousLock)
                 SetLockTargetAndMode(
-                (lock == 0) ? &earth : (lock == 1) ? &sun : (lock == 2) ? &moon : nullptr,
+                (lock == 0) ? earth : (lock == 1) ? sun : (lock == 2) ? moon : nullptr,
                     TargetLockMode_ViewTarget);
 
             //----------------------------------------------------------

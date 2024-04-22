@@ -10,15 +10,12 @@
 class MonthLabelsRenderer : public Renderer
 {
 public:
-	MonthLabelsRenderer(SphericalBody& sphere) : _sphere(sphere)
-	{
-	}
-
+	MonthLabelsRenderer() {}
     ~MonthLabelsRenderer() {}
 
-	void init()
-    {
-	}
+    void init();
+
+    virtual void parentChanged();
 
     void advance(float stepMultiplier) {}
 
@@ -30,7 +27,7 @@ public:
     virtual void renderPost(GlslProgram& glslProgram);
 
 private:
-	SphericalBody& _sphere;
+	SphericalBody* _sphere;
 
     std::vector<glm::vec3> monthPositions = {
         {0.0f, 0.0f, 0.0f},

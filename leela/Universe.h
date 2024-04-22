@@ -176,9 +176,11 @@ typedef enum
 
 typedef enum
 {
-    TargetLockMode_OrientedViewTarget,
-    TargetLockMode_ViewTarget,        // camera position remains fixed, but always looks at the target
-    TargetLockMode_FollowTarget       // camera moves with the object maintaining distance and direction
+    TargetLockMode_OrientedViewTarget,  // camera moves with the object; maintains orientation w.r.t parent of sphere.
+                                        //    e.g. if lock target was earth, and sun was to the left, sun will remain to the left as the earth
+                                        //         and the camera move in the orbit.
+    TargetLockMode_ViewTarget,          // camera position remains fixed, but always looks at the target
+    TargetLockMode_FollowTarget         // camera moves with the object maintaining distance and direction
 } TargetLockMode;
 
 
@@ -426,58 +428,42 @@ public:
 
 
     // Texture handles
-    GLuint tex1;
-    GLuint tex2;
+    GLuint tex1 = 0;
+    GLuint tex2 = 0;
 
-    GLuint fontVao, largeFontVao;
-    GLuint fontVbo, largeFontVbo;
+    GLuint fontVao, largeFontVao = 0;
+    GLuint fontVbo, largeFontVbo = 0;
 
     FT_Library ft;
     FT_Face face;
 
-    std::map<char, Character> characters;
-    std::map<char, Character> largeCharacters;
+    std::map<char, Character> characters = {};
+    std::map<char, Character> largeCharacters = {};
 
 
     GLint uniOverrideColor;
 
-    glm::mat4 viewMatrix;
-    glm::mat4 projectionMatrix;
+    glm::mat4 viewMatrix        = glm::mat4(1.0f);
+    glm::mat4 projectionMatrix  = glm::mat4(1.0f);
 
 
     // SphericalBody and other objects to be drawn on the screen. Instantiate them here. Their data (vertices) will be created later.
     CoordinateAxisRenderer coordinateAxisRenderer;
-    SphericalBody earth = SphericalBody("Earth");
-    SphericalBody sun = SphericalBody("Sun");
-    SphericalBody mars = SphericalBody("Mars");
-    SphericalBody moon = SphericalBody("Moon");
-    SphericalBody jupiter = SphericalBody("Jupiter");
-    SphericalBody saturn = SphericalBody("Saturn");
-    SphericalBody uranus = SphericalBody("Uranus");
-    SphericalBody neptune = SphericalBody("Neptune");
+    SphericalBody* earth;
+    SphericalBody* sun;
+    SphericalBody* mars;
+    SphericalBody* moon;
     Stars stars;
 
     Scene scene;
 
-    SphericalBody* allSpheres[9] = { &sun, &earth, &moon, &mars, &jupiter, &saturn, &uranus, &neptune, NULL };
-    SphericalBody* allPlanets[8] = {       &earth, &moon, &mars, &jupiter, &saturn, &uranus, &neptune, NULL };
+    SunRenderer *sunRenderer = nullptr;
+    PlanetRenderer *earthRenderer = nullptr;
+    PlanetRenderer *moonRenderer = nullptr;
+    PlanetRenderer *marsRenderer = nullptr;
 
-    PlanetRenderer earthRenderer;
-    PlanetRenderer moonRenderer;
-    PlanetRenderer marsRenderer;
-    PlanetRenderer jupiterRenderer;
-    PlanetRenderer saturnRenderer;
-    PlanetRenderer uranusRenderer;
-    PlanetRenderer neptuneRenderer;
-    // list of all planet & satellite (System) renderers. Does not contain sun.
-    PlanetRenderer * systemRenderers[8] = { &earthRenderer, &moonRenderer, &marsRenderer, &jupiterRenderer, &saturnRenderer , &uranusRenderer, &neptuneRenderer, NULL};
-    SunRenderer sunRenderer;
     StarsRenderer starsRenderer;
-    MonthLabelsRenderer monthLabelsRenderer;        // for earth
-    
-    // bookmarks on earth
-    //Bookmark bm[4];
-    //BookmarkRenderer bmr[4];
+    MonthLabelsRenderer* monthLabelsRenderer;        // for earth
 
     Space space;
 
@@ -487,12 +473,12 @@ public:
     std::vector<float> twoPixelWideStarVertices;
     std::vector<float> gstarVertices;
 
-	GlslProgram planetGlslProgram = GlslProgram(GlslProgramType_Planet);
-	GlslProgram sunGlslProgram = GlslProgram(GlslProgramType_Sun);
-	GlslProgram starGlslProgram = GlslProgram(GlslProgramType_Star);
-    GlslProgram simpleGlslProgram = GlslProgram(GlslProgramType_Simple);
-    GlslProgram fontGlslProgram = GlslProgram(GlslProgramType_Font);
-    GlslProgram bookmarkGlslProgram = GlslProgram(GlslProgramType_BookmarkSphere);
+    GlslProgram* planetGlslProgram = nullptr;
+    GlslProgram* sunGlslProgram = nullptr;
+    GlslProgram* starGlslProgram = nullptr;
+    GlslProgram* simpleGlslProgram = nullptr;
+    GlslProgram* fontGlslProgram = nullptr;
+    GlslProgram* bookmarkGlslProgram = nullptr;
 
     // Realistic day/night shading, shadow shading.
     // Effect on day & nights:
