@@ -204,6 +204,8 @@ void Universe::renderAllNontransparentObjects()
 
     fontGlslProgram->unuse();
 
+
+
     
 }
 
@@ -223,6 +225,21 @@ void Universe::renderAllTransparentObjects()
 
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+    planetGlslProgram->use();
+    planetGlslProgram->setMat4("view", glm::value_ptr(viewMatrix));
+    planetGlslProgram->setMat4("proj", glm::value_ptr(projectionMatrix));
+
+    // turn usage of texture on/off based on global setting. Individual spheres might change this
+    // depending on whether they have texture set up.
+    planetGlslProgram->setBool("useTexture", bRealisticSurfaces);
+
+    planetGlslProgram->setVec3("sunCenterTransformed", glm::value_ptr(sun->getModelTransformedCenter()));
+    planetGlslProgram->setFloat("sunRadius", sun->getRadius());
+    planetGlslProgram->setBool("realisticShading", bRealisticShading);
+
+    renderSceneUsingGlslProgram(*planetGlslProgram, RenderStage_Post);
+
+    planetGlslProgram->unuse();
     glDisable(GL_BLEND);
 
 }
@@ -1075,7 +1092,7 @@ void Universe::generateImGuiWidgets()
             ImGui::SameLine();
             if (ImGui::Button("Reset## earth precession motion"))
                 Earth_PrecessionMotion(UCmdParam_Reset);
-            SmallCheckbox("Show latitudes/longituedes## earth", &earthRenderer->bShowLatitudesAndLongitudes);
+            SmallCheckbox("Show latitudes/longituedes## earth", &earthLatLonRenderer->bShowLatitudesAndLongitudes);
             SmallCheckbox("City labels## earth", &bShowCityBookmarks);
             ImGui::PushItemWidth(100);
             if (ImGui::SliderFloat("Orbital Radius## earth", &earth->_orbitalRadius, 500.0f, 4000.0f)) {

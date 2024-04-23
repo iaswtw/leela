@@ -78,3 +78,14 @@ SceneObject* SceneObject::getSceneObjectByName(SceneObject* obj, std::string nam
     return nullptr;
 }
 
+// search in components of this scene object only.
+Component* SceneObject::getComponentByName(std::string name)
+{
+    for (Component* c : _components)
+    {
+        if (c->_componentName == name)
+            return c;
+    }
+    return nullptr;
+}
+
