@@ -60,13 +60,13 @@ public:
 	void setPolygonCountLevel(std::string polygonCountLevel);
     void constructRotationAxis();
     void constructVerticesAndSendToGpu();
+    virtual void doShaderConfig(GlslProgram& glslProgram) {}
 
     std::string _locateTextureFile(const char * filenName);
 
 
 public:
     bool bShowOrbit = false;
-    bool bShowLatitudesAndLongitudes = false;
     bool bOrbitalPlaneTransparency = false;
     bool bShowOrbitalPlane = false;
     bool bShowBody = true;                  // if true, draw the planet/moon
@@ -77,7 +77,6 @@ public:
 
     std::vector<float>* _constructMainSphereVertices();
     std::pair<std::vector<float>*, std::vector<Triangle>*> _constructMainIcoSphereVertices();
-    void constructLatitudesAndLongitudeVertices();
     void constructOrbit();
     void constructOrbitalPlaneVertices();
     void constructOrbitalPlaneGridVertices();
@@ -85,14 +84,12 @@ public:
 	float _getPolygonIncrement();
     int _getIcoSphereSubdivisionLevel();
 
-protected:
+public:
     SphericalBody * _sphere = nullptr;
 
     GLuint _mainVao;
     GLuint _orbitVao = 0;
     GLuint _orbitVbo = 0;
-    GLuint _latAndLongVao;
-    GLuint _latAndLongVbo;
     GLuint _rotationAxisVao;
     GLuint _rotationAxisVbo;
     GLuint _texture;
@@ -104,7 +101,6 @@ protected:
 
     size_t numMainSphereVertices = 0;
     size_t numMainSphereElements = 0;
-    size_t numLatAndLongVertices = 0;
     size_t numOrbitVertices = 0;
     size_t numRotationAxisVertices = 0;
     size_t numOrbitalPlaneVertices = 0;
@@ -132,8 +128,9 @@ public:
     virtual void renderMain(GlslProgram& glslProgram);
     virtual void renderTranslucentMain(GlslProgram& glslProgram);
 
+    virtual void doShaderConfig(GlslProgram& glslProgram);
+
 	void renderSphere(GlslProgram& glslProgram);
-	void renderLatitudeAndLongitudes(GlslProgram& glslProgram);
 	void renderOrbitalPlane(GlslProgram& glslProgram);
 	void renderOrbit(GlslProgram& glslProgram);
     void renderRotationAxis(GlslProgram& glslProgram);
@@ -145,6 +142,8 @@ class SunRenderer : public SphericalBodyRenderer
 public:
 	SunRenderer(std::string textureFilename = "");
 	~SunRenderer();
+
+    virtual void doShaderConfig(GlslProgram& glslProgram);
 
     void renderMain(GlslProgram& glslProgram);
 	void _renderSphere(GlslProgram& glslProgram);

@@ -14,10 +14,11 @@
 #include "SphericalBodyRenderer.h"
 #include "CoordinateAxisRenderer.h"
 #include "BookmarkRenderer.h"
+#include "MonthLabelsRenderer.h"
+#include "LatLonRenderer.h"
 #include "Stars.h"
 #include "StarsRenderer.h"
 #include "Space.h"
-#include "MonthLabelsRenderer.h"
 #include "Fir.h"
 #include <fstream>
 #include <iostream>
@@ -461,6 +462,8 @@ public:
     PlanetRenderer *earthRenderer = nullptr;
     PlanetRenderer *moonRenderer = nullptr;
     PlanetRenderer *marsRenderer = nullptr;
+
+    LatLonRenderer* earthLatLonRenderer = nullptr;
 
     StarsRenderer starsRenderer;
     MonthLabelsRenderer* monthLabelsRenderer;        // for earth

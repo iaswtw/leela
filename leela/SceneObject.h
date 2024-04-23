@@ -43,6 +43,7 @@ public:
     static void _printIndent(int indent);
     static void printTree(SceneObject* obj, int indent = 0);
     static SceneObject* getSceneObjectByName(SceneObject* obj, std::string name);
+    Component* getComponentByName(std::string name);
 
 public:
 

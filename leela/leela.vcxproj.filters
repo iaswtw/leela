@@ -54,6 +54,7 @@
       <Filter>Components</Filter>
     </ClCompile>
     <ClCompile Include="Components\CityBookmark.cpp" />
+    <ClCompile Include="Components\LatLonRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Class.h" />
@@ -128,6 +129,9 @@
       <Filter>Components</Filter>
     </ClInclude>
     <ClInclude Include="Elements.h" />
+    <ClInclude Include="Components\LatLonRenderer.h">
+      <Filter>Components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="leela.rc" />

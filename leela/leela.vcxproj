@@ -180,6 +180,7 @@
     <ClInclude Include="components\BookmarkRenderer.h" />
     <ClInclude Include="components\CityBookmark.h" />
     <ClInclude Include="components\CoordinateAxisRenderer.h" />
+    <ClInclude Include="Components\LatLonRenderer.h" />
     <ClInclude Include="components\MonthLabelsRenderer.h" />
     <ClInclude Include="components\SimpleSphere.h" />
     <ClInclude Include="components\SimpleSphereRenderer.h" />
@@ -219,6 +220,7 @@
     <ClCompile Include="components\BookmarkRenderer.cpp" />
     <ClCompile Include="Components\CityBookmark.cpp" />
     <ClCompile Include="components\CoordinateAxisRenderer.cpp" />
+    <ClCompile Include="Components\LatLonRenderer.cpp" />
     <ClCompile Include="components\MonthLabelsRenderer.cpp" />
     <ClCompile Include="components\SimpleSphereRenderer.cpp" />
     <ClCompile Include="Components\SphericalBody.cpp" />

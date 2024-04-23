@@ -179,6 +179,7 @@ void Universe::initSceneObjectsAndComponents()
         
         sphericalBodyRenderer->setPolygonCountLevel(pi.polygonCountLevel);
 
+        //----------------------------------------------------
         if (pi.name == "Sun") {
             sun = sb;
             sunRenderer->setAsLightSource();
@@ -186,8 +187,15 @@ void Universe::initSceneObjectsAndComponents()
         else if (pi.name == "Earth") {
             earth = sb;
             earthRenderer = planetRenderer;
-            earthRenderer->bShowLatitudesAndLongitudes = true;
             sphericalBodyRenderer->bShowOrbit = true;
+
+            // TODO: We would rather create the lat-lon renderer here.  But if done so, its rotation angle isn't correct.
+            //       It somehow seems to be dependent on some calculated variable in the sphere which gets updated
+            //       after initializing the main renderer several lines below.
+            // 
+            earthLatLonRenderer = new LatLonRenderer();
+            earth->addComponent(earthLatLonRenderer);
+            earthLatLonRenderer->init();
         }
         else if (pi.name == "Moon") {
             moon = sb;
@@ -201,12 +209,21 @@ void Universe::initSceneObjectsAndComponents()
         else {
         }
 
+        //----------------------------------------------------
         // this assums sun was created before other bodies in the system
         if (pi.name != "Sun")
             sb->setSunSphere(sun);
 
         sb->addComponent(renderer);         // Spherical body now owns the renderer.
         renderer->init();                   // construct spheres and send data to GPU
+
+
+        // TODO: See todo above commented code that creates lat-lon renderer.
+        //if (pi.name == "Earth") {
+        //    earthLatLonRenderer = new LatLonRenderer();
+        //    earth->addComponent(earthLatLonRenderer);
+        //    earthLatLonRenderer->init();
+        //}
 
         //----------------------------------------------------
         
