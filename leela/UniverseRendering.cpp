@@ -100,6 +100,8 @@ void Universe::render()
     // It still doesn't solve all problems.
     renderAllTransparentObjects();
 
+    renderLabels();
+
     glBindVertexArray(0);
 
 }
@@ -194,7 +196,7 @@ void Universe::renderAllNontransparentObjects()
     //---------------------------------
 
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    // Draw labels "on top"
+    // For labels "on top"
 
     fontGlslProgram->use();
     projection = glm::ortho(0.0f, float(curWidth), 0.0f, float(curHeight));
@@ -213,16 +215,7 @@ void Universe::renderAllTransparentObjects()
 {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-    simpleGlslProgram->use();
-    simpleGlslProgram->setMat4("view", glm::value_ptr(viewMatrix));
-    simpleGlslProgram->setMat4("proj", glm::value_ptr(projectionMatrix));
-
-    renderSceneUsingGlslProgram(*simpleGlslProgram, RenderStage_Translucent_Main);
-
-    simpleGlslProgram->unuse();
-
+    
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     planetGlslProgram->use();
@@ -240,7 +233,41 @@ void Universe::renderAllTransparentObjects()
     renderSceneUsingGlslProgram(*planetGlslProgram, RenderStage_Post);
 
     planetGlslProgram->unuse();
+
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    simpleGlslProgram->use();
+    simpleGlslProgram->setMat4("view", glm::value_ptr(viewMatrix));
+    simpleGlslProgram->setMat4("proj", glm::value_ptr(projectionMatrix));
+
+    renderSceneUsingGlslProgram(*simpleGlslProgram, RenderStage_Translucent_Main);
+
+    simpleGlslProgram->unuse();
+
+
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
     glDisable(GL_BLEND);
+
+
+}
+
+
+void Universe::renderLabels()
+{
+    glm::mat4 projection;
+
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    fontGlslProgram->use();
+    projection = glm::ortho(0.0f, float(curWidth), 0.0f, float(curHeight));
+    fontGlslProgram->setMat4("projection", glm::value_ptr(projection));
+
+    renderSceneUsingGlslProgram(*fontGlslProgram, RenderStage_Final);
+
+    fontGlslProgram->unuse();
+
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 }
 

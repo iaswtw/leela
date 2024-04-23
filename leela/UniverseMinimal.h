@@ -9,4 +9,6 @@ typedef enum
 
     RenderStage_Translucent_Main,
 
+    RenderStage_Final,
+
 } RenderStage;

@@ -40,7 +40,7 @@ void MonthLabelsRenderer::_renderLabels(GlslProgram& glslProgram, bool isPre)
 {
     if ((!isPre && g_universe->bShowLabelsOnTop) || (isPre && !g_universe->bShowLabelsOnTop))
     {
-        // This code is exiected in either Pre or Post render stage; not both.
+        // This code is executed in either Pre or Post render stage; not both.
         // If labels are to be shown on top, render them in `post` render stage.
 
         glm::vec3 projected;

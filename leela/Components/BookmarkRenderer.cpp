@@ -155,7 +155,7 @@ void BookmarkRenderer::renderMain(GlslProgram& glslProgram)
     }
 }
 
-void BookmarkRenderer::renderPost(GlslProgram& glslProgram)
+void BookmarkRenderer::renderFinal(GlslProgram& glslProgram)
 {
     if (glslProgram.type() == GlslProgramType_Font)
     {

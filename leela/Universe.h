@@ -223,6 +223,7 @@ public:
     void render();
     void renderAllNontransparentObjects();
     void renderAllTransparentObjects();
+    void renderLabels();
     void renderSceneUsingGlslProgram(GlslProgram& glslProgram, RenderStage stage);
     void renderSceneObjectUsingGlslProgram(SceneObject* sceneObject, GlslProgram& glslProgram, RenderStage stage);
     void RenderText(RenderTextType renderType, std::string text, float x, float y, float z, float scale, glm::vec3 color);

@@ -23,7 +23,7 @@ public:
 	void init();
 	void advance(float stepMultiplier) {}
 	virtual void renderMain(GlslProgram& glslProgram);
-	virtual void renderPost(GlslProgram& glslProgram);
+	virtual void renderFinal(GlslProgram& glslProgram);
 
 public:
 	GLuint _bookmarkVao = 0;
