@@ -130,8 +130,8 @@ void LatLonRenderer::constructSpecialLatitudesAndLongitudeVertices()
     float polygonIncrement = 100;
 
     float inc = float(2 * float(M_PI)) / polygonIncrement;
-    float c_a = 0.4f;       // color alpha
-    float c_a2 = 0.8;       // color alpha for special lat/lon
+    float c_a = 0.5f;       // color alpha
+    float c_a2 = 0.5;       // color alpha for special lat/lon
 
     //---------------------------------------------------------------------------------
     // Special Longitudes
@@ -214,7 +214,7 @@ void LatLonRenderer::constructSpecialLatitudesAndLongitudeVertices()
 
 
 
-void LatLonRenderer::renderMain(GlslProgram& glslProgram)
+void LatLonRenderer::renderPost(GlslProgram& glslProgram)
 {
     if (glslProgram.type() == GlslProgramType_Planet)
         renderLatitudeAndLongitudes(glslProgram);

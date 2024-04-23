@@ -29,10 +29,13 @@ public:
 		case RenderStage_Translucent_Main:
 			renderTranslucentMain(glslProgram);
 			break;
+		case RenderStage_Final:
+			renderFinal(glslProgram);
 		}
 	}
 	virtual void renderPre(GlslProgram& glslProgram) {}
 	virtual void renderMain(GlslProgram& glslProgram) {}
 	virtual void renderPost(GlslProgram& glslProgram) {}
 	virtual void renderTranslucentMain(GlslProgram& glslProgram) {}
+	virtual void renderFinal(GlslProgram& glslProgram) {}
 };
