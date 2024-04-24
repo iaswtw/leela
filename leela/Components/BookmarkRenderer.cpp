@@ -48,6 +48,7 @@ void BookmarkRenderer::_renderBookmarks(GlslProgram& glslProgram)
         if (projected.z < 1.0f)
         {
             g_universe->RenderText(
+                glslProgram,
                 //RenderTextType_ObjectText,
                 RenderTextType_ScreenText,
                 _bookmark->_label.c_str(),

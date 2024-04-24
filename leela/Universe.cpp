@@ -81,32 +81,61 @@ Universe::~Universe()
 
 void Universe::compileShaders()
 {
+    struct ShaderProgramInfo
+    {
+        GlslProgramType type;
+        std::string vertexShaderFilename;
+        std::string fragmentShaderFilename;
+    };
+
+    ShaderProgramInfo shaderProgInfo[] = {
+        // program type enum                vertex shader filename           fragment shader filename
+        { GlslProgramType_Planet,           "planet.vert.glsl",               "planet.frag.glsl"                  },
+        { GlslProgramType_Sun,              "sun.vert.glsl",                  "sun.frag.glsl"                     },
+        { GlslProgramType_Star,             "star.vert.glsl",                 "star.frag.glsl"                    },
+        { GlslProgramType_Simple,           "simple.vert.glsl",               "simple.frag.glsl"                  },
+        { GlslProgramType_Font,             "font.vert.glsl",                 "font.frag.glsl"                    },
+        { GlslProgramType_BookmarkSphere,   "bookmark.vert.glsl",             "bookmark.frag.glsl"                }
+    };
+    
     spdlog::info("Compiling all GLSL programs");
 
-    planetGlslProgram       = new GlslProgram(GlslProgramType_Planet);
-    sunGlslProgram          = new GlslProgram(GlslProgramType_Sun);
-    starGlslProgram         = new GlslProgram(GlslProgramType_Star);
-    simpleGlslProgram       = new GlslProgram(GlslProgramType_Simple);
-    fontGlslProgram         = new GlslProgram(GlslProgramType_Font);
-    bookmarkGlslProgram     = new GlslProgram(GlslProgramType_BookmarkSphere);
+    for (auto si : shaderProgInfo)
+    {
+        auto prog = new GlslProgram(si.type);
+        prog->compileShadersFromFile(si.vertexShaderFilename.c_str(), si.fragmentShaderFilename.c_str());
+        prog->link();
 
-    planetGlslProgram->compileShadersFromFile("planet.vert.glsl", "planet.frag.glsl");
-    planetGlslProgram->link();
+        shaderPrograms.push_back(prog);
+    }
 
-    sunGlslProgram->compileShadersFromFile("sun.vert.glsl", "sun.frag.glsl");
-    sunGlslProgram->link();
 
-    starGlslProgram->compileShadersFromFile("star.vert.glsl", "star.frag.glsl");
-    starGlslProgram->link();
+    //planetGlslProgram       = new GlslProgram(GlslProgramType_Planet);
+    //sunGlslProgram          = new GlslProgram(GlslProgramType_Sun);
+    //starGlslProgram         = new GlslProgram(GlslProgramType_Star);
+    //simpleGlslProgram       = new GlslProgram(GlslProgramType_Simple);
+    //fontGlslProgram         = new GlslProgram(GlslProgramType_Font);
+    //bookmarkGlslProgram     = new GlslProgram(GlslProgramType_BookmarkSphere);
 
-    simpleGlslProgram->compileShadersFromFile("simple.vert.glsl", "simple.frag.glsl");
-    simpleGlslProgram->link();
 
-    fontGlslProgram->compileShadersFromFile("font.vert.glsl", "font.frag.glsl");
-    fontGlslProgram->link();
+    //planetGlslProgram->compileShadersFromFile("planet.vert.glsl", "planet.frag.glsl");
+    //planetGlslProgram->link();
 
-    bookmarkGlslProgram->compileShadersFromFile("bookmark.vert.glsl", "bookmark.frag.glsl");
-    bookmarkGlslProgram->link();
+    //sunGlslProgram->compileShadersFromFile("sun.vert.glsl", "sun.frag.glsl");
+    //sunGlslProgram->link();
+
+    //starGlslProgram->compileShadersFromFile("star.vert.glsl", "star.frag.glsl");
+    //starGlslProgram->link();
+
+    //simpleGlslProgram->compileShadersFromFile("simple.vert.glsl", "simple.frag.glsl");
+    //simpleGlslProgram->link();
+
+    //fontGlslProgram->compileShadersFromFile("font.vert.glsl", "font.frag.glsl");
+    //fontGlslProgram->link();
+
+    //bookmarkGlslProgram->compileShadersFromFile("bookmark.vert.glsl", "bookmark.frag.glsl");
+    //bookmarkGlslProgram->link();
+
 }
 
 /*************************************************************************************************

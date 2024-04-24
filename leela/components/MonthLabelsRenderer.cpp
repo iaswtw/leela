@@ -75,6 +75,7 @@ void MonthLabelsRenderer::_renderLabels(GlslProgram& glslProgram, bool isPre)
                 if (projected.z < 1.0f)
                 {
                     g_universe->RenderText(
+                        glslProgram,
                         RenderTextType_ScreenText,
                         monthNames[i].c_str(),
                         projected.x,
@@ -91,6 +92,9 @@ void MonthLabelsRenderer::_renderLabels(GlslProgram& glslProgram, bool isPre)
 
 void MonthLabelsRenderer::renderPre(GlslProgram& glslProgram)
 {
+    // Labels that are allowed to hide under other objects should be written before the objects.
+    // This is because all labels, regardless of what object they are for, are written at a
+    // very shallow depth.
     if (glslProgram.type() == GlslProgramType_Font)
     {
         _renderLabels(glslProgram, true);

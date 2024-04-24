@@ -54,7 +54,9 @@
       <Filter>Components</Filter>
     </ClCompile>
     <ClCompile Include="Components\CityBookmark.cpp" />
-    <ClCompile Include="Components\LatLonRenderer.cpp" />
+    <ClCompile Include="Components\LatLonRenderer.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Class.h" />

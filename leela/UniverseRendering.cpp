@@ -94,180 +94,78 @@ void Universe::render()
     //=====================================================================================
     // Render all objects in the scene
     //=====================================================================================
-    renderAllNontransparentObjects();
+    for (auto stage : { RenderStage_Pre,
+                        RenderStage_Main,
+                        RenderStage_Post,
+                        RenderStage_Translucent_Main,
+                        RenderStage_Final }
+                        // add stages here if new items are added to RenderStage enum
+    )
+    {
+        for (GlslProgram* prog : shaderPrograms)
+        {
+            prog->use();
 
-    // Objects with alpha < 1.0 have to be rendered after all objects with alpha = 1.0
-    // It still doesn't solve all problems.
-    renderAllTransparentObjects();
+            if (prog->type() == GlslProgramType_Font)
+            {
+                glm::mat4 projection = glm::ortho(0.0f, float(curWidth), 0.0f, float(curHeight));
+                prog->setMat4("projection", glm::value_ptr(projection));
+            }
+            else if (prog->type() == GlslProgramType_Planet)
+            {
 
-    renderLabels();
+                prog->setMat4("view", glm::value_ptr(viewMatrix));
+                prog->setMat4("proj", glm::value_ptr(projectionMatrix));
+
+                // turn usage of texture on/off based on global setting. Individual spheres might change this
+                // depending on whether they have texture set up.
+                prog->setBool("useTexture", bRealisticSurfaces);
+
+                prog->setVec3("sunCenterTransformed", glm::value_ptr(sun->getModelTransformedCenter()));
+                prog->setFloat("sunRadius", sun->getRadius());
+                prog->setBool("realisticShading", bRealisticShading);
+            }
+            else if (prog->type() == GlslProgramType_Star)
+            {
+                prog->setMat4("view", glm::value_ptr(viewMatrix));
+                prog->setMat4("proj", glm::value_ptr(projectionMatrix));
+            }
+            else if (prog->type() == GlslProgramType_Sun)
+            {
+                prog->setMat4("view", glm::value_ptr(viewMatrix));
+                prog->setMat4("proj", glm::value_ptr(projectionMatrix));
+                prog->setBool("useTexture", bRealisticSurfaces);
+            }
+            else if (prog->type() == GlslProgramType_Simple)
+            {
+                prog->setMat4("view", glm::value_ptr(viewMatrix));
+                prog->setMat4("proj", glm::value_ptr(projectionMatrix));
+            }
+            else if (prog->type() == GlslProgramType_BookmarkSphere)
+            {
+                glm::mat4 projection = glm::ortho(0.0f, float(curWidth), 0.0f, float(curHeight));
+                prog->setMat4("projection", glm::value_ptr(projection));
+            }
+
+            //------------------------------------------------------
+
+            if (stage == RenderStage_Translucent_Main) {
+                glEnable(GL_BLEND);
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            }
+
+            renderSceneUsingGlslProgram(*prog, stage);
+
+            if (stage == RenderStage_Translucent_Main)
+                glDisable(GL_BLEND);
+
+            //------------------------------------------------------
+
+            prog->unuse();
+        }
+    }
 
     glBindVertexArray(0);
-
-}
-
-void Universe::renderAllNontransparentObjects()
-{
-
-    //---------------------------------
-    // Pre stage
-    //---------------------------------
-
-    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    // Labels that are allowed to hide under other objects should be written before the objects.
-    // This is because all labels, regardless of what object they are for, are written at a
-    // very shallow depth.
-
-    fontGlslProgram->use();
-    glm::mat4 projection = glm::ortho(0.0f, float(curWidth), 0.0f, float(curHeight));
-    fontGlslProgram->setMat4("projection", glm::value_ptr(projection));
-
-    renderSceneUsingGlslProgram(*fontGlslProgram, RenderStage_Pre);
-
-    fontGlslProgram->unuse();
-
-
-    //---------------------------------
-    // Main stage
-    //---------------------------------
-
-    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
-    planetGlslProgram->use();
-    planetGlslProgram->setMat4("view", glm::value_ptr(viewMatrix));
-    planetGlslProgram->setMat4("proj", glm::value_ptr(projectionMatrix));
-
-    // turn usage of texture on/off based on global setting. Individual spheres might change this
-    // depending on whether they have texture set up.
-    planetGlslProgram->setBool("useTexture", bRealisticSurfaces);
-
-    planetGlslProgram->setVec3("sunCenterTransformed", glm::value_ptr(sun->getModelTransformedCenter()));
-    planetGlslProgram->setFloat("sunRadius", sun->getRadius());
-    planetGlslProgram->setBool("realisticShading", bRealisticShading);
-
-    renderSceneUsingGlslProgram(*planetGlslProgram, RenderStage_Main);
-
-    planetGlslProgram->unuse();
-
-    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-    starGlslProgram->use();
-    printGlError();
-    starGlslProgram->setMat4("view", glm::value_ptr(viewMatrix));
-    starGlslProgram->setMat4("proj", glm::value_ptr(projectionMatrix));
-
-    renderSceneUsingGlslProgram(*starGlslProgram, RenderStage_Main);
-
-    starGlslProgram->unuse();
-
-    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-    sunGlslProgram->use();
-    sunGlslProgram->setMat4("view", glm::value_ptr(viewMatrix));
-    sunGlslProgram->setMat4("proj", glm::value_ptr(projectionMatrix));
-    sunGlslProgram->setBool("useTexture", bRealisticSurfaces);
-
-    renderSceneUsingGlslProgram(*sunGlslProgram, RenderStage_Main);
-
-    sunGlslProgram->unuse();
-
-    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-    simpleGlslProgram->use();
-    simpleGlslProgram->setMat4("view", glm::value_ptr(viewMatrix));
-    simpleGlslProgram->setMat4("proj", glm::value_ptr(projectionMatrix));
-
-    renderSceneUsingGlslProgram(*simpleGlslProgram, RenderStage_Main);
-
-    simpleGlslProgram->unuse();
-
-    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-    bookmarkGlslProgram->use();
-    projection = glm::ortho(0.0f, float(curWidth), 0.0f, float(curHeight));
-    bookmarkGlslProgram->setMat4("projection", glm::value_ptr(projection));
-
-    renderSceneUsingGlslProgram(*bookmarkGlslProgram, RenderStage_Main);
-
-    bookmarkGlslProgram->unuse();
-
-    //---------------------------------
-    // Post stage
-    //---------------------------------
-
-    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    // For labels "on top"
-
-    fontGlslProgram->use();
-    projection = glm::ortho(0.0f, float(curWidth), 0.0f, float(curHeight));
-    fontGlslProgram->setMat4("projection", glm::value_ptr(projection));
-
-    renderSceneUsingGlslProgram(*fontGlslProgram, RenderStage_Post);
-
-    fontGlslProgram->unuse();
-
-
-
-    
-}
-
-void Universe::renderAllTransparentObjects()
-{
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    
-    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-    planetGlslProgram->use();
-    planetGlslProgram->setMat4("view", glm::value_ptr(viewMatrix));
-    planetGlslProgram->setMat4("proj", glm::value_ptr(projectionMatrix));
-
-    // turn usage of texture on/off based on global setting. Individual spheres might change this
-    // depending on whether they have texture set up.
-    planetGlslProgram->setBool("useTexture", bRealisticSurfaces);
-
-    planetGlslProgram->setVec3("sunCenterTransformed", glm::value_ptr(sun->getModelTransformedCenter()));
-    planetGlslProgram->setFloat("sunRadius", sun->getRadius());
-    planetGlslProgram->setBool("realisticShading", bRealisticShading);
-
-    renderSceneUsingGlslProgram(*planetGlslProgram, RenderStage_Post);
-
-    planetGlslProgram->unuse();
-
-    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-    simpleGlslProgram->use();
-    simpleGlslProgram->setMat4("view", glm::value_ptr(viewMatrix));
-    simpleGlslProgram->setMat4("proj", glm::value_ptr(projectionMatrix));
-
-    renderSceneUsingGlslProgram(*simpleGlslProgram, RenderStage_Translucent_Main);
-
-    simpleGlslProgram->unuse();
-
-
-    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-    glDisable(GL_BLEND);
-
-
-}
-
-
-void Universe::renderLabels()
-{
-    glm::mat4 projection;
-
-    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-    fontGlslProgram->use();
-    projection = glm::ortho(0.0f, float(curWidth), 0.0f, float(curHeight));
-    fontGlslProgram->setMat4("projection", glm::value_ptr(projection));
-
-    renderSceneUsingGlslProgram(*fontGlslProgram, RenderStage_Final);
-
-    fontGlslProgram->unuse();
-
-    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 }
 
@@ -298,9 +196,9 @@ void Universe::renderSceneObjectUsingGlslProgram(SceneObject * sceneObject, Glsl
 
 // prerequisites: fontGlslProgram must be active before calling this method.
 
-void Universe::RenderText(RenderTextType renderType, std::string text, float x, float y, float z, float scale, glm::vec3 color)
+void Universe::RenderText(GlslProgram& glslProgram, RenderTextType renderType, std::string text, float x, float y, float z, float scale, glm::vec3 color)
 {
-    fontGlslProgram->setVec3("textColor", glm::value_ptr(color));
+    glslProgram.setVec3("textColor", glm::value_ptr(color));
 
     GLboolean curDepthMaskEnable;
     GLboolean prevBlendEnable;
