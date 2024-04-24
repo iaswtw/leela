@@ -1,4 +1,4 @@
-#include "CityBookmark.h"
+#include "Bookmark.h"
 #include "SphericalBody.h"
 
 void Bookmark::parentChanged()

@@ -4,7 +4,7 @@
 #include "Renderer.h"
 #include "GlslProgram.h"
 #include <vector>
-#include "CityBookmark.h"
+#include "Bookmark.h"
 
 class BookmarkRenderer : public Renderer
 {
