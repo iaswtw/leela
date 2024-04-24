@@ -178,16 +178,18 @@ void Universe::renderSceneUsingGlslProgram(GlslProgram& glslProgram, RenderStage
 
 void Universe::renderSceneObjectUsingGlslProgram(SceneObject * sceneObject, GlslProgram& glslProgram, RenderStage stage)
 {
-    for (Component* c : sceneObject->_components)
-    {
-        Renderer * r = dynamic_cast<Renderer*>(c);
-        if (r != nullptr)
-            r->render(glslProgram, stage);
-    }
+    if (!sceneObject->hidden()) {
+        for (Component* c : sceneObject->_components)
+        {
+            Renderer* r = dynamic_cast<Renderer*>(c);
+            if (r != nullptr)
+                r->render(glslProgram, stage);
+        }
 
-    for (SceneObject * obj : sceneObject->_childSceneObjects)
-    {
-        renderSceneObjectUsingGlslProgram(obj, glslProgram, stage);
+        for (SceneObject* obj : sceneObject->_childSceneObjects)
+        {
+            renderSceneObjectUsingGlslProgram(obj, glslProgram, stage);
+        }
     }
 }
 
@@ -1050,7 +1052,7 @@ void Universe::generateImGuiWidgets()
             ImGui::PopFont();
 
             ImGui::Indent();
-            SmallCheckbox("Show body", &moonRenderer->bShowBody);
+            SmallCheckbox("Hide", &moon->_hidden);
             SmallCheckbox("Revolution", &moon->bRevolutionMotion);  ImGui::SameLine();
             SmallCheckbox("Sync with Earth", &moon->bOrbitalRevolutionSyncToParent);
             SmallCheckbox("Orbit## moon", &moonRenderer->bShowOrbit); ImGui::SameLine();
