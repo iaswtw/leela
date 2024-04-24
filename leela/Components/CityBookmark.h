@@ -17,6 +17,7 @@ public:
 	void set(std::string label, float lat, float lon)
 	{
 		_label = label; _lat = lat; _lon = lon;
+		_name = _label;		// label is the name of this scene object
 	}
 
 

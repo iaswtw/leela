@@ -59,6 +59,7 @@ public:
     void setNightColorDarkness(NightColorDarkness darkness);
 	void setPolygonCountLevel(std::string polygonCountLevel);
     void constructRotationAxis();
+    void constructLongRotationAxis();
     void constructVerticesAndSendToGpu();
     virtual void doShaderConfig(GlslProgram& glslProgram) {}
 
@@ -92,6 +93,8 @@ public:
     GLuint _orbitVbo = 0;
     GLuint _rotationAxisVao;
     GLuint _rotationAxisVbo;
+    GLuint _longRotationAxisVao;
+    GLuint _longRotationAxisVbo;
     GLuint _texture;
     GLuint _texture2;
     GLuint _orbitalPlaneVao = 0;
@@ -103,13 +106,14 @@ public:
     size_t numMainSphereElements = 0;
     size_t numOrbitVertices = 0;
     size_t numRotationAxisVertices = 0;
+    size_t numLongRotationAxisVertices = 0;
     size_t numOrbitalPlaneVertices = 0;
     size_t numOrbitalPlaneGridVertices = 0;
 
 	PolygonCountLevel _polygonCountLevel = PolygonCountLevel_Low;
     NightColorDarkness _nightColorDarkness = NightColorDarkness_VeryHigh;
     float _nightColorMultiplier;
-
+    bool bLongAxis = false;         // if true, draw ridiculously long axis from north and south pole
 
     bool _bIsLightSource = false;
     std::string _textureFilename;
@@ -134,6 +138,7 @@ public:
 	void renderOrbitalPlane(GlslProgram& glslProgram);
 	void renderOrbit(GlslProgram& glslProgram);
     void renderRotationAxis(GlslProgram& glslProgram);
+    void renderLongRotationAxis(GlslProgram& glslProgram);
 
 };
 
