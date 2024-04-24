@@ -97,6 +97,7 @@ public:
     glm::vec3 _color = { 1.0f, 1.0f, 1.0f };
     //glm::vec3 _orbitalPlaneColor = glm::vec3(1.0, 1.0, 1.0);
 
+    bool bShowCityBookmarks = false;
 
     // Rotation variables
     float _radius = 0;                      // radius of sphere
