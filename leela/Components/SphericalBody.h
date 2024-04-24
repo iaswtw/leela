@@ -50,6 +50,7 @@ public:
 
     virtual void parentChanged();
 
+    void setColor(glm::vec3 color)                          { _r = color.r; _g = color.g; _b = color.b; _color = color; }
     void setColor(float r, float g, float b)                { _r = r; _g = g; _b = b; _color = glm::vec3(r, g, b); }
     void setName(std::string name)                          { _name = name; }
     //void setOrbitalPlaneColor(glm::vec3 orbitalPlaneColor)  { _orbitalPlaneColor = orbitalPlaneColor; }

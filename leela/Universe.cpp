@@ -177,6 +177,7 @@ void Universe::initSceneObjectsAndComponents()
                                  glm::radians(pi.nodalPrecessionInitialAngle),
                                  glm::radians(pi.orbitalPlaneTiltAngle)
         );
+        sb->setColor(pi.color);
 
         // set related object.  Only 1 related object is supported at the moment.
         for (std::string relatedObjName : pi.relatedObjectNames)
@@ -1308,6 +1309,8 @@ void Universe::clearAllFirFilters()
  */
 void Universe::navigate(float __throttle, float __yaw, float __pitch, float __roll)
 {
+    bool bApplyThrottle = false;
+
     if (lockTarget == nullptr)
     {
         // Finally, Apply the motion value.
@@ -1336,18 +1339,30 @@ void Universe::navigate(float __throttle, float __yaw, float __pitch, float __ro
     }
     else
     {
-        // TODO - don't allow navigating into in a object.
-        if ((lockMode == TargetLockMode_OrientedViewTarget) || (lockMode == TargetLockMode_FollowTarget)) {
-            if (__throttle != 0.0f) {
-                followDistance -= __throttle;
-            }
-        }
-        else
-        {
-            if (__throttle != 0.0f)
-                space.moveFrame(Movement_Forward, __throttle);
+        // don't allow navigating into in a object using throttle.
+        float distSC = glm::distance(lockTarget->getCenter(), space.S.toVec3());          // distance from camera to center of lock target
+
+        if ((__throttle < 0) ||                                                         // moving away from the object.
+            ((__throttle > 0) && (distSC > (1 + __throttle + lockTarget->_radius)))) {      // moving towards object, and we won't cross into the object if we did.
+            bApplyThrottle = true;
         }
 
+        if (bApplyThrottle) {
+
+            if ((lockMode == TargetLockMode_OrientedViewTarget) || (lockMode == TargetLockMode_FollowTarget)) {
+                if (__throttle != 0.0f) {
+                    followDistance -= __throttle;
+                }
+            }
+            else
+            {
+                if (__throttle != 0.0f)
+                    space.moveFrame(Movement_Forward, __throttle);
+            }
+        }
+
+        // TODO: prevent navigating into the object using using sideways mode or D-mode rotation
+        
         // rotate frame about the target's center.
         if ((__yaw != 0.0f) || (__pitch != 0.0f)) {
             float horizontalAngle = -__yaw * 3.0f;
