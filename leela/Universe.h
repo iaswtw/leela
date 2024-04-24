@@ -221,12 +221,9 @@ public:
     void processFlags();
     void navigate(float __throttle, float __yaw, float __pitch, float __roll);
     void render();
-    void renderAllNontransparentObjects();
-    void renderAllTransparentObjects();
-    void renderLabels();
     void renderSceneUsingGlslProgram(GlslProgram& glslProgram, RenderStage stage);
     void renderSceneObjectUsingGlslProgram(SceneObject* sceneObject, GlslProgram& glslProgram, RenderStage stage);
-    void RenderText(RenderTextType renderType, std::string text, float x, float y, float z, float scale, glm::vec3 color);
+    void RenderText(GlslProgram& glslProgram, RenderTextType renderType, std::string text, float x, float y, float z, float scale, glm::vec3 color);
 
     void constructFontInfrastructureAndSendToGpu();
 
@@ -477,12 +474,7 @@ public:
     std::vector<float> twoPixelWideStarVertices;
     std::vector<float> gstarVertices;
 
-    GlslProgram* planetGlslProgram = nullptr;
-    GlslProgram* sunGlslProgram = nullptr;
-    GlslProgram* starGlslProgram = nullptr;
-    GlslProgram* simpleGlslProgram = nullptr;
-    GlslProgram* fontGlslProgram = nullptr;
-    GlslProgram* bookmarkGlslProgram = nullptr;
+    std::vector<GlslProgram*> shaderPrograms;
 
     // Realistic day/night shading, shadow shading.
     // Effect on day & nights:

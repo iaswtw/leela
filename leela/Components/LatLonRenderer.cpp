@@ -40,12 +40,16 @@ void LatLonRenderer::constructLatitudesAndLongitudeVertices()
     float inc = float(2 * float(M_PI)) / polygonIncrement;
     float c_a = 0.4f;       // color alpha
     float c_a2 = 0.8;       // color alpha for special lat/lon
+    float cMult;
 
     //---------------------------------------------------------------------------------
     // Longitudes
     //---------------------------------------------------------------------------------
-    for (float alpha_deg = 0.0f; alpha_deg < 360.0f; alpha_deg += 10.0f)
+    for (float alpha_deg = 10.0f; alpha_deg < 360.0f; alpha_deg += 10.0f)
     {
+        if (alpha_deg == 180.0f)
+            continue;
+
         float alpha = glm::radians(alpha_deg);
 
         for (float theta = 0; theta < float(2 * float(M_PI)); theta += inc)
@@ -53,7 +57,6 @@ void LatLonRenderer::constructLatitudesAndLongitudeVertices()
             auto [x1, y1, z1, N1, texX1, texY1] = CalcPointOnSphere(1.001f * s._radius, alpha, theta);
             auto [x2, y2, z2, N2, texX2, texY2] = CalcPointOnSphere(1.001f * s._radius, alpha, theta + inc);
 
-            float cMult;
             if (alpha == 0.0f)
                 cMult = 1.0f;
             else
@@ -67,9 +70,12 @@ void LatLonRenderer::constructLatitudesAndLongitudeVertices()
     //---------------------------------------------------------------------------------
     // Latitudes
     //---------------------------------------------------------------------------------
-    for (float thetas = 0; thetas < 180; thetas += 10)
+    for (float theta_deg = 0; theta_deg < 180; theta_deg += 10.0f)
     {
-        float theta = glm::radians(thetas);
+        if (theta_deg == 90.0f)
+            continue;
+
+        float theta = glm::radians(theta_deg);
         float cMult = 0.7f;
 
         for (float alpha = 0; alpha < float(2 * M_PI); alpha += inc)
@@ -136,7 +142,7 @@ void LatLonRenderer::constructSpecialLatitudesAndLongitudeVertices()
     //---------------------------------------------------------------------------------
     // Special Longitudes
     //---------------------------------------------------------------------------------
-    std::list<float> alpha_degs = { 0 };
+    std::list<float> alpha_degs = { 0, 180.0f };
 
     for (float alpha_deg : alpha_degs)
     {
@@ -245,6 +251,8 @@ void LatLonRenderer::renderLatitudeAndLongitudes(GlslProgram& glslProgram)
 
             glslProgram.setMat4("model", glm::value_ptr(s.getTransform()));
 
+            glEnable(GL_BLEND);
+
             //---------------------------------------------
             // Regular lat/lon
             glBindVertexArray(_latAndLongVao);
@@ -260,6 +268,9 @@ void LatLonRenderer::renderLatitudeAndLongitudes(GlslProgram& glslProgram)
             glDrawArrays(GL_LINES, 0, (GLsizei)numSpecialLatAndLongVertices);
 
             glLineWidth(1);
+
+
+            glDisable(GL_BLEND);
         }
     }
 }

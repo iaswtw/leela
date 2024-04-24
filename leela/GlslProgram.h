@@ -55,6 +55,3 @@ private:
 	GlslProgramType _type;
 };
 
-
-
-
