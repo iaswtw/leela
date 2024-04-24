@@ -45,11 +45,15 @@ public:
     static SceneObject* getSceneObjectByName(SceneObject* obj, std::string name);
     Component* getComponentByName(std::string name);
 
+    bool hidden();
+    void setHidden(bool hide = true);
+
 public:
 
     std::vector<SceneObject*> _childSceneObjects;
     std::vector<Component*> _components;					// components of this scene object
 
+    bool _hidden = false;                           // if hidden, none of its components will be processed.
     SceneObject * _sceneParent = nullptr;
     std::string _name;
 };

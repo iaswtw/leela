@@ -89,3 +89,14 @@ Component* SceneObject::getComponentByName(std::string name)
     return nullptr;
 }
 
+bool SceneObject::hidden()
+{
+    return _hidden;
+}
+
+// set to hidden if `hide` is true.
+void SceneObject::setHidden(bool hide)
+{
+    _hidden = hide;
+}
+
