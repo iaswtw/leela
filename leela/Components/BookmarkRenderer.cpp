@@ -151,7 +151,7 @@ void BookmarkRenderer::renderMain(GlslProgram& glslProgram)
 {
     if (glslProgram.type() == GlslProgramType_BookmarkSphere)
     {
-        if (g_universe->bShowCityBookmarks)
+        if (_bookmark->_sphericalBody->bShowCityBookmarks)
             _renderBookmarkSpheres(glslProgram);
     }
 }
@@ -160,7 +160,7 @@ void BookmarkRenderer::renderFinal(GlslProgram& glslProgram)
 {
     if (glslProgram.type() == GlslProgramType_Font)
     {
-        if (g_universe->bShowCityBookmarks)
+        if (_bookmark->_sphericalBody->bShowCityBookmarks)
             _renderBookmarks(glslProgram);
     }
 }

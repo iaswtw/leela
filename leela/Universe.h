@@ -413,7 +413,6 @@ public:
     float surfaceLockAlpha = 0.0f;      // don't intend to use this. Don't see enough value.
 
     bool bSimulationPause = false;
-    bool bShowCityBookmarks = true;
 
     USimulationSpeedType eSimulationSpeed;
     UTimeDirectionType eTimeDirection;
