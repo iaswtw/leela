@@ -47,15 +47,19 @@
     <ClCompile Include="components\StarsRenderer.cpp">
       <Filter>Components</Filter>
     </ClCompile>
-    <ClCompile Include="Components\SphericalBody.cpp" />
     <ClCompile Include="SceneObject.cpp" />
     <ClCompile Include="TessellationHelper.cpp" />
     <ClCompile Include="Components\SphericalBodyRenderer.cpp">
       <Filter>Components</Filter>
     </ClCompile>
-    <ClCompile Include="Components\CityBookmark.cpp" />
     <ClCompile Include="Components\LatLonRenderer.cpp">
       <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneObjects\Bookmark.cpp">
+      <Filter>SceneObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneObjects\SphericalBody.cpp">
+      <Filter>SceneObjects</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -111,9 +115,6 @@
       <Filter>Components</Filter>
     </ClInclude>
     <ClInclude Include="UniverseMinimal.h" />
-    <ClInclude Include="components\SimpleSphere.h">
-      <Filter>Components</Filter>
-    </ClInclude>
     <ClInclude Include="components\SimpleSphereRenderer.h">
       <Filter>Components</Filter>
     </ClInclude>
@@ -122,17 +123,22 @@
     </ClInclude>
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Component.h" />
-    <ClInclude Include="components\CityBookmark.h" />
     <ClInclude Include="TessellationHelper.h" />
-    <ClInclude Include="Components\SphericalBody.h">
-      <Filter>Components</Filter>
-    </ClInclude>
     <ClInclude Include="Components\SphericalBodyRenderer.h">
       <Filter>Components</Filter>
     </ClInclude>
     <ClInclude Include="Elements.h" />
     <ClInclude Include="Components\LatLonRenderer.h">
       <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneObjects\Bookmark.h">
+      <Filter>SceneObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneObjects\SimpleSphere.h">
+      <Filter>SceneObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneObjects\SphericalBody.h">
+      <Filter>SceneObjects</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

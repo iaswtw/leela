@@ -114,7 +114,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\external\SDL2-2.30.1\include;$(ProjectDir)..\external\glm-0.9.9.5;$(ProjectDir)..\external\glew-2.1.0\include;$(ProjectDir)imgui;$(ProjectDir)..\external\FreeType\include;$(ProjectDir)..\external\spdlog-1.13.0\include;$(ProjectDir)components;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\external\SDL2-2.30.1\include;$(ProjectDir)..\external\glm-0.9.9.5;$(ProjectDir)..\external\glew-2.1.0\include;$(ProjectDir)imgui;$(ProjectDir)..\external\FreeType\include;$(ProjectDir)..\external\spdlog-1.13.0\include;$(ProjectDir)Components;$(ProjectDir)SceneObjects;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -161,7 +161,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\external\SDL2-2.30.1\include;$(ProjectDir)..\external\glm-0.9.9.5;$(ProjectDir)..\external\glew-2.1.0\include;$(ProjectDir)imgui;$(ProjectDir)..\external\FreeType\include;$(ProjectDir)..\external\spdlog-1.13.0\include;$(ProjectDir)components;$(ProjectDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\external\SDL2-2.30.1\include;$(ProjectDir)..\external\glm-0.9.9.5;$(ProjectDir)..\external\glew-2.1.0\include;$(ProjectDir)imgui;$(ProjectDir)..\external\FreeType\include;$(ProjectDir)..\external\spdlog-1.13.0\include;$(ProjectDir)Components;$(ProjectDir)SceneObjects;$(ProjectDir)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -178,13 +178,10 @@
     <ClInclude Include="Class.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="components\BookmarkRenderer.h" />
-    <ClInclude Include="components\CityBookmark.h" />
     <ClInclude Include="components\CoordinateAxisRenderer.h" />
     <ClInclude Include="Components\LatLonRenderer.h" />
     <ClInclude Include="components\MonthLabelsRenderer.h" />
-    <ClInclude Include="components\SimpleSphere.h" />
     <ClInclude Include="components\SimpleSphereRenderer.h" />
-    <ClInclude Include="Components\SphericalBody.h" />
     <ClInclude Include="Components\SphericalBodyRenderer.h" />
     <ClInclude Include="components\StarsRenderer.h" />
     <ClInclude Include="Elements.h" />
@@ -205,7 +202,10 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="SceneObject.h" />
+    <ClInclude Include="SceneObjects\Bookmark.h" />
     <ClInclude Include="SceneObjects\CoordinateAxis.h" />
+    <ClInclude Include="SceneObjects\SimpleSphere.h" />
+    <ClInclude Include="SceneObjects\SphericalBody.h" />
     <ClInclude Include="Space.h" />
     <ClInclude Include="Stars.h" />
     <ClInclude Include="stbi_image.h" />
@@ -218,12 +218,10 @@
   <ItemGroup>
     <ClCompile Include="Class.cpp" />
     <ClCompile Include="components\BookmarkRenderer.cpp" />
-    <ClCompile Include="Components\CityBookmark.cpp" />
     <ClCompile Include="components\CoordinateAxisRenderer.cpp" />
     <ClCompile Include="Components\LatLonRenderer.cpp" />
     <ClCompile Include="components\MonthLabelsRenderer.cpp" />
     <ClCompile Include="components\SimpleSphereRenderer.cpp" />
-    <ClCompile Include="Components\SphericalBody.cpp" />
     <ClCompile Include="Components\SphericalBodyRenderer.cpp" />
     <ClCompile Include="components\StarsRenderer.cpp" />
     <ClCompile Include="GlslProgram.cpp" />
@@ -243,6 +241,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="SceneObject.cpp" />
+    <ClCompile Include="SceneObjects\Bookmark.cpp" />
+    <ClCompile Include="SceneObjects\SphericalBody.cpp" />
     <ClCompile Include="TessellationHelper.cpp" />
     <ClCompile Include="Universe.cpp" />
     <ClCompile Include="UniverseDemo.cpp" />
