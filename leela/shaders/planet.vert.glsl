@@ -298,6 +298,8 @@ void main()
         }
     } while (false);
     
+    darknessFactor = pow(darknessFactor, 0.6);
+    
     // apply all 3 transformations to the original point
     gl_Position = proj * view * model * vec4(position, 1.0);
     Color = in_color;

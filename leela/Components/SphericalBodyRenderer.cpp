@@ -233,6 +233,9 @@ void SphericalBodyRenderer::setNightColorDarkness(NightColorDarkness darkness)
     case NightColorDarkness_VeryLow:    _nightColorMultiplier = 0.8f;   break;
     case NightColorDarkness_None:       _nightColorMultiplier = 1.0f;   break;
     }
+
+    _nightColorMultiplier = pow(_nightColorMultiplier, 1.5);
+
 }
 
 void SphericalBodyRenderer::setPolygonCountLevel(std::string polygonCountLevel)
@@ -974,7 +977,7 @@ float SphericalBodyRenderer::_getPolygonIncrement()
 	case PolygonCountLevel_Low:
 		return 100.0;
 	case PolygonCountLevel_Medium:
-		return 500.0;
+		return 600.0;
 	case PolygonCountLevel_High:
 		return 1000.0;
     default:
