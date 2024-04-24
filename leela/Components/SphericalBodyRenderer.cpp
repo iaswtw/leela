@@ -613,10 +613,9 @@ void SphericalBodyRenderer::constructRotationAxis()
     float alpha_inc = float(2 * M_PI) / polygonIncrement;
     
     alpha_inc = alpha_inc * 10;
-
-    float axisLengthMultipler = 1.3f;               // multiply to sphere's radius
+    
+    float axisLengthMultipler = 1.3f;   // multiply to sphere's radius to get the extent of axis above the poles
     float axisCylinderDiameterMultiplier = 0.015f;
-    //float axisLengthMultipler = 1000.0f;          // multiply to sphere's radius
 
     float alpha;
     for (alpha = 0; alpha < float(2 * M_PI); alpha += alpha_inc)
@@ -716,6 +715,61 @@ void SphericalBodyRenderer::constructRotationAxis()
     numRotationAxisVertices = v->size() / PLANET_STRIDE_IN_VBO;
     delete v;
 }
+
+
+void SphericalBodyRenderer::constructLongRotationAxis()
+{
+    std::vector<float>* v = new std::vector<float>();
+    SphericalBody& s = *_sphere;
+
+    float radius = s._radius;
+    glm::vec3& color = s._color;
+    float r = color.r;
+    float g = color.g;
+    float b = color.b;
+
+    vector_push_back_12(*v, 0.0f, 0.0f,  radius,      r, g, b, 1.0f, 1.0, 0.0f, 0.0f, 0.0f, 0.0f);
+    vector_push_back_12(*v, 0.0f, 0.0f,  radius*1000, r, g, b, 1.0f, 1.0, 0.0f, 0.0f, 0.0f, 0.0f);
+    vector_push_back_12(*v, 0.0f, 0.0f, -radius,      r, g, b, 1.0f, 1.0, 0.0f, 0.0f, 0.0f, 0.0f);
+    vector_push_back_12(*v, 0.0f, 0.0f, -radius*1000, r, g, b, 1.0f, 1.0, 0.0f, 0.0f, 0.0f, 0.0f);
+
+    //----------------------------------------
+
+    if (_longRotationAxisVbo != 0) {
+        glDeleteBuffers(1, &_longRotationAxisVbo);
+    }
+    if (_longRotationAxisVao != 0) {
+        glDeleteVertexArrays(1, &_longRotationAxisVao);
+    }
+
+    glGenVertexArrays(1, &_longRotationAxisVao);
+    glBindVertexArray(_longRotationAxisVao);
+    glGenBuffers(1, &_longRotationAxisVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, _longRotationAxisVbo);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        sizeof(float) * v->size(),
+        v->data(),
+        GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), nullptr);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(7 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(10 * sizeof(float)));
+    glEnableVertexAttribArray(3);
+
+    numLongRotationAxisVertices = v->size() / PLANET_STRIDE_IN_VBO;
+    delete v;
+}
+
+
+
 
 // Construct vertices for various aspects of the sphere such as the sphere surface itself, orbit, latitude/longitudes,
 // orbital plane, etc.
@@ -879,7 +933,6 @@ void SphericalBodyRenderer::constructVerticesAndSendToGpu()
 
     }
 
-
     // Orbital itself
     constructOrbit();
 
@@ -889,6 +942,7 @@ void SphericalBodyRenderer::constructVerticesAndSendToGpu()
 
     // Rotation axis
     constructRotationAxis();
+    constructLongRotationAxis();
 }
 
 // locate and return the complete path of the given texture filename in know texture file locations.
@@ -962,13 +1016,16 @@ void PlanetRenderer::renderMain(GlslProgram& glslProgram)
 
         if (bShowBody)
             renderSphere(glslProgram);
-        if (g_universe->bShowPlanetAxis)
+        if (g_universe->bShowPlanetAxis) {
             renderRotationAxis(glslProgram);
+        }
     }
     else if (glslProgram.type() == GlslProgramType_Simple)
     {
         if (g_universe->bShowOrbitsGlobalEnable)
             renderOrbit(glslProgram);
+        if (g_universe->bShowPlanetAxis)
+            renderLongRotationAxis(glslProgram);
     }
 }
 
@@ -1130,7 +1187,6 @@ void PlanetRenderer::renderRotationAxis(GlslProgram& glslProgram)
 
     if (!s.bIsCenterOfMass)
     {
-
         //glslProgram.setMat4("model", glm::value_ptr(_sphere.getModelMatrix()));
 
         PNT sphereCenter = PNT(s.getCenter());
@@ -1155,12 +1211,25 @@ void PlanetRenderer::renderRotationAxis(GlslProgram& glslProgram)
             glslProgram.setVec3("otherSphereCenterTransformed", glm::value_ptr(s._relatedSphere->getModelTransformedCenter()));
         }
 
-
-
         glslProgram.setBool("useTexture", false);
 
         glBindVertexArray(_rotationAxisVao);
         glDrawArrays(GL_TRIANGLES, 0, (GLsizei) numRotationAxisVertices);
+    }
+}
+
+void PlanetRenderer::renderLongRotationAxis(GlslProgram& glslProgram)
+{
+    SphericalBody& s = *_sphere;
+
+    if (!s.bIsCenterOfMass)
+    {
+        if (bLongAxis)
+        {
+            glslProgram.setMat4("model", glm::value_ptr(s.getTransform()));
+            glBindVertexArray(_longRotationAxisVao);
+            glDrawArrays(GL_LINES, 0, (GLsizei)numLongRotationAxisVertices);
+        }
     }
 }
 

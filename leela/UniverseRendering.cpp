@@ -1020,7 +1020,10 @@ void Universe::generateImGuiWidgets()
             if (ImGui::Button("Reset## earth precession motion"))
                 Earth_PrecessionMotion(UCmdParam_Reset);
             SmallCheckbox("Show latitudes/longituedes## earth", &earthLatLonRenderer->bShowLatitudesAndLongitudes);
-            SmallCheckbox("City labels## earth", &bShowCityBookmarks);
+            SmallCheckbox("City labels## earth", &bShowCityBookmarks); ImGui::SameLine();
+            if (SmallCheckbox("Long axis## earth", &earthRenderer->bLongAxis)) {
+                //earthRenderer->constructRotationAxis();
+            }
             ImGui::PushItemWidth(100);
             if (ImGui::SliderFloat("Orbital Radius## earth", &earth->_orbitalRadius, 500.0f, 4000.0f)) {
                 earthRenderer->constructOrbit();

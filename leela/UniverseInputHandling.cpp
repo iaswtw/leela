@@ -16,6 +16,7 @@ void Universe::onKeyDown(SDL_Event* event)
                 space.setFrameMoveMode(MEDIUM_D_MODE);
         break;
     case SDLK_b:
+        bShowCityBookmarks = !bShowCityBookmarks;
         break;
     case SDLK_c:
         ToggleFollowTarget(sun, TargetLockMode_ViewTarget);
