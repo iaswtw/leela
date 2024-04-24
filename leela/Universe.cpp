@@ -247,10 +247,10 @@ void Universe::initSceneObjectsAndComponents()
             // set related object.  Only 1 related object is supported at the moment.
             for (std::string relatedObjName : pi.relatedObjectNames)
             {
-                SphericalBody* relatedSphere = dynamic_cast<SphericalBody*>(
-                    SceneObject::getSceneObjectByName(&scene, relatedObjName)
-                    );
-
+                SphericalBody* relatedSphere =  dynamic_cast<SphericalBody*>(
+                                                    SceneObject::getSceneObjectByName(&scene, relatedObjName)
+                                                );
+                
                 sb->setRelatedSphere(relatedSphere);
 
                 if (relatedSphere)

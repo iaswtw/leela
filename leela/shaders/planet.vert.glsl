@@ -259,8 +259,8 @@ void main()
         
                     //----------------------------------------------------------------
                     // Apply coloring based on the type of shadow the point is in.
-                    float umbraDarknessFactor = 0.1;
-                    float antumbraDarknessFactor = 0.4;
+                    float umbraDarknessFactor = 0.03;
+                    float antumbraDarknessFactor = 0.3;
                 
     //                float penumbraBaseDarknessFactor = umbraDarknessFactor;
                     float penumbraBaseDarknessFactor = antumbraDarknessFactor;

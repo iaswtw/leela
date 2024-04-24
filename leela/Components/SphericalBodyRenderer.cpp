@@ -234,7 +234,7 @@ void SphericalBodyRenderer::setNightColorDarkness(NightColorDarkness darkness)
     case NightColorDarkness_None:       _nightColorMultiplier = 1.0f;   break;
     }
 
-    _nightColorMultiplier = pow(_nightColorMultiplier, 1.5);
+    _nightColorMultiplier = pow(_nightColorMultiplier, 1.7);
 
 }
 
