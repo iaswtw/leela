@@ -65,7 +65,19 @@ void Universe::constructFontInfrastructureAndSendToGpu()
  */
 void Universe::render()
 {
+    int x, y, w, h;
+
+    glEnable(GL_SCISSOR_TEST);
+
+
+    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    curViewportX = 0;
+    curViewportY = 0;
+    curViewportWidth = curWidth;
+    curViewportHeight = curHeight;
+
     //spdlog::info("Universe::render()");
+    glScissor(curViewportX, curViewportY, curViewportWidth, curViewportHeight);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -84,12 +96,54 @@ void Universe::render()
     //----------------------------------------------
     projectionMatrix = glm::perspective(
         glm::radians(35.0f),
-        float(curWidth) / float(curHeight),
+        float(curViewportWidth) / float(curViewportHeight),
         1.0f,
         10000000.0f);
 
     //spdlog::info("projectionMatrix = {}", glm::to_string(projectionMatrix));
 
+
+    glViewport(curViewportX, curViewportY, curViewportWidth, curViewportHeight);
+    renderAllStages();
+
+    //int maxViewports;
+    //glGetIntegerv(GL_MAX_VIEWPORTS, &maxViewports);
+    //spdlog::info("Max viewports = {}", maxViewports);
+
+    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    curViewportX = 10;
+    curViewportY = 50;
+    curViewportWidth = insetWidth;
+    curViewportHeight = insetHeight;
+
+    glScissor(curViewportX, curViewportY, curViewportWidth, curViewportHeight);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    //viewMatrix = glm::lookAt(
+    //    glm::vec3(0.0, -10000.0, 4000.0),
+    //    glm::vec3(0, 0, 0),
+    //    glm::vec3(0, 500, 0));
+    viewMatrix = glm::lookAt(
+        space.S.translated(10000, VECTOR(space.D, space.S)).toVec3(),
+        glm::vec3(0, 0, 0),
+        space.getUpwardDirectionVector());
+
+    // perspective transformation
+    //----------------------------------------------
+    projectionMatrix = glm::perspective(
+        glm::radians(35.0f),
+        float(curViewportWidth) / float(curViewportHeight),
+        1.0f,
+        10000000.0f);
+
+    glViewport(curViewportX, curViewportY, curViewportWidth, curViewportHeight);
+    renderAllStages();
+
+}
+
+void Universe::renderAllStages()
+{
 
     //=====================================================================================
     // Render all objects in the scene
@@ -99,8 +153,8 @@ void Universe::render()
                         RenderStage_Post,
                         RenderStage_Translucent_Main,
                         RenderStage_Final }
-                        // add stages here if new items are added to RenderStage enum
-    )
+        // add stages here if new items are added to RenderStage enum
+        )
     {
         for (GlslProgram* prog : shaderPrograms)
         {
@@ -108,7 +162,7 @@ void Universe::render()
 
             if (prog->type() == GlslProgramType_Font)
             {
-                glm::mat4 projection = glm::ortho(0.0f, float(curWidth), 0.0f, float(curHeight));
+                glm::mat4 projection = glm::ortho(0.0f, float(curViewportWidth), 0.0f, float(curViewportHeight));
                 prog->setMat4("projection", glm::value_ptr(projection));
             }
             else if (prog->type() == GlslProgramType_Planet)
@@ -143,7 +197,7 @@ void Universe::render()
             }
             else if (prog->type() == GlslProgramType_BookmarkSphere)
             {
-                glm::mat4 projection = glm::ortho(0.0f, float(curWidth), 0.0f, float(curHeight));
+                glm::mat4 projection = glm::ortho(0.0f, float(curViewportWidth), 0.0f, float(curViewportHeight));
                 prog->setMat4("projection", glm::value_ptr(projection));
             }
 
@@ -423,7 +477,9 @@ glm::vec3 Universe::getScreenCoordinates(glm::vec3 scenePoint)
 {
     //spdlog::info("getScreenCoordinates: {}", glm::to_string(scenePoint));
 
-    glm::vec4 viewport(0.0f, 0.0f, float(curWidth), float(curHeight));
+    //glm::vec4 viewport(0.0f, 0.0f, float(curWidth), float(curHeight));
+    //glm::vec4 viewport(0.0f, 0.0f, curViewportWidth, curViewportHeight);
+    glm::vec4 viewport(curViewportX, curViewportY, curViewportWidth, curViewportHeight);
 
     glm::vec3 projected = glm::project(
         scenePoint,
@@ -1019,7 +1075,7 @@ void Universe::generateImGuiWidgets()
             ImGui::SameLine();
             if (ImGui::Button("Reset## earth precession motion"))
                 Earth_PrecessionMotion(UCmdParam_Reset);
-            SmallCheckbox("Show latitudes/longituedes## earth", &earthLatLonRenderer->bShowLatitudesAndLongitudes);
+            SmallCheckbox("Lat/Lon## earth", &earthLatLonRenderer->bShowLatitudesAndLongitudes); ImGui::SameLine();
             SmallCheckbox("City labels (b)## earth", &earth->bShowCityBookmarks); ImGui::SameLine();
             if (SmallCheckbox("Long axis## earth", &earthRenderer->bLongAxis)) {
                 //earthRenderer->constructRotationAxis();
@@ -1102,9 +1158,9 @@ void Universe::generateImGuiWidgets()
             ImGui::PopFont();
 
             ImGui::Indent();
-            SmallCheckbox("Revolution", &mars->bRevolutionMotion);
+            SmallCheckbox("Revolution", &mars->bRevolutionMotion); ImGui::SameLine();
             SmallCheckbox("Orbit## mars", &marsRenderer->bShowOrbit); ImGui::SameLine();
-            SmallCheckbox("Orbital plane (,)##mars", &marsRenderer->bShowOrbitalPlane);
+            SmallCheckbox("Plane (,)##mars", &marsRenderer->bShowOrbitalPlane);
             ImGui::Unindent();
 
             ImGui::Separator();
