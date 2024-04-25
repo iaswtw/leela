@@ -353,3 +353,20 @@ bool Universe::isAllModifiers()
     else
         return false;
 }
+
+void Universe::setInsetSize(int width, int height)
+{
+    insetWidth = width;
+    insetHeight = height;
+
+    insetScale = float(insetSceneWidth) / insetWidth;
+}
+
+
+void Universe::setInsetSceneSize(int width, int height)
+{
+    insetSceneWidth = width;
+    insetSceneHeight = height;
+
+    insetScale = float(insetSceneWidth) / insetWidth;
+}

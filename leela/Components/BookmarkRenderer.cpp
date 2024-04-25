@@ -20,7 +20,12 @@ void BookmarkRenderer::_renderBookmarks(GlslProgram& glslProgram)
     //glm::mat4 combinedMatrix = g_universe->projectionMatrix * g_universe->viewMatrix;
     //glslProgram.setMat4("projection", glm::value_ptr(combinedMatrix));
 
-    glm::mat4 projection = glm::ortho(0.0f, float(g_universe->curWidth), 0.0f, float(g_universe->curHeight));
+    glm::mat4 projection = glm::ortho(float(g_universe->curViewportX),
+                                      float(g_universe->curViewportX + g_universe->curViewportWidth),
+                                      float(g_universe->curViewportY),
+                                      float(g_universe->curViewportY + g_universe->curViewportHeight),
+                                      0.0f,
+                                      100.0f);
     glslProgram.setMat4("projection", glm::value_ptr(projection));
     
 
@@ -64,7 +69,12 @@ void BookmarkRenderer::_renderBookmarks(GlslProgram& glslProgram)
 
 void BookmarkRenderer::_renderBookmarkSpheres(GlslProgram& glslProgram)
 {
-    glm::mat4 projection = glm::ortho(0.0f, float(g_universe->curWidth), 0.0f, float(g_universe->curHeight), 0.1f, 100.0f);
+    glm::mat4 projection = glm::ortho(float(g_universe->curViewportX),
+                                      float(g_universe->curViewportX + g_universe->curViewportWidth),
+                                      float(g_universe->curViewportY),
+                                      float(g_universe->curViewportY + g_universe->curViewportHeight),
+                                      0.0f,
+                                      100.0f);
     glslProgram.setMat4("projection", glm::value_ptr(projection));
 
     glm::vec3 projected;

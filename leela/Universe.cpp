@@ -317,6 +317,12 @@ void Universe::initSceneObjectsAndComponents()
 
     SceneObject::printTree(&scene);
 
+
+    //------------------------------------------------------------------------
+    setInsetSize(400, 300);
+    //setInsetSceneSize(800, 600);
+
+
     glBindVertexArray(0);       // Disable VBO
 
 }

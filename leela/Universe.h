@@ -221,6 +221,7 @@ public:
     void processFlags();
     void navigate(float __throttle, float __yaw, float __pitch, float __roll);
     void render();
+    void renderAllStages();
     void renderSceneUsingGlslProgram(GlslProgram& glslProgram, RenderStage stage);
     void renderSceneObjectUsingGlslProgram(SceneObject* sceneObject, GlslProgram& glslProgram, RenderStage stage);
     void RenderText(GlslProgram& glslProgram, RenderTextType renderType, std::string text, float x, float y, float z, float scale, glm::vec3 color);
@@ -300,6 +301,9 @@ public:
 
     bool isNoModifier();
     bool isAllModifiers();
+
+    void setInsetSize(int width, int height);
+    void setInsetSceneSize(int width, int height);
 
 public:
     bool bQuit = false;
@@ -421,8 +425,22 @@ public:
 
     float angle = 0.0f;
 
+    int curX = 0;
+    int curY = 0;
     int curWidth = 0;
     int curHeight = 0;
+
+    int curViewportX = 0;
+    int curViewportY = 0;
+    int curViewportWidth = 0;
+    int curViewportHeight = 0;
+
+    // width of inset in pixels
+    int insetWidth = 400;
+    int insetHeight = 300;
+    int insetSceneWidth = insetWidth;
+    int insetSceneHeight = insetHeight;
+    float insetScale = insetSceneWidth / insetWidth;
 
 
     // Texture handles

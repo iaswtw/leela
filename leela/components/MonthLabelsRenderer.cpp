@@ -55,7 +55,7 @@ void MonthLabelsRenderer::_renderLabels(GlslProgram& glslProgram, bool isPre)
 
 
             //----- TEMP ------
-            glm::mat4 projection = glm::ortho(0.0f, float(g_universe->curWidth), 0.0f, float(g_universe->curHeight));
+            glm::mat4 projection = glm::ortho(float(g_universe->curViewportX), float(g_universe->curViewportX + g_universe->curViewportWidth), float(g_universe->curViewportY), float(g_universe->curViewportY + g_universe->curViewportHeight));
             glslProgram.setMat4("projection", glm::value_ptr(projection));
             //----- TEMP ------
 
