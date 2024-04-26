@@ -76,12 +76,13 @@ void CoordinateAxisRenderer::_renderAxis(GlslProgram glslProgram)
     }
 }
 
-
-
-void CoordinateAxisRenderer::renderMain(GlslProgram& glslProgram)
+void CoordinateAxisRenderer::render(ViewportType viewportType, RenderStage renderStage, GlslProgram& glslProgram)
 {
-    if (glslProgram.type() == GlslProgramType_Simple)
-    {
-        _renderAxis(glslProgram);
+    if (renderStage == RenderStage::Main) {
+        if (glslProgram.type() == GlslProgramType::Simple) {
+            if (viewportType == ViewportType::Primary || viewportType == ViewportType::Minimap) {
+                _renderAxis(glslProgram);
+            }
+        }
     }
 }

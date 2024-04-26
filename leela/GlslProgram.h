@@ -6,23 +6,23 @@
 
 
 
-typedef enum
+enum class GlslProgramType
 {
-	GlslProgramType_None,
-	GlslProgramType_Font,
-	GlslProgramType_Planet,
-	GlslProgramType_Star,
-	GlslProgramType_Sun,
-	GlslProgramType_Simple,
-	GlslProgramType_BookmarkSphere,
+	None,
+	Font,
+	Planet,
+	Star,
+	Sun,
+	Simple,
+	BookmarkSphere,
 
-} GlslProgramType;
+};
 
 
 class GlslProgram
 {
 public:
-	GlslProgram(GlslProgramType type = GlslProgramType_None);
+	GlslProgram(GlslProgramType type = GlslProgramType::None);
 	~GlslProgram();
 	void printShaderCompileStatus(GLuint shader);
 	void compileShadersFromFile(const char * vertShaderFilenames, const char * fragShaderFilename);

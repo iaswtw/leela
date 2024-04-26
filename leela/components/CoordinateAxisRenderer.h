@@ -14,7 +14,7 @@ public:
 
     void constructVerticesAndSendToGpu();
     void _renderAxis(GlslProgram glslProgram);
-    virtual void renderMain(GlslProgram& glslProgram);
+    virtual void render(ViewportType viewportType, RenderStage renderStage, GlslProgram& glslProgram);
 
     void advance(float stepMultiplier) {}
 

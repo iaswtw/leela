@@ -129,9 +129,7 @@ public:
 	PlanetRenderer(std::string textureFilename = "", std::string textureFilename2 = "");
 	~PlanetRenderer();
 
-    virtual void renderMain(GlslProgram& glslProgram);
-    virtual void renderTranslucentMain(GlslProgram& glslProgram);
-
+    virtual void render(ViewportType viewportType, RenderStage renderStage, GlslProgram& glslProgram);
     virtual void doShaderConfig(GlslProgram& glslProgram);
 
 	void renderSphere(GlslProgram& glslProgram);
@@ -150,7 +148,8 @@ public:
 
     virtual void doShaderConfig(GlslProgram& glslProgram);
 
-    void renderMain(GlslProgram& glslProgram);
+    virtual void render(ViewportType viewportType, RenderStage renderStage, GlslProgram& glslProgram);
+
 	void _renderSphere(GlslProgram& glslProgram);
 
 };

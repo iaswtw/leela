@@ -218,15 +218,6 @@ void LatLonRenderer::constructSpecialLatitudesAndLongitudeVertices()
     delete v;
 }
 
-
-
-void LatLonRenderer::renderPost(GlslProgram& glslProgram)
-{
-    if (glslProgram.type() == GlslProgramType_Planet)
-        renderLatitudeAndLongitudes(glslProgram);
-}
-
-
 void LatLonRenderer::renderLatitudeAndLongitudes(GlslProgram& glslProgram)
 {
     SphericalBody& s = *_sphere;
@@ -274,3 +265,16 @@ void LatLonRenderer::renderLatitudeAndLongitudes(GlslProgram& glslProgram)
         }
     }
 }
+
+
+void LatLonRenderer::render(ViewportType viewportType, RenderStage renderStage, GlslProgram& glslProgram)
+{
+    if (renderStage == RenderStage::Post) {
+        if (glslProgram.type() == GlslProgramType::Planet) {
+            if (viewportType == ViewportType::Primary) {
+                renderLatitudeAndLongitudes(glslProgram);
+            }
+        }
+    }
+}
+

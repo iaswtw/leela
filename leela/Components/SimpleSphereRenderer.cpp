@@ -6,6 +6,8 @@ void SimpleSphereRenderer::init()
 
 }
 
-void SimpleSphereRenderer::renderMain(GlslProgram& glslProgram)
+void SimpleSphereRenderer::render(ViewportType viewportType, RenderStage renderStage, GlslProgram& glslProgram)
 {
 }
+
+

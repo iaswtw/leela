@@ -90,12 +90,12 @@ void Universe::compileShaders()
 
     ShaderProgramInfo shaderProgInfo[] = {
         // program type enum                vertex shader filename           fragment shader filename
-        { GlslProgramType_Planet,           "planet.vert.glsl",               "planet.frag.glsl"                  },
-        { GlslProgramType_Sun,              "sun.vert.glsl",                  "sun.frag.glsl"                     },
-        { GlslProgramType_Star,             "star.vert.glsl",                 "star.frag.glsl"                    },
-        { GlslProgramType_Simple,           "simple.vert.glsl",               "simple.frag.glsl"                  },
-        { GlslProgramType_Font,             "font.vert.glsl",                 "font.frag.glsl"                    },
-        { GlslProgramType_BookmarkSphere,   "bookmark.vert.glsl",             "bookmark.frag.glsl"                }
+        { GlslProgramType::Planet,          "planet.vert.glsl",               "planet.frag.glsl"                  },
+        { GlslProgramType::Sun,             "sun.vert.glsl",                  "sun.frag.glsl"                     },
+        { GlslProgramType::Star,            "star.vert.glsl",                 "star.frag.glsl"                    },
+        { GlslProgramType::Simple,          "simple.vert.glsl",               "simple.frag.glsl"                  },
+        { GlslProgramType::Font,            "font.vert.glsl",                 "font.frag.glsl"                    },
+        { GlslProgramType::BookmarkSphere,  "bookmark.vert.glsl",             "bookmark.frag.glsl"                }
     };
     
     spdlog::info("Compiling all GLSL programs");
