@@ -319,13 +319,22 @@ void Universe::initSceneObjectsAndComponents()
 
 
     //------------------------------------------------------------------------
-    setInsetSize(400, 300);
+    setMinimapWidth(400);
     //setInsetSceneSize(800, 600);
 
 
     glBindVertexArray(0);       // Disable VBO
 
 }
+
+
+void Universe::setMinimapWidth(int width)
+{
+    minimapWidth = width;
+    minimapHeight = int(width / minimapAspectRatio);
+}
+
+
 
 void Universe::printGlError()
 {
