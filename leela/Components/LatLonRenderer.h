@@ -19,8 +19,8 @@ public:
 	void constructLatitudesAndLongitudeVertices();
 	void constructSpecialLatitudesAndLongitudeVertices();
 
-	//virtual void renderMain(GlslProgram& glslProgram);
-	virtual void renderPost(GlslProgram& glslProgram);
+	virtual void render(ViewportType viewportType, RenderStage renderStage, GlslProgram& glslProgram);
+
 	void renderLatitudeAndLongitudes(GlslProgram& glslProgram);
 
 public:

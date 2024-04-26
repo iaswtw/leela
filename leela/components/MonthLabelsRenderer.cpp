@@ -90,21 +90,23 @@ void MonthLabelsRenderer::_renderLabels(GlslProgram& glslProgram, bool isPre)
     }
 }
 
-void MonthLabelsRenderer::renderPre(GlslProgram& glslProgram)
+void MonthLabelsRenderer::render(ViewportType viewportType, RenderStage renderStage, GlslProgram& glslProgram)
 {
-    // Labels that are allowed to hide under other objects should be written before the objects.
-    // This is because all labels, regardless of what object they are for, are written at a
-    // very shallow depth.
-    if (glslProgram.type() == GlslProgramType_Font)
-    {
-        _renderLabels(glslProgram, true);
+    if (renderStage == RenderStage::Pre) {
+        if (glslProgram.type() == GlslProgramType::Font) {
+            if (viewportType == ViewportType::Primary) {
+                // Labels that are allowed to hide under other objects should be written before the objects.
+                // This is because all labels, regardless of what object they are for, are written at a
+                // very shallow depth.
+                _renderLabels(glslProgram, true);
+            }
+        }
     }
-}
-
-void MonthLabelsRenderer::renderPost(GlslProgram& glslProgram)
-{
-    if (glslProgram.type() == GlslProgramType_Font)
-    {
-        _renderLabels(glslProgram, false);
+    else if (renderStage == RenderStage::Post) {
+        if (glslProgram.type() == GlslProgramType::Font) {
+            if (viewportType == ViewportType::Primary) {
+                _renderLabels(glslProgram, false);
+            }
+        }
     }
 }

@@ -2,14 +2,19 @@
 
 // Each shader program is used in each of these stages.
 // Renderers can choose which stage they want to draw.
-typedef enum
+enum class RenderStage
 {
-    RenderStage_Pre,
-    RenderStage_Main,
-    RenderStage_Post,
+    Pre,
+    Main,
+    Post,
+    TranslucentMain,        // Objects with alpha < 1.0 have to be rendered after all objects with alpha = 1.0
+                            // It still doesn't solve all problems.
+    Final,
+} ;
 
-    RenderStage_Translucent_Main,
-
-    RenderStage_Final,
-
-} RenderStage;
+enum class ViewportType
+{
+    Primary,
+    Minimap,
+    AlternateObserver
+};

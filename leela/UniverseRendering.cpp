@@ -65,184 +65,218 @@ void Universe::constructFontInfrastructureAndSendToGpu()
  */
 void Universe::render()
 {
-    int x, y, w, h;
-
-    glEnable(GL_SCISSOR_TEST);
-
-
-    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-    curViewportX = 0;
-    curViewportY = 0;
-    curViewportWidth = curWidth;
-    curViewportHeight = curHeight;
-
-    //spdlog::info("Universe::render()");
-    glScissor(curViewportX, curViewportY, curViewportWidth, curViewportHeight);
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    //=====================================================================================
-    // Create View and projection that remain the same for the entire scene
-    //=====================================================================================
-    // View transformation
-    //----------------------------------------------
-    // Create the initial View matrix
-    viewMatrix = glm::lookAt(
-        space.getSourcePoint(),
-        space.getDirectionPoint(),
-        space.getUpwardDirectionVector());
-
-    // perspective transformation
-    //----------------------------------------------
-    projectionMatrix = glm::perspective(
-        glm::radians(35.0f),
-        float(curViewportWidth) / float(curViewportHeight),
-        1.0f,
-        10000000.0f);
-
-    //spdlog::info("projectionMatrix = {}", glm::to_string(projectionMatrix));
-
-
-    glViewport(curViewportX, curViewportY, curViewportWidth, curViewportHeight);
-    renderAllStages();
-
-    //int maxViewports;
-    //glGetIntegerv(GL_MAX_VIEWPORTS, &maxViewports);
-    //spdlog::info("Max viewports = {}", maxViewports);
-
-    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-    curViewportX = 10;
-    curViewportY = 50;
-    curViewportWidth = insetWidth;
-    curViewportHeight = insetHeight;
-
-    glScissor(curViewportX, curViewportY, curViewportWidth, curViewportHeight);
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    //viewMatrix = glm::lookAt(
-    //    glm::vec3(0.0, -10000.0, 4000.0),
-    //    glm::vec3(0, 0, 0),
-    //    glm::vec3(0, 500, 0));
-    viewMatrix = glm::lookAt(
-        space.S.translated(10000, VECTOR(space.D, space.S)).toVec3(),
-        glm::vec3(0, 0, 0),
-        space.getUpwardDirectionVector());
-
-    // perspective transformation
-    //----------------------------------------------
-    projectionMatrix = glm::perspective(
-        glm::radians(35.0f),
-        float(curViewportWidth) / float(curViewportHeight),
-        1.0f,
-        10000000.0f);
-
-    glViewport(curViewportX, curViewportY, curViewportWidth, curViewportHeight);
-    renderAllStages();
-
+    renderAllViewportTypes();
+    
 }
 
-void Universe::renderAllStages()
+void Universe::renderAllViewportTypes()
+{
+    for (auto viewportType : { ViewportType::Primary,
+                            ViewportType::Minimap,
+                            ViewportType::AlternateObserver }
+        // add scene types here if new items are added to ViewportType enum
+        )
+    {
+        setupViewport(viewportType);
+
+        renderAllStages(viewportType);
+    }
+
+    glBindVertexArray(0);
+}
+
+
+void Universe::renderAllStages(ViewportType viewportType)
 {
 
     //=====================================================================================
     // Render all objects in the scene
     //=====================================================================================
-    for (auto stage : { RenderStage_Pre,
-                        RenderStage_Main,
-                        RenderStage_Post,
-                        RenderStage_Translucent_Main,
-                        RenderStage_Final }
-        // add stages here if new items are added to RenderStage enum
+    for (auto renderStage : {   RenderStage::Pre,
+                                RenderStage::Main,
+                                RenderStage::Post,
+                                RenderStage::TranslucentMain,
+                                RenderStage::Final }
+                                // add stages here if new items are added to RenderStage enum
         )
     {
-        for (GlslProgram* prog : shaderPrograms)
-        {
-            prog->use();
-
-            if (prog->type() == GlslProgramType_Font)
-            {
-                glm::mat4 projection = glm::ortho(0.0f, float(curViewportWidth), 0.0f, float(curViewportHeight));
-                prog->setMat4("projection", glm::value_ptr(projection));
-            }
-            else if (prog->type() == GlslProgramType_Planet)
-            {
-
-                prog->setMat4("view", glm::value_ptr(viewMatrix));
-                prog->setMat4("proj", glm::value_ptr(projectionMatrix));
-
-                // turn usage of texture on/off based on global setting. Individual spheres might change this
-                // depending on whether they have texture set up.
-                prog->setBool("useTexture", bRealisticSurfaces);
-
-                prog->setVec3("sunCenterTransformed", glm::value_ptr(sun->getModelTransformedCenter()));
-                prog->setFloat("sunRadius", sun->getRadius());
-                prog->setBool("realisticShading", bRealisticShading);
-            }
-            else if (prog->type() == GlslProgramType_Star)
-            {
-                prog->setMat4("view", glm::value_ptr(viewMatrix));
-                prog->setMat4("proj", glm::value_ptr(projectionMatrix));
-            }
-            else if (prog->type() == GlslProgramType_Sun)
-            {
-                prog->setMat4("view", glm::value_ptr(viewMatrix));
-                prog->setMat4("proj", glm::value_ptr(projectionMatrix));
-                prog->setBool("useTexture", bRealisticSurfaces);
-            }
-            else if (prog->type() == GlslProgramType_Simple)
-            {
-                prog->setMat4("view", glm::value_ptr(viewMatrix));
-                prog->setMat4("proj", glm::value_ptr(projectionMatrix));
-            }
-            else if (prog->type() == GlslProgramType_BookmarkSphere)
-            {
-                glm::mat4 projection = glm::ortho(0.0f, float(curViewportWidth), 0.0f, float(curViewportHeight));
-                prog->setMat4("projection", glm::value_ptr(projection));
-            }
-
-            //------------------------------------------------------
-
-            if (stage == RenderStage_Translucent_Main) {
-                glEnable(GL_BLEND);
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            }
-
-            renderSceneUsingGlslProgram(*prog, stage);
-
-            if (stage == RenderStage_Translucent_Main)
-                glDisable(GL_BLEND);
-
-            //------------------------------------------------------
-
-            prog->unuse();
-        }
+        renderUsingAllShaderPrograms(viewportType, renderStage);
     }
 
-    glBindVertexArray(0);
+}
 
+void Universe::renderUsingAllShaderPrograms(ViewportType viewportType, RenderStage renderStage)
+{
+    for (GlslProgram* prog : shaderPrograms)
+    {
+        prog->use();
+
+        //---------------------------------------------------------
+        // Configure shader program
+        //---------------------------------------------------------
+        if (prog->type() == GlslProgramType::Font)
+        {
+            glm::mat4 projection = glm::ortho(0.0f, float(curViewportWidth), 0.0f, float(curViewportHeight));
+            prog->setMat4("projection", glm::value_ptr(projection));
+        }
+        else if (prog->type() == GlslProgramType::Planet)
+        {
+
+            prog->setMat4("view", glm::value_ptr(viewMatrix));
+            prog->setMat4("proj", glm::value_ptr(projectionMatrix));
+
+            // turn usage of texture on/off based on global setting. Individual spheres might change this
+            // depending on whether they have texture set up.
+            prog->setBool("useTexture", bRealisticSurfaces);
+
+            prog->setVec3("sunCenterTransformed", glm::value_ptr(sun->getModelTransformedCenter()));
+            prog->setFloat("sunRadius", sun->getRadius());
+            prog->setBool("realisticShading", bRealisticShading);
+        }
+        else if (prog->type() == GlslProgramType::Star)
+        {
+            prog->setMat4("view", glm::value_ptr(viewMatrix));
+            prog->setMat4("proj", glm::value_ptr(projectionMatrix));
+        }
+        else if (prog->type() == GlslProgramType::Sun)
+        {
+            prog->setMat4("view", glm::value_ptr(viewMatrix));
+            prog->setMat4("proj", glm::value_ptr(projectionMatrix));
+            prog->setBool("useTexture", bRealisticSurfaces);
+        }
+        else if (prog->type() == GlslProgramType::Simple)
+        {
+            prog->setMat4("view", glm::value_ptr(viewMatrix));
+            prog->setMat4("proj", glm::value_ptr(projectionMatrix));
+        }
+        else if (prog->type() == GlslProgramType::BookmarkSphere)
+        {
+            glm::mat4 projection = glm::ortho(0.0f, float(curViewportWidth), 0.0f, float(curViewportHeight));
+            prog->setMat4("projection", glm::value_ptr(projection));
+        }
+        //------------------------------------------------------
+
+        if (renderStage == RenderStage::TranslucentMain) {
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        }
+
+        renderSceneUsingGlslProgram(renderStage, *prog, viewportType);
+
+        if (renderStage == RenderStage::TranslucentMain)
+            glDisable(GL_BLEND);
+
+        //------------------------------------------------------
+
+        prog->unuse();
+    }
 }
 
 
-void Universe::renderSceneUsingGlslProgram(GlslProgram& glslProgram, RenderStage stage)
+void Universe::setupViewport(ViewportType viewportType)
+{
+    int x, y, w, h;
+
+    glEnable(GL_SCISSOR_TEST);
+
+    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    if (viewportType == ViewportType::Primary) {
+        curViewportX = 0;
+        curViewportY = 0;
+        curViewportWidth = curWidth;
+        curViewportHeight = curHeight;
+
+        //spdlog::info("Universe::render()");
+        glScissor(curViewportX, curViewportY, curViewportWidth, curViewportHeight);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        //=====================================================================================
+        // Create View and projection that remain the same for the entire scene
+        //=====================================================================================
+        // View transformation
+        //----------------------------------------------
+        // Create the initial View matrix
+        viewMatrix = glm::lookAt(
+            space.getSourcePoint(),
+            space.getDirectionPoint(),
+            space.getUpwardDirectionVector());
+
+        // perspective transformation
+        //----------------------------------------------
+        projectionMatrix = glm::perspective(
+            glm::radians(35.0f),
+            float(curViewportWidth) / float(curViewportHeight),
+            1.0f,
+            10000000.0f);
+
+        //spdlog::info("projectionMatrix = {}", glm::to_string(projectionMatrix));
+
+
+        glViewport(curViewportX, curViewportY, curViewportWidth, curViewportHeight);
+    }
+
+    else if (viewportType == ViewportType::Minimap) {
+
+        //int maxViewports;
+        //glGetIntegerv(GL_MAX_VIEWPORTS, &maxViewports);
+        //spdlog::info("Max viewports = {}", maxViewports);
+
+        //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        curViewportX = 10;
+        curViewportY = 50;
+        curViewportWidth = insetWidth;
+        curViewportHeight = insetHeight;
+
+        glScissor(curViewportX, curViewportY, curViewportWidth, curViewportHeight);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        //viewMatrix = glm::lookAt(
+        //    glm::vec3(0.0, -10000.0, 4000.0),
+        //    glm::vec3(0, 0, 0),
+        //    glm::vec3(0, 500, 0));
+        viewMatrix = glm::lookAt(
+            space.S.translated(10000, VECTOR(space.D, space.S)).toVec3(),
+            glm::vec3(0, 0, 0),
+            space.getUpwardDirectionVector());
+
+        // perspective transformation
+        //----------------------------------------------
+        projectionMatrix = glm::perspective(
+            glm::radians(35.0f),
+            float(curViewportWidth) / float(curViewportHeight),
+            1.0f,
+            10000000.0f);
+
+        glViewport(curViewportX, curViewportY, curViewportWidth, curViewportHeight);
+    }
+
+    else if (viewportType == ViewportType::AlternateObserver) {
+
+    }
+
+}
+
+void Universe::renderSceneUsingGlslProgram(RenderStage renderStage, GlslProgram& glslProgram, ViewportType viewportType)
 {
     //spdlog::info("renderSceneUsingGlslProgram: glslProgram type = {}", (int)glslProgram.type());
-    renderSceneObjectUsingGlslProgram(&scene, glslProgram, stage);
+    renderSceneObjectUsingGlslProgram(&scene, renderStage, glslProgram, viewportType);
 }
 
-void Universe::renderSceneObjectUsingGlslProgram(SceneObject * sceneObject, GlslProgram& glslProgram, RenderStage stage)
+void Universe::renderSceneObjectUsingGlslProgram(SceneObject * sceneObject, RenderStage renderStage, GlslProgram& glslProgram, ViewportType viewportType)
 {
     if (!sceneObject->hidden()) {
         for (Component* c : sceneObject->_components)
         {
             Renderer* r = dynamic_cast<Renderer*>(c);
             if (r != nullptr)
-                r->render(glslProgram, stage);
+                r->render(viewportType, renderStage, glslProgram);
         }
 
         for (SceneObject* obj : sceneObject->_childSceneObjects)
         {
-            renderSceneObjectUsingGlslProgram(obj, glslProgram, stage);
+            renderSceneObjectUsingGlslProgram(obj, renderStage, glslProgram, viewportType);
         }
     }
 }

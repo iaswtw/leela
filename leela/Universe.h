@@ -221,9 +221,12 @@ public:
     void processFlags();
     void navigate(float __throttle, float __yaw, float __pitch, float __roll);
     void render();
-    void renderAllStages();
-    void renderSceneUsingGlslProgram(GlslProgram& glslProgram, RenderStage stage);
-    void renderSceneObjectUsingGlslProgram(SceneObject* sceneObject, GlslProgram& glslProgram, RenderStage stage);
+    void renderAllViewportTypes();
+    void renderAllStages(ViewportType viewportType);
+    void renderUsingAllShaderPrograms(ViewportType viewportType, RenderStage renderStage);
+    void setupViewport(ViewportType viewportType);
+    void renderSceneUsingGlslProgram(RenderStage renderStage, GlslProgram& glslProgram, ViewportType viewportType);
+    void renderSceneObjectUsingGlslProgram(SceneObject* sceneObject, RenderStage renderStage, GlslProgram& glslProgram, ViewportType viewportType);
     void RenderText(GlslProgram& glslProgram, RenderTextType renderType, std::string text, float x, float y, float z, float scale, glm::vec3 color);
 
     void constructFontInfrastructureAndSendToGpu();

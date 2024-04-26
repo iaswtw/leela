@@ -14,20 +14,14 @@ public:
     ~MonthLabelsRenderer() {}
 
     void init();
-
     virtual void parentChanged();
-
     void advance(float stepMultiplier) {}
-
     void calculateMonthPositions(float labelPositionScale);
-
     void _renderLabels(GlslProgram& glslProgram, bool isPre);
-
-    virtual void renderPre(GlslProgram& glslProgram);
-    virtual void renderPost(GlslProgram& glslProgram);
+    virtual void render(ViewportType viewportType, RenderStage renderStage, GlslProgram& glslProgram);
 
 private:
-	SphericalBody* _sphere;
+	SphericalBody* _sphere = nullptr;
 
     std::vector<glm::vec3> monthPositions = {
         {0.0f, 0.0f, 0.0f},

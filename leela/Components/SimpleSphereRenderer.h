@@ -12,7 +12,7 @@ public:
 	void init();
 	void advance(float stepMultiplier) {}
 
-	virtual void renderMain(GlslProgram& glslProgram);
+	virtual void render(ViewportType viewportType, RenderStage renderStage, GlslProgram& glslProgram);
 
 	SphericalBody& _sphere;
 

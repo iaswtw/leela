@@ -45,13 +45,17 @@ void StarsRenderer::_renderStars(GlslProgram& glslProgram)
     }
 }
 
-void StarsRenderer::renderMain(GlslProgram& glslProgram)
+void StarsRenderer::render(ViewportType viewportType, RenderStage renderStage, GlslProgram& glslProgram)
 {
-    if (glslProgram.type() == GlslProgramType_Star)
-    {
-        _renderStars(glslProgram);
+    if (renderStage == RenderStage::Main) {
+        if (glslProgram.type() == GlslProgramType::Star) {
+            if (viewportType == ViewportType::Primary || viewportType == ViewportType::Minimap) {
+                _renderStars(glslProgram);
+            }
+        }
     }
 }
+
 
 std::tuple<std::vector<float>*, std::vector<float>*> StarsRenderer::_constructCubeStars()
 {

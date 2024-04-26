@@ -1010,36 +1010,38 @@ PlanetRenderer::~PlanetRenderer()
 
 }
 
-void PlanetRenderer::renderMain(GlslProgram& glslProgram)
+void PlanetRenderer::render(ViewportType viewportType, RenderStage renderStage, GlslProgram& glslProgram)
 {
-    //spdlog::info("PlanetRenderer::render()");
-    if (glslProgram.type() == GlslProgramType_Planet)
-    {
-        doShaderConfig(glslProgram);
+    if (renderStage == RenderStage::Main) {
+        if (glslProgram.type() == GlslProgramType::Planet) {
+            if (viewportType == ViewportType::Primary || viewportType == ViewportType::Minimap) {
+                doShaderConfig(glslProgram);
 
-        if (bShowBody)
-            renderSphere(glslProgram);
-        if (g_universe->bShowPlanetAxis) {
-            renderRotationAxis(glslProgram);
+                if (bShowBody)
+                    renderSphere(glslProgram);
+                if (g_universe->bShowPlanetAxis) {
+                    renderRotationAxis(glslProgram);
+                }
+            }
+        }
+        else if (glslProgram.type() == GlslProgramType::Simple) {
+            if (viewportType == ViewportType::Primary || viewportType == ViewportType::Minimap) {
+                if (g_universe->bShowOrbitsGlobalEnable)
+                    renderOrbit(glslProgram);
+                if (g_universe->bShowPlanetAxis)
+                    renderLongRotationAxis(glslProgram);
+            }
         }
     }
-    else if (glslProgram.type() == GlslProgramType_Simple)
-    {
-        if (g_universe->bShowOrbitsGlobalEnable)
-            renderOrbit(glslProgram);
-        if (g_universe->bShowPlanetAxis)
-            renderLongRotationAxis(glslProgram);
+    else if (renderStage == RenderStage::TranslucentMain) {
+        if (glslProgram.type() == GlslProgramType::Simple) {
+            if (viewportType == ViewportType::Primary || viewportType == ViewportType::Minimap) {
+                renderOrbitalPlane(glslProgram);
+            }
+        }
     }
 }
 
-
-void PlanetRenderer::renderTranslucentMain(GlslProgram& glslProgram)
-{
-    if (glslProgram.type() == GlslProgramType_Simple)
-    {
-        renderOrbitalPlane(glslProgram);
-    }
-}
 
 void PlanetRenderer::doShaderConfig(GlslProgram& glslProgram)
 {
@@ -1266,14 +1268,17 @@ void SunRenderer::doShaderConfig(GlslProgram& glslProgram)
     }
 }
 
-void SunRenderer::renderMain(GlslProgram& glslProgram)
+void SunRenderer::render(ViewportType viewportType, RenderStage renderStage, GlslProgram& glslProgram)
 {
-    if (glslProgram.type() == GlslProgramType_Sun) {
-        
-        doShaderConfig(glslProgram);
+    if (renderStage == RenderStage::Main) {
+        if (glslProgram.type() == GlslProgramType::Sun) {
+            if (viewportType == ViewportType::Primary || viewportType == ViewportType::Minimap) {
+                doShaderConfig(glslProgram);
 
-        if (bShowBody)
-            _renderSphere(glslProgram);
+                if (bShowBody)
+                    _renderSphere(glslProgram);
+            }
+        }
     }
 }
 

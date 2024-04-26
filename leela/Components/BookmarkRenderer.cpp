@@ -156,21 +156,24 @@ void BookmarkRenderer::init()
     
 }
 
-
-void BookmarkRenderer::renderMain(GlslProgram& glslProgram)
+void BookmarkRenderer::render(ViewportType viewportType, RenderStage renderStage, GlslProgram& glslProgram)
 {
-    if (glslProgram.type() == GlslProgramType_BookmarkSphere)
-    {
-        if (_bookmark->_sphericalBody->bShowCityBookmarks)
-            _renderBookmarkSpheres(glslProgram);
+    if (renderStage == RenderStage::Main) {
+        if (glslProgram.type() == GlslProgramType::BookmarkSphere) {
+            if (viewportType == ViewportType::Primary) {
+                if (_bookmark->_sphericalBody->bShowCityBookmarks)
+                    _renderBookmarkSpheres(glslProgram);
+            }
+        }
     }
+    if (renderStage == RenderStage::Final) {
+        if (glslProgram.type() == GlslProgramType::Font) {
+            if (viewportType == ViewportType::Primary) {
+                if (_bookmark->_sphericalBody->bShowCityBookmarks)
+                    _renderBookmarks(glslProgram);
+            }
+        }
+    }
+
 }
 
-void BookmarkRenderer::renderFinal(GlslProgram& glslProgram)
-{
-    if (glslProgram.type() == GlslProgramType_Font)
-    {
-        if (_bookmark->_sphericalBody->bShowCityBookmarks)
-            _renderBookmarks(glslProgram);
-    }
-}
