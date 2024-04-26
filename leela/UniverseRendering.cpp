@@ -71,12 +71,15 @@ void Universe::render()
 
 void Universe::renderAllViewportTypes()
 {
-    for (auto viewportType : { ViewportType::Primary,
-                            ViewportType::Minimap,
-                            ViewportType::AlternateObserver }
-        // add scene types here if new items are added to ViewportType enum
+    for (auto viewportType : {  ViewportType::Primary,
+                                ViewportType::Minimap,
+                                ViewportType::AlternateObserver }
+                                // add scene types here if new items are added to ViewportType enum
         )
     {
+        if (viewportType == ViewportType::Minimap && !bShowMinimap)
+            continue;
+
         setupViewport(viewportType);
 
         renderAllStages(viewportType);
@@ -225,8 +228,8 @@ void Universe::setupViewport(ViewportType viewportType)
         //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
         curViewportX = 10;
         curViewportY = 50;
-        curViewportWidth = insetWidth;
-        curViewportHeight = insetHeight;
+        curViewportWidth = minimapWidth;
+        curViewportHeight = minimapHeight;
 
         glScissor(curViewportX, curViewportY, curViewportWidth, curViewportHeight);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -1025,12 +1028,12 @@ void Universe::generateImGuiWidgets()
 
             //-----------------------------------------------------
 
-            SmallCheckbox("Realistic shading", &bRealisticShading);
-            SmallCheckbox("Textured surfaces", &bRealisticSurfaces);
-            SmallCheckbox("Wireframe surfaces", &bShowWireframeSurfaces);
-            SmallCheckbox("Orbits (o)", &bShowOrbitsGlobalEnable);
-            SmallCheckbox("Coordinate axis (a)", &bShowAxis);
+            SmallCheckbox("Shading", &bRealisticShading); ImGui::SameLine();
+            SmallCheckbox("Textured surfaces", &bRealisticSurfaces); ImGui::SameLine();
+            SmallCheckbox("Wireframe", &bShowWireframeSurfaces);
+            SmallCheckbox("Orbits (o)", &bShowOrbitsGlobalEnable); ImGui::SameLine();
             SmallCheckbox("Planet axis", &bShowPlanetAxis);
+            SmallCheckbox("Coordinate axis (a)", &bShowAxis);
             SmallCheckbox("Low darkness at night", &bShowLowDarknessAtNight);
 
             //-----------------------------------------------------
@@ -1247,6 +1250,19 @@ void Universe::generateImGuiWidgets()
             if (ImGui::Button("Show default view (d)"))
                 SetDefaultView();
             ImGui::Unindent();
+
+            ImGui::Separator();
+
+            //-----------------------------------------------------
+            ImGui::PushFont(appFontSmall);
+            ImGui::Text("Insets:");
+            ImGui::PopFont();
+
+            SmallCheckbox("Minimap", &bShowMinimap); ImGui::SameLine();
+            ImGui::PushItemWidth(100);
+            if (ImGui::SliderInt("Minimap width", &minimapWidth, 300.0f, 600.0f))
+                setMinimapWidth(minimapWidth);      // Set width using function so that height is re-calculated as per aspect ratio.
+            ImGui::PopItemWidth();
 
             ImGui::Separator();
 

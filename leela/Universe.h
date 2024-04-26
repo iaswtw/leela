@@ -305,8 +305,7 @@ public:
     bool isNoModifier();
     bool isAllModifiers();
 
-    void setInsetSize(int width, int height);
-    void setInsetSceneSize(int width, int height);
+    void setMinimapWidth(int width);
 
 public:
     bool bQuit = false;
@@ -405,6 +404,7 @@ public:
     bool bMonthLabelsCloserToSphere = false;
     bool bShowLabelsOnTop = false;
     bool bShowLargeLabels = false;
+    bool bShowMinimap = true;
 
     TargetLockMode lockMode = TargetLockMode_ViewTarget;
     VECTOR followVector = VECTOR(1.0, 1.0, 1.0);
@@ -439,12 +439,9 @@ public:
     int curViewportHeight = 0;
 
     // width of inset in pixels
-    int insetWidth = 400;
-    int insetHeight = 300;
-    int insetSceneWidth = insetWidth;
-    int insetSceneHeight = insetHeight;
-    float insetScale = insetSceneWidth / insetWidth;
-
+    float minimapAspectRatio = 1.33;
+    int minimapWidth = 400;
+    int minimapHeight = int(minimapWidth) / minimapAspectRatio;
 
     // Texture handles
     GLuint tex1 = 0;
