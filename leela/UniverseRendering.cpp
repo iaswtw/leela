@@ -77,12 +77,10 @@ void Universe::renderAllViewportTypes()
                                 // add scene types here if new items are added to ViewportType enum
         )
     {
-        if (viewportType == ViewportType::Minimap && !bShowMinimap)
-            continue;
-
-        setupViewport(viewportType);
-
-        renderAllStages(viewportType);
+        bool configured = setupViewport(viewportType);
+        
+        if (configured)
+            renderAllStages(viewportType);
     }
 
     glBindVertexArray(0);
@@ -152,6 +150,9 @@ void Universe::renderUsingAllShaderPrograms(ViewportType viewportType, RenderSta
             prog->setMat4("view", glm::value_ptr(viewMatrix));
             prog->setMat4("proj", glm::value_ptr(projectionMatrix));
         }
+        else if (prog->type() == GlslProgramType::SimpleOrtho)
+        {
+        }
         else if (prog->type() == GlslProgramType::BookmarkSphere)
         {
             glm::mat4 projection = glm::ortho(0.0f, float(curViewportWidth), 0.0f, float(curViewportHeight));
@@ -176,9 +177,10 @@ void Universe::renderUsingAllShaderPrograms(ViewportType viewportType, RenderSta
 }
 
 
-void Universe::setupViewport(ViewportType viewportType)
+bool Universe::setupViewport(ViewportType viewportType)
 {
     int x, y, w, h;
+    bool configured = false;
 
     glEnable(GL_SCISSOR_TEST);
 
@@ -217,48 +219,55 @@ void Universe::setupViewport(ViewportType viewportType)
 
 
         glViewport(curViewportX, curViewportY, curViewportWidth, curViewportHeight);
+
+        configured = true;
     }
 
     else if (viewportType == ViewportType::Minimap) {
 
-        //int maxViewports;
-        //glGetIntegerv(GL_MAX_VIEWPORTS, &maxViewports);
-        //spdlog::info("Max viewports = {}", maxViewports);
+        if (minimapViewport->bEnabled) {
+            //int maxViewports;
+            //glGetIntegerv(GL_MAX_VIEWPORTS, &maxViewports);
+            //spdlog::info("Max viewports = {}", maxViewports);
 
-        //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        curViewportX = 10;
-        curViewportY = 50;
-        curViewportWidth = minimapWidth;
-        curViewportHeight = minimapHeight;
+            //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+            curViewportX = minimapViewport->_x;
+            curViewportY = minimapViewport->_y;
+            curViewportWidth = minimapViewport->_w;
+            curViewportHeight = minimapViewport->_h;
 
-        glScissor(curViewportX, curViewportY, curViewportWidth, curViewportHeight);
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glScissor(curViewportX, curViewportY, curViewportWidth, curViewportHeight);
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        //viewMatrix = glm::lookAt(
-        //    glm::vec3(0.0, -10000.0, 4000.0),
-        //    glm::vec3(0, 0, 0),
-        //    glm::vec3(0, 500, 0));
-        viewMatrix = glm::lookAt(
-            space.S.translated(10000, VECTOR(space.D, space.S)).toVec3(),
-            glm::vec3(0, 0, 0),
-            space.getUpwardDirectionVector());
+            //viewMatrix = glm::lookAt(
+            //    glm::vec3(0.0, -10000.0, 4000.0),
+            //    glm::vec3(0, 0, 0),
+            //    glm::vec3(0, 500, 0));
+            viewMatrix = glm::lookAt(
+                space.S.translated(10000, VECTOR(space.D, space.S)).toVec3(),
+                glm::vec3(0, 0, 0),
+                space.getUpwardDirectionVector());
 
-        // perspective transformation
-        //----------------------------------------------
-        projectionMatrix = glm::perspective(
-            glm::radians(35.0f),
-            float(curViewportWidth) / float(curViewportHeight),
-            1.0f,
-            10000000.0f);
+            // perspective transformation
+            //----------------------------------------------
+            projectionMatrix = glm::perspective(
+                glm::radians(35.0f),
+                float(curViewportWidth) / float(curViewportHeight),
+                1.0f,
+                10000000.0f);
 
-        glViewport(curViewportX, curViewportY, curViewportWidth, curViewportHeight);
+            glViewport(curViewportX, curViewportY, curViewportWidth, curViewportHeight);
+
+            configured = true;
+        }
     }
 
     else if (viewportType == ViewportType::AlternateObserver) {
 
     }
 
+    return configured;
 }
 
 void Universe::renderSceneUsingGlslProgram(RenderStage renderStage, GlslProgram& glslProgram, ViewportType viewportType)
@@ -1258,10 +1267,11 @@ void Universe::generateImGuiWidgets()
             ImGui::Text("Insets:");
             ImGui::PopFont();
 
-            SmallCheckbox("Minimap", &bShowMinimap); ImGui::SameLine();
+            SmallCheckbox("Minimap", &minimapViewport->bEnabled); ImGui::SameLine();
             ImGui::PushItemWidth(100);
-            if (ImGui::SliderInt("Minimap width", &minimapWidth, 300.0f, 600.0f))
-                setMinimapWidth(minimapWidth);      // Set width using function so that height is re-calculated as per aspect ratio.
+            int tempWidth = minimapViewport->_w;
+            if (ImGui::SliderInt("Minimap width", &tempWidth, 300.0f, 600.0f))
+                minimapViewport->setWidth(tempWidth);      // Set width using function so that height is re-calculated as per aspect ratio.
             ImGui::PopItemWidth();
 
             ImGui::Separator();

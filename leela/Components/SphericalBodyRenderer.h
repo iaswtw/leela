@@ -60,6 +60,9 @@ public:
 	void setPolygonCountLevel(std::string polygonCountLevel);
     void constructRotationAxis();
     void constructLongRotationAxis();
+    void constructOrbit();
+    void constructOrbitalPlaneVertices();
+    void constructOrbitalPlaneGridVertices();
     void constructVerticesAndSendToGpu();
     virtual void doShaderConfig(GlslProgram& glslProgram) {}
 
@@ -78,9 +81,6 @@ public:
 
     std::vector<float>* _constructMainSphereVertices();
     std::pair<std::vector<float>*, std::vector<Triangle>*> _constructMainIcoSphereVertices();
-    void constructOrbit();
-    void constructOrbitalPlaneVertices();
-    void constructOrbitalPlaneGridVertices();
 
 	float _getPolygonIncrement();
     int _getIcoSphereSubdivisionLevel();

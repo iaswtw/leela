@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <string>
 #include "Elements.h"
+#include "ViewportBorderRenderer.h"
 
 #include <spdlog/spdlog.h>
 
@@ -94,6 +95,7 @@ void Universe::compileShaders()
         { GlslProgramType::Sun,             "sun.vert.glsl",                  "sun.frag.glsl"                     },
         { GlslProgramType::Star,            "star.vert.glsl",                 "star.frag.glsl"                    },
         { GlslProgramType::Simple,          "simple.vert.glsl",               "simple.frag.glsl"                  },
+        { GlslProgramType::SimpleOrtho,     "simple_ortho.vert.glsl",         "simple_ortho.frag.glsl"            },
         { GlslProgramType::Font,            "font.vert.glsl",                 "font.frag.glsl"                    },
         { GlslProgramType::BookmarkSphere,  "bookmark.vert.glsl",             "bookmark.frag.glsl"                }
     };
@@ -315,25 +317,28 @@ void Universe::initSceneObjectsAndComponents()
     scene.addComponent(&starsRenderer);
     starsRenderer.init();
 
-    SceneObject::printTree(&scene);
-
-
     //------------------------------------------------------------------------
-    setMinimapWidth(400);
-    //setInsetSceneSize(800, 600);
+    // Viewport-related
+    
+    minimapViewport                 = new ViewportSceneObject(ViewportType::Minimap);
+    alternateObserverViewport       = new ViewportSceneObject(ViewportType::AlternateObserver);
 
+    scene.addSceneObject(minimapViewport);
+    scene.addSceneObject(alternateObserverViewport);
+
+    minimapViewport->addComponent(new ViewportBorderRenderer());
+    alternateObserverViewport->addComponent(new ViewportBorderRenderer());
+
+    minimapViewport->setDimensions(10, 50, 400, 300);
+    minimapViewport->bEnabled = true;
 
     glBindVertexArray(0);       // Disable VBO
 
+    //-------------------------------------------------------------------------
+    // Finally, print the constructed scene
+    //-------------------------------------------------------------------------
+    SceneObject::printTree(&scene);
 }
-
-
-void Universe::setMinimapWidth(int width)
-{
-    minimapWidth = width;
-    minimapHeight = int(width / minimapAspectRatio);
-}
-
 
 
 void Universe::printGlError()
@@ -1222,6 +1227,7 @@ int Universe::runMainLoop()
                     curWidth = event.window.data1;
                     curHeight = event.window.data2;
                     glViewport(0, 0, curWidth, curHeight);      // change viewport dimensions when window is resized
+                    //primaryViewport->setDimensions(0, 0, curWidth, curHeight);
                     //glViewport(200, 200, 800, 600);
                 }
                 break;

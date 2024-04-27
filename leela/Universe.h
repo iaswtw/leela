@@ -24,6 +24,7 @@
 #include <iostream>
 #include <string>
 #include "UniverseMinimal.h"
+#include "ViewportSceneObject.h"
 
 #include "imgui.h"
 #include "OneShotTimer.h"
@@ -224,7 +225,7 @@ public:
     void renderAllViewportTypes();
     void renderAllStages(ViewportType viewportType);
     void renderUsingAllShaderPrograms(ViewportType viewportType, RenderStage renderStage);
-    void setupViewport(ViewportType viewportType);
+    bool setupViewport(ViewportType viewportType);
     void renderSceneUsingGlslProgram(RenderStage renderStage, GlslProgram& glslProgram, ViewportType viewportType);
     void renderSceneObjectUsingGlslProgram(SceneObject* sceneObject, RenderStage renderStage, GlslProgram& glslProgram, ViewportType viewportType);
     void RenderText(GlslProgram& glslProgram, RenderTextType renderType, std::string text, float x, float y, float z, float scale, glm::vec3 color);
@@ -304,8 +305,6 @@ public:
 
     bool isNoModifier();
     bool isAllModifiers();
-
-    void setMinimapWidth(int width);
 
 public:
     bool bQuit = false;
@@ -404,7 +403,6 @@ public:
     bool bMonthLabelsCloserToSphere = false;
     bool bShowLabelsOnTop = false;
     bool bShowLargeLabels = false;
-    bool bShowMinimap = true;
 
     TargetLockMode lockMode = TargetLockMode_ViewTarget;
     VECTOR followVector = VECTOR(1.0, 1.0, 1.0);
@@ -428,6 +426,10 @@ public:
 
     float angle = 0.0f;
 
+    ViewportSceneObject* minimapViewport = nullptr;
+    ViewportSceneObject* alternateObserverViewport = nullptr;
+
+
     int curX = 0;
     int curY = 0;
     int curWidth = 0;
@@ -437,11 +439,6 @@ public:
     int curViewportY = 0;
     int curViewportWidth = 0;
     int curViewportHeight = 0;
-
-    // width of inset in pixels
-    float minimapAspectRatio = 1.33;
-    int minimapWidth = 400;
-    int minimapHeight = int(minimapWidth) / minimapAspectRatio;
 
     // Texture handles
     GLuint tex1 = 0;
