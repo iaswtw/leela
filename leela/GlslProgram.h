@@ -14,6 +14,7 @@ enum class GlslProgramType
 	Star,
 	Sun,
 	Simple,
+	SimpleOrtho,
 	BookmarkSphere,
 
 };

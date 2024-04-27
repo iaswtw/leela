@@ -61,6 +61,8 @@
     <ClCompile Include="SceneObjects\SphericalBody.cpp">
       <Filter>SceneObjects</Filter>
     </ClCompile>
+    <ClCompile Include="ViewportBorderRenderer.cpp" />
+    <ClCompile Include="ViewportSceneObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Class.h" />
@@ -138,6 +140,12 @@
       <Filter>SceneObjects</Filter>
     </ClInclude>
     <ClInclude Include="SceneObjects\SphericalBody.h">
+      <Filter>SceneObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="ViewportBorderRenderer.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="ViewportSceneObject.h">
       <Filter>SceneObjects</Filter>
     </ClInclude>
   </ItemGroup>

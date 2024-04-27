@@ -214,6 +214,8 @@
     <ClInclude Include="UniverseMinimal.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="OneShotTimer.h" />
+    <ClInclude Include="ViewportBorderRenderer.h" />
+    <ClInclude Include="ViewportSceneObject.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Class.cpp" />
@@ -249,6 +251,8 @@
     <ClCompile Include="UniverseInputHandling.cpp" />
     <ClCompile Include="UniverseRendering.cpp" />
     <ClCompile Include="Utils.cpp" />
+    <ClCompile Include="ViewportBorderRenderer.cpp" />
+    <ClCompile Include="ViewportSceneObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="leela.rc" />
