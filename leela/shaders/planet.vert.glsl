@@ -85,6 +85,7 @@ void main()
 
     vec3 x_normal   = normalize(vec3(model * vec4(normal, 0.0)));       // transformed normal of the current vertex
     //vec3 x_position = vec3(model * vec4(position, 1.0));
+//    float dotProduct = min(.1 + dot(normalize(sunCenterTransformed - sphereInfo.centerTransformed), x_normal), 1.0);
     float dotProduct = dot(normalize(sunCenterTransformed - sphereInfo.centerTransformed), x_normal);
     //float compareValue = sin(selfUmbraConeHalfAngle);
     
@@ -298,7 +299,7 @@ void main()
         }
     } while (false);
     
-    darknessFactor = pow(darknessFactor, 0.6);
+    darknessFactor = pow(darknessFactor, 0.3);
     
     // apply all 3 transformations to the original point
     gl_Position = proj * view * model * vec4(position, 1.0);

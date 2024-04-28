@@ -64,6 +64,9 @@ public:
     void constructOrbitalPlaneVertices();
     void constructOrbitalPlaneGridVertices();
     void constructVerticesAndSendToGpu();
+
+    void sendTextureToGpu();
+
     virtual void doShaderConfig(GlslProgram& glslProgram) {}
 
     std::string _locateTextureFile(const char * filenName);
@@ -79,7 +82,7 @@ public:
 public:
     std::tuple<float, float, float, glm::vec3, float, float> calcPointOnSphere(float radius, float alpha, float theta);
 
-    std::vector<float>* _constructMainSphereVertices();
+    void _constructMainSphereVertices();
     std::pair<std::vector<float>*, std::vector<Triangle>*> _constructMainIcoSphereVertices();
 
 	float _getPolygonIncrement();
@@ -87,6 +90,9 @@ public:
 
 public:
     SphericalBody * _sphere = nullptr;
+
+    GLuint vbo;     // vertex buffer object
+    GLuint ebo;     // element buffer object
 
     GLuint _mainVao;
     GLuint _orbitVao = 0;
