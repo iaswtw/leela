@@ -184,17 +184,15 @@ void Universe::onKeyDown(SDL_Event* event)
 
         // Arrow keys
     case SDLK_LEFT:
-        DecreaseSimulationSpeed();
         break;
     case SDLK_RIGHT:
-        IncreaseSimulationSpeed();
         break;
 
     case SDLK_MINUS:
-        bMinus = true;
+        DecreaseSimulationSpeed();
         break;
     case SDLK_EQUALS:
-        bEquals = true;
+        IncreaseSimulationSpeed();
         break;
 
     case SDLK_HOME:
