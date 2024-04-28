@@ -94,61 +94,91 @@
 //#################################################################################
 
 
-class A
+//class A
+//{
+//public:
+//    void advance()
+//    {
+//        printf("A advancing\n");
+//    }
+//
+//    A() { printf("Constructor\n"); }
+//    ~A() { printf("Destructor\n"); }
+//
+//};
+//
+//class Container
+//{
+//public:
+//
+//    void do_work()
+//    {
+//        for (std::shared_ptr<A> p : all_a)
+//        {
+//            p->advance();
+//        }
+//    }
+//
+//    void add_a(std::shared_ptr<A> p)
+//    {
+//        all_a.push_back(p);
+//    }
+//
+//    void remove_a()
+//    {
+//        std::shared_ptr<A> p = *all_a.begin();
+//        all_a.pop_back();
+//    }
+//
+//    std::vector<std::shared_ptr<A>> all_a;
+//};
+//
+//void init(Container * c)
+//{
+//    auto p = std::make_shared<A>();
+//    c->add_a(p);
+//
+//}
+//
+//int main()
+//{
+//    Container c;
+//    init(&c);
+//
+//    c.do_work();
+//    c.do_work();
+//    printf("All work done\n");
+//    c.remove_a();
+//    printf("Remove done\n");
+//
+//}
+
+
+struct Sphere
 {
-public:
-    void advance()
-    {
-        printf("A advancing\n");
-    }
+	Sphere() {}
 
-    A() { printf("Constructor\n"); }
-    ~A() { printf("Destructor\n"); }
+	int _radius;
+	void putprop(int r) {
+		_radius = r;
+		printf("Setting radius to %d\n", _radius);
+	}
+	int getprop() {
+		printf("Getting radius %d\n", _radius);
+		return _radius;
+	}
 
+	__declspec(property(get = getprop, put = putprop)) int radius;
 };
 
-class Container
-{
-public:
-
-    void do_work()
-    {
-        for (std::shared_ptr<A> p : all_a)
-        {
-            p->advance();
-        }
-    }
-
-    void add_a(std::shared_ptr<A> p)
-    {
-        all_a.push_back(p);
-    }
-
-    void remove_a()
-    {
-        std::shared_ptr<A> p = *all_a.begin();
-        all_a.pop_back();
-    }
-
-    std::vector<std::shared_ptr<A>> all_a;
-};
-
-void init(Container * c)
-{
-    auto p = std::make_shared<A>();
-    c->add_a(p);
-
-}
 
 int main()
 {
-    Container c;
-    init(&c);
+	Sphere s;
+	s.radius = 10;
+	printf("Radius is %d\n", s.radius);
 
-    c.do_work();
-    c.do_work();
-    printf("All work done\n");
-    c.remove_a();
-    printf("Remove done\n");
+	//int& refRadius = s.radius;
+	//int* pRadius = &s.radius;
 
 }

@@ -63,6 +63,7 @@
     </ClCompile>
     <ClCompile Include="ViewportBorderRenderer.cpp" />
     <ClCompile Include="ViewportSceneObject.cpp" />
+    <ClCompile Include="VerticesGpuObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Class.h" />
@@ -148,6 +149,7 @@
     <ClInclude Include="ViewportSceneObject.h">
       <Filter>SceneObjects</Filter>
     </ClInclude>
+    <ClInclude Include="VerticesGpuObject.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="leela.rc" />

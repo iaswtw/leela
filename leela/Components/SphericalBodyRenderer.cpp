@@ -325,7 +325,7 @@ void SphericalBodyRenderer::_constructMainSphereVertices()
     delete v;
 }
 
-std::pair<std::vector<float>*, std::vector<Triangle>*>  SphericalBodyRenderer::_constructMainIcoSphereVertices()
+void SphericalBodyRenderer::_constructMainIcoSphereVertices()
 {
     std::vector<float>* v = new std::vector<float>();
     SphericalBody& s = *_sphere;
@@ -341,12 +341,9 @@ std::pair<std::vector<float>*, std::vector<Triangle>*>  SphericalBodyRenderer::_
         // Generate normal for this vertex
         glm::vec3 N = glm::normalize(glm::vec3(vertex.x, vertex.y, vertex.z) - glm::vec3(0.0f, 0.0f, 0.0f));
 
-
         float texCoordX;
         float texCoordY;
-
         float d;
-
 
         //------------------------------------------------------------------
         // calculate alpha and beta angle. Convert it to a range between 0 & 1 to be used as texture coordinates.
@@ -355,30 +352,24 @@ std::pair<std::vector<float>*, std::vector<Triangle>*>  SphericalBodyRenderer::_
         float alpha = asin(float(vertex.y) / d);
         if (alpha == -0.0f)
             alpha = 0.0f;
-        if (vertex.y >= 0.0f)
-        {
-            if (vertex.x >= 0.0f)
-            { // 1st quadrant. no special handling
+        if (vertex.y >= 0.0f) {
+            if (vertex.x >= 0.0f) { // 1st quadrant. no special handling
             }
-            else
-            {   // 2nd quadrant
+            else     // 2nd quadrant
                 alpha = (float)M_PI - alpha;
-            }
+            
         }
-        else
-        {
+        else {
             if (alpha >= 0.0f)
                 throw std::exception("ERROR: alpha should be negative");
 
             // y is -ve. alpha will also be -ve
             if (vertex.x < 0.0f)
-            {   // 3rd quadrant
+                // 3rd quadrant
                 alpha = float(M_PI) - alpha;
-            }
             else
-            {   // 4th quadrant
+               // 4th quadrant
                 alpha += 2 * float(M_PI);
-            }
         }
         
         if (alpha < 0)
@@ -392,21 +383,13 @@ std::pair<std::vector<float>*, std::vector<Triangle>*>  SphericalBodyRenderer::_
         texCoordX = float(alpha / (2 * M_PI));
         //printf("tex X: %f", texCoordX);
         //if (texCoordX > 1.0f)
-        //{
         //    printf("texture X coord is greater than 1.0f");
-        //}
         //if (texCoordX < 0.0f)
-        //{
         //    printf("texture X coord is less than 0.0f");
-        //}
         //if (texCoordX > 1.0f)
-        //{
         //    texCoordX -= 1.0f;
-        //}
         //if (texCoordX < 0.0f)
-        //{
         //    texCoordX += 1.0f;
-        //}
 
         //------------------------------------------------------------------
         // beta is measured from from +ve Z axis.
@@ -415,28 +398,18 @@ std::pair<std::vector<float>*, std::vector<Triangle>*>  SphericalBodyRenderer::_
         texCoordY = beta / float(M_PI);             // 0 to PI => 0 to 1
         //printf("tex Y: %f", texCoordY);
         //if (texCoordY > 1.0f)
-        //{
         //    printf("texture Y coord is greater than 1.0f");
-        //}
         //if (texCoordY < 0.0f)
-        //{
         //    printf("texture Y coord is less than 0.0f");
-        //}
         //if (texCoordY > 1.0f)
-        //{
         //    texCoordY -= 1.0f;
-        //}
         //if (texCoordY < 0.0f)
-        //{
         //    texCoordY += 1.0f;
-        //}
 
         //printf("%%%% texture coord: x = %f, y = %f\n", texCoordX, texCoordY);
         
-        
         // scale vertices with unit radius to the actual radius of sphere.
         vertex *= s._radius;
-
 
         vector_push_back_12(*v, vertex.x, vertex.y, vertex.z, s._r, s._g, s._b, 1.0f, N.x, N.y, N.z, texCoordX, texCoordY);
     }
@@ -445,10 +418,51 @@ std::pair<std::vector<float>*, std::vector<Triangle>*>  SphericalBodyRenderer::_
     spdlog::info("{}: SphericalBody: Num vertices = {}", _sphere->_name, v->size()/10);
     spdlog::info("{}: SphericalBody: Num elements = {}", _sphere->_name, indexMesh.second->size() / 6);
 
+
+    //v = pair.first;
+    auto e = indexMesh.second;
+
+    glGenVertexArrays(1, &_mainVao);
+    glBindVertexArray(_mainVao);
+
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        sizeof(float) * v->size(),
+        v->data(),
+        GL_STATIC_DRAW);
+
+    glGenBuffers(1, &ebo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(
+        GL_ELEMENT_ARRAY_BUFFER,
+        sizeof(unsigned int) * e->size() * 3,
+        e->data(),
+        GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), nullptr);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(7 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(10 * sizeof(float)));
+    glEnableVertexAttribArray(3);
+
+    numMainSphereVertices = v->size() / PLANET_STRIDE_IN_VBO;
+    numMainSphereElements = e->size() * 3;
+
+    //--------------------------------------------
+
     sendTextureToGpu();
 
     delete indexMesh.first;
-    return std::pair<std::vector<float>*, std::vector<Triangle>*>(v, indexMesh.second);
+    delete v;
+    delete e;
 }
 
 
@@ -906,47 +920,8 @@ void SphericalBodyRenderer::constructVerticesAndSendToGpu()
 #else
     //---------------------------------------------------------------------------------------------------
     // The sphere itself (Icosphere)
-    auto pair = _constructMainIcoSphereVertices();
+    _constructMainIcoSphereVertices();
 
-    v = pair.first;
-    auto e = pair.second;
-
-    glGenVertexArrays(1, &_mainVao);
-    glBindVertexArray(_mainVao);
-
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        sizeof(float) * v->size(),
-        v->data(),
-        GL_STATIC_DRAW);
-
-    glGenBuffers(1, &ebo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(
-        GL_ELEMENT_ARRAY_BUFFER,
-        sizeof(unsigned int) * e->size() * 3,
-        e->data(),
-        GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), nullptr);
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(7 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-
-    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(10 * sizeof(float)));
-    glEnableVertexAttribArray(3);
-
-    numMainSphereVertices = v->size() / PLANET_STRIDE_IN_VBO;
-    numMainSphereElements = e->size() * 3;
-    
-    delete v;
-    delete e;
 #endif
 
     // Orbital itself
@@ -1036,17 +1011,21 @@ void PlanetRenderer::render(ViewportType viewportType, RenderStage renderStage, 
             }
         }
         else if (glslProgram.type() == GlslProgramType::Simple) {
-            if (viewportType == ViewportType::Primary || viewportType == ViewportType::Minimap) {
+            if (viewportType == ViewportType::Primary) {
                 if (g_universe->bShowOrbitsGlobalEnable)
                     renderOrbit(glslProgram);
                 if (g_universe->bShowPlanetAxis)
                     renderLongRotationAxis(glslProgram);
             }
+            else if (viewportType == ViewportType::Minimap) {
+                if (g_universe->bShowOrbitsGlobalEnable)
+                    renderOrbit(glslProgram);
+            }
         }
     }
     else if (renderStage == RenderStage::TranslucentMain) {
         if (glslProgram.type() == GlslProgramType::Simple) {
-            if (viewportType == ViewportType::Primary || viewportType == ViewportType::Minimap) {
+            if (viewportType == ViewportType::Primary) {
                 renderOrbitalPlane(glslProgram);
             }
         }
