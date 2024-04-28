@@ -244,10 +244,22 @@ bool Universe::setupViewport(ViewportType viewportType)
             //    glm::vec3(0.0, -10000.0, 4000.0),
             //    glm::vec3(0, 0, 0),
             //    glm::vec3(0, 500, 0));
+
+            // Zoomed-out view
             viewMatrix = glm::lookAt(
                 space.S.translated(10000, VECTOR(space.D, space.S)).toVec3(),
-                glm::vec3(0, 0, 0),
+                space.D.toVec3(),
+                //glm::vec3(0, 0, 0),
                 space.getUpwardDirectionVector());
+            
+            // "Review view mirror" view
+            //viewMatrix = glm::lookAt(
+            //    space.S.toVec3(),
+            //    space.S.translated(1000, VECTOR(space.D, space.S)).toVec3(),
+            //    space.getUpwardDirectionVector());
+
+
+
 
             // perspective transformation
             //----------------------------------------------

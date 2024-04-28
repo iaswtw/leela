@@ -58,12 +58,15 @@ public:
     void setAsLightSource();
     void setNightColorDarkness(NightColorDarkness darkness);
 	void setPolygonCountLevel(std::string polygonCountLevel);
+
+    void constructVerticesAndSendToGpu();
+    void _constructMainSphereVertices();
+    void _constructMainIcoSphereVertices();
     void constructRotationAxis();
     void constructLongRotationAxis();
     void constructOrbit();
     void constructOrbitalPlaneVertices();
     void constructOrbitalPlaneGridVertices();
-    void constructVerticesAndSendToGpu();
 
     void sendTextureToGpu();
 
@@ -82,8 +85,6 @@ public:
 public:
     std::tuple<float, float, float, glm::vec3, float, float> calcPointOnSphere(float radius, float alpha, float theta);
 
-    void _constructMainSphereVertices();
-    std::pair<std::vector<float>*, std::vector<Triangle>*> _constructMainIcoSphereVertices();
 
 	float _getPolygonIncrement();
     int _getIcoSphereSubdivisionLevel();

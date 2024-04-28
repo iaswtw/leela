@@ -214,6 +214,7 @@
     <ClInclude Include="UniverseMinimal.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="OneShotTimer.h" />
+    <ClInclude Include="VerticesGpuObject.h" />
     <ClInclude Include="ViewportBorderRenderer.h" />
     <ClInclude Include="ViewportSceneObject.h" />
   </ItemGroup>
@@ -251,6 +252,7 @@
     <ClCompile Include="UniverseInputHandling.cpp" />
     <ClCompile Include="UniverseRendering.cpp" />
     <ClCompile Include="Utils.cpp" />
+    <ClCompile Include="VerticesGpuObject.cpp" />
     <ClCompile Include="ViewportBorderRenderer.cpp" />
     <ClCompile Include="ViewportSceneObject.cpp" />
   </ItemGroup>
