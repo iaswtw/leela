@@ -1044,21 +1044,16 @@ void Universe::generateImGuiWidgets()
             SmallCheckbox("Planet axis", &bShowPlanetAxis);
             SmallCheckbox("Coordinate axis (a)", &bShowAxis);
             SmallCheckbox("Low darkness at night", &bShowLowDarknessAtNight);
-
-            //-----------------------------------------------------
-            // Month names
             ImGui::Separator();
-            ImGui::PushFont(appFontSmall);
-            ImGui::Text("Months:");
-            ImGui::PopFont();
-            ImGui::Indent();
 
-            SmallCheckbox("Show labels", &bShowMonthNames);  ImGui::SameLine();
-            SmallCheckbox("Closer to planet", &bMonthLabelsCloserToSphere);
-            SmallCheckbox("Labels on top", &bShowLabelsOnTop);  ImGui::SameLine();
-            SmallCheckbox("Large Labels", &bShowLargeLabels);
+            ImGui::PushItemWidth(100);
+            float sunRadius = sun->_radius;
+            if (ImGui::SliderFloat("Sun radius## sun", &sunRadius, 100.0f, 250.0f)) {
+                sun->_radius = sunRadius;
+                sunRenderer->_constructMainSphereVertices();
+            }
+            ImGui::PopItemWidth();
 
-            ImGui::Unindent();
             ImGui::Separator();
 
             //-----------------------------------------------------
@@ -1145,8 +1140,23 @@ void Universe::generateImGuiWidgets()
             if (ImGui::Button("Reset## earth axis tilt")) {
                 earth->restoreAxisTiltAngleFromBackup();
             }
-            ImGui::Unindent();
+            
+            
+            
+            //---------------------
+            // Month names
+            ImGui::PushFont(appFontSmall);
+            ImGui::Text("Months:");
+            ImGui::PopFont();
+            ImGui::Indent();
 
+            SmallCheckbox("Show labels", &bShowMonthNames);  ImGui::SameLine();
+            SmallCheckbox("Closer to planet", &bMonthLabelsCloserToSphere);
+            SmallCheckbox("Labels on top", &bShowLabelsOnTop);  ImGui::SameLine();
+            SmallCheckbox("Large Labels", &bShowLargeLabels);
+
+            ImGui::Unindent();
+            ImGui::Unindent();
             ImGui::Separator();
 
             //-----------------------------------------------------

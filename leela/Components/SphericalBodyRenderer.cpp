@@ -276,14 +276,53 @@ std::tuple<float, float, float, glm::vec3, float, float> SphericalBodyRenderer::
     return { x, y, z, N, texX, texY };
 }
 
-std::vector<float>* SphericalBodyRenderer::_constructMainSphereVertices()
+void SphericalBodyRenderer::_constructMainSphereVertices()
 {
     SphericalBody& s = *_sphere;
     float numEquatorVertices = _getPolygonIncrement();
 
     std::vector<float>* v = ConstructSphereVertices(s._radius, s._color, numEquatorVertices, true);
 
-    return v;
+    if (vbo != 0) {
+        glDeleteBuffers(1, &vbo);
+    }
+    if (_mainVao != 0) {
+        glDeleteVertexArrays(1, &_mainVao);
+    }
+
+    glGenVertexArrays(1, &_mainVao);
+    glBindVertexArray(_mainVao);
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        sizeof(float) * v->size(),
+        v->data(),
+        GL_STATIC_DRAW);
+
+    // x, y & z coordinates of the point
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), nullptr);
+    glEnableVertexAttribArray(0);
+
+    // r, g, b, a color values of the point
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    // x, y & z of unit normal vector to the sphere at the point
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(7 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    // texture coordinates of the point
+    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(10 * sizeof(float)));
+    glEnableVertexAttribArray(3);
+
+    numMainSphereVertices = v->size() / PLANET_STRIDE_IN_VBO;
+    
+    //---------------------------------------------------------
+
+    sendTextureToGpu();
+
+    delete v;
 }
 
 std::pair<std::vector<float>*, std::vector<Triangle>*>  SphericalBodyRenderer::_constructMainIcoSphereVertices()
@@ -405,6 +444,8 @@ std::pair<std::vector<float>*, std::vector<Triangle>*>  SphericalBodyRenderer::_
     spdlog::info("");
     spdlog::info("{}: SphericalBody: Num vertices = {}", _sphere->_name, v->size()/10);
     spdlog::info("{}: SphericalBody: Num elements = {}", _sphere->_name, indexMesh.second->size() / 6);
+
+    sendTextureToGpu();
 
     delete indexMesh.first;
     return std::pair<std::vector<float>*, std::vector<Triangle>*>(v, indexMesh.second);
@@ -772,7 +813,82 @@ void SphericalBodyRenderer::constructLongRotationAxis()
 }
 
 
+void SphericalBodyRenderer::sendTextureToGpu()
+{
+    if (_texture == 0)
+    {
+        //printf("*************** texture setup *******************\n");
+        //printf("_textureFilename = %s\n", _textureFilename.c_str());
+        if (!_textureFilename.empty())
+        {
+            glGenTextures(1, &_texture);
+            glBindTexture(GL_TEXTURE_2D, _texture);
+#ifdef USE_ICOSPHERE
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+#else
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+#endif
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            // The following border color isn't used because 'clamp_to_edge' used above. 
+            // Set border color to debug problems at the edge in the future.
+            float color[] = { 1.0f, 0.0f, 0.0f, 1.0f };
+            glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
 
+
+            std::vector<unsigned char> image1;
+            unsigned int width, height;
+            std::string textureFilePath = _locateTextureFile(_textureFilename.c_str());
+            spdlog::info("Using texture file " + textureFilePath);
+            unsigned int error = lodepng::decode(image1, width, height, textureFilePath.c_str());
+            if (error)
+            {
+                printf("error %d: %s\n", error, lodepng_error_text(error));
+            }
+
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image1.data());
+            glGenerateMipmap(GL_TEXTURE_2D);
+        }
+    }
+
+    if (_texture2 == 0)
+    {
+        if (!_textureFilename2.empty())
+        {
+            glGenTextures(1, &_texture2);
+            glBindTexture(GL_TEXTURE_2D, _texture2);
+#ifdef USE_ICOSPHERE
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+#else
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+#endif
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            // The following border color isn't used because 'clamp_to_edge' used above. 
+            // Set border color to debug problems at the edge in the future.
+            float color[] = { 1.0f, 0.0f, 0.0f, 1.0f };
+            glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
+
+
+            std::vector<unsigned char> image1;
+            unsigned int width, height;
+            std::string textureFilePath = _locateTextureFile(_textureFilename2.c_str());
+            spdlog::info("Using texture 2 file " + textureFilePath);
+            unsigned int error = lodepng::decode(image1, width, height, textureFilePath.c_str());
+            if (error)
+            {
+                printf("error %d: %s\n", error, lodepng_error_text(error));
+            }
+
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image1.data());
+            glGenerateMipmap(GL_TEXTURE_2D);
+        }
+    }
+}
 
 // Construct vertices for various aspects of the sphere such as the sphere surface itself, orbit, latitude/longitudes,
 // orbital plane, etc.
@@ -780,45 +896,12 @@ void SphericalBodyRenderer::constructLongRotationAxis()
 //  - If the sphere parameters change at runtime, some vertex generation methods have to be invoked again from those places.
 void SphericalBodyRenderer::constructVerticesAndSendToGpu()
 {
-    GLuint vbo;     // vertex buffer object
-    GLuint ebo;     // element buffer object
-    std::vector<float> *v = nullptr;
-
 
 #ifndef USE_ICOSPHERE
     //---------------------------------------------------------------------------------------------------
     // The sphere itself
-    v = _constructMainSphereVertices();
+    _constructMainSphereVertices();
     
-    glGenVertexArrays(1, &_mainVao);
-    glBindVertexArray(_mainVao);
-
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        sizeof(float) * v->size(),
-        v->data(),
-        GL_STATIC_DRAW);
-
-    // x, y & z coordinates of the point
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), nullptr);
-    glEnableVertexAttribArray(0);
-
-    // r, g, b, a color values of the point
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    // x, y & z of unit normal vector to the sphere at the point
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(7 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-
-    // texture coordinates of the point
-    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(10 * sizeof(float)));
-    glEnableVertexAttribArray(3);
-
-    numMainSphereVertices = v->size() / PLANET_STRIDE_IN_VBO;
-    delete v;
 
 #else
     //---------------------------------------------------------------------------------------------------
@@ -866,81 +949,9 @@ void SphericalBodyRenderer::constructVerticesAndSendToGpu()
     delete e;
 #endif
 
-    //printf("*************** texture setup *******************\n");
-    //printf("_textureFilename = %s\n", _textureFilename.c_str());
-    if (!_textureFilename.empty())
-    {
-        glGenTextures(1, &_texture);
-        glBindTexture(GL_TEXTURE_2D, _texture);
-#ifdef USE_ICOSPHERE
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-#else
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-#endif
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        // The following border color isn't used because 'clamp_to_edge' used above. 
-        // Set border color to debug problems at the edge in the future.
-        float color[] = { 1.0f, 0.0f, 0.0f, 1.0f };
-        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
-
-
-        std::vector<unsigned char> image1;
-        unsigned int width, height;
-        std::string textureFilePath = _locateTextureFile(_textureFilename.c_str());
-        spdlog::info("Using texture file " + textureFilePath);
-        unsigned int error = lodepng::decode(image1, width, height, textureFilePath.c_str());
-        if (error)
-        {
-            printf("error %d: %s\n", error, lodepng_error_text(error));
-        }
-
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image1.data());
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-
-
-    if (!_textureFilename2.empty())
-    {
-        glGenTextures(1, &_texture2);
-        glBindTexture(GL_TEXTURE_2D, _texture2);
-#ifdef USE_ICOSPHERE
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-#else
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-#endif
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        // The following border color isn't used because 'clamp_to_edge' used above. 
-        // Set border color to debug problems at the edge in the future.
-        float color[] = { 1.0f, 0.0f, 0.0f, 1.0f };
-        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
-
-
-        std::vector<unsigned char> image1;
-        unsigned int width, height;
-        std::string textureFilePath = _locateTextureFile(_textureFilename2.c_str());
-        spdlog::info("Using texture 2 file " + textureFilePath);
-        unsigned int error = lodepng::decode(image1, width, height, textureFilePath.c_str());
-        if (error)
-        {
-            printf("error %d: %s\n", error, lodepng_error_text(error));
-        }
-
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image1.data());
-        glGenerateMipmap(GL_TEXTURE_2D);
-
-    }
-
     // Orbital itself
     constructOrbit();
-
     constructOrbitalPlaneVertices();
-
     constructOrbitalPlaneGridVertices();
 
     // Rotation axis
