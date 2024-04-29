@@ -58,6 +58,7 @@ public:
     void setOrbitalAngle(float orbitalAngle)                { _orbitalAngle = orbitalAngle; }
     inline glm::vec3& getCenter()                           { return _center; }
     inline float getRadius()                                { return _radius; }
+    void restoreRadius()                                    { _radius = _radius_Backup;  }
     inline float _normalizeAngle(float angle)               { return (float) fmod(angle, 2 * M_PI);  }
 
     // related sphere is a sphere that is close enough to this sphere so as to possibly cast a shadow
@@ -101,6 +102,7 @@ public:
 
     // Rotation variables
     float _radius = 0;                      // radius of sphere
+    float _radius_Backup = 0;
     float _rotationAngle = 0;               // current rotation angle (increments based on rotation angular velocity).
     float _rotationAngularVelocity = 0;     // angular velocity or rotation around sphere's axis.
     bool   bSyncWithRevolution = false;      // sync with this sphere's revolution

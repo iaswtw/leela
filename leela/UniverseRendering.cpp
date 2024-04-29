@@ -1065,7 +1065,11 @@ void Universe::generateImGuiWidgets()
                 sun->_radius = sunRadius;
                 sunRenderer->constructMainSphereVertices();
             }
-            ImGui::PopItemWidth();
+            ImGui::PopItemWidth(); ImGui::SameLine();
+            if (ImGui::Button("Reset##Sun radius")) {
+                sun->restoreRadius();
+                sunRenderer->constructMainSphereVertices();
+            }
 
             ImGui::Separator();
 

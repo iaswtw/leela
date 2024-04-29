@@ -4,6 +4,7 @@
 void SphericalBody::setRotationParameters(float radius, float rotationAngle, float rotationAngularVelocity, float axisTiltOrientationAngle, float axisTiltAngle)
 {
     _radius = radius;
+    _radius_Backup = _radius;
     _rotationAngle = rotationAngle;
     _rotationAngularVelocity = rotationAngularVelocity;
     _axisTiltOrientationAngle = axisTiltOrientationAngle;
