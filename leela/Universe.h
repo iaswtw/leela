@@ -519,6 +519,9 @@ public:
 
     OneShotTimer doubleClicked = OneShotTimer();
 
+    std::string minimapMode = "Zoomed Out";
+    std::vector<std::string> minimapModes = { "Zoomed Out", "Rear View" };
+
     std::string logString = "";
 
 };

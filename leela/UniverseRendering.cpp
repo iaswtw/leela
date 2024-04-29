@@ -245,20 +245,21 @@ bool Universe::setupViewport(ViewportType viewportType)
             //    glm::vec3(0, 0, 0),
             //    glm::vec3(0, 500, 0));
 
-            // Zoomed-out view
-            viewMatrix = glm::lookAt(
-                space.S.translated(10000, VECTOR(space.D, space.S)).toVec3(),
-                space.D.toVec3(),
-                //glm::vec3(0, 0, 0),
-                space.getUpwardDirectionVector());
-            
-            // "Review view mirror" view
-            //viewMatrix = glm::lookAt(
-            //    space.S.toVec3(),
-            //    space.S.translated(1000, VECTOR(space.D, space.S)).toVec3(),
-            //    space.getUpwardDirectionVector());
-
-
+            if (minimapMode == "Zoomed Out") {
+                // Zoomed-out view
+                viewMatrix = glm::lookAt(
+                    space.S.translated(10000, VECTOR(space.D, space.S)).toVec3(),
+                    space.D.toVec3(),
+                    //glm::vec3(0, 0, 0),
+                    space.getUpwardDirectionVector());
+            }
+            else if (minimapMode == "Rear View") {
+                // "Review view mirror" view
+                viewMatrix = glm::lookAt(
+                    space.S.toVec3(),
+                    space.S.translated(1000, VECTOR(space.D, space.S)).toVec3(),
+                    space.getUpwardDirectionVector());
+            }
 
 
             // perspective transformation
@@ -1290,11 +1291,26 @@ void Universe::generateImGuiWidgets()
             ImGui::PopFont();
 
             SmallCheckbox("Minimap", &minimapViewport->bEnabled); ImGui::SameLine();
-            ImGui::PushItemWidth(100);
+            ImGui::PushItemWidth(50);
             int tempWidth = minimapViewport->_w;
-            if (ImGui::SliderInt("Minimap width", &tempWidth, 300.0f, 600.0f))
+            if (ImGui::SliderInt("Width", &tempWidth, 300.0f, 600.0f))
                 minimapViewport->setWidth(tempWidth);      // Set width using function so that height is re-calculated as per aspect ratio.
-            ImGui::PopItemWidth();
+            ImGui::PopItemWidth(); ImGui::SameLine();
+
+            ImGui::PushItemWidth(90);
+            if (ImGui::BeginCombo("##combo", minimapMode.c_str())) // The second parameter is the label previewed before opening the combo.
+            {
+                for (int n = 0; n < minimapModes.size(); n++)
+                {
+                    bool is_selected = (minimapMode == minimapModes[n]); // You can store your selection however you want, outside or inside your objects
+                    if (ImGui::Selectable(minimapModes[n].c_str(), is_selected))
+                        minimapMode = minimapModes[n];
+                    if (is_selected)
+                        ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::PopItemWidth(); ImGui::SameLine();
 
             ImGui::Separator();
 
@@ -1322,6 +1338,23 @@ void Universe::generateImGuiWidgets()
 
             ImGui::End();
         }
+
+
+        //ImGui::SetNextWindowPos(ImVec2(50.0f, 500.0f), ImGuiCond_Always, ImVec2(0.0f, 0.0f));
+        ////ImGui::SetNextWindowSize(ImVec2(350.0f, curHeight - 25.0f));
+        //ImGui::SetNextWindowBgAlpha(0.0f);
+
+        //{
+        //    // Create a window called "Hello, world!" and append into it.
+        //    //ImGui::Begin(
+        //    //    "Minimap Panel",
+        //    //    nullptr,
+        //    //    ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings 
+        //    //);
+
+        //    bool bTest = true;
+        //    SmallCheckbox("Test checkox", &bTest); ImGui::SameLine();
+        //}
 
         // 3. Show another simple window.
         //if (show_another_window)
