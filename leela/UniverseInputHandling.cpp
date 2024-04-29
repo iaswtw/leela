@@ -182,11 +182,6 @@ void Universe::onKeyDown(SDL_Event* event)
         break;
 
 
-        // Arrow keys
-    case SDLK_LEFT:
-        break;
-    case SDLK_RIGHT:
-        break;
 
     case SDLK_MINUS:
         DecreaseSimulationSpeed();
@@ -196,15 +191,19 @@ void Universe::onKeyDown(SDL_Event* event)
         break;
 
     case SDLK_HOME:
+    case SDLK_UP:
         keyboard_throttle = nominalThrottle;
         break;
     case SDLK_END:
+    case SDLK_DOWN:
         keyboard_throttle = -nominalThrottle;
         break;
     case SDLK_PAGEDOWN:
+    case SDLK_RIGHT:
         keyboard_yaw = nominalYaw;
         break;
     case SDLK_DELETE:
+    case SDLK_LEFT:
         keyboard_yaw = -nominalYaw;
         break;
     case SDLK_PAGEUP:
@@ -293,10 +292,14 @@ void Universe::onKeyUp(SDL_Event* event)
 
     case SDLK_HOME:
     case SDLK_END:
+    case SDLK_UP:
+    case SDLK_DOWN:
         keyboard_throttle = noThrottle;
         break;
     case SDLK_PAGEDOWN:
     case SDLK_DELETE:
+    case SDLK_RIGHT:
+    case SDLK_LEFT:
         keyboard_yaw = noYaw;
         break;
     case SDLK_PAGEUP:
