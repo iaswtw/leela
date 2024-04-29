@@ -1062,7 +1062,7 @@ void Universe::generateImGuiWidgets()
             float sunRadius = sun->_radius;
             if (ImGui::SliderFloat("Sun radius## sun", &sunRadius, 100.0f, 250.0f)) {
                 sun->_radius = sunRadius;
-                sunRenderer->_constructMainSphereVertices();
+                sunRenderer->constructMainSphereVertices();
             }
             ImGui::PopItemWidth();
 

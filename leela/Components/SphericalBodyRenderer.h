@@ -28,7 +28,9 @@ struct Triangle
 
 enum PolygonCountLevel
 {
-	PolygonCountLevel_Low,
+    PolygonCountLevel_YouChoose,
+    PolygonCountLevel_VeryLow,
+    PolygonCountLevel_Low,
 	PolygonCountLevel_Medium,
 	PolygonCountLevel_High
 } ;
@@ -60,8 +62,12 @@ public:
 	void setPolygonCountLevel(std::string polygonCountLevel);
 
     void constructVerticesAndSendToGpu();
-    void _constructMainSphereVertices();
+    void _constructMainSphereVertices(int numEquatorVertices, GLuint* pVao, GLuint* pVbo, size_t* pNumSphereVertices);
     void _constructMainIcoSphereVertices();
+    void constructMainSphereVertices();
+    void constructMainSphereVerticesForMinimap();
+    //void constructIcoSphereVertices();
+    //void constructIcoSphereVerticesForMinimap();
     void constructRotationAxis();
     void constructLongRotationAxis();
     void constructOrbit();
@@ -86,24 +92,37 @@ public:
     std::tuple<float, float, float, glm::vec3, float, float> calcPointOnSphere(float radius, float alpha, float theta);
 
 
-	float _getPolygonIncrement();
+	int _getNumEquatorVertices(PolygonCountLevel polygonCountLevel = PolygonCountLevel_YouChoose);
     int _getIcoSphereSubdivisionLevel();
 
 public:
     SphericalBody * _sphere = nullptr;
 
-    GLuint vbo;     // vertex buffer object
-    GLuint ebo;     // element buffer object
+    
+    GLuint _minimapMainVao = 0;
+    GLuint _minimapMainVbo = 0;
+    GLuint minimapVbo = 0;     // vertex buffer object
+    GLuint minimapEbo = 0;     // element buffer object
+    
+    size_t numMinimapMainSphereVertices = 0;
+    size_t minimapNumMainSphereVertices = 0;
+    size_t minimapNumMainSphereElements = 0;
 
-    GLuint _mainVao;
+    //-------------------------------------------
+    // Primary scene VAOs, VBOs and vertex counts
+
+    GLuint _mainVao = 0;
+    GLuint _mainVbo = 0;
+    GLuint vbo = 0;     // vertex buffer object
+    GLuint ebo = 0;     // element buffer object
     GLuint _orbitVao = 0;
     GLuint _orbitVbo = 0;
-    GLuint _rotationAxisVao;
-    GLuint _rotationAxisVbo;
-    GLuint _longRotationAxisVao;
-    GLuint _longRotationAxisVbo;
-    GLuint _texture;
-    GLuint _texture2;
+    GLuint _rotationAxisVao = 0;
+    GLuint _rotationAxisVbo = 0;
+    GLuint _longRotationAxisVao = 0;
+    GLuint _longRotationAxisVbo = 0;
+    GLuint _texture = 0;
+    GLuint _texture2 = 0;
     GLuint _orbitalPlaneVao = 0;
     GLuint _orbitalPlaneVbo = 0;
     GLuint _orbitalPlaneGridVao = 0;            // grid lines in the orbital plane
@@ -117,14 +136,16 @@ public:
     size_t numOrbitalPlaneVertices = 0;
     size_t numOrbitalPlaneGridVertices = 0;
 
+    //-------------------------------------------
+
 	PolygonCountLevel _polygonCountLevel = PolygonCountLevel_Low;
     NightColorDarkness _nightColorDarkness = NightColorDarkness_VeryHigh;
     float _nightColorMultiplier;
     bool bLongAxis = false;         // if true, draw ridiculously long axis from north and south pole
 
     bool _bIsLightSource = false;
-    std::string _textureFilename;
-    std::string _textureFilename2;
+    std::string _textureFilename = "";
+    std::string _textureFilename2 = "";
 
     unsigned char* data = nullptr;
 };
@@ -140,6 +161,7 @@ public:
     virtual void doShaderConfig(GlslProgram& glslProgram);
 
 	void renderSphere(GlslProgram& glslProgram);
+    void renderMinimapSphere(GlslProgram& glslProgram);
 	void renderOrbitalPlane(GlslProgram& glslProgram);
 	void renderOrbit(GlslProgram& glslProgram);
     void renderRotationAxis(GlslProgram& glslProgram);
@@ -158,5 +180,5 @@ public:
     virtual void render(ViewportType viewportType, RenderStage renderStage, GlslProgram& glslProgram);
 
 	void _renderSphere(GlslProgram& glslProgram);
-
+    void renderMinimapSphere(GlslProgram& glslProgram);
 };
