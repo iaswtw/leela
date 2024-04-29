@@ -276,24 +276,23 @@ std::tuple<float, float, float, glm::vec3, float, float> SphericalBodyRenderer::
     return { x, y, z, N, texX, texY };
 }
 
-void SphericalBodyRenderer::_constructMainSphereVertices()
+void SphericalBodyRenderer::_constructMainSphereVertices(int numEquatorVertices, GLuint* pVao, GLuint* pVbo, size_t* pNumSphereVertices)
 {
     SphericalBody& s = *_sphere;
-    float numEquatorVertices = _getPolygonIncrement();
 
     std::vector<float>* v = ConstructSphereVertices(s._radius, s._color, numEquatorVertices, true);
 
-    if (vbo != 0) {
-        glDeleteBuffers(1, &vbo);
+    if (*pVbo != 0) {
+        glDeleteBuffers(1, pVbo);
     }
-    if (_mainVao != 0) {
-        glDeleteVertexArrays(1, &_mainVao);
+    if (*pVao != 0) {
+        glDeleteVertexArrays(1, pVao);
     }
 
-    glGenVertexArrays(1, &_mainVao);
-    glBindVertexArray(_mainVao);
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glGenVertexArrays(1, pVao);
+    glBindVertexArray(*pVao);
+    glGenBuffers(1, pVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, *pVbo);
     glBufferData(
         GL_ARRAY_BUFFER,
         sizeof(float) * v->size(),
@@ -316,7 +315,7 @@ void SphericalBodyRenderer::_constructMainSphereVertices()
     glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, PLANET_STRIDE_IN_VBO * sizeof(float), (void*)(10 * sizeof(float)));
     glEnableVertexAttribArray(3);
 
-    numMainSphereVertices = v->size() / PLANET_STRIDE_IN_VBO;
+    *pNumSphereVertices = v->size() / PLANET_STRIDE_IN_VBO;
     
     //---------------------------------------------------------
 
@@ -463,6 +462,18 @@ void SphericalBodyRenderer::_constructMainIcoSphereVertices()
     delete indexMesh.first;
     delete v;
     delete e;
+}
+
+void SphericalBodyRenderer::constructMainSphereVertices()
+{
+    int numEquatorVertices = _getNumEquatorVertices();
+    _constructMainSphereVertices(numEquatorVertices, &_mainVao, &_mainVbo, &numMainSphereVertices);
+}
+
+void SphericalBodyRenderer::constructMainSphereVerticesForMinimap()
+{
+    int numEquatorVertices = _getNumEquatorVertices(PolygonCountLevel_VeryLow);
+    _constructMainSphereVertices(numEquatorVertices, &_minimapMainVao, &_minimapMainVbo, &numMinimapMainSphereVertices);
 }
 
 
@@ -667,7 +678,7 @@ void SphericalBodyRenderer::constructRotationAxis()
     float radius = s._radius;
     glm::vec3& color = s._color;
 
-    float polygonIncrement = _getPolygonIncrement();
+    int polygonIncrement = _getNumEquatorVertices();
     float alpha_inc = float(2 * M_PI) / polygonIncrement;
     
     alpha_inc = alpha_inc * 10;
@@ -914,14 +925,14 @@ void SphericalBodyRenderer::constructVerticesAndSendToGpu()
 #ifndef USE_ICOSPHERE
     //---------------------------------------------------------------------------------------------------
     // The sphere itself
-    _constructMainSphereVertices();
+    int numEquatorVertices;
     
-
+    constructMainSphereVertices();
+    constructMainSphereVerticesForMinimap();
 #else
     //---------------------------------------------------------------------------------------------------
     // The sphere itself (Icosphere)
     _constructMainIcoSphereVertices();
-
 #endif
 
     // Orbital itself
@@ -956,18 +967,27 @@ std::string SphericalBodyRenderer::_locateTextureFile(const char * fileName)
     throw std::exception(msg.c_str());
 }
 
-float SphericalBodyRenderer::_getPolygonIncrement()
+int SphericalBodyRenderer::_getNumEquatorVertices(PolygonCountLevel polygonCountLevel)
 {
-	switch (_polygonCountLevel)
+    PolygonCountLevel level;
+
+    if (polygonCountLevel == PolygonCountLevel_YouChoose)
+        level = _polygonCountLevel;
+    else
+        level = polygonCountLevel;
+
+	switch (level)
 	{
-	case PolygonCountLevel_Low:
-		return 100.0;
-	case PolygonCountLevel_Medium:
-		return 600.0;
-	case PolygonCountLevel_High:
-		return 1000.0;
-    default:
-        return 500;
+	    case PolygonCountLevel_VeryLow:
+            return 30;
+	    case PolygonCountLevel_Low:
+		    return 100;
+	    case PolygonCountLevel_Medium:
+		    return 600;
+	    case PolygonCountLevel_High:
+		    return 1000;
+        default:
+            return 500;
 	}
 }
 
@@ -1003,8 +1023,12 @@ void PlanetRenderer::render(ViewportType viewportType, RenderStage renderStage, 
             if (viewportType == ViewportType::Primary || viewportType == ViewportType::Minimap) {
                 doShaderConfig(glslProgram);
 
-                if (bShowBody)
-                    renderSphere(glslProgram);
+                if (bShowBody) {
+                    if (viewportType == ViewportType::Primary)
+                        renderSphere(glslProgram);
+                    else
+                        renderMinimapSphere(glslProgram);
+                }
                 if (g_universe->bShowPlanetAxis) {
                     renderRotationAxis(glslProgram);
                 }
@@ -1101,25 +1125,41 @@ void PlanetRenderer::renderSphere(GlslProgram& glslProgram)
 {
     SphericalBody& s = *_sphere;
 
-    if (!_sphere->bIsCenterOfMass)
-    {
+    if (!_sphere->bIsCenterOfMass) {
         glBindVertexArray(_mainVao);
 
-
         if (g_universe->bShowWireframeSurfaces)
-        {
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        }
         else
-        {
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        }
 
     // Draw vertices
 #ifndef USE_ICOSPHERE
         glDrawArrays(GL_TRIANGLES, 0, (GLsizei) numMainSphereVertices);
 #else
-        glDrawElements(GL_TRIANGLES, numMainSphereElements, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, numMinimapMainSphereElements, GL_UNSIGNED_INT, 0);
+#endif
+    }
+}
+
+
+void PlanetRenderer::renderMinimapSphere(GlslProgram& glslProgram)
+{
+    SphericalBody& s = *_sphere;
+
+    if (!_sphere->bIsCenterOfMass) {
+        glBindVertexArray(_minimapMainVao);
+
+        if (g_universe->bShowWireframeSurfaces)
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        else
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+        // Draw vertices
+#ifndef USE_ICOSPHERE
+        glDrawArrays(GL_TRIANGLES, 0, (GLsizei)numMinimapMainSphereVertices);
+#else
+        glDrawElements(GL_TRIANGLES, numMinimapMainSphereElements, GL_UNSIGNED_INT, 0);
 #endif
     }
 }
@@ -1266,7 +1306,10 @@ void SunRenderer::render(ViewportType viewportType, RenderStage renderStage, Gls
                 doShaderConfig(glslProgram);
 
                 if (bShowBody)
-                    _renderSphere(glslProgram);
+                    if (viewportType == ViewportType::Primary)
+                        _renderSphere(glslProgram);
+                    else
+                        renderMinimapSphere(glslProgram);
             }
         }
     }
@@ -1285,5 +1328,21 @@ void SunRenderer::_renderSphere(GlslProgram& glslProgram)
     glDrawArrays(GL_TRIANGLES, 0, (GLsizei) numMainSphereVertices);
 #else
     glDrawElements(GL_TRIANGLES, numMainSphereElements, GL_UNSIGNED_INT, 0);
+#endif
+}
+
+void SunRenderer::renderMinimapSphere(GlslProgram& glslProgram)
+{
+    SphericalBody& s = *_sphere;
+
+    glslProgram.setMat4("model", glm::value_ptr(s.getTransform()));
+
+    glBindVertexArray(_minimapMainVao);
+
+    // Draw vertices
+#ifndef USE_ICOSPHERE
+    glDrawArrays(GL_TRIANGLES, 0, (GLsizei)numMinimapMainSphereVertices);
+#else
+    glDrawElements(GL_TRIANGLES, numMinimapMainSphereElements, GL_UNSIGNED_INT, 0);
 #endif
 }

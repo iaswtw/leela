@@ -30,11 +30,11 @@ void LatLonRenderer::constructLatitudesAndLongitudeVertices()
     std::vector<float>* v = new std::vector<float>();
     SphericalBody& s = *_sphere;
 
-    // TODO implement _getPolygonIncrement() in one of several ways:
+    // TODO implement _getNumEquatorVertices() in one of several ways:
     //  - in this class
     //  - as a mixin into this class.  The same mixin class can be used in SphericalBodyRenderer.
     //  - locate the main renderer class (will have to add infrastructure in SceneObject for this), and this method on it.
-    //float polygonIncrement = s._getPolygonIncrement();
+    //float polygonIncrement = s._getNumEquatorVertices();
     float polygonIncrement = 100;
 
     float inc = float(2 * float(M_PI)) / polygonIncrement;
@@ -128,11 +128,11 @@ void LatLonRenderer::constructSpecialLatitudesAndLongitudeVertices()
     std::vector<float>* v = new std::vector<float>();
     SphericalBody& s = *_sphere;
 
-    // TODO implement _getPolygonIncrement() in one of several ways:
+    // TODO implement _getNumEquatorVertices() in one of several ways:
     //  - in this class
     //  - as a mixin into this class.  The same mixin class can be used in SphericalBodyRenderer.
     //  - locate the main renderer class (will have to add infrastructure in SceneObject for this), and this method on it.
-    //float polygonIncrement = s._getPolygonIncrement();
+    //float polygonIncrement = s._getNumEquatorVertices();
     float polygonIncrement = 100;
 
     float inc = float(2 * float(M_PI)) / polygonIncrement;
