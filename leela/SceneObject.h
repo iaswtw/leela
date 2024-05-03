@@ -8,6 +8,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <Renderer.h>
 
 class Component;
 
@@ -36,6 +37,7 @@ public:
     glm::mat4 getTransform();
 
     void addComponent(Component* component);
+    void removeComponent(Component* component);
 
     // Add a child scene object
     void addSceneObject(SceneObject* childObject);
@@ -52,6 +54,7 @@ public:
 
     std::vector<SceneObject*> _childSceneObjects;
     std::vector<Component*> _components;					// components of this scene object
+    std::vector<Renderer*> _renderers;                      // subset of components that are renderers
 
     bool _hidden = false;                           // if hidden, none of its components will be processed.
     SceneObject * _sceneParent = nullptr;
