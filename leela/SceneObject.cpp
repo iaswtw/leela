@@ -24,6 +24,15 @@ void SceneObject::addComponent(Component* component)
 {
     component->setParent(this);
     _components.push_back(component);
+    Renderer* r = dynamic_cast<Renderer*>(component);
+    if (r)
+        _renderers.push_back(r);
+
+}
+
+void SceneObject::removeComponent(Component* component)
+{
+    // TODO
 }
 
 // Add a child scene object

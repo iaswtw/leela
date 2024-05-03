@@ -283,20 +283,24 @@ bool Universe::setupViewport(ViewportType viewportType)
     return configured;
 }
 
+//
+// Render all scene objects.
+//
 void Universe::renderSceneUsingGlslProgram(RenderStage renderStage, GlslProgram& glslProgram, ViewportType viewportType)
 {
     //spdlog::info("renderSceneUsingGlslProgram: glslProgram type = {}", (int)glslProgram.type());
     renderSceneObjectUsingGlslProgram(&scene, renderStage, glslProgram, viewportType);
 }
 
+//
+// Render the given `sceneObject` and all its children recursively.
+//
 void Universe::renderSceneObjectUsingGlslProgram(SceneObject * sceneObject, RenderStage renderStage, GlslProgram& glslProgram, ViewportType viewportType)
 {
     if (!sceneObject->hidden()) {
-        for (Component* c : sceneObject->_components)
+        for (Renderer* r : sceneObject->_renderers)
         {
-            Renderer* r = dynamic_cast<Renderer*>(c);
-            if (r != nullptr)
-                r->render(viewportType, renderStage, glslProgram);
+            r->render(viewportType, renderStage, glslProgram);
         }
 
         for (SceneObject* obj : sceneObject->_childSceneObjects)
@@ -308,9 +312,9 @@ void Universe::renderSceneObjectUsingGlslProgram(SceneObject * sceneObject, Rend
 
 
 
-
+//
 // prerequisites: fontGlslProgram must be active before calling this method.
-
+//
 void Universe::RenderText(GlslProgram& glslProgram, RenderTextType renderType, std::string text, float x, float y, float z, float scale, glm::vec3 color)
 {
     glslProgram.setVec3("textColor", glm::value_ptr(color));
