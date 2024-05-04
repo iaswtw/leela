@@ -857,7 +857,10 @@ void Universe::resetWidgetControlMode()
     SDL_SetRelativeMouseMode(SDL_TRUE);
 }
 
-
+//
+// - Process flags set in response to key presses.
+// - Process mouse movements.
+//
 void Universe::processFlags()
 {
     //----------------------------------------------
@@ -1002,6 +1005,7 @@ void Universe::processFlags()
 
     } else {
         // simulation is not paused.
+        // process time speed-up and slow-down flags.
 
         stepMultiplierFilterWhenPaused.filter(0.0f);        // feed zeros to filter that isn't being used.
 
@@ -1060,20 +1064,23 @@ void Universe::processFlags()
         glm::mat4 emm = earth->getTransform();
         glm::vec3 xCenter = earth->getModelTransformedCenter();
 
-        glm::vec4 S = glm::vec4(
+        // S has x and z components. y = 0. S is on 180 degree meridian.
+        PNT S = PNT(
             1.01f * earth->_radius * sinf((float)space.rad(surfaceLockTheta)),
             0.0f,
-            1.01f * earth->_radius * cosf((float)space.rad(surfaceLockTheta)),
-            1.0f);
+            1.01f * earth->_radius * cosf((float)space.rad(surfaceLockTheta)));
+        
+        PNT D = S.translated(100.0, VECTOR(PNT(0,0,0), PNT(0.0, 100.0, 0.0)));
 
-        glm::vec3 xS = emm * S;
-        glm::vec3 xD = emm * glm::vec4(S.x, S.y + 100.0f, S.z, 1.0f);
+        glm::vec3 xS = emm * glm::vec4(S.toVec3(), 1.0);
+        //glm::vec3 xD = emm * glm::vec4(S.x, S.y + 100.0f, S.z, 1.0f);
+        glm::vec3 xD = emm * glm::vec4(space.D.toVec3(), 1.0);
+        
         //VECTOR downwardDirVector = VECTOR(xS, xCenter);
         //    space.crossProduct(VECTOR(xS, xCenter), VECTOR(xS, xD));
-
         //PNT xD PNT(xS.x, xS.y + 100, xS.z);
-
         //PNT newS = PNT(earth.getCenter()).translated(-followDistance, followVector);
+
         space.setFrame(
             AT_POINT,
             xS,
@@ -1106,7 +1113,16 @@ void Universe::navigate(float __throttle, float __yaw, float __pitch, float __ro
 {
     bool bApplyThrottle = false;
 
-    if (lockTarget == nullptr)
+
+    if (bEarthSurfaceLockMode)
+    {
+        if ((__yaw != 0.0f) || (__pitch != 0.0f))
+        {
+            space.moveFrame(Movement_RotateRight, __yaw);
+            space.moveFrame(Movement_RotateUp, __pitch);
+        }
+    }
+    else if (lockTarget == nullptr)
     {
         // Finally, Apply the motion value.
         // TODO - don't allow navigating into in a object.

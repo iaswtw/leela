@@ -414,7 +414,7 @@ public:
     SphericalBody* lockTarget = nullptr;           // If not null, the camera will change direction such that target
                                             // will always appear at the center of the screen.
     bool bEarthSurfaceLockMode = false;
-    float surfaceLockTheta = 1.0f;      // change which latitude camera is at.
+    float surfaceLockTheta = 1.0f;      // change which latitude camera is at in degrees.
     float surfaceLockAlpha = 0.0f;      // don't intend to use this. Don't see enough value.
 
     bool bSimulationPause = false;
