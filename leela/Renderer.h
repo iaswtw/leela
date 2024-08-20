@@ -10,8 +10,8 @@
 // 
 // A given rendering call is a single combinations of the following 3 things:
 //	- rendering stage 
-//  - Glsl program type
-//  - scene type (main, inset1, inset2, etc.)
+//  - Glsl program type that is currently running when the call is made
+//  - scene / Viewport type (primary, minimap, alternate observer, etc.)
 //
 class Renderer : public Component
 {

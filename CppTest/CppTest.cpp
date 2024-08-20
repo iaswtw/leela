@@ -171,6 +171,7 @@ struct Sphere
 	__declspec(property(get = getprop, put = putprop)) int radius;
 };
 
+#include <string.h>
 
 int main()
 {
@@ -180,5 +181,4 @@ int main()
 
 	//int& refRadius = s.radius;
 	//int* pRadius = &s.radius;
-
 }

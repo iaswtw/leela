@@ -190,7 +190,7 @@ IndexedMesh make_icosphere(int subdivisions)
 
 SphericalBodyRenderer::SphericalBodyRenderer(std::string textureFilename, std::string textureFilename2)
 {
-    setNightColorDarkness(NightColorDarkness_Black);
+    //setNightColorDarkness(NightColorDarkness_Black);
     //setNightColorDarkness(NightColorDarkness_VeryLow);
     _textureFilename = textureFilename;
     _textureFilename2 = textureFilename2;
@@ -976,19 +976,19 @@ int SphericalBodyRenderer::_getNumEquatorVertices(PolygonCountLevel polygonCount
     else
         level = polygonCountLevel;
 
-	switch (level)
-	{
-	    case PolygonCountLevel_VeryLow:
+    switch (level)
+    {
+        case PolygonCountLevel_VeryLow:
             return 30;
-	    case PolygonCountLevel_Low:
-		    return 100;
-	    case PolygonCountLevel_Medium:
-		    return 600;
-	    case PolygonCountLevel_High:
-		    return 1000;
+        case PolygonCountLevel_Low:
+            return 100;
+        case PolygonCountLevel_Medium:
+            return 600;
+        case PolygonCountLevel_High:
+            return 1000;
         default:
             return 500;
-	}
+    }
 }
 
 int SphericalBodyRenderer::_getIcoSphereSubdivisionLevel()
@@ -1007,7 +1007,7 @@ int SphericalBodyRenderer::_getIcoSphereSubdivisionLevel()
 //############################################################################################################
 
 PlanetRenderer::PlanetRenderer(std::string textureFilename, std::string textureFilename2)
-	: SphericalBodyRenderer(textureFilename, textureFilename2)
+    : SphericalBodyRenderer(textureFilename, textureFilename2)
 {
 }
 
@@ -1274,7 +1274,7 @@ void PlanetRenderer::renderLongRotationAxis(GlslProgram& glslProgram)
 
 
 SunRenderer::SunRenderer( std::string textureFilename)
-	: SphericalBodyRenderer(textureFilename)
+    : SphericalBodyRenderer(textureFilename)
 {
 }
 
@@ -1323,7 +1323,7 @@ void SunRenderer::_renderSphere(GlslProgram& glslProgram)
 
     glBindVertexArray(_mainVao);
 
-	// Draw vertices
+    // Draw vertices
 #ifndef USE_ICOSPHERE
     glDrawArrays(GL_TRIANGLES, 0, (GLsizei) numMainSphereVertices);
 #else
