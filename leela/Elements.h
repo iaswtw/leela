@@ -36,6 +36,7 @@ PlanetInfo planetInfo[] = {
     //              name        object              angle       angular    orientation  angle       radius  angle   angular     precession  plane tilt                          count   
     //                          names                           velocity   angle                                    velocity    init angle  angle
     {  "Sun",       "",         {},         160,    0,          0.002f,    0.0f,        0.0f,       0,      0.0f,   0.01f,      0,          0,          {1.0f, 1.0f, 0.6f},     "low",      "sunmap.png"                    },
+    {  "Mercury",   "Sun",      {},         10,     0,          0.0004f,   0.0f,        2.0f,       700,    90.0f,  0.004f,     0.0f,       7.0f,       {0.8f, 0.8f, 0.8f},     "medium",   "2k_mercury.png"                },
     {  "Earth",     "Sun",      {"Moon"},   80,     0,          0.02f,     0.0f,        23.5f,      3000,   30.0f,  0.001f,     0.0f,       0,          {0.55f, 0.82f, 1.0f},   "medium",   "earth-erde-mit-wolken-2k.png"  },
     {  "Moon",      "Earth",    {"Earth"},  22,     0,          0.008888f, 0.0f,        10.0f,      400,    0.0f,   0.0088888f, 0,          30.0f,      {0.8f, 0.8f, 0.8f},     "medium",   "moonmap1k.png"                 },
     //{  "Earth2",    "Sun",      {},         80,     0,          0.02f,     0.0f,        23.5f,      3000,   60.0f,  0.001f,     0.0f,       0,          {0.55f, 0.82f, 1.0f},   "medium",   "earth-erde-mit-wolken-2k.png"  },
