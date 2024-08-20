@@ -222,21 +222,57 @@ void SphericalBodyRenderer::setAsLightSource()
 
 void SphericalBodyRenderer::setNightColorDarkness(NightColorDarkness darkness)
 {
-    _nightColorDarkness = darkness;
-    switch (_nightColorDarkness)
+    _nightColorDarkness     = darkness;
+    _nightColorMultiplier   = nightColorDarknessLevelToFloat(_nightColorDarkness);
+}
+
+float SphericalBodyRenderer::nightColorDarknessLevelToFloat(NightColorDarkness level)
+{
+    float floatValue = 0.0f;
+    switch (level)
     {
-    case NightColorDarkness_Black:      _nightColorMultiplier = 0.0f;   break;
-    case NightColorDarkness_VeryHigh:   _nightColorMultiplier = 0.07f;  break;
-    case NightColorDarkness_High:       _nightColorMultiplier = 0.15f;  break;
-    case NightColorDarkness_Medium:     _nightColorMultiplier = 0.2f;   break;
-    case NightColorDarkness_Low:        _nightColorMultiplier = 0.5f;   break;
-    case NightColorDarkness_VeryLow:    _nightColorMultiplier = 0.8f;   break;
-    case NightColorDarkness_None:       _nightColorMultiplier = 1.0f;   break;
+        case NightColorDarkness_Black:      floatValue = 0.0f;   break;
+        case NightColorDarkness_VeryHigh:   floatValue = 0.07f;  break;
+        case NightColorDarkness_High:       floatValue = 0.15f;  break;
+        case NightColorDarkness_Medium:     floatValue = 0.2f;   break;
+        case NightColorDarkness_Low:        floatValue = 0.5f;   break;
+        case NightColorDarkness_VeryLow:    floatValue = 0.8f;   break;
+        case NightColorDarkness_None:       floatValue = 1.0f;   break;
     }
 
-    _nightColorMultiplier = pow(_nightColorMultiplier, 1.7);
+    floatValue = pow(floatValue, 1.7);
 
+    return floatValue;
 }
+
+NightColorDarkness SphericalBodyRenderer::nightColorDarknessStrToLevel(std::string levelStr)
+{
+    if (levelStr == "Black") {
+        return NightColorDarkness_Black;
+    }
+    else if (levelStr == "Very High") {
+        return NightColorDarkness_VeryHigh;
+    }
+    else if (levelStr == "High") {
+        return NightColorDarkness_High;
+    }
+    else if (levelStr == "Medium") {
+        return NightColorDarkness_Medium;
+    }
+    else if (levelStr == "Low") {
+        return NightColorDarkness_Low;
+    }
+    else if (levelStr == "Very Low") {
+        return NightColorDarkness_VeryLow;
+    }
+    else if (levelStr == "None") {
+        return NightColorDarkness_None;
+    }
+    else {
+        return NightColorDarkness_VeryHigh;     // default to Very High for invalid levelStr
+    }
+}
+
 
 void SphericalBodyRenderer::setPolygonCountLevel(std::string polygonCountLevel)
 {
@@ -1075,7 +1111,12 @@ void PlanetRenderer::doShaderConfig(GlslProgram& glslProgram)
     {
         multiplierAdjust = 2.0f;
     }
-    glslProgram.setFloat("nightColorMultiplier", _nightColorMultiplier * multiplierAdjust);
+    //glslProgram.setFloat("nightColorMultiplier", _nightColorMultiplier * multiplierAdjust);
+    NightColorDarkness level = nightColorDarknessStrToLevel(g_universe->nightDarknessLevelStr);
+    float levelFloatValue = nightColorDarknessLevelToFloat(level);
+
+    glslProgram.setFloat("nightColorMultiplier", levelFloatValue * multiplierAdjust);
+
     glslProgram.setFloat("sphereInfo.sineOfSelfUmbraConeHalfAngle", sineOfSelfUmbraConeHalfAngle);
 
     //glEnable(GL_MULTISAMPLE);

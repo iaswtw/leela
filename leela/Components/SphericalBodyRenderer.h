@@ -59,6 +59,8 @@ public:
 
     void setAsLightSource();
     void setNightColorDarkness(NightColorDarkness darkness);
+    float nightColorDarknessLevelToFloat(NightColorDarkness level);
+    NightColorDarkness nightColorDarknessStrToLevel(std::string levelStr);
 	void setPolygonCountLevel(std::string polygonCountLevel);
 
     void constructVerticesAndSendToGpu();

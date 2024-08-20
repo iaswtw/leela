@@ -1126,7 +1126,26 @@ void Universe::generateImGuiWidgets()
             ImGui::Indent();
             SmallCheckbox("Rotation## earth", &earth->bRotationMotion); ImGui::SameLine();
             SmallCheckbox("Sync with revolution", &earth->bSyncWithRevolution);
-            SmallCheckbox("Revolution  (0)## earth", &earth->bRevolutionMotion);
+            SmallCheckbox("Revolution  (0)## earth", &earth->bRevolutionMotion); ImGui::SameLine();
+
+            ImGui::Text("Darkness:"); ImGui::SameLine();
+            ImGui::PushItemWidth(75);
+            if (ImGui::BeginCombo("##combo darkness level", nightDarknessLevelStr.c_str())) // The second parameter is the label previewed before opening the combo.
+            {
+                for (int n = 0; n < nightDarknessLevelStrs.size(); n++)
+                {
+                    bool is_selected = (nightDarknessLevelStr == nightDarknessLevelStrs[n]); // You can store your selection however you want, outside or inside your objects
+                    if (ImGui::Selectable(nightDarknessLevelStrs[n].c_str(), is_selected)) {
+                        nightDarknessLevelStr = nightDarknessLevelStrs[n];
+
+                    }
+                    if (is_selected)
+                        ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::PopItemWidth();
+
             SmallCheckbox("Orbit## earth", &earthRenderer->bShowOrbit);  ImGui::SameLine();
             SmallCheckbox("Plane (e)## earth", &earthRenderer->bShowOrbitalPlane);  ImGui::SameLine();
             if (SmallCheckbox("Transparency##earth orbital plane", &earthRenderer->bOrbitalPlaneTransparency)) {
@@ -1306,7 +1325,7 @@ void Universe::generateImGuiWidgets()
             ImGui::PopItemWidth(); ImGui::SameLine();
 
             ImGui::PushItemWidth(90);
-            if (ImGui::BeginCombo("##combo", minimapMode.c_str())) // The second parameter is the label previewed before opening the combo.
+            if (ImGui::BeginCombo("##combo minimap", minimapMode.c_str())) // The second parameter is the label previewed before opening the combo.
             {
                 for (int n = 0; n < minimapModes.size(); n++)
                 {

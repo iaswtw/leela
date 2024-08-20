@@ -522,6 +522,9 @@ public:
     std::string minimapMode = "Zoomed Out";
     std::vector<std::string> minimapModes = { "Zoomed Out", "Rear View" };
 
+    std::string nightDarknessLevelStr = "Very High";
+    std::vector<std::string> nightDarknessLevelStrs = { "Black", "Very High", "High", "Medium", "Low", "Very Low", "None"};
+
     std::string logString = "";
 
 };

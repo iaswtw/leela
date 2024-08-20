@@ -299,7 +299,7 @@ void main()
         }
     } while (false);
     
-    darknessFactor = pow(darknessFactor, 0.3);
+    darknessFactor = pow(darknessFactor, 0.5);
     
     // apply all 3 transformations to the original point
     gl_Position = proj * view * model * vec4(position, 1.0);
