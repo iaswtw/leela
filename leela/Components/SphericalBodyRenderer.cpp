@@ -1072,14 +1072,12 @@ void PlanetRenderer::render(ViewportType viewportType, RenderStage renderStage, 
         }
         else if (glslProgram.type() == GlslProgramType::Simple) {
             if (viewportType == ViewportType::Primary) {
-                if (g_universe->bShowOrbitsGlobalEnable)
-                    renderOrbit(glslProgram);
+                renderOrbit(glslProgram);
                 if (g_universe->bShowPlanetAxis)
                     renderLongRotationAxis(glslProgram);
             }
             else if (viewportType == ViewportType::Minimap) {
-                if (g_universe->bShowOrbitsGlobalEnable)
-                    renderOrbit(glslProgram);
+                renderOrbit(glslProgram);
             }
         }
     }

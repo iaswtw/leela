@@ -54,7 +54,20 @@ void Universe::onKeyDown(SDL_Event* event)
         Moon_OrbitalPlane(UCmdParam_Toggle);
         break;
     case SDLK_o:
-        ChangeBoolean(&bShowOrbitsGlobalEnable, UCmdParam_Toggle);
+        if (bShiftModifier) {
+            if (IsAnyOrbitVisible())
+                DisableShowingAllOrbits();
+            else
+                ShowAllOrbits();
+        }
+        else {
+            if (IsAnyOrbitVisible())
+                DisableShowingAllOrbits();
+            else {
+                printf("Showing earth and moon orbits\n");
+                ShowEarthAndMoonOrbits();
+            }
+        }
         break;
     case SDLK_p:
     case SDLK_PAUSE:

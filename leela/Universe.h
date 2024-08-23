@@ -269,6 +269,13 @@ public:
 
     void Moon_OrbitalPlaneRotation(int nParam);
     void Moon_Orbit(int nParam);
+    bool IsAnyOrbitVisible();
+    bool _IsAnyOrbitVisible(SceneObject* sceneObject);
+    void DisableShowingAllOrbits();
+    void _DisableShowingOrbit(SceneObject* scene);
+    void ShowAllOrbits();
+    void _ShowAllOrbits(SceneObject* sceneObject, vector<string>& names);
+    void ShowEarthAndMoonOrbits();
     void Moon_RevolutionMotion(int nParam);
     void Moon_SetOrbitalPositionAngle(double fAngle);
 

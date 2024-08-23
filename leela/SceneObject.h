@@ -49,6 +49,8 @@ public:
 
     bool hidden();
     void setHidden(bool hide = true);
+    std::string name() const { return _name; }
+
 
 public:
 

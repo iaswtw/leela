@@ -129,6 +129,4 @@ public:
 
     SphericalBody* _sphericalBodyParent = nullptr;  // e.g. if this is moon, _parent is earth.
                                                     // TODO: this will change when we bring in center of mass virtual SphericalBody object.
-    std::string _name = "NoName";
-
 };

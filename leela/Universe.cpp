@@ -764,6 +764,99 @@ void Universe::Moon_Orbit(int nParam)
     ChangeBoolean(&moonRenderer->bShowOrbit, nParam);
 }
 
+bool Universe::IsAnyOrbitVisible()
+{
+    return _IsAnyOrbitVisible(&scene);
+}
+
+bool Universe::_IsAnyOrbitVisible(SceneObject * sceneObject)
+{
+    for (Renderer* r : sceneObject->_renderers)
+    {
+        SphericalBodyRenderer* sbr = dynamic_cast<SphericalBodyRenderer*>(r);
+        if (sbr) {
+            if (sbr->bShowOrbit)
+                return true;        // if orbit is visible for this scene object, break the recursion.
+                                    // No need to test any child scene objects.
+        }
+    }
+
+    for (SceneObject* obj : sceneObject->_childSceneObjects)
+    {
+        if (_IsAnyOrbitVisible(obj))
+            return true;
+    }
+
+    return false;
+}
+
+void Universe::DisableShowingAllOrbits()
+{
+    _DisableShowingOrbit(&scene);
+}
+
+void Universe::_DisableShowingOrbit(SceneObject* sceneObject)
+{
+    for (Renderer* r : sceneObject->_renderers)
+    {
+        SphericalBodyRenderer * sbr = dynamic_cast<SphericalBodyRenderer*>(r);
+        if (sbr) {
+            sbr->bShowOrbit = false;
+        }
+    }
+    for (SceneObject* obj : sceneObject->_childSceneObjects)
+    {
+        _DisableShowingOrbit(obj);
+    }
+}
+
+void Universe::ShowAllOrbits()
+{
+    vector<string> names;
+    _ShowAllOrbits(&scene, names);
+}
+
+//
+// If `names` is empty, all spherical bodies will have their orbits turned on.
+// If `names` is not empty, only the spherical bodies whose names are in `names` vector will have orbits turned on.
+//
+void Universe::_ShowAllOrbits(SceneObject * sceneObject, vector<string>& names)
+{
+    for (Renderer* r : sceneObject->_renderers)
+    {
+        SphericalBodyRenderer* sbr = dynamic_cast<SphericalBodyRenderer*>(r);
+        if (sbr) {
+            bool doChange = true;           // assume empty `names`
+
+            if (names.size()) {
+                doChange = false;           // default to false now
+
+                for (string name : names) {
+                    if (name == sbr->_sphere->name()) {
+                        doChange = true;
+                        break;
+                    }
+                }
+            }
+
+            if (doChange)
+                sbr->bShowOrbit = true;
+        }
+    }
+    for (SceneObject* obj : sceneObject->_childSceneObjects)
+    {
+        _ShowAllOrbits(obj, names);
+    }
+}
+
+
+void Universe::ShowEarthAndMoonOrbits()
+{
+    vector<string> names = {"Earth", "Moon"};
+    _ShowAllOrbits(&scene, names);
+}
+
+
 void Universe::Moon_OrbitalPlaneRotation(int nParam)
 {
 
