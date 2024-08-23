@@ -45,7 +45,12 @@ void Universe::onKeyDown(SDL_Event* event)
         bEquals = true;
         break;
     case SDLK_l:
-        cycleLockMode();
+        if (bShiftModifier) {
+            cycleLabelModes();
+        }
+        else {
+            cycleLockMode();
+        }
         break;
     case SDLK_n:
         bEarthSurfaceLockMode = !bEarthSurfaceLockMode;

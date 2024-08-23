@@ -246,6 +246,7 @@ public:
     void calculateFollowTargetLockVariables();
     void calculateOrientedViewLockVariables();
     void cycleLockMode();
+    void cycleLabelModes();
     void ResetFollowTargetAndMode();
     void ToggleFollowTarget(SphericalBody* target, TargetLockMode mode);
 

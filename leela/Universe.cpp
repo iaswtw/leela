@@ -544,6 +544,21 @@ void Universe::cycleLockMode()
         SetLockMode(TargetLockMode_ViewTarget);
 }
 
+void Universe::cycleLabelModes()
+{
+    if (!bShowMonthNames && !bShowLargeLabels) {
+        bShowMonthNames = true;
+    }
+    else if (bShowMonthNames && !bShowLargeLabels) {
+        bShowLargeLabels = true;
+    }
+    else {
+        bShowMonthNames = false;
+        bShowLargeLabels = false;
+    }
+
+}
+
 void Universe::ResetFollowTargetAndMode()
 {
     SetLockTargetAndMode(nullptr, TargetLockMode_ViewTarget);
@@ -1306,7 +1321,7 @@ void Universe::navigate(float __throttle, float __yaw, float __pitch, float __ro
 
 int Universe::runMainLoop()
 {
-	ImGuiIO& io = ImGui::GetIO();
+    ImGuiIO& io = ImGui::GetIO();
     SDL_Event event;
 
     while (1)
@@ -1408,7 +1423,7 @@ int Universe::runMainLoop()
         SDL_GL_SwapWindow(window);
     }
 
-	return 0;
+    return 0;
 
 }
 
@@ -1491,34 +1506,34 @@ int Universe::run()
     //---------------------------------------------------
 
 
-	SDL_GL_SetSwapInterval(1);
-	int retval = 0;
-	try
-	{
+    SDL_GL_SetSwapInterval(1);
+    int retval = 0;
+    try
+    {
         compileShaders();
-		initSceneObjectsAndComponents();
-		printf("done\n");
+        initSceneObjectsAndComponents();
+        printf("done\n");
 
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		//glBlendFunc(GL_SRC_ALPHA, GL_SRC_ALPHA);
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        //glBlendFunc(GL_SRC_ALPHA, GL_SRC_ALPHA);
 
 
-		SDL_GetMouseState(&previousX, &previousY);
+        SDL_GetMouseState(&previousX, &previousY);
 
-		/// todo
-		runMainLoop();
-	}
-	catch (exception& e)
-	{
+        /// todo
+        runMainLoop();
+    }
+    catch (exception& e)
+    {
         printf("%s\n", e.what());
-		retval = 1;
-	}
+        retval = 1;
+    }
 
 
-	cout << "Cleaning up..." << endl;
-	cleanupAndExitApplication();
+    cout << "Cleaning up..." << endl;
+    cleanupAndExitApplication();
 
     cout << "Exiting leela with value " << retval;
     return retval;
