@@ -460,6 +460,7 @@ void Universe::ShowDemo(int nParam)
         SetLockTargetAndMode(earth, TargetLockMode_FollowTarget);
 
         SetSimulationSpeed(USimulationSpeed_100_Percent);
+        SimulationPause(UCmdParam_Off);
 
         break;
 

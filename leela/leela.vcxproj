@@ -164,6 +164,8 @@
       <AdditionalIncludeDirectories>$(ProjectDir)..\external\SDL2-2.30.1\include;$(ProjectDir)..\external\glm-0.9.9.5;$(ProjectDir)..\external\glew-2.1.0\include;$(ProjectDir)imgui;$(ProjectDir)..\external\FreeType\include;$(ProjectDir)..\external\spdlog-1.13.0\include;$(ProjectDir)Components;$(ProjectDir)SceneObjects;$(ProjectDir)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

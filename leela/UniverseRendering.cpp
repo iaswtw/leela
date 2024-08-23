@@ -1,4 +1,4 @@
-#include "Universe.h"
+﻿#include "Universe.h"
 
 #include "imgui.h"
 #include "imgui_impl_sdl2.h"
@@ -709,18 +709,19 @@ void Universe::generateImGuiWidgets()
 
             const char* shortcutHelp[][2] = {
             { "Space bar",      "Pause time. All navigation will continue to work." },
-            { "f",              "Pressing and keeping it pressed will cause simulation time to elapse faster by about 10 times."},
-            { "r",              "Pressing and keeping it pressed with cause simulation time to run in reverse by about 10 times the current forward speed. "
-                                "Releasing this key shall restore the forward movement of time at the speed it was just before pressing this key."},
-            { "Right arrow",    "Speeds up the time passage by 100%%."},
-            { "Left arrow",     "Slows down the time passage to 50%%."},
+            { "f",              "10X fast forward simulation time. "
+                                "Release to restore forward time at previous speed."},
+            { "r",              "10X fast reverse simulation time. "
+                                "Release to restore forward time at previous speed."},
+            { "=",              "Press once to speed up time by 100%%."},
+            { "-",              "Press once to slow down time by 50%%."},
             { "d",              "Show default view. Bring the camera to far away position so that the entire earth's orbit is visible. "
                                 "If you get lost navigating, press this key to reorient yourself."},
             { "Escape",         "Get back mouse cursor control if in navigation mode." },
             { nullptr, nullptr },
 
-            { "a",              "Toggle visibility of the XYZ coordinate axis.  When looking from the default view position, +ve X direction is towards bottom left from origin (blue),"
-                                "+ve Y is towards bottom right from origin (green), and +ve Z is upwards from origin (cyan)." },
+            { "a",              "Toggle visibility of XYZ coordinate axis.  In default view, +X (blue) goes south-west from origin, "
+                                "+Y (green) goes south east, and +Z (cyan) goes north."},
             { "e",              "Toggle visibility of earth's orbital plane." },
             { "m",              "Toggle visibility of moon's orbital plane." },
 
@@ -798,10 +799,10 @@ void Universe::generateImGuiWidgets()
 
             { nullptr, nullptr },
 
-            { "1",              "Set earth's position at 0 degrees measured from the positive X axis (blue)." },
-            { "2",              "Set earth's position at 90 degrees measured from the positive X axis (blue)." },
-            { "3",              "Set earth's position at 180 degrees measured from the positive X axis (blue)." },
-            { "4",              "Set earth's position at 270 degrees measured from the positive X axis (blue)." },
+            { "1",              "Set earth's position at 0° from +X axis in XY plane." },
+            { "2",              "Set earth's position at 90° from +X axis in XY plane" },
+            { "3",              "Set earth's position at 180° from +X axis in XY plane." },
+            { "4",              "Set earth's position at 270° from +X axis in XY plane." },
 
             {nullptr, nullptr },
 
