@@ -37,13 +37,20 @@ bool changeDirToParentOfExecutable()
     }
 }
 
-#undef main
 
 Universe * g_universe = new Universe();  // global instance accessible to all objects
 Space* g_space = &g_universe->space;
 
 int main(int argc, char *argv[])
+//int WINAPI WinMain(HINSTANCE hThisInstance, HINSTANCE hPrevInstance, LPSTR lpszArgument, int nCmdShow)
 {
+
+#ifdef _WIN32
+#if defined(DEBUG) | defined(_DEBUG)
+    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#endif
+#endif
+
     spdlog::set_pattern("[%H:%M:%S.%e] [%^%l%$] %v");
     
     if (!changeDirToParentOfExecutable())

@@ -25,7 +25,10 @@ SetupIconFile=leela.ico
 DisableDirPage=no
 
 [Files]
-Source: "Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs; Excludes: "*.pdb,*.ini"
+Source: "x64\Release\leela.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "external\FreeType\release_dll\win64\freetype.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "external\glew-2.1.0\bin\Release\x64\glew32.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\prj\leela\external\SDL2-2.30.1\lib\x64\SDL2.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "leela\shaders\*"; DestDir: "{app}\shaders"; Flags: ignoreversion recursesubdirs;
 Source: "leela\textures\*"; DestDir: "{app}\textures"; Flags: ignoreversion recursesubdirs;
 Source: "external\fonts\*.ttf"; DestDir: "{app}\fonts"; Flags: ignoreversion;
@@ -38,23 +41,35 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppMainExe}"
 Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppMainExe}"; IconFilename: "{app}\leela.ico"; Tasks: desktopicon
 
+[Run]
+Filename: {app}\{#MyAppName}.exe; Description: Run application after install; Flags: postinstall nowait
 
-;[Code]
-;procedure InitializeWizard();
-;begin
-;  { Welcome page }
-;  { Hide the labels }
-;  WizardForm.WelcomeLabel1.Visible := False;
-;  WizardForm.WelcomeLabel2.Visible := False;
-;  { Stretch image over whole page }
-;  WizardForm.WizardBitmapImage.Width :=
-;    WizardForm.WizardBitmapImage.Parent.Width;
-;
-;  { Finished page }
-;  { Hide the labels }
-;  WizardForm.FinishedLabel.Visible := False;
-;  WizardForm.FinishedHeadingLabel.Visible := False;
-;  { Stretch image over whole page }
-;  WizardForm.WizardBitmapImage2.Width :=
-;   WizardForm.WizardBitmapImage2.Parent.Width;
-;end;
+[Code]
+// remove previous 64-bits installation
+function Uninstall64bitsVersion () : Boolean;
+var
+  sUninstall: string;
+  ResultCode: Integer;
+begin
+  Result := True;
+  // Try getting the uninstall string.
+  if RegQueryStringValue (HKLM,
+      'SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{#MyAppName}_is1',
+      'UninstallString', sUninstall) then
+  begin
+    // uninstall it
+    ShellExec ('', sUninstall, '/SILENT', '', SW_SHOWNORMAL, ewWaitUntilTerminated, ResultCode);
+  end;
+end;
+
+// Called with CurStep=ssInstall just before the actual installation starts, with CurStep=ssPostInstall
+// just after the actual installation finishes, and with CurStep=ssDone just before Setup terminates after
+// a successful install.
+procedure CurStepChanged(CurStep: TSetupStep);
+begin
+  if (CurStep = ssInstall) then
+  begin
+    Uninstall64bitsVersion ();
+  end;
+end;
+
