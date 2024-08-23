@@ -202,6 +202,12 @@ void Universe::initSceneObjectsAndComponents()
             mars = sb;
             marsRenderer = planetRenderer;
         }
+        else if (pi.name == "Jupiter") {
+            jupiter = sb;
+        }
+        else if (pi.name == "Uranus") {
+            uranus = sb;
+        }
         else {
         }
 
@@ -943,13 +949,11 @@ void Universe::cleanupAndExitApplication()
 void Universe::Moon_SetOrbitalPositionAngle(double fAngle)
 {
     moon->setOrbitalAngle(float(fAngle));
-    moon->calculateCenterPosition();
 }
 
 void Universe::Earth_SetOrbitalPositionAngle(double fAngle)
 {
     earth->setOrbitalAngle(float(fAngle));
-    earth->calculateCenterPosition();
 }
 
 

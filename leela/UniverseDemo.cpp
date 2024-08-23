@@ -379,11 +379,11 @@ void Universe::ShowDemo(int nParam)
         Earth_RevolutionMotion(UCmdParam_On);
         Earth_PrecessionMotion(UCmdParam_Reset);
 
-        //// Adjust Moon's motions
+        // Adjust Moon's motions
         Moon_RevolutionMotion(UCmdParam_Off);
         Moon_Orbit(UCmdParam_Off);
 
-        //// Adjust orbital planes
+        // Adjust orbital planes
         Earth_OrbitalPlane(UCmdParam_Off);
         Moon_OrbitalPlane(UCmdParam_Off);
 
@@ -426,6 +426,43 @@ void Universe::ShowDemo(int nParam)
 
 
         break;
+
+    case UDemo_ApparentRetrogradeMotion:
+
+        newS = PNT(5183.477090, 2757.311460, 928.718430);
+        newD = PNT(4007.128576, 2808.851895, 697.314547);
+
+        space.setFrame(AT_POINT,
+            newS,
+            VECTOR(newS, newD),
+            PNT(newS.x, newS.y, newS.z - 100));
+
+        bShowLargeLabels = false;
+
+        // Adjust Earth's motions
+        Earth_RotationMotion(UCmdParam_On);
+        Earth_RevolutionMotion(UCmdParam_On);
+        Earth_PrecessionMotion(UCmdParam_Reset);
+
+        // Adjust Moon's motions
+        Moon_RevolutionMotion(UCmdParam_On);
+        Moon_Orbit(UCmdParam_On);
+
+        // Adjust orbital planes
+        Earth_OrbitalPlane(UCmdParam_Off);
+        Moon_OrbitalPlane(UCmdParam_Off);
+
+        earth->setOrbitalAngle(1.416077f);
+        mars->setOrbitalAngle(2.574843f);
+        jupiter->setOrbitalAngle(2.89f);
+
+        // FollowTarget mode is necessary or else retrograde motion will not be visible.
+        SetLockTargetAndMode(earth, TargetLockMode_FollowTarget);
+
+        SetSimulationSpeed(USimulationSpeed_100_Percent);
+
+        break;
+
     }
 
 }

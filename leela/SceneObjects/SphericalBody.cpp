@@ -1,6 +1,14 @@
 #include "SphericalBody.h"
 
 
+void SphericalBody::setOrbitalAngle(float orbitalAngle, bool calculateDependencies)
+{
+    _orbitalAngle = orbitalAngle;
+    if (calculateDependencies) {
+        calculateCenterPosition();
+    }
+}
+
 void SphericalBody::setRotationParameters(float radius, float rotationAngle, float rotationAngularVelocity, float axisTiltOrientationAngle, float axisTiltAngle)
 {
     _radius = radius;

@@ -173,6 +173,7 @@ typedef enum
     UDemo_PrecessionMotion,
     UDemo_StarParallex,
     UDemo_MoonsNodalPrecession,
+    UDemo_ApparentRetrogradeMotion,
 } UDemoType;
 
 
@@ -473,6 +474,8 @@ public:
     SphericalBody* earth;
     SphericalBody* sun;
     SphericalBody* mars;
+    SphericalBody* jupiter;
+    SphericalBody* uranus;
     SphericalBody* moon;
     Stars stars;
 

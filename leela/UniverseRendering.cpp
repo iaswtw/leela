@@ -1047,6 +1047,13 @@ void Universe::generateImGuiWidgets()
                 if (ImGui::Button("Moon's Nodal Precession## demo"))
                     ShowDemo(UDemo_MoonsNodalPrecession);
 
+                if (ImGui::Button("Apparent Retrograde motion of\nMars and Jupiter## demo"))
+                    ShowDemo(UDemo_ApparentRetrogradeMotion);
+                ImGui::SameLine();
+                HelpMarker(
+                    "Observe how Mars and Jupiter appear to move back in their orbit when they are near opposition w.r.t. Sun."
+                );
+
                 ImGui::PopFont();
             }
             ImGui::PopFont();

@@ -95,11 +95,15 @@ void Universe::onKeyDown(SDL_Event* event)
                 "\nS = %f, %f, %f"
                 "\nD = %f, %f, %f"
                 "\nEarth->_orbitalAngle = %f"
+                "\nmars->_orbitalAngle = %f"
+                "\njupiter->_orbitalAngle = %f"
                 "\nmoon->_nodalPrecessionAngle = %f"
                 ,
                 space.S.x, space.S.y, space.S.z,
                 space.D.x, space.D.y, space.D.z,
                 earth->_orbitalAngle,
+                mars->_orbitalAngle,
+                jupiter->_orbitalAngle,
                 moon->_nodalPrecessionAngle
             );
             logString = logBuffer;                  // ImGui will check the logString (of type std::string), and write its contents to Windows clipboard.

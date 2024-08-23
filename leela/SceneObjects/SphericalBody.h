@@ -55,7 +55,7 @@ public:
     void setName(std::string name)                          { _name = name; }
     //void setOrbitalPlaneColor(glm::vec3 orbitalPlaneColor)  { _orbitalPlaneColor = orbitalPlaneColor; }
     void setOrbitalRadius(float orbitalRadius)              { _orbitalRadius = orbitalRadius; }
-    void setOrbitalAngle(float orbitalAngle)                { _orbitalAngle = orbitalAngle; }
+    void setOrbitalAngle(float orbitalAngle, bool calculateDependencies = true);
     inline glm::vec3& getCenter()                           { return _center; }
     inline float getRadius()                                { return _radius; }
     void restoreRadius()                                    { _radius = _radius_Backup;  }
