@@ -700,7 +700,7 @@ void Universe::generateImGuiWidgets()
                         ImGui::Separator();
                     }
                     else {
-                        ImGui::Text(arr[i][0]);  ImGui::NextColumn();  ImGui::SetColumnOffset(-1, 150);
+                        ImGui::Text(arr[i][0]);  ImGui::NextColumn();  ImGui::SetColumnOffset(-1, 200);
                         ImGui::TextWrapped(arr[i][1]);  ImGui::NextColumn();
                     }
                 }
@@ -709,12 +709,10 @@ void Universe::generateImGuiWidgets()
 
             const char* shortcutHelp[][2] = {
             { "Space bar",      "Pause time. All navigation will continue to work." },
-            { "f",              "10X fast forward simulation time. "
-                                "Release to restore forward time at previous speed."},
-            { "r",              "10X fast reverse simulation time. "
-                                "Release to restore forward time at previous speed."},
-            { "=",              "Press once to speed up time by 100%%."},
-            { "-",              "Press once to slow down time by 50%%."},
+            { "f / r",          "10X Fast Forward / 10X Fast Reverse simulation time. "
+                                "Releasing will restore forward time at previous speed."},
+            { "Shift+f / Shift+r", "50X Fast Forward /50X Fast Reverse simulation time."},
+            { "= / -",          "Speed up / Slow down simulation time by a factor of 2."},
             { "d",              "Show default view. Bring the camera to far away position so that the entire earth's orbit is visible. "
                                 "If you get lost navigating, press this key to reorient yourself."},
             { "Escape",         "Get back mouse cursor control if in navigation mode." },
@@ -741,27 +739,26 @@ void Universe::generateImGuiWidgets()
 
 
             { nullptr, nullptr },
-            { nullptr, nullptr },
 
             { "",               "The 6 keys -- Ins, Del, Home, End, Page Up and Page Down -- form the main keyboard navigation control.\n"
                                 "Note that mouse navigation is easier and is preferred."
             },
             { nullptr, nullptr },
 
-            { "Home",           "Zoom in"
-                                "\n\n"
+            { "Home / Up arrow",   "Zoom in"
+                                   "\n\n"
             },
 
-            { "End",            "Zoom out"
-                                "\n\n"
+            { "End / Down arror",  "Zoom out"
+                                   "\n\n"
             },
-            { "Del",            "Yaw left\n\n"
-                                "Turn left.  In Shift mode, shift left.  If there is a locked target, rotate left around it."
-                                "\n\n"
+            { "Del / Left arrow",  "Yaw left\n\n"
+                                   "Turn left.  In Shift mode, shift left.  If there is a locked target, rotate left around it."
+                                   "\n\n"
             },
-            { "Page Down",      "Yaw right\n\n"
-                                "Turn right.  In Shift mode, shift right.  If there is a locked target, rotate right around it."
-                                "\n\n"
+            { "Page Down / Right arrow",  "Yaw right\n\n"
+                                          "Turn right.  In Shift mode, shift right.  If there is a locked target, rotate right around it."
+                                          "\n\n"
             },
             { "Page Up",        "Pitch up\n\n"
                                 "Rotate up.  In Shift mode, shift up.  If there is a locked target, rotate up around it. "
@@ -783,11 +780,8 @@ void Universe::generateImGuiWidgets()
             },
             { nullptr, nullptr },
             { "v",              "Toggle 'Shift mode' navigation.  In this mode, left/right/up/down mouse movements will result in the camera being shifted in those directions as "
-                                "as opposed to rotating in those directions.  When the camera shifts, the viewing direction vector does not change. It is as if the camera is looking at a point at infinity. "
-                                "If you want to look at how the background stars shift due to parallex as the earth moves in its orbit, turn this mode on, go to default "
-                                "view (d), and then move the mouse left and right."
+                                "as opposed to rotate in those directions.  When the camera shifts, the viewing direction vector does not change. It is as if the camera is looking at a point at infinity. "
             },
-
 
             { nullptr, nullptr },
 
@@ -810,7 +804,7 @@ void Universe::generateImGuiWidgets()
 
             ImGui::PushFont(appFontMedium);
             ImGui::Columns(2, "mycolumn");
-            ImGui::Text("Shortcut"); ImGui::NextColumn();  ImGui::SetColumnOffset(-1, 150);
+            ImGui::Text("Shortcut"); ImGui::NextColumn();  ImGui::SetColumnOffset(-1, 200);
             ImGui::Text("Description"); ImGui::NextColumn();
             ImGui::Separator();
 

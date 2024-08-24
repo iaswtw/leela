@@ -429,8 +429,8 @@ void Universe::ShowDemo(int nParam)
 
     case UDemo_ApparentRetrogradeMotion:
 
-        newS = PNT(5183.477090, 2757.311460, 928.718430);
-        newD = PNT(4007.128576, 2808.851895, 697.314547);
+        newS = PNT(7191.532228, 1906.936172, 1171.509057);
+        newD = PNT(6025.590868, 1890.167779, 888.137275);
 
         space.setFrame(AT_POINT,
             newS,
@@ -452,9 +452,9 @@ void Universe::ShowDemo(int nParam)
         Earth_OrbitalPlane(UCmdParam_Off);
         Moon_OrbitalPlane(UCmdParam_Off);
 
-        earth->setOrbitalAngle(1.416077f);
-        mars->setOrbitalAngle(2.574843f);
-        jupiter->setOrbitalAngle(2.89f);
+        earth->setOrbitalAngle(0.659267f);
+        mars->setOrbitalAngle(2.347793f);
+        jupiter->setOrbitalAngle(2.799210f);
 
         // FollowTarget mode is necessary or else retrograde motion will not be visible.
         SetLockTargetAndMode(earth, TargetLockMode_FollowTarget);
