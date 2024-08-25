@@ -63,7 +63,8 @@ static std::string FindFontFile(const char * fileName)
 Universe::Universe() :
 
     sunRenderer(*this, sun, "sunmap.png"),
-    earthRenderer(*this, earth, "earth-erde-mit-wolken-2k.png"),
+    //earthRenderer(*this, earth, "earth-erde-mit-wolken-2k.png"),
+    earthRenderer(*this, earth, "earth_no_clouds.png", "earth_fair_clouds_8k.png"),
     moonRenderer(*this, moon, "moonmap1k.png"),
     marsRenderer(*this, mars, "mars2k.png"),
     jupiterRenderer(*this, jupiter, "jupiter2k.png"),
