@@ -39,6 +39,8 @@ bool changeDirToParentOfExecutable()
 
 #undef main
 
+Universe universe;  // global instance accessible to all objects
+
 int main(int argc, char *argv[])
 {
     spdlog::set_pattern("[%H:%M:%S.%e] [%^%l%$] %v");
@@ -48,8 +50,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    Universe app;
-    auto retval = app.run();
+    auto retval = universe.run();
 
     if (retval != 0)
     {

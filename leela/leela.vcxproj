@@ -175,6 +175,7 @@
     <ClInclude Include="components\AxisComponent.h" />
     <ClInclude Include="components\Component.h" />
     <ClInclude Include="components\OrbitalPlaneComponent.h" />
+    <ClInclude Include="components\Renderer.h" />
     <ClInclude Include="Fir.h" />
     <ClInclude Include="glcorearb.h" />
     <ClInclude Include="GlslProgram.h" />
@@ -220,7 +221,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="StarsRenderer.cpp" />
     <ClCompile Include="Universe.cpp" />
     <ClCompile Include="UniverseDemo.cpp" />

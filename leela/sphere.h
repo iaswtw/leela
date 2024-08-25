@@ -12,6 +12,7 @@
 #include <algorithm>
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <SceneObject.h>
 
 #include <spdlog/spdlog.h>
 
@@ -46,7 +47,7 @@ public:
 };
 
 
-class Sphere
+class Sphere : public SceneObject
 {
 public:
     Sphere()
@@ -195,7 +196,7 @@ public:
 
     // Get the model matrix of the center of this sphere.
     // - This includes first getting the parent's center's model matrix.
-    glm::mat4 getCenterModelMatrix()
+    glm::mat4 getPositionTransform()
     {
         glm::mat4 mat(1.0f);
 
@@ -205,7 +206,7 @@ public:
 
         // parent is assumed to have been updated.  Translate by an amount equal to the parent's position.
         if (_parent != nullptr)
-            mat = _parent->getCenterModelMatrix();
+            mat = _parent->getPositionTransform();
 
         // apply nodal precession
         mat = glm::rotate(
@@ -234,22 +235,15 @@ public:
         return mat;
     }
 
-    // returns a vec3 in x-y plane (z=0)
-    glm::vec3 getAxisTiltOrientationAxis()
+    // Transforms a point on an upright sphere at origin to the tilted sphere at origin.
+    //    - use axial tilt, rotation position and precession of the sphere.
+    glm::mat4 getOrientationTransform()
     {
-        glm::vec3 axisTiltOrientationAxis = glm::vec3(cos(getAxisTiltOrientationAngle()), sin(getAxisTiltOrientationAngle()), 0.0f);
-        return axisTiltOrientationAxis;
-    }
+        glm::mat4 mat(1.0f);
 
-    // Transforms a point on an upright sphere at origin to the tilted sphere in its orbit.
-    //    - usis axial tilt, rotation position and precession of the sphere.
-    //    - uses orbital radius, tilt and nodal precession. 
-    glm::mat4 getModelMatrix()
-    {
-        glm::mat4 modelTrans(1.0f);
-
-        // translate
-        modelTrans = glm::translate(modelTrans,   getCenter());
+        //-------------------------------------------------------------------
+        // Transformation matrix is created in reverse order of intended application to the transformed point.
+        //-------------------------------------------------------------------
 
         // tilt and rotate axis. 
         // todo - do this using a single rotate invocation
@@ -257,10 +251,18 @@ public:
 
         glm::vec3 axisTiltOrientationAxis = getAxisTiltOrientationAxis();
 
-        modelTrans = glm::rotate(modelTrans,   getAxisTiltAngle(),       axisTiltOrientationAxis);
-        modelTrans = glm::rotate(modelTrans,   getRotationAngle(),       glm::vec3(0.0f, 0.0f, 1.0f));
-        
-        return modelTrans;
+        mat = glm::rotate(mat, getAxisTiltAngle(), axisTiltOrientationAxis);
+        mat = glm::rotate(mat, getRotationAngle(), glm::vec3(0.0f, 0.0f, 1.0f));
+
+        return mat;
+    }
+
+
+    // returns a vec3 in x-y plane (z=0)
+    glm::vec3 getAxisTiltOrientationAxis()
+    {
+        glm::vec3 axisTiltOrientationAxis = glm::vec3(cos(getAxisTiltOrientationAngle()), sin(getAxisTiltOrientationAngle()), 0.0f);
+        return axisTiltOrientationAxis;
     }
 
     void advance(float stepMultiplier)
@@ -312,7 +314,7 @@ public:
     // Calculates center position based on the value of current parameters
     void calculateCenterPosition()
     {
-        glm::mat4 mat = getCenterModelMatrix();
+        glm::mat4 mat = getPositionTransform();
         glm::vec3 raisedCenter;
 
         _center         = mat * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);       // transform point at origin to form the transformed sphere's center.
@@ -323,13 +325,13 @@ public:
     // Get a point defined in untranslated coordinates to be translated by this sphere's model matrix.
     glm::vec3 getTranslatedSpherePoint(glm::vec3 p)
     {
-        return getCenterModelMatrix() * glm::vec4(p, 1.0);
-        //return getModelMatrix() * getCenterModelMatrix() * glm::vec4(p, 1.0);
+        return getPositionTransform() * glm::vec4(p, 1.0);
+        //return getTransform() * glm::vec4(p, 1.0);
     }
 
     glm::vec3 getTransformedNorthPole()
     {
-        return getModelMatrix() * glm::vec4(0.0f, 0.0f, _radius, 1.0);
+        return getTransform() * glm::vec4(0.0f, 0.0f, _radius, 1.0);
     }
 
     glm::vec3 getTransformedLatitudeLongitude(float lat, float lon, float radiusScale = 1.0f)
@@ -345,7 +347,7 @@ public:
         float y = _radius * radiusScale * sin(theta_rad) * sin(alpha_rad);
         float z = _radius * radiusScale * cos(theta_rad);
 
-        return getModelMatrix() * glm::vec4(x, y, z, 1.0);
+        return getTransform() * glm::vec4(x, y, z, 1.0);
     }
 
     // Calculate 12 points outside the orbit suitable for drawing month labels

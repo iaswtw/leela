@@ -188,11 +188,10 @@ typedef enum
                                     //  - text appears the same size regardless of observer's position
 } RenderTextType;
 
+class Universe;
 
-// This will hold components for the top level
-class MiscComponentContainer : public SceneObject
-{
-};
+extern Universe* universe;
+
 
 class Universe
 {
@@ -266,7 +265,8 @@ public:
 
     void ChangeBoolean(bool *pBool, int nParam);
 
-    void advance(float stepMultiplier);
+    void _advanceSceneObject(SceneObject * sceneObject, float stepMultiplier);
+    void advanceScene(float stepMultiplier);
 
     void onKeyDown(SDL_Event* event);
     void onKeyUp(SDL_Event* event);
@@ -450,8 +450,7 @@ public:
     Sphere neptune;
     Stars stars;
 
-    MiscComponentContainer miscComponentContainer;
-    std::vector<SceneObject*> sceneObjects;
+    Scene scene;
 
     Sphere* allSpheres[9] = { &sun, &earth, &moon, &mars, &jupiter, &saturn, &uranus, &neptune, NULL };
     Sphere* allPlanets[8] = {       &earth, &moon, &mars, &jupiter, &saturn, &uranus, &neptune, NULL };
