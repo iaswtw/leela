@@ -12,7 +12,7 @@
 #include "SceneObject.h"
 #include "sphere.h"
 #include "SphereRenderer.h"
-#include "AxisComponent.h"
+#include "CoordinateAxisRenderer.h"
 #include "Stars.h"
 #include "StarsRenderer.h"
 #include "Space.h"
@@ -39,7 +39,6 @@ constexpr auto FIR_WIDTH = 100;
 
 #define RELEASE_BUILD
 //#define USE_ICOSPHERE
-//#define DRAW_LINES_INSTEAD_OF_TRIANGLES
 
 struct Character {
     unsigned int textureID;     // ID handle of the glyph texture
@@ -209,18 +208,16 @@ public:
     void render();
     void renderAllNontransparentObjects();
     void renderAllTransparentObjects();
-    void renderUsingPlanetGlslProgram();
-	void renderUsingStarGlslProgram();
-	void renderUsingSunGlslProgram();
-    void renderUsingSimpleGlslProgram();
-    void renderTransparentUsingSimpleGlslProgram();
+    void renderTransparentSceneUsingGlslProgram(GlslProgram& glslProgram);
+    void renderTransparentSceneObjectUsingGlslProgram(SceneObject* sceneObject, GlslProgram& glslProgram);
     void renderUsingFontGlslProgram();
+    void renderSceneUsingGlslProgram(GlslProgram& glslProgram);
+    void renderSceneObjectUsingGlslProgram(SceneObject* sceneObject, GlslProgram& glslProgram);
     void RenderText(RenderTextType renderType, std::string text, float x, float y, float z, float scale, glm::vec3 color);
 
     void constructFontInfrastructureAndSendToGpu();
 
-    void initializeGL();
-    void initSceneObjects();
+    void initSceneObjectsAndComponents();
     void printGlError();
 
     void ChangeSidewaysMotionMode();
@@ -439,7 +436,7 @@ public:
 
 
     // Sphere and other objects to be drawn on the screen. Instantiate them here. Their data (vertices) will be created later.
-    AxisComponent axis;
+    CoordinateAxisRenderer coordinateAxisRenderer;
     Sphere earth;
     Sphere sun;
     Sphere mars;
@@ -477,11 +474,11 @@ public:
     std::vector<float> twoPixelWideStarVertices;
     std::vector<float> gstarVertices;
 
-	GlslProgram planetGlslProgram;
-	GlslProgram sunGlslProgram;
-	GlslProgram starGlslProgram;
-    GlslProgram simpleGlslProgram;
-    GlslProgram fontGlslProgram;
+	GlslProgram planetGlslProgram = GlslProgram(GlslProgramType_Planet);
+	GlslProgram sunGlslProgram = GlslProgram(GlslProgramType_Sun);
+	GlslProgram starGlslProgram = GlslProgram(GlslProgramType_Star);
+    GlslProgram simpleGlslProgram = GlslProgram(GlslProgramType_Simple);
+    GlslProgram fontGlslProgram = GlslProgram(GlslProgramType_Font);
 
     // Realistic day/night shading, shadow shading.
     // Effect on day & nights:

@@ -1,23 +1,24 @@
 #include "Utils.h"
-#include "AxisComponent.h"
+#include "CoordinateAxisRenderer.h"
+#include "universe.h"
 
 
-
-AxisComponent::AxisComponent()
-    : Component(ComponentType_Axis)
+CoordinateAxisRenderer::CoordinateAxisRenderer()
 {
 }
 
-AxisComponent::~AxisComponent()
+CoordinateAxisRenderer::~CoordinateAxisRenderer()
 {
 }
 
-void AxisComponent::init()
+
+
+void CoordinateAxisRenderer::init()
 {
     constructVerticesAndSendToGpu();
 }
 
-std::vector<float>* AxisComponent::_constructVertices()
+std::vector<float>* CoordinateAxisRenderer::_constructVertices()
 {
     std::vector<float>* v = new std::vector<float>();
 
@@ -33,7 +34,7 @@ std::vector<float>* AxisComponent::_constructVertices()
     return v;
 }
 
-void AxisComponent::constructVerticesAndSendToGpu()
+void CoordinateAxisRenderer::constructVerticesAndSendToGpu()
 {
     GLuint vbo;
     std::vector<float>* v = nullptr;
@@ -61,13 +62,15 @@ void AxisComponent::constructVerticesAndSendToGpu()
 
 }
 
-void AxisComponent::render(GlslProgram& glslProgram)
+void CoordinateAxisRenderer::render(GlslProgram& glslProgram)
 {
-    //----------------------------------------------
-    // Axis model transformation
-    //----------------------------------------------
-    glslProgram.setMat4("model", glm::value_ptr(glm::mat4(1.0)));
-    glBindVertexArray(_axisVao);
-    // Draw vertices
-    glDrawArrays(GL_LINES, 0, numVertices);
+    if (universe->bShowAxis) {
+        //----------------------------------------------
+        // Axis model transformation
+        //----------------------------------------------
+        glslProgram.setMat4("model", glm::value_ptr(glm::mat4(1.0)));
+        glBindVertexArray(_axisVao);
+        // Draw vertices
+        glDrawArrays(GL_LINES, 0, numVertices);
+    }
 }

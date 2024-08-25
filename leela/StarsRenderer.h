@@ -4,12 +4,21 @@
 #include <GL/glew.h>
 #include <vector>
 #include "Stars.h"
+#include "Renderer.h"
 
-class StarsRenderer
+class StarsRenderer : public Renderer
 {
 public:
     StarsRenderer(Stars& stars);
     ~StarsRenderer();
+
+    void init();
+    void render(GlslProgram& glslProgram);
+
+    void advance(float stepMultiplier) {}
+    std::vector<GlslProgramType> getNeededGlslProgramTypes() {
+        return { GlslProgramType_Star };
+    }
 
     void constructVerticesAndSendToGpu();
     void renderCubeStars(GlslProgram& glslProgram);

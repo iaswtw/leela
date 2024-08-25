@@ -1,6 +1,7 @@
 #pragma once
 
 #include "sphere.h"
+#include "Renderer.h"
 
 class Universe;
 
@@ -42,11 +43,18 @@ enum NightColorDarkness
     NightColorDarkness_None,            // night vertex color same as day color
 };
 
-class SphereRenderer
+class SphereRenderer : public Renderer
 {
 public:
     SphereRenderer(Universe& parent, Sphere& sphere, std::string textureFilename, std::string textureFilename2);
     ~SphereRenderer();
+
+    virtual std::vector<GlslProgramType> getNeededGlslProgramTypes() {
+        return { GlslProgramType_Planet, GlslProgramType_Simple };
+    }
+    virtual void init();
+    virtual void advance(float stepMultiplier) {};
+
 
     void setAsLightSource();
     void setNightColorDarkness(NightColorDarkness darkness);
@@ -56,9 +64,12 @@ public:
 
     std::string _locateTextureFile(const char * filenName);
 
+
 public:
     bool bShowOrbit = true;
     bool bShowLatitudesAndLongitudes = false;
+    bool bOrbitalPlaneTransparency = false;
+    bool bShowOrbitalPlane = false;
 
 
 public:
@@ -68,6 +79,7 @@ public:
     std::pair<std::vector<float>*, std::vector<Triangle>*> _constructMainIcoSphereVertices();
     void constructLatitudesAndLongitudeVertices();
     void constructOrbit();
+    void constructOrbitalPlaneVertices();
     void constructOrbitalPlaneGridVertices();
 
 	float _getPolygonIncrement();
@@ -86,14 +98,20 @@ protected:
     GLuint _rotationAxisVbo;
     GLuint _texture;
     GLuint _texture2;
+    GLuint _orbitalPlaneVao = 0;
+    GLuint _orbitalPlaneVbo = 0;
+    GLuint _orbitalPlaneGridVao = 0;            // grid lines in the orbital plane
+    GLuint _orbitalPlaneGridVbo = 0;
 
     size_t numMainSphereVertices = 0;
     size_t numMainSphereElements = 0;
     size_t numLatAndLongVertices = 0;
     size_t numOrbitVertices = 0;
     size_t numRotationAxisVertices = 0;
+    size_t numOrbitalPlaneVertices = 0;
+    size_t numOrbitalPlaneGridVertices = 0;
 
-	PolygonCountLevel _polygonCountLevel;
+	PolygonCountLevel _polygonCountLevel = PolygonCountLevel_Low;
     NightColorDarkness _nightColorDarkness;
     float _nightColorMultiplier;
 
@@ -111,6 +129,9 @@ public:
 	PlanetRenderer(Universe& parent, Sphere& sphere, std::string textureFilename = "", std::string textureFilename2 = "");
 	~PlanetRenderer();
 
+    void render(GlslProgram& glslProgram);
+    void renderTransparent(GlslProgram& glslProgram);
+
 	void renderSphere(GlslProgram& glslProgram);
 	void renderLatitudeAndLongitudes(GlslProgram& glslProgram);
 	void renderOrbitalPlane(GlslProgram& glslProgram);
@@ -125,6 +146,10 @@ public:
 	SunRenderer(Universe& parent, Sphere& sphere, std::string textureFilename = "");
 	~SunRenderer();
 
+    virtual std::vector<GlslProgramType> getNeededGlslProgramTypes() {
+        return { GlslProgramType_Sun };
+    }
+    void render(GlslProgram& glslProgram);
 	void renderSphere(GlslProgram& glslProgram);
 
 };

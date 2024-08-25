@@ -1,5 +1,4 @@
-#ifndef SPHERE_H
-#define SPHERE_H
+#pragma once
 
 // GLM includes
 #include <glm/glm.hpp>
@@ -57,6 +56,8 @@ public:
     ~Sphere()
     {
     }
+
+    virtual void init() {}
 
     void setColor(float r, float g, float b)
     {
@@ -460,6 +461,3 @@ public:
         {0.0f, 0.0f, 0.0f},
     };
 };
-
-
-#endif

@@ -3,18 +3,22 @@
 #include "Sphere.h"
 #include "GlslProgram.h"
 #include <GL/glew.h>
-#include <Component.h>
+#include "Renderer.h"
 
-class AxisComponent : public Component
+class CoordinateAxisRenderer : public Renderer
 {
 public:
-    AxisComponent();
-    ~AxisComponent();
+    CoordinateAxisRenderer();
+    ~CoordinateAxisRenderer();
     void init();
 
     void constructVerticesAndSendToGpu();
     void render(GlslProgram& glslProgram);
 
+
+    std::vector<GlslProgramType> getNeededGlslProgramTypes() {
+        return { GlslProgramType_Simple };
+    }
     void advance(float stepMultiplier) {}
 
     void setSpan(float xHalfSpan, float yHalfSpan, float zHalfSpan)

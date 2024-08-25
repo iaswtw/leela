@@ -4,6 +4,7 @@
 #include <tuple>
 #include <GL/glew.h>
 #include "Sphere.h"
+#include "universe.h"
 
 static inline void vector_push_back_7(std::vector<float>& v, float f1, float f2, float f3, float f4, float f5, float f6, float f7)
 {
@@ -24,6 +25,25 @@ StarsRenderer::StarsRenderer(Stars& stars)
 
 StarsRenderer::~StarsRenderer()
 {
+
+}
+
+void StarsRenderer::init()
+{
+    constructVerticesAndSendToGpu();
+}
+
+
+void StarsRenderer::render(GlslProgram& glslProgram)
+{
+    if (!universe->bGalaxyStars)
+    {
+        renderCubeStars(glslProgram);
+    }
+    else
+    {
+        renderGalaxyStars(glslProgram);
+    }
 
 }
 

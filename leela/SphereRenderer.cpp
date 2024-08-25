@@ -189,6 +189,7 @@ IndexedMesh make_icosphere(int subdivisions)
 SphereRenderer::SphereRenderer(Universe& parent, Sphere& sphere, std::string textureFilename = "", std::string textureFilename2 = "") :
     parent(parent),
     _sphere(sphere)
+
 {
     setNightColorDarkness(NightColorDarkness_Black);
     //setNightColorDarkness(NightColorDarkness_VeryLow);
@@ -199,6 +200,11 @@ SphereRenderer::SphereRenderer(Universe& parent, Sphere& sphere, std::string tex
 
 SphereRenderer::~SphereRenderer()
 {
+}
+
+void SphereRenderer::init()
+{
+    constructVerticesAndSendToGpu();
 }
 
 void SphereRenderer::setAsLightSource()
@@ -589,6 +595,138 @@ void SphereRenderer::constructOrbit()
     delete v;
 }
 
+void SphereRenderer::constructOrbitalPlaneGridVertices()
+{
+    std::vector<float>* v = new std::vector<float>();
+    Sphere& s = _sphere;
+
+    //---------------------------------------------------------------------------------
+    // Orbital plane grid.
+    //---------------------------------------------------------------------------------
+    // generate parallel lines along Y axis in the orbital plane
+    //float inc = float(_orbitalRadius) / int(_orbitalRadius / 50.0);
+
+    float maxGridLines = 120;
+    float inc = (s._orbitalRadius * 2 * 1.2f) / maxGridLines;
+    //inc = std::max(inc, 50.0f);
+    //printf("inc = %f\n", inc);
+
+    float x, y;
+    float m = 0.4f;      // color multiplier
+    float radius = s._orbitalRadius;
+    glm::vec3& color = s._orbitalPlaneColor;
+
+    x = y = -radius * 1.2f;
+
+    // Create a grid tiny bit above and below the orbital plane
+    for (int i = 0; i <= maxGridLines; i++)
+    {
+        vector_push_back_7(*v, x, -radius * 1.2f, +1, color.r * m, color.g * m, color.b * m, 1.0f);
+        vector_push_back_7(*v, x, +radius * 1.2f, +1, color.r * m, color.g * m, color.b * m, 1.0f);
+
+        // If orbital plane is transparent, don't create the bottom grid
+        if (!bOrbitalPlaneTransparency) {
+            vector_push_back_7(*v, x, -radius * 1.2f, -1, color.r * m, color.g * m, color.b * m, 1.0f);
+            vector_push_back_7(*v, x, +radius * 1.2f, -1, color.r * m, color.g * m, color.b * m, 1.0f);
+        }
+
+        x += inc;
+    }
+    for (int i = 0; i <= maxGridLines; i++)
+    {
+        vector_push_back_7(*v, -radius * 1.2f, y, +1, color.r * m, color.g * m, color.b * m, 1.0f);
+        vector_push_back_7(*v, +radius * 1.2f, y, +1, color.r * m, color.g * m, color.b * m, 1.0f);
+
+        // If orbital plane is transparent, don't create the bottom grid
+        if (!bOrbitalPlaneTransparency) {
+            vector_push_back_7(*v, -radius * 1.2f, y, -1, color.r * m, color.g * m, color.b * m, 1.0f);
+            vector_push_back_7(*v, +radius * 1.2f, y, -1, color.r * m, color.g * m, color.b * m, 1.0f);
+        }
+
+        y += inc;
+    }
+
+    //--------------------------------------
+
+    if (_orbitalPlaneGridVbo != 0) {
+        glDeleteBuffers(1, &_orbitalPlaneGridVbo);
+    }
+    if (_orbitalPlaneGridVao != 0) {
+        glDeleteVertexArrays(1, &_orbitalPlaneGridVao);
+    }
+
+    glGenVertexArrays(1, &_orbitalPlaneGridVao);
+    glBindVertexArray(_orbitalPlaneGridVao);
+    glGenBuffers(1, &_orbitalPlaneGridVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, _orbitalPlaneGridVbo);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        sizeof(float) * v->size(),
+        v->data(),
+        GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), nullptr);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    numOrbitalPlaneGridVertices = v->size() / VERTEX_STRIDE_IN_VBO;
+    delete v;
+
+}
+
+
+void SphereRenderer::constructOrbitalPlaneVertices()
+{
+    std::vector<float>* v = new std::vector<float>();
+    Sphere& s = _sphere;
+    float m = 0.3f;                          // color multiplier
+    float radius = s._orbitalRadius;
+    glm::vec3& color = s._orbitalPlaneColor;
+    float alpha = 1.0f;
+
+    if (bOrbitalPlaneTransparency)
+        alpha = 0.5f;
+
+    //---------------------------------------------------------------------------------
+    // Orbital plane.  This is centered at origin.
+    //---------------------------------------------------------------------------------
+    vector_push_back_7(*v, -radius * 1.2f, -radius * 1.2f, 0, color.r * m, color.g * m, color.b * m, alpha);
+    vector_push_back_7(*v, +radius * 1.2f, -radius * 1.2f, 0, color.r * m, color.g * m, color.b * m, alpha);
+    vector_push_back_7(*v, +radius * 1.2f, +radius * 1.2f, 0, color.r * m, color.g * m, color.b * m, alpha);
+    vector_push_back_7(*v, +radius * 1.2f, +radius * 1.2f, 0, color.r * m, color.g * m, color.b * m, alpha);
+    vector_push_back_7(*v, -radius * 1.2f, +radius * 1.2f, 0, color.r * m, color.g * m, color.b * m, alpha);
+    vector_push_back_7(*v, -radius * 1.2f, -radius * 1.2f, 0, color.r * m, color.g * m, color.b * m, alpha);
+
+    //---------------------------------
+
+    if (_orbitalPlaneVbo != 0) {
+        glDeleteBuffers(1, &_orbitalPlaneVbo);
+    }
+    if (_orbitalPlaneVao != 0) {
+        glDeleteVertexArrays(1, &_orbitalPlaneVao);
+    }
+
+    glGenVertexArrays(1, &_orbitalPlaneVao);
+    glBindVertexArray(_orbitalPlaneVao);
+    glGenBuffers(1, &_orbitalPlaneVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, _orbitalPlaneVbo);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        sizeof(float) * v->size(),
+        v->data(),
+        GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), nullptr);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, VERTEX_STRIDE_IN_VBO * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    numOrbitalPlaneVertices = v->size() / VERTEX_STRIDE_IN_VBO;
+    delete v;
+}
 
 
 void SphereRenderer::constructRotationAxis()
@@ -871,12 +1009,15 @@ void SphereRenderer::constructVerticesAndSendToGpu()
     }
 
 
-
     // latitude and longitude
     constructLatitudesAndLongitudeVertices();
 
     // Orbital itself
     constructOrbit();
+
+    constructOrbitalPlaneVertices();
+
+    constructOrbitalPlaneGridVertices();
 
     // Rotation axis
     constructRotationAxis();
@@ -943,15 +1084,41 @@ PlanetRenderer::~PlanetRenderer()
 {
 
 }
+
+void PlanetRenderer::render(GlslProgram& glslProgram)
+{
+    //spdlog::info("PlanetRenderer::render()");
+    if (glslProgram.type() == GlslProgramType_Planet)
+    {
+        renderSphere(glslProgram);
+        renderLatitudeAndLongitudes(glslProgram);
+        if (universe->bShowPlanetAxis)
+            renderRotationAxis(glslProgram);
+    }
+    else if (glslProgram.type() == GlslProgramType_Simple)
+    {
+        if (universe->bShowOrbitsGlobalEnable)
+            renderOrbit(glslProgram);
+    }
+}
+
+
+void PlanetRenderer::renderTransparent(GlslProgram& glslProgram)
+{
+    if (glslProgram.type() == GlslProgramType_Simple)
+    {
+        renderOrbitalPlane(glslProgram);
+    }
+
+}
+
 /*
  * Render the main sphere.
  * 
  * otherSphere      the sphere that could eclipse the sun for this planet/moon. 
  */
 void PlanetRenderer::renderSphere(GlslProgram& glslProgram)
-{
-    
-
+{   
     if (!_sphere.bIsCenterOfMass)
     {
         PNT sphereCenter = PNT(_sphere.getCenter());
@@ -960,7 +1127,7 @@ void PlanetRenderer::renderSphere(GlslProgram& glslProgram)
         float sineOfSelfUmbraConeHalfAngle = asin(_sphere.getRadius() / selfUmbraLength);
 
 
-        glslProgram.setMat4("model", glm::value_ptr(_sphere.getModelMatrix()));
+        glslProgram.setMat4("model", glm::value_ptr(_sphere.getTransform()));
         glslProgram.setVec3("sphereInfo.centerTransformed", glm::value_ptr(_sphere.getCenter()));
         glslProgram.setFloat("sphereInfo.radius", _sphere.getRadius());
         float multiplierAdjust = 1.0f;
@@ -1033,7 +1200,7 @@ void PlanetRenderer::renderLatitudeAndLongitudes(GlslProgram& glslProgram)
     {
         if (bShowLatitudesAndLongitudes)
         {
-            glslProgram.setMat4("model", glm::value_ptr(_sphere.getModelMatrix()));
+            glslProgram.setMat4("model", glm::value_ptr(_sphere.getTransform()));
             glBindVertexArray(_latAndLongVao);
 
             glslProgram.setBool("useTexture", false);
@@ -1060,6 +1227,36 @@ void PlanetRenderer::renderOrbit(GlslProgram& glslProgram)
     }
 }
 
+
+void PlanetRenderer::renderOrbitalPlane(GlslProgram& glslProgram)
+{
+    Sphere& s = _sphere;
+
+    if (!s.bIsCenterOfMass)
+    {
+        // orbital plane has its own model transform different from the sphere itself.
+        if (bShowOrbitalPlane)
+        {
+            glslProgram.setMat4("model", glm::value_ptr(s.getOrbitalPlaneModelMatrix()));
+
+            // Draw orbital plane grid
+            glBindVertexArray(_orbitalPlaneGridVao);
+            glDrawArrays(GL_LINES, 0, (GLsizei)numOrbitalPlaneGridVertices);
+
+            // Draw vertices
+            if (bOrbitalPlaneTransparency) {
+                glDepthMask(GL_FALSE);
+            }
+            glBindVertexArray(_orbitalPlaneVao);
+            glDrawArrays(GL_TRIANGLES, 0, (GLsizei)numOrbitalPlaneVertices);
+            if (bOrbitalPlaneTransparency) {
+                glDepthMask(GL_TRUE);
+            }
+        }
+    }
+}
+
+
 /*
  * 
  */
@@ -1076,7 +1273,7 @@ void PlanetRenderer::renderRotationAxis(GlslProgram& glslProgram)
         float sineOfSelfUmbraConeHalfAngle = asin(_sphere.getRadius() / selfUmbraLength);
 
 
-        glslProgram.setMat4("model", glm::value_ptr(_sphere.getModelMatrix()));
+        glslProgram.setMat4("model", glm::value_ptr(_sphere.getTransform()));
         glslProgram.setVec3("sphereInfo.centerTransformed", glm::value_ptr(_sphere.getCenter()));
         glslProgram.setFloat("sphereInfo.radius", _sphere.getRadius());
         //glslProgram.setFloat("nightColorMultiplier", 0.1);
@@ -1116,9 +1313,14 @@ SunRenderer::~SunRenderer()
 
 }
 
+void SunRenderer::render(GlslProgram& glslProgram)
+{
+    renderSphere(glslProgram);
+}
+
 void SunRenderer::renderSphere(GlslProgram& glslProgram)
 {
-    glslProgram.setMat4("model", glm::value_ptr(_sphere.getModelMatrix()));
+    glslProgram.setMat4("model", glm::value_ptr(_sphere.getTransform()));
 
     if (!_textureFilename.empty())
     {

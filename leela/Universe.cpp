@@ -91,7 +91,7 @@ Universe::~Universe()
  Initialize various parameters of planets, stars, etc.  Parameters include radius of objects,
  time periods of rotation and revolution, colors, etc.
 **************************************************************************************************/
-void Universe::initSceneObjects()
+void Universe::initSceneObjectsAndComponents()
 {
     stars.setCubeStarParameters(
         3500,                               // total number of stars (single + double pixel)
@@ -99,13 +99,13 @@ void Universe::initSceneObjects()
     );
 
 
-    axis.setSpan(3600, 3600, 1200);
-    axis.setColors(
+    coordinateAxisRenderer.setSpan(3600, 3600, 1200);
+    coordinateAxisRenderer.setColors(
         glm::vec3(0.2f, 0.2f, 0.5f),        // X axis color
         glm::vec3(0.2f, 0.5f, 0.2f),        // Y axis color
         glm::vec3(0.2f, 0.5f, 0.5f)         // Z axis color
     );
-    scene.addComponent(&axis);
+    scene.addComponent(&coordinateAxisRenderer);
 
     // Sun
     //---------------------------------------
@@ -143,7 +143,7 @@ void Universe::initSceneObjects()
     );
     earth.setOrbitalPlaneColor(glm::vec3(0.55, 0.82, 1.0));
     earth.setSunSphere(&sun);
-    sun.addChildSceneObject(&earth)
+    sun.addChildSceneObject(&earth);
 
     // Moon
     //---------------------------------------
@@ -280,6 +280,96 @@ void Universe::initSceneObjects()
 
     //---------------------------------------------------------------
     SetApplicationStartView();
+
+
+    //=================================================================
+
+    spdlog::info("Compiling all GLSL programs");
+
+    planetGlslProgram.compileShadersFromFile("planet.vert.glsl", "planet.frag.glsl");
+    planetGlslProgram.link();
+
+    sunGlslProgram.compileShadersFromFile("sun.vert.glsl", "sun.frag.glsl");
+    sunGlslProgram.link();
+
+    starGlslProgram.compileShadersFromFile("star.vert.glsl", "star.frag.glsl");
+    starGlslProgram.link();
+
+    simpleGlslProgram.compileShadersFromFile("simple.vert.glsl", "simple.frag.glsl");
+    simpleGlslProgram.link();
+
+    fontGlslProgram.compileShadersFromFile("font.vert.glsl", "font.frag.glsl");
+    fontGlslProgram.link();
+
+    //---------------------------------------------------------------------------------------------------
+
+    coordinateAxisRenderer.init();
+
+    sunRenderer.setAsLightSource();
+    sunRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
+    sun.addComponent(&sunRenderer);
+    sunRenderer.init();
+
+    earthRenderer.setPolygonCountLevel(PolygonCountLevel_Medium);
+    earthRenderer.constructVerticesAndSendToGpu();
+    earthRenderer.bShowLatitudesAndLongitudes = true;
+    earthRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
+    earthRenderer.init();
+    earth.addComponent(&earthRenderer);
+
+    moonRenderer.setPolygonCountLevel(PolygonCountLevel_Medium);
+    moonRenderer.constructVerticesAndSendToGpu();
+    moonRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
+    moonRenderer.init();
+    moon.addComponent(&moonRenderer);
+
+    marsRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
+    marsRenderer.constructVerticesAndSendToGpu();
+    marsRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
+    marsRenderer.bShowOrbit = False;
+    marsRenderer.init();
+    mars.addComponent(&marsRenderer);
+
+    jupiterRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
+    jupiterRenderer.constructVerticesAndSendToGpu();
+    jupiterRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
+    jupiterRenderer.bShowOrbit = False;
+    jupiterRenderer.init();
+    jupiter.addComponent(&jupiterRenderer);
+
+    saturnRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
+    saturnRenderer.constructVerticesAndSendToGpu();
+    saturnRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
+    saturnRenderer.bShowOrbit = False;
+    saturnRenderer.init();
+    saturn.addComponent(&saturnRenderer);
+
+    uranusRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
+    uranusRenderer.constructVerticesAndSendToGpu();
+    uranusRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
+    uranusRenderer.bShowOrbit = False;
+    uranusRenderer.init();
+    uranus.addComponent(&uranusRenderer);
+
+    neptuneRenderer.setPolygonCountLevel(PolygonCountLevel_Low);
+    neptuneRenderer.constructVerticesAndSendToGpu();
+    neptuneRenderer.setNightColorDarkness(NightColorDarkness_VeryHigh);
+    neptuneRenderer.bShowOrbit = False;
+    neptuneRenderer.init();
+    neptune.addComponent(&neptuneRenderer);
+
+    //------------------------------
+
+    constructFontInfrastructureAndSendToGpu();
+
+
+    //---------------------------------------------------------------------------------------------------
+    
+    scene.addComponent(&starsRenderer);
+    starsRenderer.init();
+
+
+    glBindVertexArray(0);       // Disable VBO
 
 }
 
@@ -1293,8 +1383,7 @@ int Universe::run()
 	int retval = 0;
 	try
 	{
-		initSceneObjects();
-		initializeGL();
+		initSceneObjectsAndComponents();
 		printf("done\n");
 
 		glEnable(GL_DEPTH_TEST);
