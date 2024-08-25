@@ -232,11 +232,11 @@ float SphericalBodyRenderer::nightColorDarknessLevelToFloat(NightColorDarkness l
     switch (level)
     {
         case NightColorDarkness_Black:      floatValue = 0.0f;   break;
-        case NightColorDarkness_VeryHigh:   floatValue = 0.07f;  break;
-        case NightColorDarkness_High:       floatValue = 0.15f;  break;
-        case NightColorDarkness_Medium:     floatValue = 0.2f;   break;
-        case NightColorDarkness_Low:        floatValue = 0.5f;   break;
-        case NightColorDarkness_VeryLow:    floatValue = 0.8f;   break;
+        case NightColorDarkness_VeryHigh:   floatValue = 0.03f;  break;
+        case NightColorDarkness_High:       floatValue = 0.07f;  break;
+        case NightColorDarkness_Medium:     floatValue = 0.15f;   break;
+        case NightColorDarkness_Low:        floatValue = 0.3f;   break;
+        case NightColorDarkness_VeryLow:    floatValue = 0.7f;   break;
         case NightColorDarkness_None:       floatValue = 1.0f;   break;
     }
 
@@ -519,8 +519,7 @@ void SphericalBodyRenderer::constructOrbit()
 {
     std::vector<float>* v   = new std::vector<float>();
     SphericalBody& s               = *_sphere;
-    glm::vec3& color        = s._color;
-    float m                 = 0.7f;
+    glm::vec3 color         = s._color / 2.5f;
 
     float alpha_inc = float(2 * M_PI) / 500;
 
@@ -537,8 +536,8 @@ void SphericalBodyRenderer::constructOrbit()
         float y2 = s._orbitalRadius * sin(alpha + alpha_inc);
         float z2 = 0;
 
-        vector_push_back_7(*v, x1, y1, z1, color.r*m, color.g*m, color.b*m, 0.8f);
-        vector_push_back_7(*v, x2, y2, z2, color.r*m, color.g*m, color.b*m, 0.8f);
+        vector_push_back_7(*v, x1, y1, z1, color.r, color.g, color.b, 0.8f);
+        vector_push_back_7(*v, x2, y2, z2, color.r, color.g, color.b, 0.8f);
     }
 
     //-----------------------------------
@@ -588,35 +587,34 @@ void SphericalBodyRenderer::constructOrbitalPlaneGridVertices()
     //printf("inc = %f\n", inc);
 
     float x, y;
-    float m = 0.4f;      // color multiplier
     float radius = s._orbitalRadius;
-    glm::vec3& color = s._color;
+    glm::vec3 color = s._color / 3.9f;      // make darker
 
     x = y = -radius * 1.2f;
 
     // Create a grid tiny bit above and below the orbital plane
     for (int i = 0; i <= maxGridLines; i++)
     {
-        vector_push_back_7(*v, x, -radius * 1.2f, +1, color.r * m, color.g * m, color.b * m, 1.0f);
-        vector_push_back_7(*v, x, +radius * 1.2f, +1, color.r * m, color.g * m, color.b * m, 1.0f);
+        vector_push_back_7(*v, x, -radius * 1.2f, +1, color.r, color.g, color.b, 1.0f);
+        vector_push_back_7(*v, x, +radius * 1.2f, +1, color.r, color.g, color.b, 1.0f);
 
         // If orbital plane is transparent, don't create the bottom grid
         if (!bOrbitalPlaneTransparency) {
-            vector_push_back_7(*v, x, -radius * 1.2f, -1, color.r * m, color.g * m, color.b * m, 1.0f);
-            vector_push_back_7(*v, x, +radius * 1.2f, -1, color.r * m, color.g * m, color.b * m, 1.0f);
+            vector_push_back_7(*v, x, -radius * 1.2f, -1, color.r, color.g, color.b, 1.0f);
+            vector_push_back_7(*v, x, +radius * 1.2f, -1, color.r, color.g, color.b, 1.0f);
         }
 
         x += inc;
     }
     for (int i = 0; i <= maxGridLines; i++)
     {
-        vector_push_back_7(*v, -radius * 1.2f, y, +1, color.r * m, color.g * m, color.b * m, 1.0f);
-        vector_push_back_7(*v, +radius * 1.2f, y, +1, color.r * m, color.g * m, color.b * m, 1.0f);
+        vector_push_back_7(*v, -radius * 1.2f, y, +1, color.r, color.g, color.b, 1.0f);
+        vector_push_back_7(*v, +radius * 1.2f, y, +1, color.r, color.g, color.b, 1.0f);
 
         // If orbital plane is transparent, don't create the bottom grid
         if (!bOrbitalPlaneTransparency) {
-            vector_push_back_7(*v, -radius * 1.2f, y, -1, color.r * m, color.g * m, color.b * m, 1.0f);
-            vector_push_back_7(*v, +radius * 1.2f, y, -1, color.r * m, color.g * m, color.b * m, 1.0f);
+            vector_push_back_7(*v, -radius * 1.2f, y, -1, color.r, color.g, color.b, 1.0f);
+            vector_push_back_7(*v, +radius * 1.2f, y, -1, color.r, color.g, color.b, 1.0f);
         }
 
         y += inc;
@@ -657,9 +655,8 @@ void SphericalBodyRenderer::constructOrbitalPlaneVertices()
 {
     std::vector<float>* v = new std::vector<float>();
     SphericalBody& s = *_sphere;
-    float m = 0.3f;                          // color multiplier
     float radius = s._orbitalRadius;
-    glm::vec3& color = s._color;
+    glm::vec3 color = s._color / 5.0f;      // make darker
     float alpha = 1.0f;
 
     if (bOrbitalPlaneTransparency)
@@ -668,12 +665,12 @@ void SphericalBodyRenderer::constructOrbitalPlaneVertices()
     //---------------------------------------------------------------------------------
     // Orbital plane.  This is centered at origin.
     //---------------------------------------------------------------------------------
-    vector_push_back_7(*v, -radius * 1.2f, -radius * 1.2f, 0, color.r * m, color.g * m, color.b * m, alpha);
-    vector_push_back_7(*v, +radius * 1.2f, -radius * 1.2f, 0, color.r * m, color.g * m, color.b * m, alpha);
-    vector_push_back_7(*v, +radius * 1.2f, +radius * 1.2f, 0, color.r * m, color.g * m, color.b * m, alpha);
-    vector_push_back_7(*v, +radius * 1.2f, +radius * 1.2f, 0, color.r * m, color.g * m, color.b * m, alpha);
-    vector_push_back_7(*v, -radius * 1.2f, +radius * 1.2f, 0, color.r * m, color.g * m, color.b * m, alpha);
-    vector_push_back_7(*v, -radius * 1.2f, -radius * 1.2f, 0, color.r * m, color.g * m, color.b * m, alpha);
+    vector_push_back_7(*v, -radius * 1.2f, -radius * 1.2f, 0, color.r, color.g, color.b, alpha);
+    vector_push_back_7(*v, +radius * 1.2f, -radius * 1.2f, 0, color.r, color.g, color.b, alpha);
+    vector_push_back_7(*v, +radius * 1.2f, +radius * 1.2f, 0, color.r, color.g, color.b, alpha);
+    vector_push_back_7(*v, +radius * 1.2f, +radius * 1.2f, 0, color.r, color.g, color.b, alpha);
+    vector_push_back_7(*v, -radius * 1.2f, +radius * 1.2f, 0, color.r, color.g, color.b, alpha);
+    vector_push_back_7(*v, -radius * 1.2f, -radius * 1.2f, 0, color.r, color.g, color.b, alpha);
 
     //---------------------------------
 

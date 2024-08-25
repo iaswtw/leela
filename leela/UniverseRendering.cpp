@@ -1267,7 +1267,7 @@ void Universe::generateImGuiWidgets()
             ImGui::Indent();
             SmallCheckbox("Revolution", &mars->bRevolutionMotion); ImGui::SameLine();
             SmallCheckbox("Orbit## mars", &marsRenderer->bShowOrbit); ImGui::SameLine();
-            SmallCheckbox("Plane (,)##mars", &marsRenderer->bShowOrbitalPlane);
+            SmallCheckbox("Plane## mars", &marsRenderer->bShowOrbitalPlane);
             ImGui::Unindent();
 
             ImGui::Separator();
@@ -1297,9 +1297,9 @@ void Universe::generateImGuiWidgets()
             ImGui::Text("Lock target:");  ImGui::SameLine(); HelpMarker("Camera will always look at the selected target.");
             int lock = (lockTarget == earth) ? 0 : (lockTarget == sun) ? 1 : (lockTarget == moon) ? 2 : 3;
             int previousLock = lock;
-            ImGui::RadioButton("earth", &lock, 0); ImGui::SameLine();
-            ImGui::RadioButton("sun", &lock, 1); ImGui::SameLine();
-            ImGui::RadioButton("moon", &lock, 2); ImGui::SameLine();
+            ImGui::RadioButton("earth (z)", &lock, 0); ImGui::SameLine();
+            ImGui::RadioButton("sun (c)", &lock, 1); ImGui::SameLine();
+            ImGui::RadioButton("moon (x)", &lock, 2);
             ImGui::RadioButton("none", &lock, 3);
             if (lock != previousLock)
                 SetLockTargetAndMode(
