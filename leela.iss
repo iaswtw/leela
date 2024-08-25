@@ -32,6 +32,7 @@ Source: "C:\prj\leela\external\SDL2-2.30.1\lib\x64\SDL2.dll"; DestDir: "{app}"; 
 Source: "leela\shaders\*"; DestDir: "{app}\shaders"; Flags: ignoreversion recursesubdirs;
 Source: "leela\textures\*"; DestDir: "{app}\textures"; Flags: ignoreversion recursesubdirs;
 Source: "external\fonts\*.ttf"; DestDir: "{app}\fonts"; Flags: ignoreversion;
+Source: "leela.ico"; DestDir: "{app}"; Flags: ignoreversion;
 
 
 [Tasks]
