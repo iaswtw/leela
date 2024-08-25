@@ -261,6 +261,9 @@
   <ItemGroup>
     <ResourceCompile Include="leela.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\leela.ico" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

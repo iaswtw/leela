@@ -1,6 +1,6 @@
 #define MyAppName "Leela"
 #define MyAppMainExe "leela.exe"
-#define MyAppVersion "1.0"
+#define MyAppVersion GetVersionNumbersString("x64\Release\" + MyAppMainExe)
 ;#define MyAppVersion GetVersionNumbersString("build\exe.win-amd64-3.11\" + MyAppMainExe)
 
 [Setup]
