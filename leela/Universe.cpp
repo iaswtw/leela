@@ -180,6 +180,9 @@ void Universe::initSceneObjectsAndComponents()
             sun = sb;
             sunRenderer->setAsLightSource();
         }
+        else if (pi.name == "Mercury") {
+            mercury = sb;
+        }
         else if (pi.name == "Earth") {
             earth = sb;
             earthRenderer = planetRenderer;
@@ -804,6 +807,11 @@ void Universe::Moon_OrbitalPlane(int nParam)
 void Universe::Moon_Orbit(int nParam)
 {
     ChangeBoolean(&moonRenderer->bShowOrbit, nParam);
+}
+
+void Universe::Moon_ResetNodalPrecession()
+{
+    moon->_nodalPrecessionAngle = 0.0f;
 }
 
 bool Universe::IsAnyOrbitVisible()

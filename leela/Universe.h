@@ -174,6 +174,7 @@ typedef enum
     UDemo_StarParallex,
     UDemo_MoonsNodalPrecession,
     UDemo_ApparentRetrogradeMotion,
+    UDemo_MercuryTransit,
 } UDemoType;
 
 
@@ -274,6 +275,7 @@ public:
 
     void Moon_OrbitalPlaneRotation(int nParam);
     void Moon_Orbit(int nParam);
+    void Moon_ResetNodalPrecession();
     bool IsAnyOrbitVisible();
     bool _IsAnyOrbitVisible(SceneObject* sceneObject);
     void DisableShowingAllOrbits();
@@ -474,12 +476,13 @@ public:
 
     // SphericalBody and other objects to be drawn on the screen. Instantiate them here. Their data (vertices) will be created later.
     CoordinateAxisRenderer coordinateAxisRenderer;
-    SphericalBody* earth;
-    SphericalBody* sun;
-    SphericalBody* mars;
-    SphericalBody* jupiter;
-    SphericalBody* uranus;
-    SphericalBody* moon;
+    SphericalBody* mercury = nullptr;
+    SphericalBody* earth = nullptr;
+    SphericalBody* sun = nullptr;
+    SphericalBody* mars = nullptr;
+    SphericalBody* jupiter = nullptr;
+    SphericalBody* uranus = nullptr;
+    SphericalBody* moon = nullptr;
     Stars stars;
 
     Scene scene;

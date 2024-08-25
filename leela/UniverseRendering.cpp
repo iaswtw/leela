@@ -1049,6 +1049,15 @@ void Universe::generateImGuiWidgets()
                     "Observe how Mars and Jupiter appear to move back in their orbit when they are near opposition w.r.t. Sun."
                 );
 
+                if (ImGui::Button("Mercury Transit## demo"))
+                    ShowDemo(UDemo_MercuryTransit);
+                ImGui::SameLine();
+                HelpMarker(
+                    "See Mercury pass over the sun's disk from Earth's point of view when the Sun, Mercury and Earth approximately "
+                    "align in a straight line."
+                );
+
+
                 ImGui::PopFont();
             }
             ImGui::PopFont();

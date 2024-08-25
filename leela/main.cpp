@@ -1,6 +1,8 @@
 #include "Windows.h"
+#include "ShlObj.h"
 #include "Universe.h"
 #include <spdlog/spdlog.h>
+#include "spdlog/sinks/rotating_file_sink.h"
 
 /*
  * Change to the parent directory of the executable we are running from.
@@ -38,6 +40,8 @@ bool changeDirToParentOfExecutable()
 }
 
 
+
+
 Universe * g_universe = new Universe();  // global instance accessible to all objects
 Space* g_space = &g_universe->space;
 
@@ -51,7 +55,37 @@ int main(int argc, char *argv[])
 #endif
 #endif
 
+
+
+
+    //-------------------------------------------
+
+    CHAR path[MAX_PATH];
+    std::string appName = "Leela";
+
+    // Get the path to the AppData\Local folder
+    if (SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, path) != S_OK) {
+        std::cerr << "Failed to get AppData Local folder path" << std::endl;
+    }
+
+    std::string logFolderPath = std::string(path) + "\\" + appName + "\\" + "Logs";
+    std::string logFilePath = logFolderPath + "\\" + "leela.log";
+
     spdlog::set_pattern("[%H:%M:%S.%e] [%^%l%$] %v");
+
+
+    // Create file and console sink
+    auto file_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(logFilePath, 5 * 1024 * 1024, 3);
+    auto console_sink = std::make_shared<spdlog::sinks::wincolor_stdout_sink_mt>();
+
+    std::vector<spdlog::sink_ptr> sinks;
+    sinks.push_back(file_sink);
+    sinks.push_back(console_sink);
+    auto logger = std::make_shared<spdlog::logger>("mainlog", sinks.begin(), sinks.end());
+    spdlog::set_default_logger(logger);
+    spdlog::flush_every(std::chrono::seconds(5));
+
+    //-------------------------------------------
     
     if (!changeDirToParentOfExecutable())
     {
@@ -64,5 +98,8 @@ int main(int argc, char *argv[])
     {
         Sleep(1000);
     }
+
+    spdlog::shutdown();
+
     return retval;
 }

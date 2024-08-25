@@ -9,6 +9,8 @@ void Universe::ShowDemo(int nParam)
     {
     case UDemo_TotalSolarEclipse:
 
+        clearAllFirFilters();
+
         // Set earth at (0,R,0)
         Earth_SetOrbitalPositionAngle(1 * M_PI / 2);
 
@@ -39,6 +41,7 @@ void Universe::ShowDemo(int nParam)
         // Adjust Moon's motions
         Moon_RevolutionMotion(UCmdParam_On);
         Moon_Orbit(UCmdParam_On);
+        Moon_ResetNodalPrecession();
 
         // Increase the dot density
         SetDotDensity(UDotDensity_High);
@@ -50,7 +53,9 @@ void Universe::ShowDemo(int nParam)
         break;
 
     case UDemo_TotalSolarEclipseViewFromSun:
-        
+
+        clearAllFirFilters();
+
             // Set earth at (0,R,0)
         Earth_SetOrbitalPositionAngle(1.04 * 3 * M_PI / 2);
 
@@ -82,6 +87,7 @@ void Universe::ShowDemo(int nParam)
         // Adjust Moon's motions
         Moon_RevolutionMotion(UCmdParam_On);
         Moon_Orbit(UCmdParam_On);
+        Moon_ResetNodalPrecession();
 
         // Increase the dot density
         SetDotDensity(UDotDensity_High);
@@ -93,6 +99,8 @@ void Universe::ShowDemo(int nParam)
         break;
 
     case UDemo_TotalSolarEclipseOnNorthPole:
+
+        clearAllFirFilters();
 
         Earth_OrbitalPlane(UCmdParam_On);
         Moon_OrbitalPlane(UCmdParam_Off);
@@ -121,6 +129,7 @@ void Universe::ShowDemo(int nParam)
         // Adjust Moon's motions
         Moon_RevolutionMotion(UCmdParam_On);
         Moon_Orbit(UCmdParam_On);
+        Moon_ResetNodalPrecession();
 
         // Increase the dot density
         SetDotDensity(UDotDensity_High);
@@ -132,6 +141,9 @@ void Universe::ShowDemo(int nParam)
         break;
 
     case UDemo_AnnularSolarEclipseFromSpace:
+
+        clearAllFirFilters();
+
         // Set earth at (0,R,0)
         Earth_SetOrbitalPositionAngle(M_PI / 2);
 
@@ -162,6 +174,7 @@ void Universe::ShowDemo(int nParam)
         // Adjust Moon's motions
         Moon_RevolutionMotion(UCmdParam_On);
         Moon_Orbit(UCmdParam_On);
+        Moon_ResetNodalPrecession();
 
         // Increase the dot density
         SetDotDensity(UDotDensity_High);
@@ -175,6 +188,9 @@ void Universe::ShowDemo(int nParam)
         break;
 
     case UDemo_PartialLunarEclipse:
+
+        clearAllFirFilters();
+
         // Set earth at (0,R,0)
         Earth_SetOrbitalPositionAngle(M_PI / 2);
 
@@ -205,6 +221,7 @@ void Universe::ShowDemo(int nParam)
         // Adjust Moon's motions
         Moon_RevolutionMotion(UCmdParam_On);
         Moon_Orbit(UCmdParam_On);
+        Moon_ResetNodalPrecession();
 
         // Increase the dot density
         SetDotDensity(UDotDensity_High);
@@ -216,6 +233,9 @@ void Universe::ShowDemo(int nParam)
         break;
 
     case UDemo_PrecessionMotion:
+
+        clearAllFirFilters();
+
         // Set earth at (0,R,0)
         Earth_SetOrbitalPositionAngle(M_PI / 2);
 
@@ -262,6 +282,8 @@ void Universe::ShowDemo(int nParam)
 
     case UDemo_SixMonthLongDayAndNightOnNorthPole:
 
+        clearAllFirFilters();
+
         Moon_SetOrbitalPositionAngle(0);
         // Set earth at (0,R,0)
         Earth_SetOrbitalPositionAngle(0.0f);
@@ -304,6 +326,8 @@ void Universe::ShowDemo(int nParam)
 
     case UDemo_SixMonthLongDayAndNightOnNorthPole_AnotherAngle:
 
+        clearAllFirFilters();
+
         Moon_SetOrbitalPositionAngle(0);
         // Set earth at (0,R,0)
         Earth_SetOrbitalPositionAngle(0.0f);
@@ -344,6 +368,9 @@ void Universe::ShowDemo(int nParam)
         break;
 
     case UDemo_TiltedOrbitalPlanes:
+
+        clearAllFirFilters();
+
         Earth_SetOrbitalPositionAngle(M_PI / 2 - M_PI / 6);
 
         // Tilted orbit demo must show both the orbital planes
@@ -369,6 +396,7 @@ void Universe::ShowDemo(int nParam)
         Moon_RevolutionMotion(UCmdParam_On);
         Moon_SetOrbitalPositionAngle(0.0f);
         Moon_Orbit(UCmdParam_On);
+        Moon_ResetNodalPrecession();
 
 
         SetSimulationSpeed(USimulationSpeed_50_Percent);
@@ -380,6 +408,8 @@ void Universe::ShowDemo(int nParam)
         break;
 
     case UDemo_StarParallex:
+
+        clearAllFirFilters();
 
         Moon_SetOrbitalPositionAngle(0);
         // Set earth at (0,R,0)
@@ -418,6 +448,8 @@ void Universe::ShowDemo(int nParam)
 
     case UDemo_MoonsNodalPrecession:
 
+        clearAllFirFilters();
+
         // Set S
         //newS = PNT(earth.getCenter().x + 500, earth.getCenter().y - 700, earth.getCenter().z + 150);
         newS = PNT(-963.653801, 99.518279, 546.144668);
@@ -453,6 +485,8 @@ void Universe::ShowDemo(int nParam)
 
     case UDemo_ApparentRetrogradeMotion:
 
+        clearAllFirFilters();
+
         newS = PNT(7191.532228, 1906.936172, 1171.509057);
         newD = PNT(6025.590868, 1890.167779, 888.137275);
 
@@ -471,6 +505,7 @@ void Universe::ShowDemo(int nParam)
         // Adjust Moon's motions
         Moon_RevolutionMotion(UCmdParam_On);
         Moon_Orbit(UCmdParam_On);
+        Moon_ResetNodalPrecession();
 
         // Adjust orbital planes
         Earth_OrbitalPlane(UCmdParam_Off);
@@ -490,6 +525,48 @@ void Universe::ShowDemo(int nParam)
 
         break;
 
+    case UDemo_MercuryTransit:
+
+        clearAllFirFilters();
+
+        newS = PNT(3062.437918, -1366.079160, 91.954525);
+        newD = PNT(2105.770363, -705.266285, -204.884713);
+
+        space.setFrame(AT_POINT,
+            newS,
+            VECTOR(newS, newD),
+            PNT(newS.x, newS.y, newS.z - 100));
+
+
+        // Adjust Earth's motions
+        Earth_RotationMotion(UCmdParam_On);
+        Earth_RevolutionMotion(UCmdParam_On);
+        Earth_PrecessionMotion(UCmdParam_Reset);
+
+        // Adjust Moon's motions
+        Moon_RevolutionMotion(UCmdParam_On);
+        Moon_Orbit(UCmdParam_On);
+        Moon_ResetNodalPrecession();
+
+        // Adjust orbital planes
+        Earth_OrbitalPlane(UCmdParam_Off);
+        Moon_OrbitalPlane(UCmdParam_Off);
+
+        mercury->setOrbitalAngle(-0.587241);
+        earth->setOrbitalAngle(5.885674);
+        mars->setOrbitalAngle(1.251819);
+        jupiter->setOrbitalAngle(5.387664);
+
+        // OrientedViewTarget mode is necessary or else the sun will keep moving to the left and
+        // it will be harder to focus on the transit.
+        SetLockTargetAndMode(earth, TargetLockMode_OrientedViewTarget);
+
+        SetSimulationSpeed(USimulationSpeed_6p25_Percent);
+        SimulationPause(UCmdParam_Off);
+
+        showNormalMonthLabels();
+
+        break;
     }
 
 }

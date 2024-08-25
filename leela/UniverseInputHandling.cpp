@@ -4,6 +4,7 @@
 constexpr int LOG_BUFFER_SIZE = 1000;
 static char logBuffer[LOG_BUFFER_SIZE];
 
+
 void Universe::onKeyDown(SDL_Event* event)
 {
 
@@ -94,13 +95,15 @@ void Universe::onKeyDown(SDL_Event* event)
                 LOG_BUFFER_SIZE,
                 "\nS = %f, %f, %f"
                 "\nD = %f, %f, %f"
-                "\nEarth->_orbitalAngle = %f"
+                "\nmercury->_orbitalAngle = %f"
+                "\nearth->_orbitalAngle = %f"
                 "\nmars->_orbitalAngle = %f"
                 "\njupiter->_orbitalAngle = %f"
                 "\nmoon->_nodalPrecessionAngle = %f"
                 ,
                 space.S.x, space.S.y, space.S.z,
                 space.D.x, space.D.y, space.D.z,
+                mercury->_orbitalAngle,
                 earth->_orbitalAngle,
                 mars->_orbitalAngle,
                 jupiter->_orbitalAngle,
