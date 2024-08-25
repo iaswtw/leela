@@ -45,6 +45,8 @@ void Universe::ShowDemo(int nParam)
         SetSimulationSpeed(USimulationSpeed_6p25_Percent);
         SimulationPause(UCmdParam_Off);
 
+        showNormalMonthLabels();
+
         break;
 
     case UDemo_TotalSolarEclipseViewFromSun:
@@ -86,6 +88,8 @@ void Universe::ShowDemo(int nParam)
         SetSimulationSpeed(USimulationSpeed_6p25_Percent);
         SimulationPause(UCmdParam_Off);
 
+        showNormalMonthLabels();
+
         break;
 
     case UDemo_TotalSolarEclipseOnNorthPole:
@@ -122,6 +126,8 @@ void Universe::ShowDemo(int nParam)
         SetDotDensity(UDotDensity_High);
         SetSimulationSpeed(USimulationSpeed_6p25_Percent);
         SimulationPause(UCmdParam_Off);
+
+        showNormalMonthLabels();
 
         break;
 
@@ -163,6 +169,9 @@ void Universe::ShowDemo(int nParam)
         SimulationPause(UCmdParam_Off);
 
         bSidewaysMotionMode = false;
+
+        showNormalMonthLabels();
+
         break;
 
     case UDemo_PartialLunarEclipse:
@@ -201,6 +210,8 @@ void Universe::ShowDemo(int nParam)
         SetDotDensity(UDotDensity_High);
         SetSimulationSpeed(USimulationSpeed_6p25_Percent);
         SimulationPause(UCmdParam_Off);
+
+        showNormalMonthLabels();
 
         break;
 
@@ -242,6 +253,11 @@ void Universe::ShowDemo(int nParam)
         SetSimulationSpeed(USimulationSpeed_100_Percent);
         SimulationPause(UCmdParam_Off);
 
+        showNormalMonthLabels();
+        //showLargeMonthLabels();
+        //bMonthLabelsCloserToSphere = true;
+        //bShowLabelsOnTop = true;
+
         break;
 
     case UDemo_SixMonthLongDayAndNightOnNorthPole:
@@ -280,9 +296,8 @@ void Universe::ShowDemo(int nParam)
         SetSimulationSpeed(USimulationSpeed_100_Percent);
         SimulationPause(UCmdParam_Off);
 
-        bShowMonthNames = true;
+        showLargeMonthLabels();
         bMonthLabelsCloserToSphere = true;
-        bShowLargeLabels = true;
         bShowLabelsOnTop = true;
 
         break;
@@ -322,6 +337,10 @@ void Universe::ShowDemo(int nParam)
         SetSimulationSpeed(USimulationSpeed_400_Percent);
         SimulationPause(UCmdParam_Off);
 
+        showLargeMonthLabels();
+        bMonthLabelsCloserToSphere = true;
+        bShowLabelsOnTop = true;
+
         break;
 
     case UDemo_TiltedOrbitalPlanes:
@@ -355,6 +374,8 @@ void Universe::ShowDemo(int nParam)
         SetSimulationSpeed(USimulationSpeed_50_Percent);
         SetDotDensity(UDotDensity_Normal);
         SimulationPause(UCmdParam_Off);
+
+        showNormalMonthLabels();
 
         break;
 
@@ -391,6 +412,8 @@ void Universe::ShowDemo(int nParam)
         SetSimulationSpeed(USimulationSpeed_1600_Percent);
         SimulationPause(UCmdParam_Off);
 
+        showNormalMonthLabels();
+
         break;
 
     case UDemo_MoonsNodalPrecession:
@@ -424,6 +447,7 @@ void Universe::ShowDemo(int nParam)
         bShowLargeLabels = false;
         bShowLabelsOnTop = true;
 
+        showNormalMonthLabels();
 
         break;
 
@@ -461,6 +485,8 @@ void Universe::ShowDemo(int nParam)
 
         SetSimulationSpeed(USimulationSpeed_100_Percent);
         SimulationPause(UCmdParam_Off);
+
+        showNormalMonthLabels();
 
         break;
 

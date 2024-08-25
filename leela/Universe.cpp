@@ -565,6 +565,27 @@ void Universe::cycleLabelModes()
 
 }
 
+
+void Universe::hideMonthLabels()
+{
+    bShowMonthNames = false;
+}
+
+void Universe::showLargeMonthLabels()
+{
+    bShowMonthNames = true;
+    bShowLargeLabels = true;
+}
+
+void Universe::showNormalMonthLabels()
+{
+    bShowMonthNames = true;
+    bShowLargeLabels = false;
+    bMonthLabelsCloserToSphere = false;
+    bShowLabelsOnTop = false;
+}
+
+
 void Universe::ResetFollowTargetAndMode()
 {
     SetLockTargetAndMode(nullptr, TargetLockMode_ViewTarget);

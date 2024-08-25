@@ -248,6 +248,9 @@ public:
     void calculateOrientedViewLockVariables();
     void cycleLockMode();
     void cycleLabelModes();
+    void hideMonthLabels();
+    void showLargeMonthLabels();
+    void showNormalMonthLabels();
     void ResetFollowTargetAndMode();
     void ToggleFollowTarget(SphericalBody* target, TargetLockMode mode);
 
