@@ -78,7 +78,7 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "CompanyName", "Leela Development Team"
-            VALUE "FileDescription", "TODO: <File description>"
+            VALUE "FileDescription", "Leela"
             VALUE "FileVersion", "1.1.0.0"
             VALUE "InternalName", "leela.exe"
             VALUE "LegalCopyright", "Copyright (C) 2024"
