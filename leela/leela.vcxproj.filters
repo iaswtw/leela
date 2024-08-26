@@ -64,6 +64,7 @@
     <ClCompile Include="ViewportBorderRenderer.cpp" />
     <ClCompile Include="ViewportSceneObject.cpp" />
     <ClCompile Include="VerticesGpuObject.cpp" />
+    <ClCompile Include="UniverseActions.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Class.h" />
@@ -164,5 +165,8 @@
     <Filter Include="SceneObjects">
       <UniqueIdentifier>{a1c99238-d0e7-4d81-9938-1bdbf74e0af7}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\leela.ico" />
   </ItemGroup>
 </Project>

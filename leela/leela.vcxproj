@@ -250,6 +250,7 @@
     <ClCompile Include="SceneObjects\SphericalBody.cpp" />
     <ClCompile Include="TessellationHelper.cpp" />
     <ClCompile Include="Universe.cpp" />
+    <ClCompile Include="UniverseActions.cpp" />
     <ClCompile Include="UniverseDemo.cpp" />
     <ClCompile Include="UniverseInputHandling.cpp" />
     <ClCompile Include="UniverseRendering.cpp" />

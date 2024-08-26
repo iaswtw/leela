@@ -23,6 +23,8 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include "map"
+#include <stack>
 #include "UniverseMinimal.h"
 #include "ViewportSceneObject.h"
 
@@ -31,8 +33,7 @@
 #include "GlslProgram.h"
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include "map"
-using namespace std;
+
 
 #include <spdlog/spdlog.h>
 
@@ -51,6 +52,37 @@ struct Character {
     glm::ivec2 bearing;         // offset from baseline to top/left of glyph
     unsigned int advance;       // offset to advance to next glyph
 };
+
+
+
+class Action
+{
+public:
+    Action(std::function<void()> work_func, std::string help)
+        : 
+        _work_func(work_func),
+        _help(help)
+    {}
+
+    ~Action() {}
+
+    void invoke()
+    {
+        if (_work_func) {
+            _work_func();
+        }
+    }
+
+
+private:
+    std::function<void()> _work_func;
+    std::string _help;
+};
+
+
+// map between SDK key info and a vector of functions.
+typedef std::map<std::tuple<int, int>, Action> ActionMap;
+
 
 
 /*!
@@ -215,6 +247,8 @@ class Universe
 public:
     Universe();    
     ~Universe();
+
+    void createActions();
 
     void HelpMarker(const char* desc);
 
@@ -514,6 +548,8 @@ public:
     bool bRealisticShading = true;
     bool bRealisticSurfaces = true;
 
+    ActionMap actionMap;
+
     //=================================================================
     // IMGUI, SDL related
     SDL_Window *window = nullptr;
@@ -543,6 +579,7 @@ public:
     std::vector<std::string> nightDarknessLevelStrs = { "Black", "Very High", "High", "Medium", "Low", "Very Low", "None"};
 
     std::string logString = "";
+
 
 };
 
