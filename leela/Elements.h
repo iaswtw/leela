@@ -33,8 +33,8 @@ struct PlanetInfo
 };
 
 
-//#define USE_TO_SCALE true
-#define USE_TO_SCALE false
+#define USE_TO_SCALE true
+//#define USE_TO_SCALE false
 
 
 extern PlanetInfo planetInfo[];

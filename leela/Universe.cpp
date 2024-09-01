@@ -1472,6 +1472,19 @@ int Universe::runMainLoop()
         processFlags();
         render();
 
+        {
+            GLint renderbufferID;
+            GLint depthSize;
+            glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &renderbufferID);
+
+            glBindRenderbuffer(GL_RENDERBUFFER, renderbufferID);
+            glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_DEPTH_SIZE, &depthSize);
+            glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+            std::cout << "Depth buffer size: " << depthSize << " bits" << std::endl;
+        }
+
+
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         SDL_GL_SwapWindow(window);
