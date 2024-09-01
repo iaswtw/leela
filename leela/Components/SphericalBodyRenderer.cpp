@@ -1066,7 +1066,7 @@ void PlanetRenderer::render(ViewportType viewportType, RenderStage renderStage, 
                     else
                         renderMinimapSphere(glslProgram);
                 }
-                if (g_universe->bShowPlanetAxis) {
+                if (g_leela->bShowPlanetAxis) {
                     renderRotationAxis(glslProgram);
                 }
             }
@@ -1074,7 +1074,7 @@ void PlanetRenderer::render(ViewportType viewportType, RenderStage renderStage, 
         else if (glslProgram.type() == GlslProgramType::Simple) {
             if (viewportType == ViewportType::Primary) {
                 renderOrbit(glslProgram);
-                if (g_universe->bShowPlanetAxis)
+                if (g_leela->bShowPlanetAxis)
                     renderLongRotationAxis(glslProgram);
             }
             else if (viewportType == ViewportType::Minimap) {
@@ -1106,12 +1106,12 @@ void PlanetRenderer::doShaderConfig(GlslProgram& glslProgram)
     glslProgram.setVec3("sphereInfo.centerTransformed", glm::value_ptr(s.getCenter()));
     glslProgram.setFloat("sphereInfo.radius", s.getRadius());
     float multiplierAdjust = 1.0f;
-    if (g_universe->bShowLowDarknessAtNight)
+    if (g_leela->bShowLowDarknessAtNight)
     {
         multiplierAdjust = 2.0f;
     }
     //glslProgram.setFloat("nightColorMultiplier", _nightColorMultiplier * multiplierAdjust);
-    NightColorDarkness level = nightColorDarknessStrToLevel(g_universe->nightDarknessLevelStr);
+    NightColorDarkness level = nightColorDarknessStrToLevel(g_leela->nightDarknessLevelStr);
     float levelFloatValue = nightColorDarknessLevelToFloat(level);
 
     glslProgram.setFloat("nightColorMultiplier", levelFloatValue * multiplierAdjust);
@@ -1132,7 +1132,7 @@ void PlanetRenderer::doShaderConfig(GlslProgram& glslProgram)
 
     if (!_textureFilename.empty())
     {
-        glslProgram.setBool("useTexture", g_universe->bRealisticSurfaces);
+        glslProgram.setBool("useTexture", g_leela->bRealisticSurfaces);
 
         //printf("texture filename not empty. Texture = %d\n", _texture);
         glActiveTexture(GL_TEXTURE0);
@@ -1168,7 +1168,7 @@ void PlanetRenderer::renderSphere(GlslProgram& glslProgram)
     if (!_sphere->bIsCenterOfMass) {
         glBindVertexArray(_mainVao);
 
-        if (g_universe->bShowWireframeSurfaces)
+        if (g_leela->bShowWireframeSurfaces)
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         else
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -1190,7 +1190,7 @@ void PlanetRenderer::renderMinimapSphere(GlslProgram& glslProgram)
     if (!_sphere->bIsCenterOfMass) {
         glBindVertexArray(_minimapMainVao);
 
-        if (g_universe->bShowWireframeSurfaces)
+        if (g_leela->bShowWireframeSurfaces)
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         else
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

@@ -17,21 +17,21 @@ bool BookmarkRenderer::isSpherePointHidden(glm::vec3 p)
 
 void BookmarkRenderer::_renderBookmarks(GlslProgram& glslProgram)
 {
-    //glm::mat4 combinedMatrix = g_universe->projectionMatrix * g_universe->viewMatrix;
+    //glm::mat4 combinedMatrix = g_leela->projectionMatrix * g_leela->viewMatrix;
     //glslProgram.setMat4("projection", glm::value_ptr(combinedMatrix));
 
-    glm::mat4 projection = glm::ortho(float(g_universe->curViewportX),
-                                      float(g_universe->curViewportX + g_universe->curViewportWidth),
-                                      float(g_universe->curViewportY),
-                                      float(g_universe->curViewportY + g_universe->curViewportHeight),
+    glm::mat4 projection = glm::ortho(float(g_leela->curViewportX),
+                                      float(g_leela->curViewportX + g_leela->curViewportWidth),
+                                      float(g_leela->curViewportY),
+                                      float(g_leela->curViewportY + g_leela->curViewportHeight),
                                       0.0f,
                                       100.0f);
     glslProgram.setMat4("projection", glm::value_ptr(projection));
     
 
     // adjust scale based on zoom level to ensure font size is not too large.
-    float heightOfCharA = g_universe->getHeightOfCharA();
-    float screenProjectedHeight = g_universe->findScreenProjectedHeight(heightOfCharA, _bookmark->_sphericalBody->_center);
+    float heightOfCharA = g_leela->getHeightOfCharA();
+    float screenProjectedHeight = g_leela->findScreenProjectedHeight(heightOfCharA, _bookmark->_sphericalBody->_center);
     //spdlog::info("heightOfCharA = {}", heightOfCharA);
     //spdlog::info("screenProjectedHeight of A = {}", screenProjectedHeight);
 
@@ -48,11 +48,11 @@ void BookmarkRenderer::_renderBookmarks(GlslProgram& glslProgram)
     bookmarkPoint = _bookmark->_sphericalBody->getTransformedLatitudeLongitude(_bookmark->_lat, _bookmark->_lon, 1.0f);
     if (!isSpherePointHidden(bookmarkPoint))
     {
-        projected = g_universe->getScreenCoordinates(bookmarkPoint);
+        projected = g_leela->getScreenCoordinates(bookmarkPoint);
         //projected = _sphere.getTransformedLatitudeLongitude(aus_lat, aus_lon, (_sphere._radius + 1) / _sphere._radius);
         if (projected.z < 1.0f)
         {
-            g_universe->RenderText(
+            g_leela->RenderText(
                 glslProgram,
                 //RenderTextType_ObjectText,
                 RenderTextType_ScreenText,
@@ -69,10 +69,10 @@ void BookmarkRenderer::_renderBookmarks(GlslProgram& glslProgram)
 
 void BookmarkRenderer::_renderBookmarkSpheres(GlslProgram& glslProgram)
 {
-    glm::mat4 projection = glm::ortho(float(g_universe->curViewportX),
-                                      float(g_universe->curViewportX + g_universe->curViewportWidth),
-                                      float(g_universe->curViewportY),
-                                      float(g_universe->curViewportY + g_universe->curViewportHeight),
+    glm::mat4 projection = glm::ortho(float(g_leela->curViewportX),
+                                      float(g_leela->curViewportX + g_leela->curViewportWidth),
+                                      float(g_leela->curViewportY),
+                                      float(g_leela->curViewportY + g_leela->curViewportHeight),
                                       0.0f,
                                       100.0f);
     glslProgram.setMat4("projection", glm::value_ptr(projection));
@@ -85,7 +85,7 @@ void BookmarkRenderer::_renderBookmarkSpheres(GlslProgram& glslProgram)
 
     if (!isSpherePointHidden(bookmarkPoint))
     {
-        projected = g_universe->getScreenCoordinates(bookmarkPoint);
+        projected = g_leela->getScreenCoordinates(bookmarkPoint);
         //spdlog::info("projected.z = {}", projected.z);
 
         GLboolean curDepthMaskEnable;

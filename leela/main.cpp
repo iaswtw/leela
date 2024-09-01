@@ -42,8 +42,8 @@ bool changeDirToParentOfExecutable()
 
 
 
-Leela * g_universe = new Leela();  // global instance accessible to all objects
-Space* g_space = &g_universe->space;
+Leela * g_leela = new Leela();  // global instance accessible to all objects
+Space* g_space = &g_leela->space;
 
 int main(int argc, char *argv[])
 //int WINAPI WinMain(HINSTANCE hThisInstance, HINSTANCE hPrevInstance, LPSTR lpszArgument, int nCmdShow)
@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    auto retval = g_universe->run();
+    auto retval = g_leela->run();
 
     if (retval != 0)
     {

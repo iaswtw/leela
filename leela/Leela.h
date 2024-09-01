@@ -236,7 +236,7 @@ class Space;
 //-----------------------------------------
 // Globally available handles
 //-----------------------------------------
-extern Leela* g_universe;
+extern Leela* g_leela;
 extern Space* g_space;
 
 

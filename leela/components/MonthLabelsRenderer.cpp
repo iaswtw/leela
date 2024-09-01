@@ -38,7 +38,7 @@ void MonthLabelsRenderer::calculateMonthPositions(float labelPositionScale)
 
 void MonthLabelsRenderer::_renderLabels(GlslProgram& glslProgram, bool isPre)
 {
-    if ((!isPre && g_universe->bShowLabelsOnTop) || (isPre && !g_universe->bShowLabelsOnTop))
+    if ((!isPre && g_leela->bShowLabelsOnTop) || (isPre && !g_leela->bShowLabelsOnTop))
     {
         // This code is executed in either Pre or Post render stage; not both.
         // If labels are to be shown on top, render them in `post` render stage.
@@ -46,16 +46,16 @@ void MonthLabelsRenderer::_renderLabels(GlslProgram& glslProgram, bool isPre)
         glm::vec3 projected;
         float z = 0.0f;
 
-        if (g_universe->bShowMonthNames)
+        if (g_leela->bShowMonthNames)
         {
-            if (g_universe->bMonthLabelsCloserToSphere)
+            if (g_leela->bMonthLabelsCloserToSphere)
                 calculateMonthPositions((_sphere->_orbitalRadius + 1.5f * _sphere->_radius) / _sphere->_orbitalRadius);
             else
                 calculateMonthPositions(1.2f);
 
 
             //----- TEMP ------
-            glm::mat4 projection = glm::ortho(float(g_universe->curViewportX), float(g_universe->curViewportX + g_universe->curViewportWidth), float(g_universe->curViewportY), float(g_universe->curViewportY + g_universe->curViewportHeight));
+            glm::mat4 projection = glm::ortho(float(g_leela->curViewportX), float(g_leela->curViewportX + g_leela->curViewportWidth), float(g_leela->curViewportY), float(g_leela->curViewportY + g_leela->curViewportHeight));
             glslProgram.setMat4("projection", glm::value_ptr(projection));
             //----- TEMP ------
 
@@ -67,14 +67,14 @@ void MonthLabelsRenderer::_renderLabels(GlslProgram& glslProgram, bool isPre)
 
             for (int i = 0; i < 12; i++)
             {
-                projected = g_universe->getScreenCoordinates(monthPositions[i]);
+                projected = g_leela->getScreenCoordinates(monthPositions[i]);
                 //glm::vec2 projected = getScreenCoordinates(glm::vec3(0.0f, 0.0f, 0.0f));
 
                 //spdlog::info("month Position {}: {}", i, glm::to_string(projected));
 
                 if (projected.z < 1.0f)
                 {
-                    g_universe->RenderText(
+                    g_leela->RenderText(
                         glslProgram,
                         RenderTextType_ScreenText,
                         monthNames[i].c_str(),

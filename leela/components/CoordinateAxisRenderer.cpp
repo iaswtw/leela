@@ -65,7 +65,7 @@ void CoordinateAxisRenderer::constructVerticesAndSendToGpu()
 
 void CoordinateAxisRenderer::_renderAxis(GlslProgram glslProgram)
 {
-    if (g_universe->bShowAxis) {
+    if (g_leela->bShowAxis) {
         //----------------------------------------------
         // Axis model transformation
         //----------------------------------------------

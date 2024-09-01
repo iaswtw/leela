@@ -36,7 +36,7 @@ void StarsRenderer::init()
 
 void StarsRenderer::_renderStars(GlslProgram& glslProgram)
 {
-    if (!g_universe->bGalaxyStars)
+    if (!g_leela->bGalaxyStars)
     {
         renderCubeStars(glslProgram);
     }
