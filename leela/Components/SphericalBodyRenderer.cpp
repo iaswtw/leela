@@ -1,6 +1,7 @@
 #include "SphericalBodyRenderer.h"
 #include "Utils.h"
 #include "Universe.h"
+#include "Elements.h"
 
 #include "glm/ext.hpp"
 #include "glm/gtx/string_cast.hpp"
@@ -522,6 +523,9 @@ void SphericalBodyRenderer::constructOrbit()
     glm::vec3 color         = s._color / 2.5f;
 
     float alpha_inc = float(2 * M_PI) / 500;
+
+    if (USE_TO_SCALE)
+        alpha_inc = float(2 * M_PI) / 5000;
 
     //---------------------------------------------------------------------------------
     // Orbit itself

@@ -5,6 +5,7 @@
 #include <GL/glew.h>
 #include "SphericalBody.h"
 #include "Universe.h"
+#include "Elements.h"
 
 static inline void vector_push_back_7(std::vector<float>& v, float f1, float f2, float f3, float f4, float f5, float f6, float f7)
 {
@@ -68,6 +69,10 @@ std::tuple<std::vector<float>*, std::vector<float>*> StarsRenderer::_constructCu
     float i = 0.0f;
     float x, y, z, c, r, g, b;
     float max_dist = 500000.0;
+
+    //if (USE_TO_SCALE)
+    //    max_dist = 1000000.0;
+
     printf("Starting to generate stars\n");
     while (1) {
         if (i == _stars.maxCubeStars)

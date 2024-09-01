@@ -139,8 +139,24 @@ void Universe::initSceneObjectsAndComponents()
     // For each planet entry in the table, create a Spherical body object and configure it.
     //      - Create an appropriate renderer object for it.
     //      - do special handling for some spheres such as earth, moon, and sun.
-    for (PlanetInfo pi : planetInfo)
+    PlanetInfo* _planetInfo = nullptr;
+    int _numPlanetInfo = 0;
+
+    if (USE_TO_SCALE) {
+        _planetInfo = &planetInfoToScale[0];
+        _numPlanetInfo = numPlanetInfoToScale;
+    }
+    else {
+        _planetInfo = &planetInfo[0];
+        _numPlanetInfo = numPlanetInfo;
+    }
+
+
+    //for (PlanetInfo pi : planetInfo)
+    for (int i = 0; i < _numPlanetInfo; i++)
     {
+        PlanetInfo &pi = _planetInfo[i];
+
         SphericalBody * sb = new SphericalBody(pi.name);
         sb->setRotationParameters(pi.radius,
                                   glm::radians(pi.rotationAngle),
@@ -248,8 +264,9 @@ void Universe::initSceneObjectsAndComponents()
     // has been created. (Releated sphere can be a child sphere; and the child won't exist if parent were
     // to find its "other" sphere in the above loop.)
     //
-    for (PlanetInfo pi : planetInfo)
+    for (int i = 0; i < _numPlanetInfo; i++)
     {
+        PlanetInfo &pi = _planetInfo[i];
         SphericalBody* sb = dynamic_cast<SphericalBody*>(
                                 SceneObject::getSceneObjectByName(&scene, pi.name)
                             );
@@ -1076,8 +1093,12 @@ void Universe::processFlags()
         else
             throttle /= 10;              // ctrl       = slow zoom
     else if (bShiftModifier)
-        if (bAltModifier)
-            throttle *= 100;             // shift + alt = super fast zoom
+        if (bAltModifier) {
+            if (USE_TO_SCALE)
+                throttle *= 100;             // shift + alt = super fast zoom
+            else
+                throttle *= 100;             // shift + alt = super fast zoom
+        }
         else
             throttle *= 10;              // shift       = fast zoom
 

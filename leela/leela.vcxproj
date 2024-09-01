@@ -229,6 +229,7 @@
     <ClCompile Include="components\SimpleSphereRenderer.cpp" />
     <ClCompile Include="Components\SphericalBodyRenderer.cpp" />
     <ClCompile Include="components\StarsRenderer.cpp" />
+    <ClCompile Include="Elements.cpp" />
     <ClCompile Include="GlslProgram.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />

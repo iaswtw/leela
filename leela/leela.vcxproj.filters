@@ -65,6 +65,7 @@
     <ClCompile Include="ViewportSceneObject.cpp" />
     <ClCompile Include="VerticesGpuObject.cpp" />
     <ClCompile Include="UniverseActions.cpp" />
+    <ClCompile Include="Elements.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Class.h" />

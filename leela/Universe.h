@@ -54,7 +54,6 @@ struct Character {
 };
 
 
-
 class Action
 {
 public:
