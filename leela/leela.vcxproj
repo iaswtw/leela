@@ -251,11 +251,11 @@
     <ClCompile Include="SceneObjects\Bookmark.cpp" />
     <ClCompile Include="SceneObjects\SphericalBody.cpp" />
     <ClCompile Include="TessellationHelper.cpp" />
-    <ClCompile Include="Universe.cpp" />
-    <ClCompile Include="UniverseActions.cpp" />
-    <ClCompile Include="UniverseDemo.cpp" />
-    <ClCompile Include="UniverseInputHandling.cpp" />
-    <ClCompile Include="UniverseRendering.cpp" />
+    <ClCompile Include="Leela.cpp" />
+    <ClCompile Include="LeelaActions.cpp" />
+    <ClCompile Include="LeelaDemo.cpp" />
+    <ClCompile Include="LeelaInputHandling.cpp" />
+    <ClCompile Include="LeelaRendering.cpp" />
     <ClCompile Include="Utils.cpp" />
     <ClCompile Include="VerticesGpuObject.cpp" />
     <ClCompile Include="ViewportBorderRenderer.cpp" />

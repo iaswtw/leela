@@ -6,9 +6,9 @@
     <ClCompile Include="lodepng.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="Universe.cpp" />
-    <ClCompile Include="UniverseInputHandling.cpp" />
-    <ClCompile Include="UniverseRendering.cpp" />
+    <ClCompile Include="Leela.cpp" />
+    <ClCompile Include="LeelaInputHandling.cpp" />
+    <ClCompile Include="LeelaRendering.cpp" />
     <ClCompile Include="Utils.cpp" />
     <ClCompile Include="imgui\imgui.cpp">
       <Filter>ImGui</Filter>
@@ -63,10 +63,10 @@
     <ClCompile Include="ViewportBorderRenderer.cpp" />
     <ClCompile Include="ViewportSceneObject.cpp" />
     <ClCompile Include="VerticesGpuObject.cpp" />
-    <ClCompile Include="UniverseActions.cpp" />
+    <ClCompile Include="LeelaActions.cpp" />
     <ClCompile Include="Elements.cpp" />
     <ClCompile Include="LeelaImguiWidgets.cpp" />
-    <ClCompile Include="UniverseDemo.cpp" />
+    <ClCompile Include="LeelaDemo.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Class.h" />
