@@ -42,7 +42,7 @@ bool changeDirToParentOfExecutable()
 
 
 
-Universe * g_universe = new Universe();  // global instance accessible to all objects
+Leela * g_universe = new Leela();  // global instance accessible to all objects
 Space* g_space = &g_universe->space;
 
 int main(int argc, char *argv[])

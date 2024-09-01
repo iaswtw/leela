@@ -25,7 +25,7 @@
 // Following function was copied from imgui_demo.cpp
 // Helper to display a little (?) mark which shows a tooltip when hovered.
 // In your own code you may want to display an actual icon if you are using a merged icon fonts (see misc/fonts/README.txt)
-void Universe::HelpMarker(const char* desc)
+void Leela::HelpMarker(const char* desc)
 {
     ImGui::TextDisabled("(?)");
     if (ImGui::IsItemHovered())
@@ -62,7 +62,7 @@ static std::string FindFontFile(const char * fileName)
 }
 
 
-Universe::Universe() :
+Leela::Leela() :
 
     starsRenderer(stars),
 
@@ -76,11 +76,11 @@ Universe::Universe() :
 }
 
 
-Universe::~Universe()
+Leela::~Leela()
 {
 }
 
-void Universe::compileShaders()
+void Leela::compileShaders()
 {
     struct ShaderProgramInfo
     {
@@ -117,7 +117,7 @@ void Universe::compileShaders()
  Initialize various parameters of planets, stars, etc.  Parameters include radius of objects,
  time periods of rotation and revolution, colors, etc.
 **************************************************************************************************/
-void Universe::initSceneObjectsAndComponents()
+void Leela::initSceneObjectsAndComponents()
 {
     stars.setCubeStarParameters(
         3500,                               // total number of stars (single + double pixel)
@@ -367,7 +367,7 @@ void Universe::initSceneObjectsAndComponents()
 }
 
 
-void Universe::printGlError()
+void Leela::printGlError()
 {
     GLenum err = glGetError();
     while (err != GL_NO_ERROR)
@@ -389,7 +389,7 @@ void Universe::printGlError()
     }
 }
 
-void Universe::_advanceSceneObject(SceneObject* sceneObject, float stepMultiplier)
+void Leela::_advanceSceneObject(SceneObject* sceneObject, float stepMultiplier)
 {
     //----------------------------------------
     // todo - eventually implement this without recursion
@@ -413,18 +413,18 @@ void Universe::_advanceSceneObject(SceneObject* sceneObject, float stepMultiplie
 
 }
 
-void Universe::advanceScene(float stepMultiplier)
+void Leela::advanceScene(float stepMultiplier)
 {
     _advanceSceneObject(&scene, stepMultiplier);
 }
 
 
-void Universe::ChangeSidewaysMotionMode()
+void Leela::ChangeSidewaysMotionMode()
 {
     bSidewaysMotionMode = !bSidewaysMotionMode;
 }
 
-void Universe::SetDefaultView()
+void Leela::SetDefaultView()
 {
     space.pushFrame();
 
@@ -438,7 +438,7 @@ void Universe::SetDefaultView()
 
 }
 
-void Universe::SetApplicationStartView()
+void Leela::SetApplicationStartView()
 {
     space.pushFrame();
     space.initFrame();
@@ -457,7 +457,7 @@ void Universe::SetApplicationStartView()
 }
 
 
-void Universe::SetLockTargetAndMode(SphericalBody* target, TargetLockMode mode)
+void Leela::SetLockTargetAndMode(SphericalBody* target, TargetLockMode mode)
 {
     lockTarget = target;
 
@@ -465,7 +465,7 @@ void Universe::SetLockTargetAndMode(SphericalBody* target, TargetLockMode mode)
     SetLockMode(mode);
 }
 
-void Universe::SetLockMode(TargetLockMode mode)
+void Leela::SetLockMode(TargetLockMode mode)
 {
     lockMode = mode;
 
@@ -492,7 +492,7 @@ void Universe::SetLockMode(TargetLockMode mode)
     }
 }
 
-void Universe::calculateCommonTargetLockVariables()
+void Leela::calculateCommonTargetLockVariables()
 {
     PNT T = lockTarget->getCenter();
     PNT S = space.S;
@@ -502,7 +502,7 @@ void Universe::calculateCommonTargetLockVariables()
 
 }
 
-void Universe::calculateFollowTargetLockVariables()
+void Leela::calculateFollowTargetLockVariables()
 {
     PNT T = lockTarget->getCenter();
     PNT S = space.S;
@@ -512,7 +512,7 @@ void Universe::calculateFollowTargetLockVariables()
 //
 // Calculate `orientedTargetLock_alpha` and `orientedTargetLock_beta` members.
 //
-void Universe::calculateOrientedViewLockVariables()
+void Leela::calculateOrientedViewLockVariables()
 {
     // T = target's center
     // P = target's parent's center
@@ -560,7 +560,7 @@ void Universe::calculateOrientedViewLockVariables()
     }
 }
 
-void Universe::cycleLockMode()
+void Leela::cycleLockMode()
 {
     if (lockMode == TargetLockMode_ViewTarget)
         SetLockMode(TargetLockMode_FollowTarget);
@@ -570,7 +570,7 @@ void Universe::cycleLockMode()
         SetLockMode(TargetLockMode_ViewTarget);
 }
 
-void Universe::cycleLabelModes()
+void Leela::cycleLabelModes()
 {
     if (!bShowMonthNames && !bShowLargeLabels) {
         bShowMonthNames = true;
@@ -586,18 +586,18 @@ void Universe::cycleLabelModes()
 }
 
 
-void Universe::hideMonthLabels()
+void Leela::hideMonthLabels()
 {
     bShowMonthNames = false;
 }
 
-void Universe::showLargeMonthLabels()
+void Leela::showLargeMonthLabels()
 {
     bShowMonthNames = true;
     bShowLargeLabels = true;
 }
 
-void Universe::showNormalMonthLabels()
+void Leela::showNormalMonthLabels()
 {
     bShowMonthNames = true;
     bShowLargeLabels = false;
@@ -606,12 +606,12 @@ void Universe::showNormalMonthLabels()
 }
 
 
-void Universe::ResetFollowTargetAndMode()
+void Leela::ResetFollowTargetAndMode()
 {
     SetLockTargetAndMode(nullptr, TargetLockMode_ViewTarget);
 }
 
-void Universe::ToggleFollowTarget(SphericalBody* target, TargetLockMode mode)
+void Leela::ToggleFollowTarget(SphericalBody* target, TargetLockMode mode)
 {
     if (lockTarget == target)
         lockTarget = nullptr;
@@ -621,7 +621,7 @@ void Universe::ToggleFollowTarget(SphericalBody* target, TargetLockMode mode)
     SetLockMode(mode);
 }
 
-void Universe::LookAtTarget()
+void Leela::LookAtTarget()
 {
     if (lockMode == TargetLockMode_FollowTarget)
     {
@@ -682,7 +682,7 @@ void Universe::LookAtTarget()
 /*
  Double the speed each time this is called.
  */
-void Universe::IncreaseSimulationSpeed()
+void Leela::IncreaseSimulationSpeed()
 {
     if (_stepMultiplier < 400.0f)
         _stepMultiplier *= 2.0f;
@@ -691,7 +691,7 @@ void Universe::IncreaseSimulationSpeed()
 /*
  Halve the speed each time this is called.
  */
-void Universe::DecreaseSimulationSpeed()
+void Leela::DecreaseSimulationSpeed()
 {
     if (_stepMultiplier > 0.0001666)
         _stepMultiplier *= 0.5f;
@@ -703,7 +703,7 @@ void Universe::DecreaseSimulationSpeed()
  Set simulation speed to one of the 5 hardcoded values.
 
 ****************************************************************************/
-void Universe::SetSimulationSpeed(int nParam)
+void Leela::SetSimulationSpeed(int nParam)
 {
     eSimulationSpeed = USimulationSpeedType(nParam);
     switch (eSimulationSpeed)
@@ -724,19 +724,19 @@ void Universe::SetSimulationSpeed(int nParam)
  * Set time flow direction to either Forward or Reverse depending on the
  * argument.
 */
-void Universe::SetTimeDirection(int nParam)
+void Leela::SetTimeDirection(int nParam)
 {
     eTimeDirection = (UTimeDirectionType)nParam;
 }
 
 // Turn On/Off Fast forward motion.
-void Universe::FastForward(int nParam)
+void Leela::FastForward(int nParam)
 {
     ChangeBoolean(&bEquals, nParam);
 }
 
 // Turn On/Off fast Reverse motion.
-void Universe::Rewind(int nParam)
+void Leela::Rewind(int nParam)
 {
     ChangeBoolean(&bMinus, nParam);
 }
@@ -754,7 +754,7 @@ void Universe::Rewind(int nParam)
  Sets bUpdateUI to true unconditionally.
 
 ****************************************************************************/
-void Universe::ChangeBoolean(bool *pBool, int nParam)
+void Leela::ChangeBoolean(bool *pBool, int nParam)
 {
     switch (nParam)
     {
@@ -774,17 +774,17 @@ void Universe::ChangeBoolean(bool *pBool, int nParam)
     }
 }
 
-void Universe::SimulationPause(int nParam)
+void Leela::SimulationPause(int nParam)
 {
     ChangeBoolean(&bSimulationPause, nParam);
 }
 
-void Universe::Earth_RotationMotion(int nParam)
+void Leela::Earth_RotationMotion(int nParam)
 {
     ChangeBoolean(&earth->bRotationMotion, nParam);
 }
 
-void Universe::Earth_RevolutionMotion(int nParam)
+void Leela::Earth_RevolutionMotion(int nParam)
 {
     ChangeBoolean(&earth->bRevolutionMotion, nParam);
     //F_REFERENCE_VECTOR_ALONG_Z = 0;
@@ -792,7 +792,7 @@ void Universe::Earth_RevolutionMotion(int nParam)
 }
 
 
-void Universe::Earth_PrecessionMotion(int nParam)
+void Leela::Earth_PrecessionMotion(int nParam)
 {
     if (nParam == UCmdParam_Reset)
     {
@@ -805,38 +805,38 @@ void Universe::Earth_PrecessionMotion(int nParam)
     }
 }
 
-void Universe::Earth_OrbitalPlane(int nParam)
+void Leela::Earth_OrbitalPlane(int nParam)
 {
     ChangeBoolean(&earthRenderer->bShowOrbitalPlane, nParam);
 }
 
-void Universe::Earth_Orbit(int nParam)
+void Leela::Earth_Orbit(int nParam)
 {
     ChangeBoolean(&earthRenderer->bShowOrbit, nParam);
 }
 
-void Universe::Moon_OrbitalPlane(int nParam)
+void Leela::Moon_OrbitalPlane(int nParam)
 {
     ChangeBoolean(&moonRenderer->bShowOrbitalPlane, nParam);
 }
 
 
-void Universe::Moon_Orbit(int nParam)
+void Leela::Moon_Orbit(int nParam)
 {
     ChangeBoolean(&moonRenderer->bShowOrbit, nParam);
 }
 
-void Universe::Moon_ResetNodalPrecession()
+void Leela::Moon_ResetNodalPrecession()
 {
     moon->_nodalPrecessionAngle = 0.0f;
 }
 
-bool Universe::IsAnyOrbitVisible()
+bool Leela::IsAnyOrbitVisible()
 {
     return _IsAnyOrbitVisible(&scene);
 }
 
-bool Universe::_IsAnyOrbitVisible(SceneObject * sceneObject)
+bool Leela::_IsAnyOrbitVisible(SceneObject * sceneObject)
 {
     for (Renderer* r : sceneObject->_renderers)
     {
@@ -857,12 +857,12 @@ bool Universe::_IsAnyOrbitVisible(SceneObject * sceneObject)
     return false;
 }
 
-void Universe::DisableShowingAllOrbits()
+void Leela::DisableShowingAllOrbits()
 {
     _DisableShowingOrbit(&scene);
 }
 
-void Universe::_DisableShowingOrbit(SceneObject* sceneObject)
+void Leela::_DisableShowingOrbit(SceneObject* sceneObject)
 {
     for (Renderer* r : sceneObject->_renderers)
     {
@@ -877,7 +877,7 @@ void Universe::_DisableShowingOrbit(SceneObject* sceneObject)
     }
 }
 
-void Universe::ShowAllOrbits()
+void Leela::ShowAllOrbits()
 {
     vector<string> names;
     _ShowAllOrbits(&scene, names);
@@ -887,7 +887,7 @@ void Universe::ShowAllOrbits()
 // If `names` is empty, all spherical bodies will have their orbits turned on.
 // If `names` is not empty, only the spherical bodies whose names are in `names` vector will have orbits turned on.
 //
-void Universe::_ShowAllOrbits(SceneObject * sceneObject, vector<string>& names)
+void Leela::_ShowAllOrbits(SceneObject * sceneObject, vector<string>& names)
 {
     for (Renderer* r : sceneObject->_renderers)
     {
@@ -917,14 +917,14 @@ void Universe::_ShowAllOrbits(SceneObject * sceneObject, vector<string>& names)
 }
 
 
-void Universe::ShowEarthAndMoonOrbits()
+void Leela::ShowEarthAndMoonOrbits()
 {
     vector<string> names = {"Earth", "Moon"};
     _ShowAllOrbits(&scene, names);
 }
 
 
-void Universe::Moon_OrbitalPlaneRotation(int nParam)
+void Leela::Moon_OrbitalPlaneRotation(int nParam)
 {
 
     if (nParam == UCmdParam_Reset)
@@ -938,12 +938,12 @@ void Universe::Moon_OrbitalPlaneRotation(int nParam)
     }
 }
 
-void Universe::Moon_RevolutionMotion(int nParam)
+void Leela::Moon_RevolutionMotion(int nParam)
 {
     ChangeBoolean(&moon->bRevolutionMotion, nParam);
 }
 
-void Universe::SetDotDensity(int nParam)
+void Leela::SetDotDensity(int nParam)
 {
     eDotDensity = (UDotDensityType)nParam;
     switch (eDotDensity)
@@ -961,7 +961,7 @@ void Universe::SetDotDensity(int nParam)
 }
 
 
-void Universe::toggleFullScreen()
+void Leela::toggleFullScreen()
 {
     if (bIsWindowFullScreen) {
         SDL_SetWindowFullscreen(window, 0);
@@ -975,12 +975,12 @@ void Universe::toggleFullScreen()
     }
 }
 
-void Universe::toggleControlPanelVisibilityWhenMouseGrabbed()
+void Leela::toggleControlPanelVisibilityWhenMouseGrabbed()
 {
     bAlwaysShowControlPanel = !bAlwaysShowControlPanel;
 }
 
-void Universe::cleanupAndExitApplication()
+void Leela::cleanupAndExitApplication()
 {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
@@ -992,24 +992,24 @@ void Universe::cleanupAndExitApplication()
     SDL_Quit();
 }
 
-void Universe::Moon_SetOrbitalPositionAngle(double fAngle)
+void Leela::Moon_SetOrbitalPositionAngle(double fAngle)
 {
     moon->setOrbitalAngle(float(fAngle));
 }
 
-void Universe::Earth_SetOrbitalPositionAngle(double fAngle)
+void Leela::Earth_SetOrbitalPositionAngle(double fAngle)
 {
     earth->setOrbitalAngle(float(fAngle));
 }
 
 
-void Universe::setWidgetControlMode()
+void Leela::setWidgetControlMode()
 {
     SDL_ShowCursor(SDL_ENABLE);
     SDL_SetRelativeMouseMode(SDL_FALSE);
 }
 
-void Universe::resetWidgetControlMode()
+void Leela::resetWidgetControlMode()
 {
     //SDL_ShowCursor(SDL_DISABLE);
     SDL_SetRelativeMouseMode(SDL_TRUE);
@@ -1019,7 +1019,7 @@ void Universe::resetWidgetControlMode()
 // - Process flags set in response to key presses.
 // - Process mouse movements.
 //
-void Universe::processFlags()
+void Leela::processFlags()
 {
     //----------------------------------------------
     // First half of this method applies FIR filtering to various motion inputs.
@@ -1255,7 +1255,7 @@ void Universe::processFlags()
 
 }
 
-void Universe::clearAllFirFilters()
+void Leela::clearAllFirFilters()
 {
     throttleFilter.clear();
     yawFilter.clear();
@@ -1271,7 +1271,7 @@ void Universe::clearAllFirFilters()
   This changes view only, not anything to do with model.
  
  */
-void Universe::navigate(float __throttle, float __yaw, float __pitch, float __roll)
+void Leela::navigate(float __throttle, float __yaw, float __pitch, float __roll)
 {
     bool bApplyThrottle = false;
 
@@ -1373,7 +1373,7 @@ void Universe::navigate(float __throttle, float __yaw, float __pitch, float __ro
 }
 
 
-int Universe::runMainLoop()
+int Leela::runMainLoop()
 {
     ImGuiIO& io = ImGui::GetIO();
     SDL_Event event;
@@ -1494,7 +1494,7 @@ int Universe::runMainLoop()
 
 }
 
-int Universe::run()
+int Leela::run()
 {
     setvbuf(stdout, 0, _IONBF, 0);
     const char* glsl_version = "#version 330";

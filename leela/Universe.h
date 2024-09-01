@@ -88,7 +88,7 @@ typedef std::map<std::tuple<int, int>, Action> ActionMap;
  **************************************************************************
 
  In response to the interaction of the user with the GUI widgets, the GUI
- should send these commands to the Universe core
+ should send these commands to the Leela core
 
  **************************************************************************/
 typedef enum
@@ -230,22 +230,22 @@ typedef enum
 
 
 
-class Universe;
+class Leela;
 class Space;
 
 //-----------------------------------------
 // Globally available handles
 //-----------------------------------------
-extern Universe* g_universe;
+extern Leela* g_universe;
 extern Space* g_space;
 
 
 
-class Universe
+class Leela
 {
 public:
-    Universe();    
-    ~Universe();
+    Leela();    
+    ~Leela();
 
     void createActions();
 

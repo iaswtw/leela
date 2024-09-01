@@ -7,7 +7,6 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="Universe.cpp" />
-    <ClCompile Include="UniverseDemo.cpp" />
     <ClCompile Include="UniverseInputHandling.cpp" />
     <ClCompile Include="UniverseRendering.cpp" />
     <ClCompile Include="Utils.cpp" />
@@ -66,6 +65,8 @@
     <ClCompile Include="VerticesGpuObject.cpp" />
     <ClCompile Include="UniverseActions.cpp" />
     <ClCompile Include="Elements.cpp" />
+    <ClCompile Include="LeelaImguiWidgets.cpp" />
+    <ClCompile Include="UniverseDemo.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Class.h" />

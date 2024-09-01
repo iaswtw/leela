@@ -1,6 +1,6 @@
 #include "Universe.h"
 
-void Universe::ShowDemo(int nParam)
+void Leela::ShowDemo(int nParam)
 {
     PNT newS;
     PNT newD;

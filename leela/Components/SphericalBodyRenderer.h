@@ -3,7 +3,7 @@
 #include "SphericalBody.h"
 #include "Renderer.h"
 
-class Universe;
+class Leela;
 
 // GLM includes
 #define GLM_ENABLE_EXPERIMENTAL

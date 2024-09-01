@@ -5,7 +5,7 @@ constexpr int LOG_BUFFER_SIZE = 1000;
 static char logBuffer[LOG_BUFFER_SIZE];
 
 
-void Universe::onKeyDown(SDL_Event* event)
+void Leela::onKeyDown(SDL_Event* event)
 {
 
     switch (event->key.keysym.sym) {
@@ -267,7 +267,7 @@ void Universe::onKeyDown(SDL_Event* event)
 
 }
 
-void Universe::onKeyUp(SDL_Event* event)
+void Leela::onKeyUp(SDL_Event* event)
 {
     switch (event->key.keysym.sym) {
 
@@ -356,14 +356,14 @@ void Universe::onKeyUp(SDL_Event* event)
 
 }
 
-void Universe::onMouseMotion(int xrel, int yrel)
+void Leela::onMouseMotion(int xrel, int yrel)
 {
     mouse_dx = float(xrel);
     mouse_dy = float(yrel);
 }
 
 // return true if no modifier is set.
-bool Universe::isNoModifier()
+bool Leela::isNoModifier()
 {
     if (!bShiftModifier && !bCtrlModifier && !bAltModifier)
         return true;
@@ -372,7 +372,7 @@ bool Universe::isNoModifier()
 }
 
 // return true if all modifiers are set.
-bool Universe::isAllModifiers()
+bool Leela::isAllModifiers()
 {
     if (bShiftModifier && bCtrlModifier && bAltModifier)
         return true;

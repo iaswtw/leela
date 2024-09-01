@@ -4,7 +4,7 @@
 
 constexpr SDL_Keycode SHIFT = SDLK_LSHIFT | SDLK_RSHIFT;
 
-void Universe::createActions()
+void Leela::createActions()
 {
 
     actionMap.emplace(
