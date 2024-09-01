@@ -1,7 +1,7 @@
 #include "LatLonRenderer.h"
 #include "Utils.h"
 #include "TessellationHelper.h"
-#include "Universe.h"
+#include "Leela.h"
 
 void LatLonRenderer::init()
 {

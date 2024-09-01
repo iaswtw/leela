@@ -1,6 +1,6 @@
 #include "SphericalBodyRenderer.h"
 #include "Utils.h"
-#include "Universe.h"
+#include "Leela.h"
 #include "Elements.h"
 
 #include "glm/ext.hpp"

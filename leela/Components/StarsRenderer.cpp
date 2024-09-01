@@ -4,7 +4,7 @@
 #include <tuple>
 #include <GL/glew.h>
 #include "SphericalBody.h"
-#include "Universe.h"
+#include "Leela.h"
 #include "Elements.h"
 
 static inline void vector_push_back_7(std::vector<float>& v, float f1, float f2, float f3, float f4, float f5, float f6, float f7)

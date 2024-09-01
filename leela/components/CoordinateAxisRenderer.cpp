@@ -1,6 +1,6 @@
 #include "Utils.h"
 #include "CoordinateAxisRenderer.h"
-#include "Universe.h"
+#include "Leela.h"
 
 
 CoordinateAxisRenderer::CoordinateAxisRenderer()

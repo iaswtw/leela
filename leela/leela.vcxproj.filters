@@ -79,7 +79,7 @@
     <ClInclude Include="Space.h" />
     <ClInclude Include="Stars.h" />
     <ClInclude Include="stbi_image.h" />
-    <ClInclude Include="Universe.h" />
+    <ClInclude Include="Leela.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="OneShotTimer.h" />
     <ClInclude Include="imgui\imgui.h">

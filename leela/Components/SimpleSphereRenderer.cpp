@@ -1,5 +1,5 @@
 #include "SimpleSphereRenderer.h"
-#include "Universe.h"
+#include "Leela.h"
 
 void SimpleSphereRenderer::init()
 {

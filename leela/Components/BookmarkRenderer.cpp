@@ -1,5 +1,5 @@
 #include "BookmarkRenderer.h"
-#include "Universe.h"
+#include "Leela.h"
 #include "TessellationHelper.h"
 
 bool BookmarkRenderer::isSpherePointHidden(glm::vec3 p)

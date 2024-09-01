@@ -9,7 +9,7 @@
 #include "imgui_impl_opengl3.h"
 
 #include <stdio.h>
-#include "Universe.h"
+#include "Leela.h"
 #include "Utils.h"
 #include <stdio.h>
 #include <string>
