@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SceneObject.h"
-#include "UniverseMinimal.h"
+#include "LeelaMinimal.h"
 
 class ViewportSceneObject : public SceneObject
 {

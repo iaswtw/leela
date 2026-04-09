@@ -3,7 +3,7 @@
 #include "Component.h"
 #include "GlslProgram.h"
 #include <spdlog/spdlog.h>
-#include "UniverseMinimal.h"
+#include "LeelaMinimal.h"
 
 //
 // Render certain aspects of a scene object.

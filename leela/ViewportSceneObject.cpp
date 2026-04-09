@@ -1,5 +1,5 @@
 #include "ViewportSceneObject.h"
-#include "UniverseMinimal.h"
+#include "LeelaMinimal.h"
 
 #include <spdlog/spdlog.h>
 

@@ -4,7 +4,7 @@
 #include "Renderer.h"
 #include "GlslProgram.h"
 #include "SphericalBody.h"
-#include "UniverseMinimal.h"
+#include "LeelaMinimal.h"
 
 
 class MonthLabelsRenderer : public Renderer

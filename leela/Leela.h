@@ -25,7 +25,7 @@
 #include <string>
 #include "map"
 #include <stack>
-#include "UniverseMinimal.h"
+#include "LeelaMinimal.h"
 #include "ViewportSceneObject.h"
 
 #include "imgui.h"

@@ -186,7 +186,7 @@ void main()
                         //                                                                     .
                         //----------------------------------------------
                         // penumbraLength is the length:
-                        //    From: the tip of imginary cone (that starts between the sun and 'other' sphere)
+                        //    From: the tip of imaginary cone (that starts between the sun and 'other' sphere)
                         //      To: the center of otherSphere.
                         // The penumbra is to the right of the otherSphere in the above diagram.
                         float penumbraLength        = (otherSphereRadius * dist_sun_otherSphere) / (sunRadius + otherSphereRadius);

@@ -31,7 +31,6 @@
 using TriangleList = std::vector<Triangle>;
 using VertexList = std::vector<glm::vec3>;
 
-extern Leela* p_universe;
 
 namespace icosahedron
 {
